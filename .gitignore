@@ -40,3 +40,6 @@ rsconnect/
 
 # Auto-save stuff:
 *~
+
+# swp files
+.swp
