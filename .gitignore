@@ -34,3 +34,9 @@ vignettes/*.pdf
 
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
+
+# .rds data files
+*.rds
+
+# Auto-save stuff:
+*~
