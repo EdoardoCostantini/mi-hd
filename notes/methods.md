@@ -8,6 +8,10 @@ supported, highdimensionality etc.)
 * BART and Bayesian CART imputation (if we want polytomous categorical) following Xu et al 2016.
 	BART implementation w/ the bayesTree R package is functioning for both coninuous and binary 
 	target variables and highdimensional settings.
+	Using the 'bart' function with y.train = variable with missing values, x.train = all other 
+	variables, we obtain ndpost/keepevery draws from the posterior distribution of the missing 
+	values given observed part of y.train, all other vairables, and model specifications 
+	(in yhat.train, and also in yhat.test if you use the same X for x.train and x.test)
 
 * MICE-Random Forest following Shah et al 2014 (same as bart but the difference is how the 
 	conditional mean is found)
