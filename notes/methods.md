@@ -5,6 +5,8 @@ supported, highdimensionality etc.)
 
 * Sequential MI CART following Reiter 2005, and Drechsler Reiter 2011.
 	I can use any CART growing R package. Supports any type of outcome variable without any effort
+	There is no guideline on what initialization method to use as these papers deal w/ creating
+	synthetic datasets
 
 * BART and Bayesian CART imputation (if we want polytomous categorical) following Xu et al 2016.
 	BART implementation w/ the bayesTree R package is functional for both coninuous and binary 

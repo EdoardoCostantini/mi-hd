@@ -13,6 +13,7 @@
 # dimensionality
   n = 100 # sample size
   p = 200 # number of predictors (relevant + junk)
+  
 
 # Predictors
   set.seed(20191113)
