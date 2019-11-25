@@ -9,6 +9,12 @@ supported, highdimensionality etc.)
 	I can use any CART growing R package. Supports any type of outcome variable without any effort
 	There is no guideline on what initialization method to use as most of the papers that proposed this method 
 	deal w/ creating synthetic datasets, where all variables are actually observed.
+	
+	*Implementation status:*
+	* Variables supported: continuous, dichtomous, and categorical covaraites
+	* Limitations: none
+	* Software/Packages: 'mice' basic mice imputation function with a 'cart' option does everything you need; 
+	you have also implemented a version of it that uses bayesian bootstrap.
 
 * **BART** and Bayesian CART imputation (if we want polytomous categorical) following Xu et al 2016.
 	BART implementation w/ the bayesTree R package is functional for both coninuous and binary 
@@ -26,11 +32,15 @@ supported, highdimensionality etc.)
 	trees fiven the data observed. To predict the Y value for one particular $x_i$, we can take the mean 
 	of the sums of $\mu$ obtained in each of the K sets of *m* trees sampled.
 
-	Using the 'bart' function in the package 'BayesTree' package with y.train = yobs (observed values of the 
-	variable with missing values), x.train = Xobs, the observed and preveiously imputed/initialized values on
-	X corresponding to the yobs observations; x.test = Xmiss, the observed/previously imputed values on X 
-	corresponding to the missing values on y, we obtain ndpost/keepevery draws from the posterior distribution 
-	of the missing values on Y given observed part of y.train, x.train, and model specifications (trees).
+	*Implementation status:*
+	* Variables supported: continuous, dichtomous, and categorical covaraites
+	* Limitations: (1) requires the imputer to know the analysis model before imputation. (2) requires 
+	a fully observed y variable. For the future, you could take insipiration from the Sequential BART paper 
+	but avoid the assumption of knowing the analysis model beforehand.
+	* Packages: A 'sbart' package was developed but has been removed from CRAN (and no updates since 2 years).
+	The 'bart' function in BayesianTrees is not directly applicabale as I cannot update the dataset that
+	is used at each iteration of the mcmc algorithm. You could scrape the basic tree growing parts of bart 
+	from either backage and build your own implementation of this algorithm.
 
 * **MICE-Random Forest** following Shah et al 2014 (same as bart but the difference is how the 
 	conditional mean is found)
