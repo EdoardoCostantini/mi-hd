@@ -33,20 +33,24 @@ supported, highdimensionality etc.)
 	of the sums of $\mu$ obtained in each of the K sets of *m* trees sampled.
 
  	*Implementation status:*
-	* Variables supported: continuous, dichtomous, and categorical covaraites
-	* Limitations: (1) requires the imputer to know the analysis model before imputation. (2) requires 
-	a fully observed y variable. For the future, you could take insipiration from the Sequential BART paper 
-	but avoid the assumption of knowing the analysis model beforehand.
-	* Packages: A 'sbart' package was developed but has been removed from CRAN (and no updates since 2 years).
-	The 'bart' function in BayesianTrees is not directly applicabale as I cannot update the dataset that
-	is used at each iteration of the mcmc algorithm. You could scrape the basic tree growing parts of bart 
-	from either backage and build your own implementation of this algorithm.
+	* Variables supported: continuous, and dichtomous covaraites (but not mixed!); continous and dichtomous DVs;
+	* Limitations: 		
+		* (1) requires the imputer to know the analysis model before imputation (look at the paper's 
+			imputation model);
+		* (2) requires a fully observed y variable. For the future, you could take insipiration 
+			from the Sequential BART paper but avoid the assumption of knowing the analysis model beforehand;
+		* (3) can only generate 5 multiply imputed datasets.
+	* Packages: A 'sbart' package was developed but has been removed from CRAN (and no updates since 2 years). 
+		On github you have found 'bartpkg1' which is basically 'sbart'. The 'bart' function in BayesianTrees is 
+		not directly applicabale as I cannot update the dataset that is used at each iteration of the mcmc
+		algorithm. You could scrape the basic tree growing parts of bart from either backage and build 
+		your own implementation of this algorithm.
 
 * **MICE-Random Forest** following Shah et al 2014 (same as bart but the difference is how the 
 	conditional mean is found)
 
 * **Frequentist regularized-MICE** (directly and indirectly) following Deng et al 2016;
-	There are no refere3nces to specific packages that implemented the methods but there are detailed 
+	There are no references to specific packages that implemented the methods but there are detailed 
 	descriptions of how to make regularized multiple imputations.
 
 * **Bayesian LASSO** following Zhao Long 2016;
