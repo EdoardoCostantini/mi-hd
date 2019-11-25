@@ -32,7 +32,7 @@ supported, highdimensionality etc.)
 	trees fiven the data observed. To predict the Y value for one particular $x_i$, we can take the mean 
 	of the sums of $\mu$ obtained in each of the K sets of *m* trees sampled.
 
-	*Implementation status:*
+ 	*Implementation status:*
 	* Variables supported: continuous, dichtomous, and categorical covaraites
 	* Limitations: (1) requires the imputer to know the analysis model before imputation. (2) requires 
 	a fully observed y variable. For the future, you could take insipiration from the Sequential BART paper 
@@ -55,5 +55,11 @@ supported, highdimensionality etc.)
 	Supports auxiliary vairables with missing values
 	It is extendable to categorical and ordinal variables but I'm not familiar with PCA on these type
 	of data so I need to look into it (Jolliffe 1986 discusses some ideas).
+	
+	*Implementation status:*
+	* Variables supported: continuous, dichtomous (?), and categorical covaraites (?)
+	* Limitations: NA
+	* Packages: look into the missMDA function of the R package 'factoineR'. It might be doing something close
+		to what you want (but it might also just be a form of MI *for*, rather than *using*, PCA)
 
 
