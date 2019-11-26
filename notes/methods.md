@@ -52,18 +52,57 @@ supported, highdimensionality etc.)
 * **Frequentist regularized-MICE** (directly and indirectly) following Deng et al 2016;
 	There are no references to specific packages that implemented the methods but there are detailed 
 	descriptions of how to make regularized multiple imputations.
+	
+	*Implementation status:*
+	* Variables supported: NA
+	* Limitations: NA
+	* Packages: mice package might supports ridge regression MICE: specify the argument ls.meth = "ridge" (check)
 
 * **Bayesian LASSO** following Zhao Long 2016;
 
 * **PCA based auxiliary variables inclusion** following Howard et al 2015
-	Supports auxiliary vairables with missing values
 	It is extendable to categorical and ordinal variables but I'm not familiar with PCA on these type
 	of data so I need to look into it (Jolliffe 1986 discusses some ideas).
 	
 	*Implementation status:*
-	* Variables supported: continuous, dichtomous (?), and categorical covaraites (?)
-	* Limitations: NA
-	* Packages: look into the missMDA function of the R package 'factoineR'. It might be doing something close
-		to what you want (but it might also just be a form of MI *for*, rather than *using*, PCA)
+	* Variables supported: 
+		* IVs: continuous, dichtomous (?), and categorical (?); 
+		* DVs: continuous, dichotomous, and categorical DVs (you simply run mice on a PCs)
+			low-dimensional dataset of DV and IVs + auxiliary
+	* Limitations: 
+		* The initialization procedure advised for in the paper is plausible only for a low dimensinal
+		  case ("A single Markov chain Monte Carlo (MCMC) imputation was used (including X and Y) as an 
+		  intermediate step to acquire a complete data set on the auxiliary variables for the subsequent 
+		  principal component analysis." p 289 under "Extracting Principal Components"). We might want to
+		  use the form of imputation for PCA presented in the factominer R package. For now no intialization
+		  is required for the auxiliary vairables, so I prepare a dataset with PCs and then use it in MICE
+		  directly. In the future, for each variable with missing values, a dataset with only the variable
+		  and the first n PC components could be used (n should be defiend, look into the paper again) where all
+		  other variables (interaction and poly terms) are used to compute the PC as well.
+		* A priori knowledge of analysis model - Related to this issue, the implementation proposed by
+		  Howard et al 2015 extracts PCs only form the auxiliary vairables and not from the real or otherwise
+		  selected predictors in the models and then uses the predictors + auxiliary Principal Components for
+		  the actual imputation. This however, does not allow to automatically include interaction effects and
+		  squared terms between real / selected predictors and auxiliary vairables. In the implementation
+		  I perfromed here I decided to extract PCs
+		  form the auxiliary variables which have no missing values and then use the predictors + auxiliary PCs
+		  for imputation with regular MICE. This is howver undesirable as we are not exlpoiting the full potential
+		  of PCA for dimension reduction; this would still require to manually specify interactions and squared 
+		  terms between real/selected predictors in the imputation model; we need to assume that we know the analsysi 
+		  model (ie which vairables are auxiliary and which variables are predicotrs at least) beofre we 
+		  perform the imputation, which is not ideal.
+		  * I have a bare bone implementation: no functions, just continuous, only squared terms
+	* Packages/Software: look into the missMDA function of the R package 'factominer'. It might be doing something close
+		to what you want (but it might also just be a form of MI *for*, rather than *using*, PCA).
+	* Notes:
+		* number of PCs to be used: in the simualtion Howard et al 2015 use always just 1, in the real data 
+		  example they use different numbers to see what is the effect of such choice and they conclude for example
+		  that using 14 PCs that explain 55% of the auxiliary vairable variance or 7 PCs that explain 40$ yields 
+		  essentialy equivalent FMIs. In my implementation I will make the conservative choice of including a higher
+		  number of PCs (say the ones that explain 50% of the vairance, although why not include all?)
+		* future perspective: I would like to have a version that uses all variables to compute the PC scores, 
+		  this would help including in a automatic way the interaction and poly terms. This woul require some
+		  repetitions of PCA at least once per variable with missing values, if not once per variable per 
+		  iteration (needs more thought)
 
 
