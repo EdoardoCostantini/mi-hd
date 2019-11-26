@@ -11,7 +11,9 @@ supported, highdimensionality etc.)
 	deal w/ creating synthetic datasets, where all variables are actually observed.
 	
 	*Implementation status:*
-	* Variables supported: continuous, dichtomous, and categorical covaraites
+	* Variables supported: continuous, dichotomous, and categorical covaraites
+		* IVs continuous, dichotomous and categorical (and mixed!);
+		* DVs continuous, dichotomous and categorical;
 	* Limitations: none
 	* Software/Packages: 'mice' basic mice imputation function with a 'cart' option does everything you need; 
 	you have also implemented a version of it that uses bayesian bootstrap.
@@ -33,7 +35,9 @@ supported, highdimensionality etc.)
 	of the sums of $\mu$ obtained in each of the K sets of *m* trees sampled.
 
  	*Implementation status:*
-	* Variables supported: continuous, and dichtomous covaraites (but not mixed!); continous and dichtomous DVs;
+	* Variables supported: 
+		* IVs continuous and dichotomous (but not mixed!);
+		* DVs continuous and dichotomous;
 	* Limitations: 		
 		* (1) requires the imputer to know the analysis model before imputation (look at the paper's 
 			imputation model);
@@ -66,7 +70,7 @@ supported, highdimensionality etc.)
 	
 	*Implementation status:*
 	* Variables supported: 
-		* IVs: continuous, dichtomous (?), and categorical (?); 
+		* IVs: continuous, dichotomous (?), and categorical (?), mixed (?); 
 		* DVs: continuous, dichotomous, and categorical DVs (you simply run mice on a PCs)
 			low-dimensional dataset of DV and IVs + auxiliary
 	* Limitations: 
@@ -91,7 +95,7 @@ supported, highdimensionality etc.)
 		  terms between real/selected predictors in the imputation model; we need to assume that we know the analsysi 
 		  model (ie which vairables are auxiliary and which variables are predicotrs at least) beofre we 
 		  perform the imputation, which is not ideal.
-		  * I have a bare bone implementation: no functions, just continuous, only squared terms
+		* I have a bare bone implementation: no functions, just continuous, only squared terms
 	* Packages/Software: look into the missMDA function of the R package 'factominer'. It might be doing something close
 		to what you want (but it might also just be a form of MI *for*, rather than *using*, PCA).
 	* Notes:
