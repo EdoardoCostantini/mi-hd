@@ -1,12 +1,16 @@
 ### Title:    imputeHD-comp impute with bart
 ### Author:   Edoardo Costantini
 ### Created:  2019-NOV-13
-### Modified: 2019-NOV-13
+### Modified: 2019-NOV-25
 ### Notes:    testing bart to impute a dataset
 
 # load packages
-library(BayesTree)
 library(tidyverse)
+library(BayesTree)
+library(tgp)      # for Bayesian CART implementation bcart
+library(rpart)    # for computing decision tree models
+library(bartpkg1) # github version of the package
+library(sbart)    # newest cran version available
 
 # Prep data ---------------------------------------------------------------
 
@@ -22,7 +26,7 @@ library(tidyverse)
   # Create using datagen function
   source("./dataGen_test.R")
   set.seed(20191120)
-  dt <- missDataGen(n=100, p=500)
+  dt <- missDataGen(n=10, p=7)
   dt_c <- dt[[1]] # fully observed
     mice::md.pattern(dt_c)
     dim(dt_c)
@@ -57,13 +61,16 @@ library(tidyverse)
   for (k in 1:K) {
     dt_aug <- dt_aug %>% dplyr::mutate_at(vars(K_names[k]), ~replace(., is.na(.), sample_means[k]))
   }
-
+  head(dt_aug[,1:7], 10)
+  head(dt_i[,1:7], 10)
 # Sequential BART
   iters <- 10
   fast_diagnostic <- matrix(rep(NA, iters*7), ncol = 7)
 for(i in 1:iters) {
+  #i <- 1
   print(paste0("Iteration status: ", i, " of ", iters))
   for (k in 1:K) {
+    #k <- 1
     print(paste0("Variable under imputation: ", K_names[k], " (", k, " of ", K, ")" ))
     # Prep Data
     indx_k <- names(dt_aug) %in% K_names[k]               # to index x_k
@@ -71,14 +78,14 @@ for(i in 1:iters) {
     data4tree <- arrange_dt_x_k(dt_aug, K_names[k])[ry, ] # arrange and select Xobs (values of Xno_k for which X_k is observed)
     Xobs <- data4tree[, -1]                               # after rearranging, the variable under imputation is always first
       dim(Xobs)
-    yobs <- data4tree[, 1]
+    yobs <- data4tree[, 1] #the x_k, variable under imputation
       length(yobs)
     Xmiss <- arrange_dt_x_k(dt_aug, K_names[k])[!ry, -1]     # observed and previously imputed / initialized values on all other variables
       dim(Xmiss)
     # Define tree type (classification or regression) based on nature of variable under imputation
     #tt <- tree_type(data4tree$x_k)
     
-    # Grow tree
+    # Sample tree from distribution of trees given augmented data (step 1 in algorithm p.593)
     set.seed(1234)
     bt <- bart(Xobs, yobs, Xmiss, # using previously imputed dataset
                # general setup
@@ -106,6 +113,22 @@ for(i in 1:iters) {
                  # of one observation for which you want a prediction. Hence, this value
                  # is a reasonable prediction of Y at a particular X
     # Impute values
+    # Sample one mising value at the time
+    y_miss_k <- NULL
+    i <- 1
+    # Sample proposition
+    y_miss_k[i] <- rnorm(1, 
+                         tail(bt$yhat.test[, i], 1), # I'm using the last draw from all the ones obtained with BART
+                                                     # I'm not sure this is the correct procedure but for now let's stick to it
+                         tail(bt$sigma, 1))
+    # Accept/reject proposition
+    data4tree[i,1] <- y_miss_k[i]
+    full_data <- data.frame(data4tree[,-1], 
+                            focusK = data4tree[,1])
+    BCART <- rpart(focusK ~., data = full_data) # this should be a Bayesian tree as in tgp::bcart
+    BCART$
+    head(Xobs[, 1:7])
+    dnorm(Xobs[i, k+1], )
     dt_aug[row.names(Xmiss), indx_k] <- bt$yhat.test.mean
   }
    new_impute <- dt_aug %>% filter(is.na(dt_i$yinc)) %>% select(1:7)
@@ -161,5 +184,35 @@ arrange_dt_x_k <- function(dt, var_name){
     ymiss_t <- t(bt$yhat.test)[,1] # I only keep the draw in the middle of the iterations (the first one)
   }
   
+
+#  using 'bartpkg1' package -----------------------------------------------
+
+  # Create dataset
+  # Create using datagen function
+  source("./dataGen_test.R")
+  set.seed(20191120)
+  dt <- missDataGen(n=50, p=7)
+
+  dt_i <- data.frame(dt$complete$y, dt$incomplete[,-1])
+    names(dt_i) = names(dt[[1]])
+    # sbart implementatio requires a fully observed y 
+    # and a covariates matrix with missing values
+  mice::md.pattern(dt_i)
+  dim(dt_i)
   
+  # Impute
+  imputedList <- serBARTfunc(dt_i[,-1], dt_i$y, 
+                             datatype=0, #continuous covariates
+                             type = 0,   #continuous dependent
+                             numskip = 199, burn = 1000, m = 200,
+                             sigdf = 3, sigquant = 0.9, kfac = 2)
+  str(imputedList)
+
+# using 'sbart' package ---------------------------------------------------
+  imputedList <- seqBART(dt_i[,-1], dt_i$y, 
+                         datatype=0, #continuous covariates
+                         type = 0,   #continuous dependent
+                         numskip = 199, burn = 1000, m = 200,
+                         sigdf = 3, sigquant = 0.9, kfac = 2)
+  str(imputedList)
   

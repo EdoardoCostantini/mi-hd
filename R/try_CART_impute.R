@@ -1,7 +1,7 @@
-### Title:    imputeHD-comp impute with bart
+### Title:    imputeHD-comp impute with sequential CART
 ### Author:   Edoardo Costantini
 ### Created:  2019-NOV-14
-### Modified: 2019-NOV-15
+### Modified: 2019-NOV-26
 ### Notes:    Main implementation is based on Burgette Reiter 2010 Sequential Regression Trees
 ###           and Drechsler Reiter 2011
 ###           - Homogeneity criterion: Gini index for categorical, deviance for numerical
@@ -29,6 +29,7 @@ library(bayesboot)
   dt_i <- dt[[2]] # with missings
   mice::md.pattern(dt_i)
   dim(dt_i)
+  
   dt_i[1:10, 1:6]
 
 # Define variables with missings
@@ -81,7 +82,7 @@ library(bayesboot)
     # - size: number of obseervations desired in the new bayesian bootstrap sample
     # Output: a bayesian bootsrap sample of size size of x
   ## Trial inputs
-    # x <- rbinom(n, 1, .5)
+    # x <- rbinom(30, 1, .5)
     size <- length(x)
     u <- sort(c(runif(length(x)-1, 0, 1))) # n-1 uniform draws
     g <- numeric(0)
@@ -94,6 +95,7 @@ library(bayesboot)
       }
       #print(cbind(u[i], u_prev, g[i]) ) # check that it works
     }
+    #sum(g)
     bbsample <- sample(x, 
                        size = size, 
                        replace = TRUE, 

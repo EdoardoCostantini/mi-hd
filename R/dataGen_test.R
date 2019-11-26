@@ -10,7 +10,7 @@
   pr = function(n,x) {rbinom(n, size = 1, prob = exp(x-2)/(1+exp(x-2))) }
   replace_na <- function(x, r) {replace(x, r==1, NA)}
   
-  missDataGen <- function(n, p){
+  missDataGen <- function(n, p, corre = "n"){
   ## Description
     # The dependent variable depends on 5 variables (see f to understand how)
     # Missing values are forces on y and those 5 predictors based on the values
@@ -22,12 +22,21 @@
   ## Trial inputs
     # n = 30 # sample size
     # p = 7 # number of predictors (relevant + junk)
+    # corre = c("y") #, "n") which type of correlatio n strucutre do you want
     
     # Predictors
+    Sigma = diag(p) # no correlation between predictors
+    
+    if (corre == "y"){ # random correlations
+      p_coefs <- runif(p*p, -1, 1)
+      s <- abs(diag(p)-1) * p_coefs
+      s[lower.tri(s)] = t(s)[lower.tri(s)]
+      diag(s) <- 1
+      Sigma <- s
+    } 
     X <- as.data.frame(mvtnorm::rmvnorm(n, 
                                         mean = rep(0, p), 
-                                        sigma=diag(rep(1, p))) )
-    
+                                        sigma=Sigma ) )
     # Noise for DV
     Z <- rnorm(n, 0, 1)
     
