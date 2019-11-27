@@ -58,9 +58,14 @@ supported, highdimensionality etc.)
 	descriptions of how to make regularized multiple imputations.
 	
 	*Implementation status:*
-	* Variables supported: NA
-	* Limitations: NA
+	* Imputation Model Variables supported: 
+		* IVs: continuous, dichotomous, and categorical, mixed;
+		* DVs: continuous, dichotomous, and categorical DVs (but still need to implement it for non continuos)
+	* Limitations:
+		* IURR does not allow for Ridge regression because ridge does no variable selection
 	* Packages: mice package might supports ridge regression MICE: specify the argument ls.meth = "ridge" (check)
+		apart from that, none. I have implemented a ridge version with continuous DVs (limited to a ridge 
+		case for now, not function yet)
 
 * **Bayesian LASSO** following Zhao Long 2016;
 
@@ -69,10 +74,10 @@ supported, highdimensionality etc.)
 	of data so I need to look into it (Jolliffe 1986 discusses some ideas).
 	
 	*Implementation status:*
-	* Variables supported: 
-		* IVs: continuous, dichotomous (?), and categorical (?), mixed (?); 
-		* DVs: continuous, dichotomous, and categorical DVs (you simply run mice on a PCs)
-			low-dimensional dataset of DV and IVs + auxiliary
+	* Imputation Model Variables supported: 
+		* IVs: continuous, dichotomous, and categorical, mixed (see bottom notes for how);
+		* DVs: continuous, dichotomous, and categorical DVs (you simply run mice on a
+			low-dimensional dataset of DV and IVs + auxiliary)
 	* Limitations: 
 		* The initialization procedure advised for in the paper is plausible only for a low dimensinal
 		  case ("A single Markov chain Monte Carlo (MCMC) imputation was used (including X and Y) as an 
@@ -83,7 +88,7 @@ supported, highdimensionality etc.)
 		  directly. In the future, for each variable with missing values, a dataset with only the variable
 		  and the first n PC components could be used (n should be defiend, look into the paper again) where all
 		  other variables (interaction and poly terms) are used to compute the PC as well.
-		* A priori knowledge of analysis model - Related to this issue, the implementation proposed by
+		* A priori knowledge of analysis model - Related to this issue, the method proposed by
 		  Howard et al 2015 extracts PCs only form the auxiliary vairables and not from the real or otherwise
 		  selected predictors in the models and then uses the predictors + auxiliary Principal Components for
 		  the actual imputation. This however, does not allow to automatically include interaction effects and
@@ -92,20 +97,31 @@ supported, highdimensionality etc.)
 		  form the auxiliary variables which have no missing values and then use the predictors + auxiliary PCs
 		  for imputation with regular MICE. This is howver undesirable as we are not exlpoiting the full potential
 		  of PCA for dimension reduction; this would still require to manually specify interactions and squared 
-		  terms between real/selected predictors in the imputation model; we need to assume that we know the analsysi 
-		  model (ie which vairables are auxiliary and which variables are predicotrs at least) beofre we 
+		  terms between real/selected predictors in the imputation model; we need to assume that we know the analysis 
+		  model (ie which vairables are auxiliary and which variables are predicotrs at least) before we 
 		  perform the imputation, which is not ideal.
-		* I have a bare bone implementation: no functions, just continuous, only squared terms
-	* Packages/Software: look into the missMDA function of the R package 'factominer'. It might be doing something close
-		to what you want (but it might also just be a form of MI *for*, rather than *using*, PCA).
+		* I have a bare bone implementation: no functions, just continuous, only squared terms but PcAux provides
+		  a complete implementation that resolves the two aforementioned issues
+	* Packages/Software: 
+		* PcAux package implements Howards et al 2015
+		* look into the missMDA function of the R package 'factominer'. It might be doing something close
+		  to what you want (but it might also just be a form of MI *for*, rather than *using*, PCA).
 	* Notes:
+		* the single imputation referered to in PcAux package is one run of MICE with m = 1 and pmm method.
+		* in PcAux the interaction variables missingness is done according to a transform then impute approach
+		  (as Von Hippel 2009 advised for)
+		* how are ordinal, non-ordinal, and dichotomous factors treated by PcAux? ordinal factors are casted to numeric
+		  variables and treated as any oder continuous variable; nominal factors are dummy coded and just left as such
+		  along with other potential dichotomous variables
+		* in PcAux PCs are computed once, then used iteratively to predict the missing values in a MICE procedure
+		  but their values stay constant across iterations and different data imputations.
 		* number of PCs to be used: in the simualtion Howard et al 2015 use always just 1, in the real data 
 		  example they use different numbers to see what is the effect of such choice and they conclude for example
 		  that using 14 PCs that explain 55% of the auxiliary vairable variance or 7 PCs that explain 40$ yields 
 		  essentialy equivalent FMIs. In my implementation I will make the conservative choice of including a higher
 		  number of PCs (say the ones that explain 50% of the vairance, although why not include all?)
 		* future perspective: I would like to have a version that uses all variables to compute the PC scores, 
-		  this would help including in a automatic way the interaction and poly terms. This woul require some
+		  this would help including in a automatic way the interaction and poly terms. This would require some
 		  repetitions of PCA at least once per variable with missing values, if not once per variable per 
 		  iteration (needs more thought)
 
