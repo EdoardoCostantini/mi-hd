@@ -60,7 +60,7 @@ library(sbart)    # newest cran version available
   dt_aug <- dt_i
   for (k in 1:K) {
     dt_aug <- dt_aug %>% dplyr::mutate_at(vars(K_names[k]), ~replace(., is.na(.), sample_means[k]))
-  }
+  } 
   head(dt_aug[,1:7], 10)
   head(dt_i[,1:7], 10)
 # Sequential BART

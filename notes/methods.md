@@ -57,15 +57,14 @@ supported, highdimensionality etc.)
 	There are no references to specific packages that implemented the methods but there are detailed 
 	descriptions of how to make regularized multiple imputations.
 	
-	*Implementation status:*
+	*Implementation status: DURR*
 	* Imputation Model Variables supported: 
-		* IVs: continuous, dichotomous, and categorical, mixed;
-		* DVs: continuous, dichotomous, and categorical DVs (but still need to implement it for non continuos)
+		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
+		* DVs: continuous, dichotomous, multinomial, ordinal DVs
 	* Limitations:
 		* IURR does not allow for Ridge regression because ridge does no variable selection
-	* Packages: mice package might supports ridge regression MICE: specify the argument ls.meth = "ridge" (check)
-		apart from that, none. I have implemented a ridge version with continuous DVs (limited to a ridge 
-		case for now, not function yet)
+		* DURR implementation at the moment gives you a terrible lasso selection for gaussian case. FIX on monday
+	* Packages: none
 
 * **Bayesian LASSO** following Zhao Long 2016;
 

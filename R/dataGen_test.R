@@ -20,9 +20,9 @@
     # - p: how many variables (>=)
     # Output: two datasets, one compelte and one with missing at random datasets 
   ## Trial inputs
-    # n = 30 # sample size
-    # p = 7 # number of predictors (relevant + junk)
-    # corre = c("y") #, "n") which type of correlatio n strucutre do you want
+    # n = 20 # sample size
+    # p = 6 # number of predictors (relevant + junk)
+    # corre = c("n") #, "y") which type of correlatio n strucutre do you want
     
     # Predictors
     Sigma = diag(p) # no correlation between predictors
@@ -42,19 +42,47 @@
     
     # Dependent
     # Model based on an example (Firedman) reported by Xu et al 2016 for the BART paper
-    y = f(X[,1],X[,2],X[,3],X[,4],X[,5]) + Z
+    y = f(X[,1],X[,2],X[,3],X[,4],X[,5]) + Z # continuous
+    
+    # Dichotomous Responses
+    y_dicho <- factor(pr(n, f(X[,1],X[,2],X[,3],X[,4],X[,5])), labels = c("A", "B"))
+    
+    # Multinomila Responses (nominal)
+    a <- c(4, 2, 1)
+    b <- c(2, 4, 6)
+    denom <- 1 + exp(a[1] + X[,1] * b[1]) +
+                 exp(a[2] + X[,1] * b[2]) + 
+                 exp(a[3] + X[,1] * b[3])
+    vProb = cbind( 1/denom,             # baseline category
+                   exp(a[1] + X[,1] * b[1])/denom, 
+                   exp(a[2] + X[,1] * b[2])/denom, 
+                   exp(a[3] + X[,1] * b[3])/denom )
+    DV_location = t(apply(vProb, 1, rmultinom, n = 1, size = 1))
+    DV <- apply(DV_location, 1, function(x) which(x==1))
+    y_categ <- factor(DV, labels = c("A", "B", "C", "D"))
+    
+    # Multinomila Responses (ordinal, with multtinomial odered logit)
+    u <- rlogis(nrow(X), location = 0, scale = 1)
+    y <- X[,2] + u
+    threshold <- c(-Inf,-1,0,1, Inf)
+    y_order <- cut(y, threshold, ordered_result = TRUE)
+    levels(y_order) <- c(1,2,3,4)
     
     # Missingness
     # Following a simple MAR mechanisms where the missingness on the
-    # first 5 predictors depends on the values of the 6th variable
-    R <- as.data.frame(split(rep( pr(n, X[, 6]), 6), 1:(1+ncol(X[,1:5])) )) # missingness for Y and first 5 Xs
-    yinc <- replace(y, R[,1]==1, NA)
+    # first 5 predictors, and the tree dependent variables depends on
+    # the values of the 6th variable
+    R <- as.data.frame(split(pr(n*9, X[, 6]), 1:(4+5) )) # missingness for 3 Ys and first 5 Xs
+    yI    <- replace(y, R[,1]==1, NA)
+    y_dichoI <- replace(y_dicho, R[,2]==1, NA)
+    y_categI <- replace(y_categ, R[,3]==1, NA)
+    y_orderI <- replace(y_order, R[,4]==1, NA)
     Xinc <- X # initialize matrix for incomplete dataset
     for (p in 1:ncol(X[,2:6])) {
       Xinc[,p] <- replace(X[,p], R[,p]==1, NA)
     }
     return(list(complete = cbind(y, X), 
-                incomplete = cbind(yinc, Xinc)))
+                incomplete = cbind(y_dichoI, y_categI, y_orderI, yI, Xinc)))
   }
 
 # # Do it out of function (to save the data)
