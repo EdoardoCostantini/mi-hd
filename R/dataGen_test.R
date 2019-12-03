@@ -6,7 +6,8 @@
 ###           no simulation set up
 
 # Functions for data generation
-  f = function(x1,x2,x3,x4,x5) {10*sin(pi*x1*x2) + 20*(x3-.5)**2 + 10*x4 + 5*x5}
+  #f = function(x1,x2,x3,x4,x5) {10*sin(pi*x1*x2) + 20*(x3-.5)**2 + 10*x4 + 5*x5}
+  f = function(x1,x2,x3,x4,x5) {1 + 10*x1 + 20*x2 + 30*x3 + 40*x4 + 50*x5}
   pr = function(n,x) {rbinom(n, size = 1, prob = exp(x-2)/(1+exp(x-2))) }
   replace_na <- function(x, r) {replace(x, r==1, NA)}
   
@@ -20,7 +21,7 @@
     # - p: how many variables (>=)
     # Output: two datasets, one compelte and one with missing at random datasets 
   ## Trial inputs
-    # n = 20 # sample size
+    # n = 100 # sample size
     # p = 6 # number of predictors (relevant + junk)
     # corre = c("n") #, "y") which type of correlatio n strucutre do you want
     
@@ -43,12 +44,12 @@
     # Dependent
     # Model based on an example (Firedman) reported by Xu et al 2016 for the BART paper
     y = f(X[,1],X[,2],X[,3],X[,4],X[,5]) + Z # continuous
-    
+    # lm(y ~ X[,1]+X[,2]+X[,3]+X[,4]+X[,5])
     # Dichotomous Responses
-    y_dicho <- factor(pr(n, f(X[,1],X[,2],X[,3],X[,4],X[,5])), labels = c("A", "B"))
+    y_dicho <- factor(pr(n, 5*X[,1]), labels = c("A", "B"))
     
     # Multinomila Responses (nominal)
-    a <- c(4, 2, 1)
+    a <- c(0, 0, 0)
     b <- c(2, 4, 6)
     denom <- 1 + exp(a[1] + X[,1] * b[1]) +
                  exp(a[2] + X[,1] * b[2]) + 
@@ -63,9 +64,9 @@
     
     # Multinomila Responses (ordinal, with multtinomial odered logit)
     u <- rlogis(nrow(X), location = 0, scale = 1)
-    y <- X[,2] + u
+    y_order <- X[,2] + u
     threshold <- c(-Inf,-1,0,1, Inf)
-    y_order <- cut(y, threshold, ordered_result = TRUE)
+    y_order <- cut(y_order, threshold, ordered_result = TRUE)
     levels(y_order) <- c(1,2,3,4)
     
     # Missingness
@@ -81,8 +82,11 @@
     for (p in 1:ncol(X[,2:6])) {
       Xinc[,p] <- replace(X[,p], R[,p]==1, NA)
     }
-    return(list(complete = cbind(y, X), 
-                incomplete = cbind(y_dichoI, y_categI, y_orderI, yI, Xinc)))
+    return(list(complete = cbind(y_dicho, y_categ, y_order, y, X), 
+                incomplete = cbind(y_dichoI, y_categI, y_orderI, yI, Xinc),
+                complete_cont = cbind(y, X),
+                incomplete_cont = cbind( yI, Xinc))
+           )
   }
 
 # # Do it out of function (to save the data)

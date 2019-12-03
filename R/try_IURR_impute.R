@@ -1,0 +1,232 @@
+### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
+### Author:   Edoardo Costantini
+### Created:  2019-DEC-2
+### Modified: 2019-DEC-3
+### Notes:    reference paper is Deng et al 2016
+
+# load packages
+library(tidyverse)
+library(dplyr)
+library(glmnet)    # for regularized regressions
+library(mice)      
+
+# Prep data ---------------------------------------------------------------
+# Load all purpose functions
+  source("./functions_allpurp.R")
+# Create using datagen function
+  source("./dataGen_test.R")
+    set.seed(20191120)
+  dt <- missDataGen(n=1e3, p=10)
+  dt_c <- dt[[1]] # fully observed
+  dt_i <- dt[[2]] # with missings
+    dim(dt_i)
+    mice::md.pattern(dt_i)
+    
+# Match paper (see note up top) notation
+  Z <- dt_i    # dataset with missing values
+  p <- ncol(Z) # number of variables [INDEX with j]
+  n <- nrow(Z) # number of observations
+    colnames(Z) <- paste0(rep("z_", p), seq(1, p))
+  r <- colSums(apply(Z, 2, function (x) {!is.na(x)} )) # vector with number of observed values in a j variable
+  
+  # For a jth variable say (example)
+    j = 2
+    z_j_obs   <- Z[, j][!is.na(Z[, j])]  # observed components of j-th variable
+    z_j_mis   <- Z[, j][is.na(Z[, j])]   # missing components of j-th variable
+    z_mj      <- Z[, -j]                 # collection of the p − 1 variables in Z except z_j (m for minus)
+    z_mj_obs  <- z_mj[!is.na(Z[, j]), ]  # z_mj compponents corresponding to z_j_obs
+    z_mj_mis  <- z_mj[is.na(Z[, j]), ]   # z_mj compponents corresponding to z_j_mis
+    
+  # Define variables with missings
+  l <- ncol(Z)-sum(tail(mice::md.pattern(Z),1) == 0) # number of variables needing imputation
+  l_names <- names(which(colSums(apply(Z, 2, is.na)) != 0)) # select the names of these k variables
+  
+# Initiliaze by sample mean of variable with missing values
+  print("Data initialization by sample mean")
+  
+  # Define a dataset to recieve initialized missing values
+  Z0 <- Z 
+  
+  # Define names of variables w/ missing values (general and by measurment scale)
+  vartypes <- rbind(lapply(lapply(Z0[, names(Z0) %in% l_names], class), paste, collapse = " "))
+    contVars <- colnames(vartypes)[vartypes == "numeric"] # names of continuous variables for selection
+    factVars <- colnames(vartypes)[vartypes == "factor"] # includes factors and ordered factors
+    ordeVars <- colnames(vartypes)[vartypes == "ordered factor"] # includes factors and ordered factors
+  
+  # Make oredered factors as numeric
+  Z0[, ordeVars] <- as.numeric(Z0[, ordeVars])
+  
+  # Impute sample means for continuous variables and odered factors
+  s_means <- apply(Z0[, c(contVars, ordeVars)], 2, mean, na.rm = TRUE) # sample means
+  for (j in 1:length(c(contVars, ordeVars))) {
+    Z0 <- Z0 %>% mutate_at(vars(c(contVars, ordeVars)[j]),
+                           ~replace(., is.na(.), s_means[j])
+                          )
+  }
+  # Impute most common level for unordered factors
+  for (j in 1:length(factVars)) {
+    x <- addNA(Z0[, factVars[j]])
+    m_commo <- names(which.max(table(x)))
+    levels(x) <- c(levels(Z0[, factVars[j]]), 99)
+    x[x == 99] <- m_commo
+    x <- droplevels(x)
+    Z0[, factVars[j]] <- x
+  }
+
+  Zm <- Z0  # the dataset at Zm iteration 
+            # when dataset hass been itialized, m=0, so Z0 = {z0_1, z0_2, ... , z0_l, z_l+1, ... , z_p}
+            # each z_j of this data will be the m-1 "previous iteration" version at the beginning of 
+            # the variable loop (for j in 1:l) and the current iteration data at the end
+  
+# Imputed dataset
+  iters <- 5
+  imputed_datasets <- vector("list", iters)
+  for(m in 1:iters) {
+    print(paste0("Iteration status: ", m, " of ", iters))
+    for (j in 1:p) { # for j-th variable w/ missing values in p number of variables w/ missing values 
+                     # skipping variables without missing with the if
+      if(r[j] != nrow(Z)){ # perform only for variables that have missing values
+        Wm_j  <- Zm[,-j]               # predictors for imp model from inizialized dataset (m-1) [ALL CASES]
+        zm_j   <- Zm[,j]               # outcome for imp model from inizialized dataset (m-1) [ALL CASES]
+        Wm_mj <- Wm_j[is.na(Z[, j]), ] # predictor rows for cases with missing z_j [MISSING CASES]
+        zm_mj <- zm_j[is.na(Z[, j])]   # current (m) draw of z_j for cases with missing z_j [MISSING CASES]
+        
+        # Select cases for regularized regression
+        z_j_obs  <- Zm[, j][!is.na(Z[, j])]   # observed components of j-th variable [OBSERVED CASES]
+        Wm_j_obs <- Zm[, -j][!is.na(Z[, j]),] # current (m) components of the predictors cooresponding 
+                                              # to observed cases on j-th variable (OBSERVED and IMPUTED CASES)
+        
+        ## Fit regularized regression
+        x <- model.matrix(z_j_obs~., data.frame(z_j_obs, Wm_j_obs))
+        y <- z_j_obs
+        glmfam <- detect_family(y)
+        
+        # Lasso Regression: choose lambda with corss validation
+        cv.out = cv.glmnet(x[,-1], y, family = glmfam,
+                           alpha = 1) # alpha = 1 is the lasso penality
+        b_lambda <- cv.out$lambda.min
+        
+        # Fit rigde Regression with best lambda
+        lasso.mod = glmnet(x, y,
+                           family = glmfam, 
+                           alpha  = 1,
+                           lambda = b_lambda,
+                           thresh = 1e-12)
+        
+        # Define Active Set
+        if(glmfam != "multinomial"){ # multinomial not currently supported
+          lasso.coef <- as.matrix(coef(lasso.mod))
+          coefNames  <- row.names(lasso.coef)[lasso.coef != 0]
+          as_index   <- coefNames[grep("z", coefNames)]
+          active.set <- lasso.coef[as_index, ] # select only regression coefficients (no intercept)
+          W_Sjm_obs  <- x[, coefNames] # reusing x object without making another model matrix
+          W_Sjm_mis  <- model.matrix(zm_mj~., data.frame(zm_mj, Wm_mj))[,coefNames]
+        }
+
+        if(glmfam == "gaussian"){
+          ## Fit ML regressions
+          # Manual Way
+          ml.fit <- optim(rep(1, ncol(W_Sjm_obs)+1), # +1 for the error variance
+                     unigaus.lf,                # log likelihood function
+                     method="BFGS", 
+                     hessian=T, #
+                     y = y, X = W_Sjm_obs) # data
+          
+          theta.hat.m_MLE <- ml.fit$par#[1:(ncol(W_Sjm_obs)+1)] # vector of estiamted reg coef at this iteration
+            # slight variation from paper notation is that I'm including the error varaince parameter in this
+            # vector theta although in the paper theta are just sloeps and intercepts
+          Sigma.hat.m.MLE <- solve(ml.fit$hessian) # variance covariance matrix of the estiamted parameters
+          
+          # Using glm (similar results but no se for the error variance estimate)
+          # X <- model.matrix(z_j_obs~., data.frame(z_j_obs, W_Sjm_obs))[,-1]
+          # MLfit <- glm(y~W_Sjm_obs, family = glmfam)
+          # theta_hat_m_MLE <- as.vector(MLfit$coefficients)
+          # Sigma_hat_m_MLE <- vcov(MLfit) # but you would not have the se of the error variance
+          
+          # Sample parameters for prediction/imputation
+          theta.hat.m_j <- MASS::mvrnorm(1, theta.hat.m_MLE, Sigma.hat.m.MLE)
+          # Get imputations
+          z.m_j_mis <- rnorm(n = nrow(W_Sjm_mis),
+                            mean = W_Sjm_mis %*% theta.hat.m_j[1:(length(theta.hat.m_j)-1)],
+                            sd = tail(theta.hat.m_j,1) )
+        }
+        
+        if(glmfam == "binomial"){
+          MLfit <- glm(y~0+W_Sjm_obs, family = glmfam) # intercept is estimated thanks to the desing matrix
+          theta.hat.m_MLE <- as.vector(MLfit$coefficients)
+          Sigma.hat.m.MLE <- vcov(MLfit) # but you would not have the se of the error variance
+          
+          # Sample parameters for prediction/imputation
+          theta.hat.m_j <- MASS::mvrnorm(1, theta.hat.m_MLE, Sigma.hat.m.MLE)
+          
+          # Get imputations
+          lin_term  <- W_Sjm_mis %*% theta.hat.m_j # obtain the predicted probabilties for missing values based on their original dataset other values
+          z.m_j_mis <- rbinom(n = length(lin_term), size=1, 
+                              prob=exp(lin_term)/(1+exp(lin_term)))
+          z.m_j_mis <- factor(z.m_j_mis, labels = levels(y)) # return to original labels
+        }
+        
+        if(glmfam == "multinomial"){
+          paste0(colnames(dt_i)[j], " is a polytomous variable. Currently not supported: returning initial guess")
+          z.m_j_mis <- Zm[is.na(Z[, j]), j]
+        }
+        # Append
+        Zm[is.na(Z[, j]), j] <- z.m_j_mis
+      }
+    }
+    # # Print the coefficient for the linear model to simple check interative changes (short life)
+    #   x <- model.matrix(z_4~., Zm)[,-1]
+    #   y <- Zm$z_4
+    #   glmfam <- detect_family(y)
+    #   
+    #   # Lasso Regression: choose lambda with corss validation
+    #   cv.out = cv.glmnet(x, y, family = glmfam,
+    #                      alpha = 1) # alpha = 1 is the lasso penality
+    #   b_lambda <- cv.out$lambda.min
+    #   
+    #   # Fit rigde Regression with best lambda
+    #   lasso.mod = glmnet(x, y,
+    #                      family = glmfam, 
+    #                      alpha  = 1,
+    #                      lambda = b_lambda,
+    #                      thresh = 1e-12)
+    #   coef(lasso.mod)
+    #   lasso.coef <- as.data.frame(as.matrix(coef(lasso.mod)))
+    #   lasso.coef.sel <- data.frame(varn = row.names(lasso.coef)[lasso.coef$s0 != 0],
+    #                                coef = lasso.coef[lasso.coef$s0 != 0, ])
+    #   print(lasso.coef.sel)
+      
+    # Store imputed dataset at this iteration
+    imputed_datasets[[m]] <- Zm
+  }
+
+# Check models ------------------------------------------------------------
+  dt4check <- dt_c
+  # Now using complete data, but can easly change it
+  
+  # True models
+  lm(y~V1+V2+V3+V4+V5, dt4check) #linear model
+  glm(y_dicho ~ V1 , data = dt4check, family = binomial) #dichotmous
+  multinom(y_categ ~ V1, dt4check) #multinomial (right now I cannot really replicate this results with the lasso penality)
+  
+  # Lasso penalities models (change dependent variable to match interest)
+  x <- model.matrix(y_categ~., dt4check[,1:10])[,-1]
+  y <- dt4check$y_categ
+  glmfam <- detect_family(y)
+  
+  # Lasso Regression: choose lambda with corss validation
+  cv.out = cv.glmnet(x, y, family = glmfam,
+                     alpha = 1) # alpha = 1 is the lasso penality
+  b_lambda <- cv.out$lambda.min
+  
+  # Fit rigde Regression with best lambda
+  lasso.mod = glmnet(x, y,
+                     family = glmfam, 
+                     alpha  = 1,
+                     lambda = b_lambda,
+                     thresh = 1e-12)
+  coef(lasso.mod)
+  lasso.mod$beta
+
+
+  

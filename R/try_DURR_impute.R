@@ -1,22 +1,23 @@
-
-### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions
+### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
 ### Author:   Edoardo Costantini
 ### Created:  2019-NOV-27
-### Modified: 2019-NOV-27
+### Modified: 2019-DEC-2
+### Notes:    reference paper is Deng et al 2016
 
 # load packages
 library(tidyverse)
 library(dplyr)
 library(glmnet)    # for regularized regressions
 library(mice)      
-library(PcAux)     # for iris dataset
+library(PcAux)     # for iris2 dataset
 
 # Prep data ---------------------------------------------------------------
-
+# Load all purpose functions
+  source("./functions_allpurp.R")
 # Create using datagen function
   source("./dataGen_test.R")
     set.seed(20191120)
-  dt <- missDataGen(n=300, p=6)
+  dt <- missDataGen(n=300, p=100)
   dt_c <- dt[[1]] # fully observed
   dt_i <- dt[[2]] # with missings
     dim(dt_i)
@@ -30,13 +31,8 @@ library(PcAux)     # for iris dataset
     str(selfreport)
     selfreport$ed
     colSums(is.na(selfreport[, c("src", "age", "sex", "hr", "wr", "pop", "web", "prg", "edu")]))
-    # prg categorical with missing values
-    # edu ordered wit missing values
-  
-    str(walking)
-    md.pattern(walking)
     
-# Match paper notation
+# Match paper (see note up top) notation
   Z <- dt_i    # dataset with missing values
   p <- ncol(Z) # number of variables [INDEX with j]
   n <- nrow(Z) # number of observations
@@ -57,14 +53,15 @@ library(PcAux)     # for iris dataset
   
 # Initiliaze by sample mean of variable with missing values
   print("Data initialization by sample mean")
-
-  vartypes <- rbind(lapply(lapply(Z[, names(Z) %in% l_names], class), paste, collapse = " "))
-
-  contVars <- colnames(vartypes)[vartypes == "numeric"] # names of continuous variables for selection
-  factVars <- colnames(vartypes)[vartypes == "factor"] # includes factors and ordered factors
-  ordeVars <- colnames(vartypes)[vartypes == "ordered factor"] # includes factors and ordered factors
   
-  Z0 <- Z
+  # Define a dataset to recieve initialized missing values
+  Z0 <- Z 
+  
+  # Define names of variables w/ missing values (general and by measurment scale)
+  vartypes <- rbind(lapply(lapply(Z0[, names(Z0) %in% l_names], class), paste, collapse = " "))
+    contVars <- colnames(vartypes)[vartypes == "numeric"] # names of continuous variables for selection
+    factVars <- colnames(vartypes)[vartypes == "factor"] # includes factors and ordered factors
+    ordeVars <- colnames(vartypes)[vartypes == "ordered factor"] # includes factors and ordered factors
   
   # Make oredered factors as numeric
   Z0[, ordeVars] <- as.numeric(Z0[, ordeVars])
@@ -92,15 +89,13 @@ library(PcAux)     # for iris dataset
             # the variable loop (for j in 1:l) and the current iteration data at the end
   
 # Imputed dataset
+  iters <- 5
   imputed_datasets <- vector("list", iters)
   for(m in 1:iters) {
     print(paste0("Iteration status: ", m, " of ", iters))
     for (j in 1:p) { # for j-th variable w/ missing values in p number of variables w/ missing values 
                      # skipping variables without missing with the if
       if(r[j] != nrow(Z)){ # perform only for variables that have missing values
-        
-        j <- 5
-        
         Wm_j  <- Zm[,-j]
         zm_j   <- Zm[,j]
         Wm_mj <- Wm_j[is.na(Z[, j]), ]
@@ -131,7 +126,9 @@ library(PcAux)     # for iris dataset
                            alpha  = 1,
                            lambda = b_lambda,
                            thresh = 1e-12)
-        coef(lasso.mod)
+        # lasso.coef.all <- as.data.frame(as.matrix(coef(lasso.mod)))
+        # lasso.coef.sel <- data.frame(varn = row.names(lasso.coef)[lasso.coef$s0 != 0],
+        #                              coef = lasso.coef[lasso.coef$s0 != 0, ])
         
         # Impute
         if(glmfam == "gaussian"){
@@ -158,22 +155,59 @@ library(PcAux)     # for iris dataset
         Zm[is.na(Z[, j]), j] <- z.m_j_mis
       }
     }
+    # Print the coefficient for the linear model to simple check interative changes (short life)
+      x <- model.matrix(z_4~., Zm)[,-1]
+      y <- Zm$z_4
+      glmfam <- detect_family(y)
+      
+      # Lasso Regression: choose lambda with corss validation
+      cv.out = cv.glmnet(x, y, family = glmfam,
+                         alpha = 1) # alpha = 1 is the lasso penality
+      b_lambda <- cv.out$lambda.min
+      
+      # Fit rigde Regression with best lambda
+      lasso.mod = glmnet(x, y,
+                         family = glmfam, 
+                         alpha  = 1,
+                         lambda = b_lambda,
+                         thresh = 1e-12)
+      coef(lasso.mod)
+      lasso.coef <- as.data.frame(as.matrix(coef(lasso.mod)))
+      lasso.coef.sel <- data.frame(varn = row.names(lasso.coef)[lasso.coef$s0 != 0],
+                                   coef = lasso.coef[lasso.coef$s0 != 0, ])
+      print(lasso.coef.sel)
+      
+    # Store imputed dataset at this iteration
     imputed_datasets[[m]] <- Zm
-    #print(dt_aug %>% filter(is.na(dt_i$yinc)) %>% select(1:7))
   }
 
+# Check models ------------------------------------------------------------
+  dt4check <- dt_c
+  # Now using complete data, but can easly change it
   
+  # True models
+  lm(y~V1+V2+V3+V4+V5, dt4check) #linear model
+  glm(y_dicho ~ V1 , data = dt4check, family = binomial) #dichotmous
+  multinom(y_categ ~ V1, dt4check) #multinomial (right now I cannot really replicate this results with the lasso penality)
+  
+  # Lasso penalities models (change dependent variable to match interest)
+  x <- model.matrix(y_categ~., dt4check[,1:10])[,-1]
+  y <- dt4check$y_categ
+  glmfam <- detect_family(y)
+  
+  # Lasso Regression: choose lambda with corss validation
+  cv.out = cv.glmnet(x, y, family = glmfam,
+                     alpha = 1) # alpha = 1 is the lasso penality
+  b_lambda <- cv.out$lambda.min
+  
+  # Fit rigde Regression with best lambda
+  lasso.mod = glmnet(x, y,
+                     family = glmfam, 
+                     alpha  = 1,
+                     lambda = b_lambda,
+                     thresh = 1e-12)
+  coef(lasso.mod)
+  lasso.mod$beta
 
-# Functions ---------------------------------------------------------------
 
-  detect_family <- function(x){
-    if(!is.null(levels(x))){
-      family <- ifelse(length(levels(x))>2, "multinomial", "binomial")
-    } else {
-      family <- "gaussian" # limited to nomrally distributed var for now
-    }
-    return(family)
-  }
-  
-  
   

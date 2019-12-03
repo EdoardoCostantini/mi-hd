@@ -42,4 +42,7 @@ rsconnect/
 *~
 
 # swp files
-.swp
+*.swp
+
+# Ignore folder with notes
+/notes/data_notes

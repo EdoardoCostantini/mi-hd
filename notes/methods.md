@@ -62,9 +62,22 @@ supported, highdimensionality etc.)
 		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
 		* DVs: continuous, dichotomous, multinomial, ordinal DVs
 	* Limitations:
-		* IURR does not allow for Ridge regression because ridge does no variable selection
 		* DURR implementation at the moment gives you a terrible lasso selection for gaussian case. FIX on monday
 	* Packages: none
+
+	*Implementation status: IURR*
+	* Imputation Model Variables supported: 
+		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
+		* DVs: continuous, dichotomous, ordinal DVs.
+	* Limitations:
+		* currently this apporach does not support multinomial outcome vairables because the 
+			paper does not specify how to do it and the way I perform a multinomial logistic regression 
+			with lasso penality will provide different active sets (variable selection) for each baseline 
+			category logit, meaning that I cannot use it for variable selection in a straightforward 
+			way (I would need to think about how to implement this: e.g. inlcude only variables that 
+			are in all?)
+	* Packages: none
+
 
 * **Bayesian LASSO** following Zhao Long 2016;
 
@@ -122,6 +135,6 @@ supported, highdimensionality etc.)
 		* future perspective: I would like to have a version that uses all variables to compute the PC scores, 
 		  this would help including in a automatic way the interaction and poly terms. This would require some
 		  repetitions of PCA at least once per variable with missing values, if not once per variable per 
-		  iteration (needs more thought)
+		  iteration (needs more thought); what about ICA?
 
 
