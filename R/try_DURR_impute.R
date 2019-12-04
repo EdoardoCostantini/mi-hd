@@ -117,6 +117,7 @@ library(PcAux)     # for iris2 dataset
         
         # Lasso Regression: choose lambda with corss validation
         cv.out = cv.glmnet(x, y, family = glmfam,
+                           nfolds = 10, # as specified in paper (also default)
                            alpha = 1) # alpha = 1 is the lasso penality
         b_lambda <- cv.out$lambda.min
         

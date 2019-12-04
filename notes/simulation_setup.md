@@ -6,10 +6,15 @@ analysis when the data imputed is high-dimensional.
 
 ## Factorial Design
 * fixed: MAR + MCAR; sample size; set of model-relevant, auxiliary and junk variables
-* factors: % missing info; number of p p<<n, p =~ n, p >> n;
+* factors: 
+	* % missing info; 
+	* number of p p<<n, p =~ n, p >> n; 
+	* wierd variable distributions (binomials, poissons (e.g. number of children), skewed truncated normals (many 1-10 scales), 
+		cut-off (mmm something like age where no one younger than 18 is measured)
+	* interaction types and quantity (based maybe on that paper that you read about MICE imputation and interaction types)
 
 ## Think about
-* y model: there should be (at least) one vairable that is generated according to some model involving 'ture' predictors
+* y model: there should be (at least) one vairable that is generated according to some model involving 'true' predictors
 	we might work with one linear model and maybe one GLM for categorical vairables. But this depends
 	also on whether we want to include only continuous variables in the simulation study or other types 
 	as well.

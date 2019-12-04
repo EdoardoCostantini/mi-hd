@@ -1,7 +1,7 @@
 ### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
 ### Author:   Edoardo Costantini
 ### Created:  2019-DEC-2
-### Modified: 2019-DEC-3
+### Modified: 2019-DEC-4
 ### Notes:    reference paper is Deng et al 2016
 
 # load packages
@@ -16,7 +16,7 @@ library(mice)
 # Create using datagen function
   source("./dataGen_test.R")
     set.seed(20191120)
-  dt <- missDataGen(n=1e3, p=10)
+  dt <- missDataGen(n=40, p=10)
   dt_c <- dt[[1]] # fully observed
   dt_i <- dt[[2]] # with missings
     dim(dt_i)
@@ -86,6 +86,7 @@ library(mice)
     for (j in 1:p) { # for j-th variable w/ missing values in p number of variables w/ missing values 
                      # skipping variables without missing with the if
       if(r[j] != nrow(Z)){ # perform only for variables that have missing values
+        j <- 2
         Wm_j  <- Zm[,-j]               # predictors for imp model from inizialized dataset (m-1) [ALL CASES]
         zm_j   <- Zm[,j]               # outcome for imp model from inizialized dataset (m-1) [ALL CASES]
         Wm_mj <- Wm_j[is.na(Z[, j]), ] # predictor rows for cases with missing z_j [MISSING CASES]
@@ -103,6 +104,7 @@ library(mice)
         
         # Lasso Regression: choose lambda with corss validation
         cv.out = cv.glmnet(x[,-1], y, family = glmfam,
+                           nfolds = 10, # as specified in paper (also default)
                            alpha = 1) # alpha = 1 is the lasso penality
         b_lambda <- cv.out$lambda.min
         

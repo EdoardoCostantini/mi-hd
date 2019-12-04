@@ -43,7 +43,7 @@ supported, highdimensionality etc.)
 			imputation model);
 		* (2) requires a fully observed y variable. For the future, you could take insipiration 
 			from the Sequential BART paper but avoid the assumption of knowing the analysis model beforehand;
-		* (3) can only generate 5 multiply imputed datasets.
+		* (3) can only generate 5 multiply imputed datasets in current implementation.
 	* Packages: A 'sbart' package was developed but has been removed from CRAN (and no updates since 2 years). 
 		On github you have found 'bartpkg1' which is basically 'sbart'. The 'bart' function in BayesianTrees is 
 		not directly applicabale as I cannot update the dataset that is used at each iteration of the mcmc
@@ -60,26 +60,43 @@ supported, highdimensionality etc.)
 	*Implementation status: DURR*
 	* Imputation Model Variables supported: 
 		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
-		* DVs: continuous, dichotomous, multinomial, ordinal DVs
+		* DVs: continuous, dichotomous, multinomial, ordinal
 	* Limitations:
 		* DURR implementation at the moment gives you a terrible lasso selection for gaussian case. FIX on monday
+		* number of iterations is not clearly specified in articles. Says to keep the last few datasets after convergence
+		  but no clear measure of convergence is provided.
 	* Packages: none
 
 	*Implementation status: IURR*
 	* Imputation Model Variables supported: 
 		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
-		* DVs: continuous, dichotomous, ordinal DVs.
+		* DVs: continuous, dichotomous, ordinal.
 	* Limitations:
 		* currently this apporach does not support multinomial outcome vairables because the 
 			paper does not specify how to do it and the way I perform a multinomial logistic regression 
 			with lasso penality will provide different active sets (variable selection) for each baseline 
 			category logit, meaning that I cannot use it for variable selection in a straightforward 
-			way (I would need to think about how to implement this: e.g. inlcude only variables that 
-			are in all?)
+			way. In the logistic regression case, what you do is identify the predictors of the logit with
+			the penalised method, then fit a logistic model using just those predictors and estimate parameters
+			with a regular ML estimation. Finally, you use the parameters covariance matrix estiamted with such
+			ML model to sample from a nomral distribution random values of the parameters to deifne a predictive
+			model for the missing values. When using a regularized method for multinomial logistic, a log-linear
+			model is used and each poisson count (how many observations in are in response category j of the dv, 
+			given X) are modelled with different predictors (because of how the lasso penality works in the glmnet
+			package). Hence, a unique active set is not identified and I cannot fit a regular multinomial logit,
+			nor log linear model, to obtain a covariance matrix of parameter estiamtes that I would need to perform
+			the missing data imputation.
+		* number of iterations as for DURR
 	* Packages: none
 
-
 * **Bayesian LASSO** following Zhao Long 2016;
+	* Imputation Model Variables supported: 
+		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
+		* DVs: continuous.
+	* Limitations:
+		* cannot impute dichotomous or polythmous variables at the moment
+	* Packages: 'monomvn' R package implements the BLasso parameters selection part, I wrote code for implementing the
+		MICE-like imputation algorithm.
 
 * **PCA based auxiliary variables inclusion** following Howard et al 2015
 	It is extendable to categorical and ordinal variables but I'm not familiar with PCA on these type
