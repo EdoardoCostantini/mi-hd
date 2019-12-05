@@ -43,6 +43,7 @@ supported, highdimensionality etc.)
 			imputation model);
 		* (2) requires a fully observed y variable. For the future, you could take insipiration 
 			from the Sequential BART paper but avoid the assumption of knowing the analysis model beforehand;
+			IMPORTANT: why do they need this?
 		* (3) can only generate 5 multiply imputed datasets in current implementation.
 	* Packages: A 'sbart' package was developed but has been removed from CRAN (and no updates since 2 years). 
 		On github you have found 'bartpkg1' which is basically 'sbart'. The 'bart' function in BayesianTrees is 
