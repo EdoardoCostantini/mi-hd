@@ -4,6 +4,20 @@
 To what extent do the MI imputation methods considered grant statistical validity of the secondary data
 analysis when the data imputed is high-dimensional.
 
+## Simulation studies
+* 1) multivariate normal data with no structure - Baseline: how well do the methods "recover" infomration on the covaraince structure of a simple unrealistic scenario?
+	* factors: 1) % of missing infomration; 2) dimensionality (p<<n, p =~ n, p >> n)
+* 2) (multivariate normal) data with latent structure - How do the method perform when missingness is on items that measure latent constructs
+	* fixed: % of missing infomration; dimensionality (p >> n);
+	* factors: 1) latent construct normality level (+/- deviation from normality: i'm thinking opinions/positions about polirising themes in society); 2) dependency between the latent constructs (+/-, e.g.  if all latent constructs are normally distributed then think of it maybe creating three tiers of correlation levels: low, medium high, where the correaltion coefficients maybe are randomly generated for pairs of constructs between 0 and .33, .33 and .66; .66 and 1)
+* 3) mesurement levels - How well do the methods behave with different measurement levels (nominal, ordinal, interval)
+	* fixed: % of missing infomration;  dimensionality (p >> n); latent structure
+	* factors: 1) percentage of p that are mesaured with each level?
+* 4) complex relationships - How well do the methods preserve non-linearity and interactions
+	* fixed: % of missing infomration;  dimensionality (p >> n); latent structure?
+	* factors: 1) percentage of p that are categorical?
+* 5) corssectional EVS datasent with clusters?
+
 ## Factorial Design
 * fixed: MAR + MCAR; sample size; set of model-relevant, auxiliary and junk variables
 * factors: 
