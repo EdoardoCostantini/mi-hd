@@ -43,7 +43,6 @@ supported, highdimensionality etc.)
 			imputation model);
 		* (2) requires a fully observed y variable. For the future, you could take insipiration 
 			from the Sequential BART paper but avoid the assumption of knowing the analysis model beforehand;
-			IMPORTANT: why do they need this?
 		* (3) can only generate 5 multiply imputed datasets in current implementation.
 	* Packages: A 'sbart' package was developed but has been removed from CRAN (and no updates since 2 years). 
 		On github you have found 'bartpkg1' which is basically 'sbart'. The 'bart' function in BayesianTrees is 
@@ -79,7 +78,7 @@ supported, highdimensionality etc.)
 		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
 		* DVs: continuous, dichotomous, ordinal.
 	* Limitations:
-		* currently this apporach does not support multinomial outcome variables because the 
+		* currently this apporach does not support multinomial outcome vairables because the 
 			paper does not specify how to do it and the way I perform a multinomial logistic regression 
 			with lasso penality will provide different active sets (variable selection) for each baseline 
 			category logit, meaning that I cannot use it for variable selection in a straightforward 
@@ -101,7 +100,7 @@ supported, highdimensionality etc.)
 		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
 		* DVs: continuous.
 	* Limitations:
-		* cannot impute dichotomous or polytmous variables at the moment
+		* cannot impute dichotomous or polythmous variables at the moment
 	* Packages: 'monomvn' R package implements the BLasso parameters selection part, I wrote code for implementing the
 		MICE-like imputation algorithm.
 
@@ -120,21 +119,21 @@ supported, highdimensionality etc.)
 		  intermediate step to acquire a complete data set on the auxiliary variables for the subsequent 
 		  principal component analysis." p 289 under "Extracting Principal Components"). We might want to
 		  use the form of imputation for PCA presented in the factominer R package. For now no intialization
-		  is required for the auxiliary variables, so I prepare a dataset with PCs and then use it in MICE
+		  is required for the auxiliary vairables, so I prepare a dataset with PCs and then use it in MICE
 		  directly. In the future, for each variable with missing values, a dataset with only the variable
 		  and the first n PC components could be used (n should be defiend, look into the paper again) where all
 		  other variables (interaction and poly terms) are used to compute the PC as well.
 		* A priori knowledge of analysis model - Related to this issue, the method proposed by
-		  Howard et al 2015 extracts PCs only form the auxiliary variables and not from the real or otherwise
+		  Howard et al 2015 extracts PCs only form the auxiliary vairables and not from the real or otherwise
 		  selected predictors in the models and then uses the predictors + auxiliary Principal Components for
 		  the actual imputation. This however, does not allow to automatically include interaction effects and
-		  squared terms between real / selected predictors and auxiliary variables. In the implementation
+		  squared terms between real / selected predictors and auxiliary vairables. In the implementation
 		  I perfromed here I decided to extract PCs
 		  form the auxiliary variables which have no missing values and then use the predictors + auxiliary PCs
 		  for imputation with regular MICE. This is howver undesirable as we are not exlpoiting the full potential
 		  of PCA for dimension reduction; this would still require to manually specify interactions and squared 
 		  terms between real/selected predictors in the imputation model; we need to assume that we know the analysis 
-		  model (ie which variables are auxiliary and which variables are predicotrs at least) before we 
+		  model (ie which vairables are auxiliary and which variables are predicotrs at least) before we 
 		  perform the imputation, which is not ideal.
 		* I have a bare bone implementation: no functions, just continuous, only squared terms but PcAux provides
 		  a complete implementation that resolves the two aforementioned issues
@@ -153,9 +152,9 @@ supported, highdimensionality etc.)
 		  but their values stay constant across iterations and different data imputations.
 		* number of PCs to be used: in the simualtion Howard et al 2015 use always just 1, in the real data 
 		  example they use different numbers to see what is the effect of such choice and they conclude for example
-		  that using 14 PCs that explain 55% of the auxiliary variables variance or 7 PCs that explain 40$ yields 
+		  that using 14 PCs that explain 55% of the auxiliary vairable variance or 7 PCs that explain 40$ yields 
 		  essentialy equivalent FMIs. In my implementation I will make the conservative choice of including a higher
-		  number of PCs (say the ones that explain 50% of the variance, although why not include all?)
+		  number of PCs (say the ones that explain 50% of the vairance, although why not include all?)
 		* future perspective: I would like to have a version that uses all variables to compute the PC scores, 
 		  this would help including in a automatic way the interaction and poly terms. This would require some
 		  repetitions of PCA at least once per variable with missing values, if not once per variable per 
