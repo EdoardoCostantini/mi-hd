@@ -62,10 +62,16 @@ supported, highdimensionality etc.)
 		* IVs: continuous, dichotomous, multinomial, ordinal, mixed;
 		* DVs: continuous, dichotomous, multinomial, ordinal
 	* Limitations:
-		* DURR implementation at the moment gives you a terrible lasso selection for gaussian case. FIX on monday
 		* number of iterations is not clearly specified in articles. Says to keep the last few datasets after convergence
 		  but no clear measure of convergence is provided.
+		* currently only lasso works, EN takes too much time, I'm looking for the most efficient way of crossvalidating
+		  the tuning parameters
 	* Packages: none
+	* Notes: at the moment I have implemented everything with the lasso isntead of the elastic net as it seemed from the results
+		that the biggest differences in performances came from using DURR or IURR rather than from the type of regularization.
+		However, reading the EN paper I realise that EN is better at selecting variables from a group of variables that are 
+		hihgly correlated. As we are thinking of surveys as applications, it seems more EN seems theoretically more apt to 
+		the task. EN would keep variables that have high correlation where lasso wrongly chooses one of them.
 
 	*Implementation status: IURR*
 	* Imputation Model Variables supported: 

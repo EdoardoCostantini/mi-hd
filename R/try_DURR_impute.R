@@ -17,7 +17,7 @@ library(PcAux)     # for iris2 dataset
 # Create using datagen function
   source("./dataGen_test.R")
     set.seed(20191120)
-  dt <- missDataGen(n=300, p=100)
+  dt <- missDataGen(n=1e4, p=500)
   dt_c <- dt[[1]] # fully observed
   dt_i <- dt[[2]] # with missings
     dim(dt_i)
@@ -110,42 +110,77 @@ library(PcAux)     # for iris2 dataset
         z.star_j_obs     <- zm_j[!is.na(Z[indx_boSample, j])]
         W.star.m_j_obs   <- W.star.m_j[!is.na(Z[indx_boSample, j]), ]
         
-        ## Fit regularized regression
-        x <- model.matrix(z.star_j_obs~., data.frame(z.star_j_obs, W.star.m_j_obs))[,-1]
+        # Data for regularized models
+        x <- model.matrix(z.star_j_obs~., data.frame(z.star_j_obs, W.star.m_j_obs))
         y <- z.star_j_obs
-        glmfam <- detect_family(y)
         
-        # Lasso Regression: choose lambda with corss validation
-        cv.out = cv.glmnet(x, y, family = glmfam,
-                           nfolds = 10, # as specified in paper (also default)
-                           alpha = 1) # alpha = 1 is the lasso penality
-        b_lambda <- cv.out$lambda.min
+        glmfam   <- detect_family(y) # regularized family type
+        reg_type <- "el"             # penality type 
         
-        # Fit rigde Regression with best lambda
-        lasso.mod = glmnet(x, y,
-                           family = glmfam, 
-                           alpha  = 1,
-                           lambda = b_lambda,
-                           thresh = 1e-12)
-        # lasso.coef.all <- as.data.frame(as.matrix(coef(lasso.mod)))
-        # lasso.coef.sel <- data.frame(varn = row.names(lasso.coef)[lasso.coef$s0 != 0],
-        #                              coef = lasso.coef[lasso.coef$s0 != 0, ])
+        ## Fit regularized regression (elastic net)
+        if(reg_type == "el"){
+          # Cross validation for alpha and lambda
+          cl <- makePSOCKcluster(5) # Set up parallel computing (#cores)
+          registerDoParallel(cl)
+          
+          # Tuning parameters range
+          alpha.seq <- seq(.1,.9, .1)    # choosing .1 and .9 as bound to force difference from ridge and lasso
+          lambda.seq <- seq(0,10, .5)   # choosing 10 as upper bound because
+          desired.grid <- expand.grid(alpha.seq, lambda.seq)
+          colnames(desired.grid) <- c("alpha", "lambda")
+          
+          # Cross-validate
+          model <- train(
+            y ~., data = data.frame(y, x[,-1]), method = "glmnet",
+            family = glmfam, #type.multinomial = "grouped", # type.multinomial is used only if glmfam = "multinomial"
+            trControl = trainControl("cv", number = 10),   # 10-fold corssvalidation
+            #tuneGrid = desired.grid
+            tuneLength = 10
+          )
+          
+          stopCluster(cl) # terminate parallel computing
+          best_al <- model$bestTune
+          
+          # Fit elastic net with corssvalidated values (repetation)
+          regu.mod <- glmnet(x[,-1], y,
+                             family = glmfam,
+                             type.multinomial = "grouped",
+                             alpha  = best_al["alpha"],
+                             lambda = best_al["lambda"],
+                             thresh = 1e-12)
+        }
         
+        ## Fit regularized regression (lasso)
+        if(reg_type == "lasso"){
+          # Lasso Regression: choose lambda with corss validation
+          cv.out = cv.glmnet(x[,-1], y, family = glmfam,
+                             nfolds = 10, # as specified in paper (also default)
+                             alpha = 1) # alpha = 1 is the lasso penality
+          b_lambda <- cv.out$lambda.min
+          
+          # Fit rigde Regression with best lambda
+          regu.mod = glmnet(x[,-1], y,
+                            family = glmfam, 
+                            alpha  = 1,
+                            lambda = b_lambda,
+                            thresh = 1e-12)
+        }
+
         # Impute
         if(glmfam == "gaussian"){
-          s2.hat.m_j <- mean((predict(lasso.mod, x) - z.star_j_obs)**2) # according to paper this is the estimate
+          s2.hat.m_j <- mean((predict(regu.mod, x) - z.star_j_obs)**2) # according to paper this is the estimate
           x4pred     <- model.matrix(zm_mj~., data.frame(zm_mj, Wm_mj))[,-1] # create a prediction matrix (for possible dummy coded needed)
-          z.m_j_mis  <- rnorm(nrow(Wm_mj), predict(lasso.mod, x4pred), sqrt(s2.hat.m_j))
+          z.m_j_mis  <- rnorm(nrow(Wm_mj), predict(regu.mod, x4pred), sqrt(s2.hat.m_j))
         }
         if(glmfam == "binomial"){
           x4pred    <- model.matrix(zm_mj~., data.frame(zm_mj, Wm_mj))[,-1] # create a prediction matrix (for possible dummy coded needed)
-          py1       <- predict(lasso.mod, x4pred, type = "response") # obtain the predicted probabilties for missing values based on their original dataset other values
+          py1       <- predict(regu.mod, x4pred, type = "response") # obtain the predicted probabilties for missing values based on their original dataset other values
           z.m_j_mis <- rbinom(nrow(py1), 1, py1)  # sample from binomail distirbution with the drawn probabilities
           z.m_j_mis <- factor(z.m_j_mis, labels = levels(y)) # return to original labels
         }
         if(glmfam == "multinomial"){
           x4pred    <- model.matrix(zm_mj~., data.frame(zm_mj, Wm_mj))[,-1] # create a prediction matrix (for possible dummy coded needed)
-          py        <- predict(lasso.mod, x4pred, type = "response") # obtain the predicted probabilties for missing values based on their original dataset other values
+          py        <- predict(regu.mod, x4pred, type = "response") # obtain the predicted probabilties for missing values based on their original dataset other values
           rmultinom(n=1, size=1, py[1,,])
           DV_location = t(apply(py, 1, rmultinom, n = 1, size = 1)) # 1 for the category in which is most 
                                                                     # likely that an observation is
@@ -167,13 +202,13 @@ library(PcAux)     # for iris2 dataset
       b_lambda <- cv.out$lambda.min
       
       # Fit rigde Regression with best lambda
-      lasso.mod = glmnet(x, y,
+      regu.mod = glmnet(x, y,
                          family = glmfam, 
                          alpha  = 1,
                          lambda = b_lambda,
                          thresh = 1e-12)
-      coef(lasso.mod)
-      lasso.coef <- as.data.frame(as.matrix(coef(lasso.mod)))
+      coef(regu.mod)
+      lasso.coef <- as.data.frame(as.matrix(coef(regu.mod)))
       lasso.coef.sel <- data.frame(varn = row.names(lasso.coef)[lasso.coef$s0 != 0],
                                    coef = lasso.coef[lasso.coef$s0 != 0, ])
       print(lasso.coef.sel)
