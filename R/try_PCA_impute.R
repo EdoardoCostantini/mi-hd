@@ -13,13 +13,14 @@
 # load packages
 library(tidyverse)
 library(gimme)    # for expand.grid.unique
+library(PcAux)
 
 # Prep data ---------------------------------------------------------------
 
 # Create using datagen function
 source("./dataGen_test.R")
   set.seed(20191120)
-dt <- missDataGen(n=100, p=8)
+dt <- missDataGen(n=100, p=10)
   dt_c <- dt[[1]] # fully observed
   dt_i <- dt[[2]] # with missings
     dim(dt_i)
@@ -109,23 +110,40 @@ K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names 
   ## With highdimensional data ##
     source("./dataGen_test.R")
       set.seed(20191120)
-    dt <- missDataGen(n=50, p=6)
+    dt <- missDataGen(n=50, p=10)
       dt_c <- dt[[1]] # fully observed
       dt_i <- dt[[2]] # with missings
       dim(dt_i)
     mice::md.pattern(dt_i)
     
+    # Data
+    Z <- dt_i    # dataset with missing values
+    p <- ncol(Z) # number of variables [INDEX with j]
+    n <- nrow(Z) # number of observations
+      colnames(Z) <- paste0(rep("z_", p), seq(1, p))
+    r <- colSums(apply(Z, 2, function (x) {!is.na(x)} )) # vector with number of observed values in a j variable
+    # Define variables with missings
+    l <- ncol(Z)-sum(tail(mice::md.pattern(Z),1) == 0) # number of variables needing imputation
+    l_names <- names(which(colSums(apply(Z, 2, is.na)) != 0)) # select the names of these k variables
+    # Define names of variables w/ missing values (general and by measurment scale)
+    vartypes <- rbind(lapply(lapply(Z[, names(Z) %in% l_names], class), paste, collapse = " "))
+      contVars <- colnames(vartypes)[vartypes == "numeric"] # names of continuous variables for selection
+      factVars <- colnames(vartypes)[vartypes == "factor"] # includes factors and ordered factors
+      ordeVars <- colnames(vartypes)[vartypes == "ordered factor"] # includes factors and ordered factors
+    
     # First, load and prepare your data:
-    cleanData <- prepData(rawData   = dt_i,
-                          moderators = c(names(dt_i))) # all interactions
+    cleanData <- prepData(rawData   = Z,
+                          nomVars = factVars,
+                          ordVars = ordeVars,
+                          moderators = c(names(Z))) # all interactions
     
     # Note on moderators: by inlcuding all variable names in the moderator arguments,
     # you obtain the following
-    varCombs <- combn(names(dt_i), 2, simplify = FALSE)
+    varCombs <- combn(names(Z), 2, simplify = FALSE)
     interact <- data.frame(
       lapply(varCombs,
              function(x, dat) dat[ , x[1]] * dat[ , x[2]],
-             dat = dt_i)
+             dat = Z)
     )
     ncol(interact)
     
@@ -133,14 +151,17 @@ K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names 
     pcAuxOut <- createPcAux(pcAuxData = cleanData,
                             interactType = 2L,
                             maxPolyPow = 3L,
+                            nomVars = factVars,
+                            ordVars = ordeVars,
                             nComps    = c(3, 2))
     # Imputations
-    miOut <- miWithPcAux(rawData   = dt_i,
+    miOut <- miWithPcAux(rawData   = Z,
                          pcAuxData = pcAuxOut,
+                         nomVars = factVars,
+                         ordVars = ordeVars,
                          nImps     = 5)
     getImpData(miOut)
-    head(dt_i, 9)
-    
+
     # or work directly with the PC auxiliaries by appending them to the original data
     outData <- mergePcAux(pcAuxData = pcAuxOut, rawData = dt_i)
   

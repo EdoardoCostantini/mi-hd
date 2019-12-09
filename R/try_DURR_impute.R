@@ -10,6 +10,8 @@ library(dplyr)
 library(glmnet)    # for regularized regressions
 library(mice)      
 library(PcAux)     # for iris2 dataset
+library(caret)     # for train function that you use for crossvalidation of EN parameters
+library(parallel)
 
 # Prep data ---------------------------------------------------------------
 # Load all purpose functions
@@ -17,7 +19,7 @@ library(PcAux)     # for iris2 dataset
 # Create using datagen function
   source("./dataGen_test.R")
     set.seed(20191120)
-  dt <- missDataGen(n=1e4, p=500)
+  dt <- missDataGen(n=100, p=500)
   dt_c <- dt[[1]] # fully observed
   dt_i <- dt[[2]] # with missings
     dim(dt_i)
@@ -135,7 +137,7 @@ library(PcAux)     # for iris2 dataset
             family = glmfam, #type.multinomial = "grouped", # type.multinomial is used only if glmfam = "multinomial"
             trControl = trainControl("cv", number = 10),   # 10-fold corssvalidation
             #tuneGrid = desired.grid
-            tuneLength = 10
+            tuneLength = 25 # how many alpha values tried between .1 and 1, and how many lambda values
           )
           
           stopCluster(cl) # terminate parallel computing

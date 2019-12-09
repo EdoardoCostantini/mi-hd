@@ -19,7 +19,7 @@ library(doParallel)
 # Create using datagen function
   source("./dataGen_test.R")
     set.seed(20191120)
-  dt <- missDataGen(n=100, p=10)
+  dt <- missDataGen(n=500, p=500)
   dt_c <- dt[[1]] # fully observed
   dt_i <- dt[[2]] # with missings
     dim(dt_i)
@@ -88,7 +88,7 @@ library(doParallel)
     print(paste0("Iteration status: ", m, " of ", iters))
     for (j in 1:p) {                   # for j-th variable in p number of variables
       if(r[j] != nrow(Z)){             # perform only for variables that have missing values
-        j <- 2
+        j <- 4
         ## Step 0. Prepare data for j-th variable imputation
         Wm_j  <- Zm[,-j]               # predictors for imp model from inizialized dataset (m-1) [ALL CASES]
         zm_j  <- Zm[,j]                # outcome for imp model from inizialized dataset (m-1)    [ALL CASES]
@@ -110,17 +110,18 @@ library(doParallel)
         registerDoParallel(cl)
         
         # Tuning parameters range
-        alpha.seq <- seq(.1,.9, .1)    # choosing .1 and .9 as bound to force difference from ridge and lasso
-        lambda.seq <- seq(0,10, .05)   # choosing 10 as upper bound because
-        desired.grid <- expand.grid(alpha.seq, lambda.seq)
-          colnames(desired.grid) <- c("alpha", "lambda")
+        # alpha.seq <- seq(0,1, .1)    # choosing .1 and .9 as bound to force difference from ridge and lasso
+        # lambda.seq <- seq(0,10, .05)   # choosing 10 as upper bound because
+        # desired.grid <- expand.grid(alpha.seq, lambda.seq)
+        #   colnames(desired.grid) <- c("alpha", "lambda")
           
         # Cross-validate
         model <- train(
           y ~., data = data.frame(y, x[,-1]), method = "glmnet",
           family = glmfam, type.multinomial = "grouped", # type.multinomial is used only if glmfam = "multinomial"
           trControl = trainControl("cv", number = 10),   # 10-fold corssvalidation
-          tuneGrid = desired.grid
+          #tuneGrid = desired.grid
+          tuneLength = 25 # how many alpha values tried between .1 and 1, and how many lambda values
         )
         stopCluster(cl) # terminate parallel computing
         best_al <- model$bestTune
@@ -140,7 +141,6 @@ library(doParallel)
           W_Sjm_obs  <- x[, active.set] # reusing x object without making another model matrix
           W_Sjm_mis  <- model.matrix(zm_mj~., data.frame(zm_mj, Wm_mj))[, active.set]
         }
-
         if(glmfam == "gaussian"){
           ## Fit ML regressions
           # Manual Way
@@ -219,5 +219,42 @@ library(doParallel)
     # Store imputed dataset at this iteration
     imputed_datasets[[m]] <- Zm
   }
+
   
+# Model checks on complete data
+# Original data
+  dt_c
+  y <- dt_c$y
+  x <- model.matrix(y~., dt_c)
+  head(x)
+# True linear reg model
+  lm(y~x[,c("V1","V2","V3","V4","V5")])
+
+# Fit elastic net
+  # Cross validation for alpha and lambda
+  cl <- makePSOCKcluster(5) # Set up parallel computing (#cores)
+  registerDoParallel(cl)
+
+  # Cross-validate
+  model <- train(
+    y ~., data = data.frame(y, x[,-1]), method = "glmnet",
+    family = glmfam, type.multinomial = "grouped", # type.multinomial is used only if glmfam = "multinomial"
+    trControl = trainControl("cv", number = 10),   # 10-fold corssvalidation
+    #tuneGrid = desired.grid
+    tuneLength = 25 # how many alpha values tried between .1 and 1, and how many lambda values
+  )
+  stopCluster(cl) # terminate parallel computing
+  best_al <- model$bestTune
+  
+  # Fit elastic net with corssvalidated values (repetation)
+  el.mod <- glmnet(x[,-1], y,
+                   family = glmfam,
+                   type.multinomial = "grouped",
+                   alpha  = best_al["alpha"],
+                   lambda = best_al["lambda"],
+                   thresh = 1e-12)
+  coef(el.mod)
+  md.pattern(model$results)
+
+  model$results[is.na(model$results$RsquaredSD), ]
   

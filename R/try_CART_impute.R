@@ -23,16 +23,15 @@ library(bayesboot)
   source("./functions_allpurp.R")
 
 # data --------------------------------------------------------------------
-# Create using datagen function
-source("./dataGen_test.R")
-set.seed(20191120)
-dt <- missDataGen(n=1e4, p=500)
-dt_c <- dt[[1]] # fully observed
-dt_i <- dt[[2]] # with missings
-dim(dt_i)
-mice::md.pattern(dt_i)
+  # Create using datagen function
+  source("./dataGen_test.R")
+  set.seed(20191120)
+  dt <- missDataGen(n=100, p=10)
+  dt_c <- dt[[1]] # fully observed
+  dt_i <- dt[[2]] # with missings
+  dim(dt_i)
 
-# load data
+  # or load sine data
   dt <- readRDS("../data/data_tryout.rds") # generate with dataGen_test.R if not available
   dt_c <- dt[[1]] # fully observed
   mice::md.pattern(dt_c)
@@ -40,8 +39,6 @@ mice::md.pattern(dt_i)
   dt_i <- dt[[2]] # with missings
   mice::md.pattern(dt_i)
   dim(dt_i)
-  
-  dt_i[1:10, 1:6]
 
 # Define variables with missings
   K <- ncol(dt_i)-sum(tail(mice::md.pattern(dt_i),1) == 0) # number of variables needing imputation
@@ -133,7 +130,7 @@ mice::md.pattern(dt_i)
     # Burgette Rieter 2010; (C) I need to look more into the specification of a CART (do I need to define
     # the value of "cp")
     
-    K <- sum(is.na(colSums(dt_i, na.rm = FALSE))) # number of variables needing imputation
+    K <- ncol(dt_i)-sum(tail(mice::md.pattern(dt_i),1) == 0) # number of variables needing imputation
     K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names of these k variables
     
     # Initiliaze by stochastic regression imputation

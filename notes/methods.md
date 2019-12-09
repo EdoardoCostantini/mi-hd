@@ -29,15 +29,16 @@ supported, highdimensionality etc.)
 	* Limitations:
 		* number of iterations is not clearly specified in articles. Says to keep the last few datasets after convergence
 		  but no clear measure of convergence is provided.
-		* currently only lasso works, EN takes too much time, I'm looking for the most efficient way of crossvalidating
-		  the tuning parameters
+		* currently only lasso works, EN takes too much time, I'm looking for the most efficient way of cross-validating
+		  the tuning parameters. One good aspect of EN is that good beacuse if Lasso or ridge perform better, then they
+		  are preferred. Hence, it's fine to use the corssvalidation method that even allwos for lasso and ridge.
 	* Packages: none
 	* Notes: at the moment I have implemented everything with the lasso instead of the elastic net as it seemed from the results
 		that the biggest differences in performances came from using DURR or IURR rather than from the type of regularization.
 		However, reading the EN paper I realise that EN is better at selecting variables from a group of variables that are 
 		hihgly correlated. As we are thinking of surveys as applications, EN seems theoretically more apt to 
 		the task beacuse of its grouping effect: if there are predictors that are highly correlated, then EN would tend to 
-		push their coefficient to be the same, while LASSO would tend to keep just one of them. 
+		push their coefficient to be the same, while LASSO would tend to keep just one of them.
 
 	*Implementation status: IURR*
 	* Imputation Model Variables supported: 
@@ -60,7 +61,7 @@ supported, highdimensionality etc.)
 		Tibshirani1996 section 5) and this distribution has a shape with mass in the center and in the tails meaning
 		that it will favor coefficients that are either 0 or large. Advantages of this procedure is that it provides
 		directly a valid posterior distribution of the coefficients AND the posterior predictive distribution of the
-		missing values
+		missing values.
 
 * **PCA based auxiliary variables inclusion** following Howard et al 2015
 	
