@@ -100,7 +100,7 @@ library(doParallel)
         Wm_j_obs <- Zm[, -j][!is.na(Z[, j]),] # current (m) components of the predictors cooresponding 
                                               # to observed cases on j-th variable [OBSERVED and IMPUTED VALUES]
         
-        ## Step 1. Active set selection thorugh regularized regression (Elastic Net penality) ##
+        ## Active set selection thorugh regularized regression (Elastic Net penality) ##
         x <- model.matrix(z_j_obs~., data.frame(z_j_obs, Wm_j_obs))
         y <- z_j_obs
         glmfam <- detect_family(y)
@@ -109,7 +109,7 @@ library(doParallel)
         cl <- makePSOCKcluster(5) # Set up parallel computing (#cores)
         registerDoParallel(cl)
         
-        # Tuing parameters range
+        # Tuning parameters range
         alpha.seq <- seq(.1,.9, .1)    # choosing .1 and .9 as bound to force difference from ridge and lasso
         lambda.seq <- seq(0,10, .05)   # choosing 10 as upper bound because
         desired.grid <- expand.grid(alpha.seq, lambda.seq)

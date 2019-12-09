@@ -19,7 +19,18 @@ library(treeClust) # for the rpart.predict.leaves(rp, newdata, type = "where") f
 library(dplyr)
 library(bayesboot)
 
+# Load all purpose functions
+  source("./functions_allpurp.R")
+
 # data --------------------------------------------------------------------
+# Create using datagen function
+source("./dataGen_test.R")
+set.seed(20191120)
+dt <- missDataGen(n=1e4, p=500)
+dt_c <- dt[[1]] # fully observed
+dt_i <- dt[[2]] # with missings
+dim(dt_i)
+mice::md.pattern(dt_i)
 
 # load data
   dt <- readRDS("../data/data_tryout.rds") # generate with dataGen_test.R if not available
@@ -79,10 +90,10 @@ library(bayesboot)
   ## Description
     # Input: 
     # - x: a variable of any type
-    # - size: number of obseervations desired in the new bayesian bootstrap sample
     # Output: a bayesian bootsrap sample of size size of x
   ## Trial inputs
     # x <- rbinom(30, 1, .5)
+    # x <- rownames(airquality)
     size <- length(x)
     u <- sort(c(runif(length(x)-1, 0, 1))) # n-1 uniform draws
     g <- numeric(0)
