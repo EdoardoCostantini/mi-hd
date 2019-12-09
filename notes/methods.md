@@ -111,14 +111,9 @@ supported, highdimensionality etc.)
 
 	 	*Implementation status:*
 	* Variables supported: 
-		* IVs continuous and dichotomous (but not mixed!);
-		* DVs continuous and dichotomous;
+		* IVs everything;
+		* DVs continuous and nominal (ordinal as continuous);
 	* Limitations: 		
-		* (1) requires the imputer to know the analysis model before imputation (look at the paper's 
-			imputation model);
-		* (2) requires a fully observed y variable. For the future, you could take insipiration 
-			from the Sequential BART paper but avoid the assumption of knowing the analysis model beforehand;
-		* (3) can only generate 5 multiply imputed datasets in current implementation.
 	* Packages: functions available online in the CRAN archive (see paper for link)
 	* Notes: uses random forests to define the mean of the predictive distribution of the missing values and uses the
 		out of bag mean squared error as variance. The advantage comes from
@@ -156,6 +151,7 @@ supported, highdimensionality etc.)
 		not directly applicabale as I cannot update the dataset that is used at each iteration of the mcmc
 		algorithm. You could scrape the basic tree growing parts of bart from either backage and build 
 		your own implementation of this algorithm.
+	* Notes: could be used for variables selection in a IURR fashion
 
 		
 
