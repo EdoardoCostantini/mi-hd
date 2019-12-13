@@ -154,6 +154,3 @@ supported, highdimensionality etc.)
 		your own implementation of this algorithm.
 	* Notes: could be used for variables selection in a IURR fashion
 
-		
-
-

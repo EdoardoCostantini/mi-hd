@@ -31,85 +31,11 @@ library(bayesboot)
   dt_i <- dt[[2]] # with missings
   dim(dt_i)
 
-  # or load sine data
-  dt <- readRDS("../data/data_tryout.rds") # generate with dataGen_test.R if not available
-  dt_c <- dt[[1]] # fully observed
-  mice::md.pattern(dt_c)
-  dim(dt_c)
-  dt_i <- dt[[2]] # with missings
-  mice::md.pattern(dt_i)
-  dim(dt_i)
-
-# Define variables with missings
-  K <- ncol(dt_i)-sum(tail(mice::md.pattern(dt_i),1) == 0) # number of variables needing imputation
-  K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names of these k variables
-
 # Imputation w/ rpart -----------------------------------------------------
 
-  output <- CARTimpute(dt_i, 10, 7)
+  output <- CARTimpute(dt_i, 10, 7) # your own function
     
 # Functions ---------------------------------------------------------------
-
-# Data prep
-  arrange_dt_x_k <- function(dt, var_name){
-  ## Description
-    # Input: 
-    # - dt: a complete dataset (initialized or augmented) containing a variable to be imputed and all imputation model variables
-    # - var_name: character vector containing only the name of variable under imputation
-    # Output: a dataset ready to be passed in a tree growing function with the under imputation variable in first column
-  ## Trial inputs
-    # dt <- mtcars
-    # var_name <- names(mtcars)[3]
-    indx_k <- names(dt) %in% var_name         # indexing obj: which variable is under imputation
-    indx_no_k <- !names(dt) %in% var_name     # indexing obj: all vairables EXCEPT the one under imputation 
-    Xno_k <- dt[, indx_no_k]                  # Use augmented Xno_k 
-    x_k <- dt[, indx_k]                       # Select variable under imputation
-    output <- data.frame(x_k = x_k, Xno_k)    # Combine the two for growing the tree
-                                              # (doubt: should I grow the tree only on the observed values?)
-    return(output)
-  }
-# Tree related  
-  tree_type <- function(x){
-  ## Description
-    # Input: 
-    # - x: a measured variable
-    # Output: "class" / "anova" (this defines whether we need to grow a classification or a regression tree, respectively)
-  ## Trial inputs
-    # x <- mtcars$mpg # continuous example
-    # x <- as.factor(mtcars$am)  # dichotomous example
-    if(is.factor(x)) {type <- "class"} else {type <- "anova"}
-    return(type)
-  }
-  
-# Bayesian Bootstrap
-  bbootstrap <- function(x) {
-    # based on Rubin 1998
-  ## Description
-    # Input: 
-    # - x: a variable of any type
-    # Output: a bayesian bootsrap sample of size size of x
-  ## Trial inputs
-    # x <- rbinom(30, 1, .5)
-    # x <- rownames(airquality)
-    size <- length(x)
-    u <- sort(c(runif(length(x)-1, 0, 1))) # n-1 uniform draws
-    g <- numeric(0)
-    for (i in 1:(length(x))) {
-      if(length(u[i-1]) == 0) u_prev <- 0 else u_prev <- u[i-1]
-      g[i] <- u[i]-(u_prev)
-      if(i == length(x)) {
-        u[i] <- 1
-        g[i] <- 1-(u[i-1])
-      }
-      #print(cbind(u[i], u_prev, g[i]) ) # check that it works
-    }
-    #sum(g)
-    bbsample <- sample(x, 
-                       size = size, 
-                       replace = TRUE, 
-                       prob = g)
-    return(bbsample)
-  }
   
 # Single Imputation function
   CARTimpute <- function(dt_i, iters, p_imod) {
