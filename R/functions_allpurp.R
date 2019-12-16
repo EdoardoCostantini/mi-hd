@@ -94,3 +94,25 @@ bbootstrap <- function(x) { # Bayesian Bootstrap
                      prob = g)
   return(bbsample)
 }
+
+missing_type <- function(Z){
+# Input: a dataset with missing values
+#   examples:
+#     @Z <- mice::boys
+# Output: a bayesian bootstrap sample of the size of x
+# Used in: MICERandomForest
+# Notes: integer and numeric variables are considered (inaccurately) both as continuous
+  l <- ncol(Z) - sum(colSums(is.na(Z)) == 0) # number of variables needing imputation
+  l_names <- names(which(colSums(is.na(Z)) != 0)) # select the names of these k variables
+  
+  # Define names of variables w/ missing values (general and by measurment scale)
+  vartypes <- rbind(lapply(lapply(Z[, names(Z) %in% l_names], class), paste, collapse = " "))
+  contVars <- colnames(vartypes)[vartypes == "numeric" || vartypes == "integer"] # names of continuous variables for selection
+  factVars <- colnames(vartypes)[vartypes == "factor"] # includes factors and ordered factors
+  ordeVars <- colnames(vartypes)[vartypes == "ordered factor"] # includes factors and ordered factors
+  
+  output <- list(l=l, l_names=l_names, 
+                 vartypes=vartypes, contVars=contVars, factVars=factVars, ordeVars=ordeVars)
+  
+  return(output)
+}

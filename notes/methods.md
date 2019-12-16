@@ -114,12 +114,32 @@ supported, highdimensionality etc.)
 	* Variables supported: 
 		* IVs everything;
 		* DVs continuous and nominal (ordinal as continuous);
-	* Limitations: 		
-	* Packages: functions available online in the CRAN archive (see paper for link)
+	* Limitations:
+		* Ordinal variables are force to numericcaly continuous ones
+	* Packages: (1) mice::mice.impute.rf() based on Doove et al 2014; (2) a modified version of mice.impute.rf() 
+			from the mice package based on Shah et al 2014, available in my forked version of the mice package.
 	* Notes: uses random forests to define the mean of the predictive distribution of the missing values and uses the
-		out of bag mean squared error as variance. The advantage comes from
+		out of bag mean squared error as variance. It differs from the regular mice::mice.impute.rf() in the following 
+		way: The main diﬀerence is in how the multiple trees in the forest are used to impute the missing values: 
+		in Shah et al’s algorithm for continuous variables, the missing value is sampled from a normal distribution 
+		centred around the aggregated predicted value for the ’test’ data (imputation model X values for the unobserved 
+		Y values) and the out-of-bag error is used as variance, while their categorical variable algorithm samples one 
+		tree at random from the k trees that populate the forest and use it for prediction; in the ’mice’ package version, 
+		each value of y_miss_j is sampled from a donor pool deﬁned by all of the y_obs_j that end up in the k leafs 
+		deﬁned by the k trees in the random forest.
+		The advantage comes from:
 		* ensamble learning algorithm
 		* prediction improvement: reduces prediction variance, but also prediction bias
+
+* **MissForest**
+*Implementation status:*
+	* Variables supported: 
+		* IVs everything;
+		* DVs continuous and nominal (ordinal as continuous? not sure);
+	* Limitations:
+		* Single imputation
+	* Packages: missForest R package 
+
 
 * **BART** and Bayesian CART imputation (if we want polytomous categorical) following Xu et al 2016.
 	BART implementation w/ the bayesTree R package is functional for both coninuous and binary 
