@@ -96,7 +96,7 @@ supported, highdimensionality etc.)
 		  nominal factors are dummy coded and just left as such along with other potential dichotomous variables (see 
 		  dummyVars and probNoms arguments in the createPcAux function)
 		* in PcAux PCs are computed once, then used iteratively to predict the missing values in a MICE procedure
-		  but their values stay constant across iterations and different data imputations.
+	void	  but their values stay constant across iterations and different data imputations.
 		* number of PCs to be used: in the simualtion Howard et al 2015 use always just 1, in the real data 
 		  example they use different numbers to see what is the effect of such choice and they conclude for example
 		  that using 14 PCs that explain 55% of the auxiliary vairable variance or 7 PCs that explain 40$ yields 
@@ -110,7 +110,7 @@ supported, highdimensionality etc.)
 * **MICE-Random Forest** following Shah et al 2014 (same as bart but the difference is how the 
 	conditional mean is found)
 
-	 	*Implementation status:*
+	*Implementation status:*
 	* Variables supported: 
 		* IVs everything;
 		* DVs continuous and nominal (ordinal as continuous);

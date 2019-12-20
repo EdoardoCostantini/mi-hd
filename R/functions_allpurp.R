@@ -99,15 +99,15 @@ missing_type <- function(Z){
 # Input: a dataset with missing values
 #   examples:
 #     @Z <- mice::boys
-# Output: a bayesian bootstrap sample of the size of x
-# Used in: MICERandomForest
+# Output: a list containing the names of the variables to be imputed in different formats
+# Used in: MICERandomForest, and many more
 # Notes: integer and numeric variables are considered (inaccurately) both as continuous
   l <- ncol(Z) - sum(colSums(is.na(Z)) == 0) # number of variables needing imputation
   l_names <- names(which(colSums(is.na(Z)) != 0)) # select the names of these k variables
   
   # Define names of variables w/ missing values (general and by measurment scale)
   vartypes <- rbind(lapply(lapply(Z[, names(Z) %in% l_names], class), paste, collapse = " "))
-  contVars <- colnames(vartypes)[vartypes == "numeric" || vartypes == "integer"] # names of continuous variables for selection
+  contVars <- colnames(vartypes)[vartypes == "numeric" | vartypes == "integer"] # names of continuous variables for selection
   factVars <- colnames(vartypes)[vartypes == "factor"] # includes factors and ordered factors
   ordeVars <- colnames(vartypes)[vartypes == "ordered factor"] # includes factors and ordered factors
   
@@ -115,4 +115,40 @@ missing_type <- function(Z){
                  vartypes=vartypes, contVars=contVars, factVars=factVars, ordeVars=ordeVars)
   
   return(output)
+}
+
+init_dt_i <- function(Z0, missVarInfo){
+  # Input: (1) a dataset with missing values; (2) and object produced by function missing_type
+  #   examples:
+  #     @Z <- mice::boys
+  #     @missVarInfo <- missing_type(Z)
+  # Output: a dataset with cotninuous vairables imputed with mean value, and categorical with mode category
+  # Used in: MICERandomForest
+  # Notes: integer and numeric variables are considered (inaccurately) both as continuous
+  
+  # Make oredered factors as numeric
+  Z0[, missVarInfo$ordeVars] <- as.numeric(Z0[, missVarInfo$ordeVars])
+  
+  # Impute sample means for continuous variables and odered factors
+  s_means <- apply(Z0[, c(missVarInfo$contVars, missVarInfo$ordeVars)], 2, mean, na.rm = TRUE) # sample means
+  for (j in 1:length(c(missVarInfo$contVars, missVarInfo$ordeVars))) {
+    Z0 <- Z0 %>% mutate_at(vars(c(missVarInfo$contVars, missVarInfo$ordeVars)[j]),
+                           ~replace(., is.na(.), s_means[j])
+    )
+  }
+  
+  # Impute most common level for unordered factors
+  for (j in 1:length(missVarInfo$factVars)) {
+    x <- addNA(Z0[, missVarInfo$factVars[j]])
+    m_commo <- names(which.max(table(x)))
+    levels(x) <- c(levels(Z0[, missVarInfo$factVars[j]]), 99)
+    x[x == 99] <- m_commo
+    x <- droplevels(x)
+    Z0[, missVarInfo$factVars[j]] <- x
+  }
+  
+  return(Z0)  # an initialized dataset
+  # when dataset hass been itialized, m=0, so Z0 = {z0_1, z0_2, ... , z0_l, z_l+1, ... , z_p}
+  # each z_j of this data will be the m-1 "previous iteration" version at the beginning of 
+  # the variable loop (for j in 1:l) and the current iteration data at the end
 }

@@ -1,7 +1,7 @@
 ### Title:    imputeHD-comp impute with bart
 ### Author:   Edoardo Costantini
 ### Created:  2019-NOV-13
-### Modified: 2019-NOV-25
+### Modified: 2019-DEC-12
 ### Notes:    testing bart to impute a dataset
 
 # load packages
@@ -11,32 +11,24 @@ library(tgp)      # for Bayesian CART implementation bcart
 library(rpart)    # for computing decision tree models
 library(bartpkg1) # github version of the package
 library(sbart)    # newest cran version available
+library(BART)
 
 # Prep data ---------------------------------------------------------------
+  source("./functions_allpurp.R")
 
-  # Load
-  dt <- readRDS("../data/data_tryout.rds") # generate with dataGen_test.R if not available
-  dt_c <- dt[[1]] # fully observed
-    mice::md.pattern(dt_c)
-    dim(dt_c)
-  dt_i <- dt[[2]] # with missings
-    mice::md.pattern(dt_i)
-    dim(dt_i)
-    
   # Create using datagen function
   source("./dataGen_test.R")
   set.seed(20191120)
-  dt <- missDataGen(n=10, p=7)
+  dt <- missDataGen(n=25, p=10)
   dt_c <- dt[[1]] # fully observed
-    mice::md.pattern(dt_c)
-    dim(dt_c)
   dt_i <- dt[[2]] # with missings
     mice::md.pattern(dt_i)
-    dim(dt_i)
-    
+  
   # Define variables with missings
-  K <- ncol(dt_i)-sum(tail(mice::md.pattern(dt_i),1) == 0) # number of variables needing imputation
-  K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names of these k variables
+  r <- !is.na(dt_i)
+  missVarInfo <- missing_type(dt_i)
+  l <- missVarInfo$l
+  l_names <- missVarInfo$l_names
   
 # Imputation --------------------------------------------------------------
 # Initialize by regression imputation
@@ -136,28 +128,6 @@ for(i in 1:iters) {
    fast_diagnostic[i,] <- colSums(new_impute - original)
 }
   
-# Functions ---------------------------------------------------------------
-  
-# Data prep
-arrange_dt_x_k <- function(dt, var_name){
-  ## Description
-  # Input: 
-  # - dt: a complete dataset (initialized or augmented) containing a variable to be imputed and all imputation model variables
-  # - var_name: character vector containing only the name of variable under imputation
-  # Output: a dataset ready to be passed in a tree growing function with the under imputation variable in first column
-  ## Trial inputs
-  # dt <- mtcars
-  # var_name <- names(mtcars)[3]
-  indx_k <- names(dt) %in% var_name         # indexing obj: which variable is under imputation
-  indx_no_k <- !names(dt) %in% var_name     # indexing obj: all vairables EXCEPT the one under imputation 
-  Xno_k <- dt[, indx_no_k]                  # Use augmented Xno_k 
-  x_k <- dt[, indx_k]                       # Select variable under imputation
-  output <- data.frame(x_k = x_k, Xno_k)    # Combine the two for growing the tree
-  # (doubt: should I grow the tree only on the observed values?)
-  return(output)
-}
-  
-  
   
 # Imputations
   X0 <- dt_c[, !names(dt_c) %in% K_names] # set of covariates fully observed
@@ -185,7 +155,7 @@ arrange_dt_x_k <- function(dt, var_name){
   }
   
 
-#  using 'bartpkg1' package -----------------------------------------------
+# using 'bartpkg1' package -----------------------------------------------
 
   # Create dataset
   # Create using datagen function
@@ -215,4 +185,91 @@ arrange_dt_x_k <- function(dt, var_name){
                          numskip = 199, burn = 1000, m = 200,
                          sigdf = 3, sigquant = 0.9, kfac = 2)
   str(imputedList)
+  
+
+
+  
+# using bart directly -----------------------------------------------------
+  # Initialize Dataset
+  Z0 <- init_dt_i(dt_i, missing_type(dt_i))
+  
+  # This takes place for one variable, for one itaration, for one imputated dataset
+  j <- 1 # define variable to be imputed
+  l_names[[j]]
+  
+  # define y, ry and wy
+  y  <- Z0[, j]
+  x  <- model.matrix(Z0[, j]~., Z0[,-j])
+
+  ry <- r[, j] # TRUE = observed
+  wy <- !ry    # TRUE = NA
+  
+  # select cases to train and predict
+  xobs <- x[ry, , drop = FALSE]
+  xmis <- x[wy, , drop = FALSE]
+  yobs <- y[ry]
+  if(tree_type(yobs)=="class") {
+    originallvls <- levels(yobs)
+    yobs <- as.numeric(yobs)
+    yobs[yobs == 1] <- 0
+    yobs[yobs == 2] <- 1
+    tt <- "pbart"
+  } else {tt <- "wbart"}
+  
+  # grow bart
+  m <- 200
+  ndpost <- 15
+    rb = gbart(x.train = xobs,
+               y.train = yobs,
+               x.test  = xmis, 
+               # general setup
+               type = tt,
+               ntree = m,
+               ndpost = ndpost,
+               nskip = 1e3, # iterations treated as burn in
+               # prior specifications
+               # prior for error variance prior guess and degrees of freedom
+               sigest = 1,
+               sigdf = 3,      # nu
+               sigquant = .90, # q
+               # prior for the mean
+               k = 2,          # varaince scale parameter of the prior for mean
+               # prior for the trees
+               power = 2, base = .95)  # power and base parameter for the tree prior
+    
+    indx <- 5
+    plot(density(rb$yhat.test[,indx]))
+    plot(seq(1, ndpost), rb$yhat.test[,indx], type = "l")
+    
+    rb$sigma         # ndpost draws of sigma
+    rb$yhat.train    # ndpost draws of p(f | data)
+    rb$yhat.test     # ndpost draws of predictive distirbution
+    rb$yhat.test[,1] # ndpost draws from posterior predictive distribution for observation 1, 
+                     # of variable under imputation. Each prediction is based on a different
+                     # draw of m trees and sigma.
+    rb$yhat.test[1,] # a draw from posterior predictive distribution for each 
+
+  # if tt == "anova"
+    yimp <- apply(rb$yhat.test, 2, sample, size=1) # from each predictive distribution we 
+                                                 # sample just one value
+  
+  # If tt==class  
+    yimp_prob <- plogis(yimp)
+    yimp <- ifelse(yimp_prob <= .5, 0, 1)
+    
+    
+  Z0[wy, j] <- yimp
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   

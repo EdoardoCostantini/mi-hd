@@ -1,10 +1,12 @@
 ### Title:    understanding the mice code
 ### Author:   Edoardo Costantini
 ### Created:  2019-DEC-16
-### Modified: 2019-DEC-16
+### Modified: 2019-DEC-17
 ### Notes:    This script is copy of the mice function from van Buuren that I used to
 ###           take notes on what happens inside the function. Not contribution or improvement
 ###           claimed.
+
+library(mice)
 
 # Load helper functions
 files.sources = list.files("../notes/code_notes/mice-master/R")
@@ -14,7 +16,7 @@ sapply(paste0("../notes/code_notes/mice-master/R/", files.sources), source)
 # Data
 source("./dataGen_test.R")
   set.seed(20191213)
-  dt <- missDataGen(n=200, p=20)
+  dt <- missDataGen(n=20, p=10)
   dt_i <- dt[[2]] # with missings
 
 ## MICE call
@@ -176,7 +178,7 @@ source("./dataGen_test.R")
   from <- fromto[1]
   to <- fromto[2]
   maxit <- to - from + 1
-  r <- !is.na(data)
+  r <- !is.na(data) # TURE = observed, FALSE = NA
   
   # set up array for convergence checking
   chainMean <- chainVar <- initialize.chain(blocks, maxit, m)
@@ -186,7 +188,7 @@ source("./dataGen_test.R")
   # Working parapeters for loops
       k <- 1 # iteration in main loop
       i <- 1 # for each iteration we do things for all the final m datasets
-      h <- 3 # for all the variables that should be visited we do things
+      h <- 1 # for all the variables that should be visited we do things
       j <- blocks[[h]]
   #######    
   
@@ -203,7 +205,7 @@ source("./dataGen_test.R")
           cat("\n ", iteration, " ", i)
         
         # prepare the i'th imputation
-        # do not overwrite any observed data
+        # do not overwrite any observed data (fills in missing values)
         for (h in visitSequence) {
           for (j in blocks[[h]]) {
             y <- data[, j]
@@ -363,7 +365,7 @@ sampler.univ <- function(data, r, where, type, formula, method, yname, k,
   }
   
   # get the model matrix
-  x <- obtain.design(data, formula)
+  x <- obtain.design(data, formula) # x is complete (initialized or previous imp)
   
   # expand type vector to model matrix, remove intercept
   if (calltype == "type") {
@@ -378,7 +380,7 @@ sampler.univ <- function(data, r, where, type, formula, method, yname, k,
   }
   
   # define y, ry and wy
-  y <- data[, j]
+  y <- data[, j] # complete data
   ry <- complete.cases(x, y) & r[, j]
   wy <- complete.cases(x) & where[, j]
   
