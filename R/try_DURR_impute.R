@@ -1,7 +1,7 @@
 ### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
 ### Author:   Edoardo Costantini
 ### Created:  2019-NOV-27
-### Modified: 2019-DEC-20
+### Modified: 2020-JAN-9
 ### Notes:    reference paper is Deng et al 2016
 
 # load packages
@@ -84,7 +84,7 @@ library(doParallel) # to parallelize cross validation
         z.star_j      <- zm_j[indx_boSample]                          # not used
         
         # but select only real observed values out of such sample
-        z.star_j_obs     <- zm_j[!is.na(Z[indx_boSample, j])]         # OBSERVED value son j-th
+        z.star_j_obs     <- z.star_j[!is.na(Z[indx_boSample, j])]         # OBSERVED value son j-th
         W.star.m_j_obs   <- W.star.m_j[!is.na(Z[indx_boSample, j]), ] # Xs for j-th var originally observed values [OBSERVED and m-1 IMPUTATIONS]
         
         # Data for regularized models

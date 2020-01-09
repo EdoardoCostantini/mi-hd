@@ -1,7 +1,7 @@
 ### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
 ### Author:   Edoardo Costantini
 ### Created:  2019-DEC-2
-### Modified: 2019-DEC-20
+### Modified: 2020-JAN-9
 ### Notes:    reference paper is Deng et al 2016
 
 # load packages

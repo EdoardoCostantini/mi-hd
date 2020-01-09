@@ -1,7 +1,7 @@
 ### Title:    imputeHD-comp all purpuse functions
 ### Author:   Edoardo Costantini
 ### Created:  2019-DEC-2
-### Modified: 2019-DEC-2
+### Modified: 2020-JAN-9
 
 # Functions ---------------------------------------------------------------
 
@@ -37,6 +37,23 @@ unigaus.lf <- function(theta,y,X){
   return(-logl)
 }
 
+unigaus.lf.dnorm<-function(theta,y,X){
+# input: a set of model parameters theta, a dv y, and a set of predictors X
+#   examples:
+#     @theta <- c(1,1,1) # intercept, b1, sigma
+#     @X <- cbind(1,runif(100))
+#     @y <- X %*% theta[1:2] + rnorm(100, 0, theta[3])
+# output: negative log likelihood of the data given some theta values
+# used in: IURR for finding MLE of model parameters
+  n<-nrow(X)
+  k<-ncol(X)
+  beta <- theta[1:k]
+  sigma2 <- theta[k+1]
+  e <- y - X%*%beta
+  R = suppressWarnings(dnorm(e, 0, sqrt(sigma2), log=TRUE)) # less error prone
+  return(-sum(R))
+}
+
 arrange_dt_x_k <- function(dt, var_name){
 # Input: a complete dataset, initialized or augmented, (dt) and the name the under-imputation variable
 #   examples:
@@ -53,7 +70,6 @@ arrange_dt_x_k <- function(dt, var_name){
   # (doubt: should I grow the tree only on the observed values?)
   return(output)
 }
-
 
 tree_type <- function(x){ # Tree type definition
 # Input: a measured variable that needs to be imputed (x)
