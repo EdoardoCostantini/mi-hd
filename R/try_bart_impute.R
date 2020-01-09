@@ -243,7 +243,7 @@ for(i in 1:iters) {
     
     rb$sigma         # ndpost draws of sigma
     rb$yhat.train    # ndpost draws of p(f | data)
-    rb$yhat.test     # ndpost draws of predictive distirbution
+    rb$yhat.test     # ndpost draws of predictive distribution
     rb$yhat.test[,1] # ndpost draws from posterior predictive distribution for observation 1, 
                      # of variable under imputation. Each prediction is based on a different
                      # draw of m trees and sigma.

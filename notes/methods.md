@@ -29,16 +29,14 @@ supported, highdimensionality etc.)
 	* Limitations:
 		* number of iterations is not clearly specified in articles. Says to keep the last few datasets after convergence
 		  but no clear measure of convergence is provided.
-		* currently only lasso works, EN takes too much time, I'm looking for the most efficient way of cross-validating
-		  the tuning parameters. One good aspect of EN is that good beacuse if Lasso or ridge perform better, then they
-		  are preferred. Hence, it's fine to use the corssvalidation method that even allwos for lasso and ridge.
-	* Packages: none
-	* Notes: at the moment I have implemented everything with the lasso instead of the elastic net as it seemed from the results
-		that the biggest differences in performances came from using DURR or IURR rather than from the type of regularization.
-		However, reading the EN paper I realise that EN is better at selecting variables from a group of variables that are 
-		hihgly correlated. As we are thinking of surveys as applications, EN seems theoretically more apt to 
-		the task beacuse of its grouping effect: if there are predictors that are highly correlated, then EN would tend to 
-		push their coefficient to be the same, while LASSO would tend to keep just one of them.
+		* one good aspect of EN is that if Lasso or ridge perform better, then they are preferred; howver, the corssvalidation
+		  of two parameters required by EN is extremely time consuming
+	* Packages: none; R function to perform imputation is operational
+	* Notes: Implemented the Elastic net exclusively because it reduces to LASSO or RIDGE that performs better. Theoretically,
+		 EN is better at selecting variables from a group of variables that are hihgly correlated. As we are thinking of 
+		 surveys as applications, EN seems theoretically more apt to the task beacuse of its grouping effect: if there are 
+		 predictors that are highly correlated, then EN would tend to push their coefficient to be the same, while LASSO 
+		 would tend to keep just one of them.
 
 	*Implementation status: IURR*
 	* Imputation Model Variables supported: 
@@ -47,7 +45,7 @@ supported, highdimensionality etc.)
 	* Limitations:
 		* number of iterations as for DURR
 		* find an efficient crossvalidation for elastic net
-	* Packages: none, manual impementation achived
+	* Packages: none, R function to perform imputation is operational
 
 * **Bayesian LASSO** following Zhao Long 2016;
 	* Imputation Model Variables supported: 
@@ -57,11 +55,11 @@ supported, highdimensionality etc.)
 		* cannot impute dichotomous or polytomous variables at the moment: needs a different algorithm 
 	* Packages: 'monomvn' R package implements the BLasso parameters selection part, I wrote code for implementing the
 		MICE-like imputation algorithm.
-	* The lasso penality is proportional to the log density of a laplacian distribution (or double exponential) (see 
+	* Notes: The lasso penalty is proportional to the log density of a laplacian distribution (or double exponential) (see 
 		Tibshirani1996 section 5) and this distribution has a shape with mass in the center and in the tails meaning
-		that it will favor coefficients that are either 0 or large. Advantages of this procedure is that it provides
-		directly a valid posterior distribution of the coefficients AND the posterior predictive distribution of the
-		missing values.
+		that when used as a prior for regression coefficeints, it will favor coefficients that are either 0 or large. 
+		Advantages of this procedure is that it provides directly a valid posterior distribution of the coefficients 
+		AND the posterior predictive distribution of the missing values.
 
 * **PCA based auxiliary variables inclusion** following Howard et al 2015
 	
@@ -92,7 +90,7 @@ supported, highdimensionality etc.)
 		* in PcAux the interaction variables missingness is done according to a transform then impute approach
 		  (as Von Hippel 2009 advised for)
 		* how are ordinal, non-ordinal, and dichotomous factors treated by PcAux? ordinal factors are casted to numeric
-		  variables and treated as any oder continuous variable if not specified otherwise with the ordVar argument; 
+		  variables and treated as any oder continuous variable if not specified otherwise with the ordVar argument?; 
 		  nominal factors are dummy coded and just left as such along with other potential dichotomous variables (see 
 		  dummyVars and probNoms arguments in the createPcAux function)
 		* in PcAux PCs are computed once, then used iteratively to predict the missing values in a MICE procedure

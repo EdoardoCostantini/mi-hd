@@ -1,13 +1,9 @@
-### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
+### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions IURR
 ### Author:   Edoardo Costantini
 ### Created:  2020-JAN-8
 ### Modified: 2020-JAN-9
 ### Notes:    function to impute data according to IURR method following reference paper Deng et al 2016
 
-# load packages
-
-# Prep data ---------------------------------------------------------------
-    
 impute_IURR <- function(Z, Z0, iters=5, reg_type="el"){
   # # Packages required by function
   #   library(glmnet)    # for regularized regressions

@@ -1,7 +1,7 @@
 ### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
 ### Author:   Edoardo Costantini
 ### Created:  2019-NOV-27
-### Modified: 2019-DEC-2
+### Modified: 2020-JAN-9
 ### Notes:    reference paper is Deng et al 2016
 
 # load packages
@@ -84,50 +84,54 @@ library(EBglmnet)    # Logistic bayesian lasso (functions do not provide posteri
   iters <- 5 # iterate until convergence (not clear what convergence is)
   imputed_datasets <- vector("list", iters)
   for(m in 1:iters) {
+    # m <- 1
     print(paste0("Iteration status: ", m, " of ", iters))
     for (j in 1:p) { # for j-th variable w/ missing values in p number of variables w/ missing values 
                      # skipping variables without missing with the if
+      # j <- 4
       if(r[j] != nrow(Z)){
         # perform only for variables that have missing values
         # iv and dv are defined in terms of the imptuation model: dv is the variable under imputation
         Wm_j  <- Zm[,-j] # predictors full data (observed + imputed)
-        zm_j  <- Zm[,j] # dv full data (observed + imputed)
+        zm_j  <- Zm[,j]  # dv full data (observed + imputed)
         
-        Wo_mj <- Wm_j[!is.na(Z[, j]), ] # predictor values for those observed on z_j
+        Wo_mj <- Wm_j[!is.na(Z[, j]), ] # predictor values for those observed on z_j          
         Wm_mj <- Wm_j[is.na(Z[, j]), ]  # mj = -j, predictors values for those missing on z_j
         
-        zo_mj <- zm_j[!is.na(Z[, j])]   # predictor values for those observed on z_j
-        zm_mj <- zm_j[is.na(Z[, j])]   # current (m) draw of z_j for cases with missing z_j [MISSING CASES]
+        zo_mj <- zm_j[!is.na(Z[, j])]   # dv values observed [OBSERVED]
+        zm_mj <- zm_j[is.na(Z[, j])]    # current (m) draw of z_j for cases with missing z_j [IMPUTED VALUES]
         
-        ### NEW ###
-        
-        Wo_mj_x <- model.matrix(zo_mj~., data.frame(zo_mj, Wo_mj))[,-1]
-        y <- zo_mj
+        Wo_mj_x <- model.matrix(zo_mj~., data.frame(zo_mj, Wo_mj))[,-1] # desing matrix for iv corresponding to observed dv
+        y <- zo_mj # imputation model dv
         glmfam <- detect_family(y)
         
         if(glmfam == "gaussian"){
           lasso.mod <- blasso(X = Wo_mj_x, y = y,
-                              T=1000,      # I'm not sure that the function does burn-in itself
-                              thin=NULL,   # automatic skip before sample is collected,
-                              lambda2 = 0, # needs tp be estiamted with maximum likelihood principle CHECK
+                              T=1000,      # number of posterior samples to keep
+                              thin=NULL,   # automatic decision on the skip before sample is collected
+                              lambda2 = 0, # initial lasso penality (=0 means least square regression estimates
+                                           # are used to define this initial guess (see ParkCasella 2008, section 3.1)
                               # sigma**2 prior: IG(a,b)
                               ab = c(.1,.1), # alpha (shape) parameter and the beta (scale) parameter for the 
-                                           # IG(a,b) for the variance parameter s2
+                                             # IG(a,b) for the variance parameter s2
                               # lamba prior: Gamma(r,s)
                               rd = c(.01, .01), # the alpha (shape) parameter and beta (rate) parameter 
                                                 # G(r,delta) for the lambda2 parameter under the lasso model
                               # rho prior: Beta(g,h)
                               mprior = c(1,1),  # Bin(m|n=M,p) prior for number of 0 coefficients, where p~Beta(g,h)
       
-                              verb=1
+                              verb=1 #verbosity lvl
           )
 
-          # CHECK parameters match what advised in ZhaoLong2013
-          sample_index <- sample(1:nrow(lasso.mod$beta), 1)
-          theta.hat.m_j <- lasso.mod$beta[sample_index, ] # random draw from posterior distribution of theta.hat.m_j
+          sample_index <- sample(1:nrow(lasso.mod$beta), 1) # each row is a parameters' draw, each column is a predictor 
+          theta.hat.m_j <- lasso.mod$beta[sample_index, ]   # random draw from posterior distribution of regression coefficients
+          theta.hat.m_j <- c(lasso.mod$mu[sample_index], theta.hat.m_j) # append intercept
           
-          Wm_mj_x <- model.matrix(zm_mj~., data.frame(zm_mj, Wm_mj))[,-1]
-          z.m_j_mis <- Wm_mj_x %*% theta.hat.m_j + rnorm(1, 0, sqrt(lasso.mod$s2[sample_index])) # sample from predictive distribution
+          Wm_mj_x   <- model.matrix(zm_mj~., data.frame(zm_mj, Wm_mj)) # desing matrix for iv corresponding to missing dv values
+          
+          z.m_j_mis <- rnorm(nrow(Wm_mj_x), 
+                             mean = (Wm_mj_x %*% theta.hat.m_j), 
+                             sd = sqrt(lasso.mod$s2[sample_index])) # sample from predictive distribution
         }
         if(glmfam == "binomial"){
           err1 <- paste0(colnames(dt_i)[j], " is a dichotomous variable. Currently not supported: returning initial guess")
