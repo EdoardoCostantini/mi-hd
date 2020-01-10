@@ -16,9 +16,12 @@ supported, highdimensionality etc.)
 		* DVs continuous, dichotomous, categorical, ordinal as numeric;
 	* Limitations: none
 	* Software/Packages: 'mice' basic mice imputation function with a 'cart' option does everything you need; 
-	you have also implemented a version of it that uses bayesian bootstrap.
+	you have also implemented a version of it that uses bayesian bootstrap. You want to include your version 
+	in the mice package. You have created  the mice.impute.cart.bb.R script in the miceImpHDv package version
+	that is on your computer in the R-packages folder (under projects). Now you need to do the same you did 
+	for the Random forests.
 
-* **Frequentist regularized-MICE** (directly and indirectly) following Deng et al 2016;
+* **Frequentist regularized-MICE (DONE)** (directly and indirectly) following Deng et al 2016;
 	There are no references to specific packages that implemented the methods but there are detailed 
 	descriptions of how to make regularized multiple imputations.
 	
@@ -61,7 +64,7 @@ supported, highdimensionality etc.)
 		Advantages of this procedure is that it provides directly a valid posterior distribution of the coefficients 
 		AND the posterior predictive distribution of the missing values.
 
-* **PCA based auxiliary variables inclusion** following Howard et al 2015
+* **PCA based auxiliary variables inclusion (DONE)** following Howard et al 2015
 	
 	*Implementation status:*
 	* Imputation Model Variables supported: 
@@ -105,7 +108,7 @@ supported, highdimensionality etc.)
 		  repetitions of PCA at least once per variable with missing values, if not once per variable per 
 		  iteration (needs more thought); what about ICA?
 
-* **MICE-Random Forest** following Shah et al 2014 (same as bart but the difference is how the 
+* **MICE-Random Forest (DONE)** following Shah et al 2014 (same as bart but the difference is how the 
 	conditional mean is found)
 
 	*Implementation status:*
@@ -129,7 +132,7 @@ supported, highdimensionality etc.)
 		* ensamble learning algorithm
 		* prediction improvement: reduces prediction variance, but also prediction bias
 
-* **MissForest**
+* **MissForest (DONE)**
 *Implementation status:*
 	* Variables supported: 
 		* IVs everything;
@@ -165,10 +168,27 @@ supported, highdimensionality etc.)
 		* (2) requires a fully observed y variable. For the future, you could take insipiration 
 			from the Sequential BART paper but avoid the assumption of knowing the analysis model beforehand;
 		* (3) can only generate 5 multiply imputed datasets in current implementation.
+		* (4) **UNDERSTANDING** - I still do not understand it fully. The main problem is what goes in the acceptance
+			probability in step 1.b of appendix 2. If you solve that then maybe you can understand. You are close
+			to understainding the code but still something is not there. Open the project in CLion and go to the
+			main programme file: "mi-bart-y1", around line 200 the definition of the proposition acceptance
+			probability numerator and denominator is done.
 	* Packages: A 'sbart' package was developed but has been removed from CRAN (and no updates since 2 years). 
 		On github you have found 'bartpkg1' which is basically 'sbart'. The 'bart' function in BayesianTrees is 
 		not directly applicabale as I cannot update the dataset that is used at each iteration of the mcmc
 		algorithm. You could scrape the basic tree growing parts of bart from either backage and build 
 		your own implementation of this algorithm.
-	* Notes: could be used for variables selection in a IURR fashion
+	* Notes: 
 
+* **BART** my way.
+	Given a basic model, Y = f(x) + E, with E ~ N(0, sigma_E^2), we can model f(x) as the sum of many trees by fitting
+	a bart model (for Heteroskedastic version of BART see the rbart vignette). Fitting a bart model is done by running 
+	a MCMC algorithm that provides, at each iteration, a draw of all the trees making up the sum that apporoximates a 
+	function f(x). We can call such draw f_d(x), w/ d indicating 
+	the number of the draw (eg draw 142 out of 500 draw that I want for the target distribution ...?). A prediction is
+	usually made by taking the average of all the f_d(x), but a draws from the predictive distribution of a Y given x 
+	= x_new can be done by simply picking one d: f_d(x_new) is one draw from the predictive distribution of y given the
+	observed xs. Now if we consider Y as a variable under imputation, and X_obs as a set of predictor values corresponding 
+	to the observed values on Y (Y_obs), we can obtain a fraw of f_d(x) based on Y_obs and X_obs, and then a draw from
+	the posterior predictive distribution of Y_mis given Y_obs, X_obs and the X_mis by picking one f_d(x) and plugging
+	in the values of X_mis for each Y_mis.
