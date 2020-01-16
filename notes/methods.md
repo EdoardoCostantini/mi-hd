@@ -5,7 +5,7 @@ For each method I will soon write down the state of their implementation
 for the specific goals of this project (e.g. what types of variables are 
 supported, highdimensionality etc.)
 
-* **Sequential MI CART** following Reiter 2005, and Drechsler Reiter 2011.
+* **Sequential MI CART (DONE)** following Reiter 2005, and Drechsler Reiter 2011.
 	I can use any CART growing R package. Supports any type of outcome variable without any effort
 	There is no guideline on what initialization method to use as most of the papers that proposed this method 
 	deal w/ creating synthetic datasets, where all variables are actually observed.

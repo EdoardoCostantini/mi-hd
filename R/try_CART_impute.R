@@ -8,7 +8,7 @@
 ###             (look into source code to see what rpart uses for these)
 ###           - initialization stochastic regression imputation through mice package
 ###             following Burgette Reiter 2010 (draws from predictive distribution conditional on observed data)
-###           - impute by sampling from a bayesian bootstrap sample of a leaft node (suggested by Drechsler Reiter 2011, 
+###           - impute by sampling from a bayesian bootstrap sample of a leaf node (suggested by Drechsler Reiter 2011, 
 ###             implemented thanks to Rubin 1998 The Bayesian Bootstrap)
 
 # load packages
@@ -18,6 +18,7 @@ library(rpart)     # for computing decision tree models
 library(treeClust) # for the rpart.predict.leaves(rp, newdata, type = "where") function
 library(dplyr)
 library(bayesboot)
+library(PcAux)     # for some trail inputs
 
 # Load all purpose functions
   source("./functions_allpurp.R")
@@ -26,11 +27,24 @@ library(bayesboot)
   # Create using datagen function
   source("./dataGen_test.R")
   set.seed(20191120)
-  dt <- missDataGen(n=100, p=10)
+  dt <- missDataGen(n=50, p=10)
   dt_c <- dt[[1]] # fully observed
   dt_i <- dt[[2]] # with missings
   dim(dt_i)
-
+  y = dt_i[, "y_categI"]
+  ry = !is.na(y) # false = missing
+  wy = !ry       # true = missing
+  x = dt_init[, -which(colnames(dt_i)=="y_categI")]
+  # Get data from PcAux
+  data(iris2)
+  dt_i <- iris2[,-c(1, 7)]
+  imp <- mice::mice(dt_i[,1:ncol(dt_i)], m = 1)
+  dt_init <- mice::complete(imp) # intialize here
+  y = dt_i[, "Species"]
+  ry = !is.na(y) # false = missing
+  wy = !ry       # true = missing
+  x = dt_init[, -which(colnames(dt_i)=="Species")]
+  
 # Imputation w/ rpart -----------------------------------------------------
 
   output <- CARTimpute(dt_i, 10, 7) # your own function
@@ -80,11 +94,16 @@ library(bayesboot)
         ry <- !is.na(dt_i[, K_names[k]])                      # response variable T = observed, F = NA
         data4tree <- arrange_dt_x_k(dt_aug, K_names[k])[ry, ] # arrange and select Xobs (values of Xno_k for which X_k is observed)
         
+        
+        
         # Define tree type (classification or regression) based on nature of variable under imputation
         tt <- tree_type(data4tree$x_k)
-        
         # Grow tree
-        tree <- rpart(x_k ~., data = data4tree, method = tt)
+        set.seed(321)
+        tree <- rpart(x_k ~., data = data4tree, method = tt,
+                      control = rpart.control(minbucket = 5, cp = 1e-04))
+        tree$frame
+        lapply(data4tree[,-5], sum)
         
         # Identify terminal nodes (l leafs) predictions (costum)
         leafs <- data.frame(x_k = data4tree[, indx_k],
@@ -117,28 +136,17 @@ library(bayesboot)
 # for function details, see: https://github.com/stefvanbuuren/mice/blob/master/R/mice.impute.cart.R
   
 # Use
-  imp <- mice(dt_i, meth = 'cart', minbucket = 4)
-  imp_sets <- mice::complete(imp)
+  imp_cart <- mice(dt_i, meth = 'cart', minbucket = 4, m=5)
+  imp_cart_sets <- mice::complete(imp_cart, "all") # "long" for a matrix with all datasets, 
+                                                   # "all" for a list with all datasets
   
-# Sections of mice code that are relevant
-    y <- dt_i$yinc
-      ry <- !is.na(y)
-      wy <- !ry
-    x <- dt_i[, 10:50]
+# Imputation w/ MICE cart bb sample ---------------------------------------
+  install.packages("/Users/Work/Drive/PhD/projects/R-packages/miceImpHDv/", 
+                   repos = NULL, 
+                   type = "source")
+  library(miceImpHDv)
+  imp_cartbb <- mice(dt_i, meth = 'cart.bb', minbucket = 4)
+  imp_cartbb_sets <- mice::complete(imp_cartbb, "all")
 
-    cp <- 1e-04
-    minbucket <- 5
-    
-    xobs <- data.frame(x[ry, , drop = FALSE])
-    xmis <- data.frame(x[wy, , drop = FALSE])
-    yobs <- y[ry]
-
-    fit <- rpart(yobs ~ ., data = cbind(yobs, xobs), method = "anova", 
-                 control = rpart.control(minbucket = minbucket, cp = cp))
-    leafnr <- floor(as.numeric(row.names(fit$frame[fit$where, ])))          # leaf location of the training units
-    fit$frame$yval <- as.numeric(row.names(fit$frame))                      # combined with the following predict finds the location 
-    nodes <- predict(object = fit, newdata = xmis)                          # of the new data in the tree
-    donor <- lapply(nodes, function(s) yobs[leafnr == s])
-    impute <- vapply(seq_along(donor), function(s) sample(donor[[s]], 1), numeric(1))
-
-  # Mice does not do the bootstrap sampling and does not initialize with conditional means
+  
+  
