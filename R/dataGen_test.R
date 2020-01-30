@@ -19,11 +19,11 @@
     # Input: 
     # - n: how many observations
     # - p: how many variables (>=)
-    # Output: two datasets, one compelte and one with missing at random datasets 
+    # Output: two datasets, one complete and one with missing at random datasets 
   ## Trial inputs
     # n = 100 # sample size
     # p = 6 # number of predictors (relevant + junk)
-    # corre = c("n") #, "y") which type of correlatio n strucutre do you want
+    # corre = c("n") #, "y") which type of correlation strucutre do you want n = none
     
     # Predictors
     Sigma = diag(p) # no correlation between predictors
@@ -41,28 +41,27 @@
     # Noise for DV
     Z <- rnorm(n, 0, 1)
     
-    # Dependent
-    # Model based on an example (Firedman) reported by Xu et al 2016 for the BART paper
-    y = f(X[,1],X[,2],X[,3],X[,4],X[,5]) + Z # continuous
-    # lm(y ~ X[,1]+X[,2]+X[,3]+X[,4]+X[,5])
-    # Dichotomous Responses
-    y_dicho <- factor(pr(n, 5*X[,1]), labels = c("A", "B"))
+    # Continuous DV
+    y = f(X[,1],X[,2],X[,3],X[,4],X[,5]) + Z
     
-    # Multinomila Responses (nominal)
+    # Dichotomous Responses
+    y_dicho <- factor(pr(n, (5*X[,2]+3*X[,5])), labels = c("A", "B"))
+    
+    # Multinomial Responses (nominal)
     a <- c(0, 0, 0)
     b <- c(2, 4, 6)
-    denom <- 1 + exp(a[1] + X[,1] * b[1]) +
-                 exp(a[2] + X[,1] * b[2]) + 
-                 exp(a[3] + X[,1] * b[3])
+    denom <- 1 + exp(a[1] + X[,3] * b[1]) +
+                 exp(a[2] + X[,3] * b[2]) + 
+                 exp(a[3] + X[,3] * b[3])
     vProb = cbind( 1/denom,             # baseline category
-                   exp(a[1] + X[,1] * b[1])/denom, 
-                   exp(a[2] + X[,1] * b[2])/denom, 
-                   exp(a[3] + X[,1] * b[3])/denom )
+                   exp(a[1] + X[,3] * b[1])/denom, 
+                   exp(a[2] + X[,3] * b[2])/denom, 
+                   exp(a[3] + X[,3] * b[3])/denom )
     DV_location = t(apply(vProb, 1, rmultinom, n = 1, size = 1))
     DV <- apply(DV_location, 1, function(x) which(x==1))
     y_categ <- factor(DV, labels = c("A", "B", "C", "D"))
     
-    # Multinomila Responses (ordinal, with multtinomial odered logit)
+    # Multinomial Responses (ordinal, with multtinomial odered logit)
     u <- rlogis(nrow(X), location = 0, scale = 1)
     y_order <- X[,2] + u
     threshold <- c(-Inf,-1,0,1, Inf)

@@ -58,11 +58,15 @@ supported, highdimensionality etc.)
 		* cannot impute dichotomous or polytomous variables at the moment: needs a different algorithm 
 	* Packages: 'monomvn' R package implements the BLasso parameters selection part, I wrote code for implementing the
 		MICE-like imputation algorithm.
-	* Notes: The lasso penalty is proportional to the log density of a laplacian distribution (or double exponential) (see 
+	* Notes: 
+		* The lasso penalty is proportional to the log density of a laplacian distribution (or double exponential) (see 
 		Tibshirani1996 section 5) and this distribution has a shape with mass in the center and in the tails meaning
 		that when used as a prior for regression coefficeints, it will favor coefficients that are either 0 or large. 
 		Advantages of this procedure is that it provides directly a valid posterior distribution of the coefficients 
 		AND the posterior predictive distribution of the missing values.
+		* HTLR R package has a very nice implementation of the bayesian multinomial logistic regression with 
+		hyper-lasso prior for feature selection. Include it in the BLasso code for imputation and then you
+		are good to go w/ it.
 
 * **PCA based auxiliary variables inclusion (DONE)** following Howard et al 2015
 	
@@ -184,7 +188,7 @@ supported, highdimensionality etc.)
 	Given a basic model, Y = f(x) + E, with E ~ N(0, sigma_E^2), we can model f(x) as the sum of many trees by fitting
 	a bart model (for Heteroskedastic version of BART see the rbart vignette). Fitting a bart model is done by running 
 	a MCMC algorithm that provides, at each iteration, a draw of all the trees making up the sum that apporoximates a 
-	function f(x). We can call such draw f_d(x), w/ d indicating 
+	function f(x). We can call such draw f_d(x), w/ indicating 
 	the number of the draw (eg draw 142 out of 500 draw that I want for the target distribution ...?). A prediction is
 	usually made by taking the average of all the f_d(x), but a draws from the predictive distribution of a Y given x 
 	= x_new can be done by simply picking one d: f_d(x_new) is one draw from the predictive distribution of y given the
@@ -192,3 +196,10 @@ supported, highdimensionality etc.)
 	to the observed values on Y (Y_obs), we can obtain a fraw of f_d(x) based on Y_obs and X_obs, and then a draw from
 	the posterior predictive distribution of Y_mis given Y_obs, X_obs and the X_mis by picking one f_d(x) and plugging
 	in the values of X_mis for each Y_mis.
+
+* **Joint Modelling**
+	HeBelin2014 have implemented a a joint modelling multiple imputation algorithm for highdimensional datasets w/ both
+	continous and dichotomous variables. They use a generalized multivariate probit model to allow for boht types of variables.
+	The idea is that using a generalization of the multivariate probit model could allow to include ordinal as well as nominal
+	variables. Citations 10 to 13 in HeBelin2014 could be useful for such purpose. Ideally, include an extension of this 
+	paper's proposition that allows for multinomial categorical variables.
