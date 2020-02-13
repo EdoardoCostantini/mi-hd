@@ -203,3 +203,6 @@ supported, highdimensionality etc.)
 	The idea is that using a generalization of the multivariate probit model could allow to include ordinal as well as nominal
 	variables. Citations 10 to 13 in HeBelin2014 could be useful for such purpose. Ideally, include an extension of this 
 	paper's proposition that allows for multinomial categorical variables.
+
+** DATA GENERATION **
+* For normal data: can follow unstructured covariance matrix generation presented by He Belin 2014
