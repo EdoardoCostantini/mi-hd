@@ -4,65 +4,29 @@
 ### Modified: 2020-JAN-10
 ### Notes:    Create simulated data for sim study p.1072
 
-gen_X_BR1073 <- function(n = 1e3){
-  # input: a dv for a glmnet::glmnet model 
-  #   examples:
-  #    n <- 1e3 # sample size
-  #    b0 <- 0 # intercept
-  #    B <- c(0, .5,.5,.5,.5,.5,1,1) # regression coefficient values
-  #    eps <- rnorm(n)
-  # output: complete dataset based on simulation set up by Burgette Reiter 2010
-  
-  # gen X
-  # Covariance
-  C1 <- matrix(rep(.5, 4*4), ncol = 4)
-    diag(C1) <- 1
-    C1[lower.tri(C1)] <- NA
-  C2 <- matrix(rep(.3, 10*10), ncol = 10)
-    diag(C2) <- 1
-    C2[lower.tri(C2)] <- NA
-    C2[1:nrow(C1), 1:ncol(C1)] <- C1
-  
-  tC2 <- t(C2)
-  tC2[upper.tri(C2)] <- C2[upper.tri(C2)]
-  
-  Sigma_X <- diag(rep(1, 10)) %*% tC2 %*% diag(rep(1, 10)) 
-    # assuming 1 as sd for every variable
-  mu_X <- rep(0, 10)
-  
-  X <- rmvnorm(n, mu_X, Sigma_X)
-  
-  return(X)
-}
-
-gen_y_BR1073 <- function(x, 
-                         b0 = 0, 
-                         b = c(0, .5,.5,.5,.5,.5,1,1)){
-  # input: a dv for a glmnet::glmnet model 
-  #   examples:
-  #    x <- mtcars[, 1:7]
-  #    b0 <- 0 # intercept
-  #    B <- runif(ncol(x)) # regression coefficient values
-  # output: dependent variable for B&R2010 set up
-  
-  y <- b0 + 
-    b[1]*x[,1] + b[2]*x[,2] + b[3]*x[,3] + b[4]*x[,8] + b[5]*x[,9] + 
-    b[6]*x[,3]**2 + b[7]*x[,1]*x[,2] + b[8]*x[,8]*x[,9] + 
-    rnorm(nrow(x))
-  
-  return(y)
-}
-
-imp_miss_BR1073 <- function(){
-  
-}
-
 gen_yhat_BR1073 <- function(x = X_test, b = pool_CART_est){
   outcome <- b[1] + # intercept
     b[2]*x[,1] + b[3]*x[,2] + b[4]*x[,3] + b[5]*x[,8] + b[6]*x[,9] + 
     b[7]*x[,3]**2 + b[8]*x[,1]*x[,2] + b[9]*x[,8]*x[,9]
   return(outcome)
 }
+
+desc_mis <- function(missData){
+  # Given a dataset with missing values, it returns the vairablewise number
+  # of missing values and the total percentage of observed cases (to check
+  # the set up by Burgette Reiter 2010)
+  
+  output <- c(
+    colMeans(is.na(missData)),
+    mean(rowSums(is.na(missData)) == 0)
+  )
+  names(output)[length(output)] <- "tot"
+  
+  return(output)
+  
+}
+
+# Extract results ---------------------------------------------------------
 
 rMSE <- function (y_pred, y_obs) {
   # output: root mean squared (prediction) error
@@ -81,3 +45,111 @@ bias_est <- function(x, x_true) {
   x - x_true
 } 
 
+avg_bias <- function(out, meth_indx = 1, parms){
+  # Given an output list coming from a parLapply of singleRun(), it returns the
+  # average bias across all repetitions for a given imputation method (index
+  # numerically)
+    
+  meth_colnames <- colnames(out[[1]]$pool_est)[meth_indx]
+  B_true <- parms$b_true
+  
+  bias_out <- matrix(rep(NA, parms$b*parms$dt_rep), ncol = parms$dt_rep)
+  for (dt in 1:length(out)) {
+    bias_out[, dt] <- bias_est(out[[dt]]$pool_est[, meth_colnames], B_true)
+  }
+
+  return(round(rowMeans(bias_out), 3))
+  
+}
+
+avg_ci_cov <- function(out, col_indx, parms){
+  # Given an output list coming from a parLapply of singleRun(), it returns the
+  # proportion of times the ci, pooled after an imputation done according to
+  # a specific method (col_indx selects the column corresponding to the method
+  # in the output), of each parameter contains the true parameter (specified in
+  # params)
+  
+  B_true <- parms$b_true
+  
+  ci_out <- 0
+  for (dt in 1:length(out)) {
+    confi <- out[[dt]]$pool_conf[, col_indx]
+    ci_out <- ci_out + as.numeric(c(B_true > confi[,1] & B_true < confi[,2]))
+  }
+  
+  bwise_cov <- ci_out/length(out)
+  tot_cov <- sum(ci_out)/(length(B_true)*length(out))
+  
+  return(c(bwise_cov, tot_cov))
+  
+}
+
+avg_rmse <- function(out, col_indx, parms){
+  # Given an output list coming from a parLapply of singleRun(), it returns the
+  # mean value of the rmse obtained with the pooled coef estiamtes resulting
+  # from an impuation method defined by the col_indx
+  
+  output <- rep(NA, parms$dt_rep)
+  
+  for (dt in 1:length(out)) {
+    y_hat <- out[[dt]]$y_hat[, col_indx]
+    y_obs <- out[[dt]]$y_test
+    rMSE(y_hat, y_obs)
+    output[dt] <- rMSE(y_hat, y_obs)
+  }
+  
+  return(round(mean(output), 3))
+}
+
+avg_miss <- function(out, parms){
+  # Given an output list coming from a parLapply of singleRun(), it returns the
+  # mean proportion of missingness per variable and overall
+  
+  output <- matrix(rep(NA, parms$dt_rep*(parms$p+2)), nrow = parms$dt_rep)
+  
+  for (dt in 1:length(out)) {
+    output[dt, ] <- out[[dt]]$miss_descrps
+  }
+  
+  output <- colMeans(output)
+  names(output) <- names(out[[1]]$miss_descrps)
+  
+  return(round(output, 3))
+}
+
+# CART methods specifics --------------------------------------------------
+
+bbootstrap <- function(x) { # Bayesian Bootstrap
+  # Input: a variable of any type (x)
+  #   examples:
+  #     @x <- rownames(airquality)
+  #     @x <- rbinom(30, 1, .5) #another example
+  # Output: a bayesian bootstrap sample of the size of x
+  # Used in: CART_impute
+  # Notes: based on Rubin 1998
+  size <- length(x)
+  u <- sort(c(runif(length(x)-1, 0, 1))) # n-1 uniform draws
+  g <- numeric(0)
+  for (i in 1:(length(x))) {
+    if(length(u[i-1]) == 0) u_prev <- 0 else u_prev <- u[i-1]
+    g[i] <- u[i]-(u_prev)
+    if(i == length(x)) {
+      u[i] <- 1
+      g[i] <- 1-(u[i-1])
+    }
+    #print(cbind(u[i], u_prev, g[i]) ) # check that it works
+  }
+  #sum(g)
+  bbsample <- sample(x, 
+                     size = size, 
+                     replace = TRUE, 
+                     prob = g)
+  return(bbsample)
+}
+
+
+# Parallel stuff ----------------------------------------------------------
+
+## Broadcast the library function of a list of packages:
+applyLib <- function(pkgList)
+  lapply(pkgList, library, character.only = TRUE, logical = TRUE)
