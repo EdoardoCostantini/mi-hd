@@ -67,7 +67,7 @@ imposeMiss <- function(Xy){
   
 }
 
-singleRun <- function(rp = 10, chains = 10, iters = 1, parms){
+singleRun <- function(rp = 10, chains = 5, iters = 2, parms){
   
 
   ## Set up seed ----------------------------------------------------------- ##

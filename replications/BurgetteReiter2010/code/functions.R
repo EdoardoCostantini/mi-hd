@@ -49,11 +49,11 @@ avg_bias <- function(out, meth_indx = 1, parms){
   # Given an output list coming from a parLapply of singleRun(), it returns the
   # average bias across all repetitions for a given imputation method (index
   # numerically)
-    
+  
   meth_colnames <- colnames(out[[1]]$pool_est)[meth_indx]
   B_true <- parms$b_true
   
-  bias_out <- matrix(rep(NA, parms$b*parms$dt_rep), ncol = parms$dt_rep)
+  bias_out <- matrix(rep(NA, parms$b*length(out)), ncol = length(out))
   for (dt in 1:length(out)) {
     bias_out[, dt] <- bias_est(out[[dt]]$pool_est[, meth_colnames], B_true)
   }

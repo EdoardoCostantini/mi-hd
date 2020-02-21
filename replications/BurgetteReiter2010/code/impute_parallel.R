@@ -2,6 +2,9 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-02-13
 ### Modified: 2020-02-15
+### Note:     This version of the parallel imputation uses parLapply
+###           Howver, I was not able to implement the seed. I get the
+###           same results out of each repetition. With mcapply no problem
 
 library(parallel) # detectCores(); makeCluster()
 

@@ -138,7 +138,7 @@ init_dt_i <- function(Z0, missVarInfo){
   #   examples:
   #     @Z <- mice::boys
   #     @missVarInfo <- missing_type(Z)
-  # Output: a dataset with cotninuous vairables imputed with mean value, and categorical with mode category
+  # Output: a dataset with cotninuous variables imputed with mean value, and categorical with mode category
   # Used in: MICERandomForest
   # Notes: integer and numeric variables are considered (inaccurately) both as continuous
   

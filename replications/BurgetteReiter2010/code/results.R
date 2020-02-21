@@ -6,29 +6,32 @@
   source("./functions.R")
   source("./init.R")
   
-  out <- readRDS("../output/pooled_BR2010-20200214_1651.rds") # CART w/ bb
+  out <- readRDS("../output/pooled_BR2010-mc-20200218_2232.rds") # CART w/ bb
   
 # Bias --------------------------------------------------------------------
   
-  result_bias <- data.frame(CART = avg_bias(out, 1, parms),
+  result_bias <- data.frame(CARTbb = avg_bias(out, 1, parms),
+                            CARTd = avg_bias(out, 3, parms),
                             mice = avg_bias(out, 2, parms))
+    rownames(result_bias) <- paste0("b", c( (0:(length(parms$b_true)-1)) ))
 
 # Coverage ----------------------------------------------------------------
-  CART_indx <- c(1, 2)
+  CARTbb_indx <- c(1, 2)
+  CARTd_indx <- c(5, 6)
   mi_indx <- c(3, 4)
   
-  ci_cov_cart <- avg_ci_cov(out, CART_indx, parms)
-  ci_cov_mice <- avg_ci_cov(out, mi_indx, parms)
+  results_ci <- data.frame(CARTbb = avg_ci_cov(out, CARTbb_indx, parms), 
+                           CARTd = avg_ci_cov(out, CARTd_indx, parms), 
+                           mice = avg_ci_cov(out, mi_indx, parms))
   
-  results_ci <- data.frame(ci_out_CART = ci_cov_cart, 
-                           ci_out_mi = ci_cov_mice)
     row.names(results_ci) <- c(paste0("b", c( (1:length(parms$b_true))-1 )), "tot")
-  round(results_ci,3)
+  round(results_ci, 3)
   
 # RMSE --------------------------------------------------------------------
   
-  result_rmse <- data.frame(CART = avg_rmse(out, 1, parms = parms),
-                            MICE = avg_rmse(out, 2, parms = parms))
+  result_rmse <- data.frame(CARTbb = avg_rmse(out, 1, parms = parms),
+                            CARTd = avg_rmse(out, 3, parms = parms),
+                            mice = avg_rmse(out, 2, parms = parms))
   result_rmse
   
 # Missing data descriptives
