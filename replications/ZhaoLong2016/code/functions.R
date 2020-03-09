@@ -25,10 +25,12 @@ genData <- function(par_conds, parms){
   Z_m1 <- rmvnorm(n, rep(0, (p-1)), AR1((p-1), rho))
   
   # Gen z1
-  a0 <- 1
+  a0 <- 1 # Based on specification of DengEtAl because Zhao was not clear
   a <- rep(1, length(S)) * stnr
-  z1 <- a0 * Z_m1[, S] %*% a
-  
+  z1 <- rnorm(n, 
+              mean = a0 * Z_m1[, S] %*% a, 
+              sd = sqrt(1))
+  # lm(z1 ~ -1 + Z_m1[, S])
   # Gen Z
   Z <- cbind(z1, Z_m1)
   colnames(Z) <- paste0("z", 1:ncol(Z))
@@ -109,6 +111,8 @@ missing_type <- function(Z){
   return(output)
 }
 
+
+
 init_dt_i <- function(Z0, missVarInfo){
   # Input: (1) a dataset with missing values; (2) and object produced by function missing_type
   #   examples:
@@ -155,7 +159,7 @@ init_dt_i <- function(Z0, missVarInfo){
   # the variable loop (for j in 1:l) and the current iteration data at the end
 }
 
-process_4regu <- function(Z, Zm, j_th, parms){
+process_4DURR <- function(Z, Zm, j_th, parms){
   ## Description:
   # Given a datset with missing values, an imputed version from a previous
   # iteration of imputation, and the index of the variable under imputation
@@ -199,6 +203,44 @@ process_4regu <- function(Z, Zm, j_th, parms){
   return(Zy)
 }
 
+process_4IURR <- function(Z, Zm, j_th, parms){
+  ## Description:
+  # Given a datset with missing values, an imputed version from a previous
+  # iteration of imputation, and the index of the variable under imputation
+  # it returns a dataset with observed values on the variable under imputation
+  # and corresponding values on the other X variables either observed or 
+  # previously imputed.
+  ## For internals:
+  # data(iris2) # example dataset from PcAux package
+  # Z <- iris2[,-c(1,7)] # original data w/ missing values
+  # Zm <- init_dt_i(Z, missing_type(Z)) # result of previous iteration
+  # j_th <- 1
+  
+  ## Step 0. Prepare data for j-th variable imputation
+  ry <- !is.na(Z[, j_th]) # indexing obserrved values on y
+  Wm_j  <- Zm[,-j_th]     # predictors for imp model from inizialized dataset (m-1) [ALL CASES]  
+  zm_j  <- Zm[,j_th]      # outcome for imp model from inizialized dataset (m-1)    [ALL CASES]
+  Wm_mj <- Wm_j[!ry, ] # predictor rows for cases with missing z_j               [OBSERVED and IMPUTED]
+  zm_mj <- zm_j[!ry]   # current (m) draw of z_j for cases with missing z_j      [IMPUTED/MISSING CASES]
+  
+  # Select cases for imputation model
+  z_j_obs  <- Zm[, j_th][!is.na(Z[, j_th])]   # observed components of j-th variable [OBSERVED VALUES]
+  Wm_j_obs <- Zm[, -j_th][!is.na(Z[, j_th]),] # current (m) components of the predictors cooresponding 
+                                        # to observed cases on j-th variable [OBSERVED and IMPUTED VALUES]
+  
+  Zy <- (list(Wm_j_obs = as.matrix(Wm_j_obs),
+              z_j_obs = as.vector(z_j_obs),
+              Wm_mj = as.matrix(Wm_mj),
+              zm_mj = as.vector(zm_mj))) 
+  
+  return(Zy)
+}
+
+
+# Estimation --------------------------------------------------------------
+
+
+
 rr_est_lasso <- function(X, y, parms){
   ## Description:
   # Given any dv y (e.g. variable to be imputed), and its corresponding X 
@@ -208,16 +250,13 @@ rr_est_lasso <- function(X, y, parms){
   #   X <- model.matrix(medv~., Boston)
   #   y <- Boston$medv
   
-  glmfam   <- detect_family(y) # regularized family type
-  
   cv_lasso <- cv.glmnet(X, y,
-                        family = glmfam,
-                        type.multinomial = "grouped",
+                        family = "gaussian",
+                        nfolds = 10,
                         alpha = 1)
   
   regu.mod <- glmnet(X, y, 
-                     family = glmfam,
-                     type.multinomial = "grouped", # if glmfam is multinomial, otherwise does not apply
+                     family = "gaussian",
                      alpha = 1, 
                      lambda = cv_lasso$lambda.min)
   
@@ -261,7 +300,10 @@ rr_est_elanet <- function(X, y, parms){
   return(regu.mod)
 }
 
-make_imp_gaus <- function(model, X_tr, y_tr, X_te, parms){
+
+# Imputation --------------------------------------------------------------
+
+imp_gaus_DURR <- function(model, X_tr, y_tr, X_te, parms){
   ## Description ##
   
   # Given a fitted imputation model it returns the imputations for
@@ -296,7 +338,7 @@ make_imp_gaus <- function(model, X_tr, y_tr, X_te, parms){
   return(z.m_j_mis)
 }
 
-make_imp_dich <- function(model, X_tr, y_tr, X_te, parms){
+imp_dich_DURR <- function(model, X_tr, y_tr, X_te, parms){
   ## Description ##
   
   # Given a fitted imputation model it returns the imputations for
@@ -330,7 +372,7 @@ make_imp_dich <- function(model, X_tr, y_tr, X_te, parms){
   return(z.m_j_mis)
 }
 
-make_imp_multi <- function(model, X_tr, y_tr, X_te, parms){
+imp_multi_DURR <- function(model, X_tr, y_tr, X_te, parms){
   ## Description ##
   
   # Given a fitted imputation model it returns the imputations for
@@ -363,62 +405,165 @@ make_imp_multi <- function(model, X_tr, y_tr, X_te, parms){
   return(z.m_j_mis)
 }
 
-get_pool_est <- function(multi_dt, parms){
-  ## Description:
-  # Given a list of imputed datasets under the same imputation model
-  # it returns the pooled estiamtes and CI of the regression coefs
+imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
+  ## Description ##
   
+  # Given a regularized model it returns the imputations for
+  # the missing values on a normally distributed imputation dv
+  # according to IURR method
+  
+  ## For internals ##
+  
+  # data("Boston", package = "MASS")
+  # train_ind <- Boston$medv %>%
+  #   createDataPartition(p = 0.8, list = FALSE)
+  # train  <- Boston[train_ind, ]
+  # test <- Boston[-train_ind, ]
+  # 
+  # X_tr <- model.matrix(medv~., train)[,-1]
+  # X_te <- model.matrix(medv~., test)[,-1]
+  # y_tr <- train$medv
+  # y_te <- test$medv
+  #   cv <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
+  # model <- glmnet(X_tr, y_tr, alpha = 1, lambda = cv$lambda.min)
+  
+  ## Body ##
+  
+  lasso.coef <- as.matrix(coef(model))
+  S_hat <- row.names(lasso.coef)[lasso.coef != 0][-1] # estimated active set
+  
+  # Estimate Imputation model on observed z_j
+  lm_fit <- lm(y_tr ~ X_tr[, S_hat])
+  
+  theta_MLE <- coef(lm_fit)
+  Sigma_MLE <- vcov(lm_fit)
+  
+  # Sample parameters for prediction/imputation
+  theta_m_j <- MASS::mvrnorm(1, 
+                             theta_MLE, 
+                             Sigma_MLE + diag(ncol(Sigma_MLE)) * parms$k_IURR )
+  sigma_m_j <- sigma(lm_fit)
+    # This is not correct. I'm using the OLS estiamtes with no variation in
+    # sigma. Later fix this!
+  
+  # Get imputations
+  y_imp <- rnorm(n = nrow(X_te),
+                 mean = (model.matrix( ~ X_te[, S_hat]) %*% theta_m_j),
+                 sd = sigma_m_j)
+  
+  return(y_imp)
+}
+
+.miDf <- function(m, b, t, dfCom) {
+  fmi   <- .fmi(m, b, t)
+  df0   <- (m - 1) * (1 / fmi^2)
+  dfObs <- .lambda(dfCom) * dfCom * (1 - fmi)
+  
+  df0 / (1 + (df0 / dfObs))
+}
+
+.fmi <- function(m, b, t){
+  # proportion of variation attributable to the missing data
+  # aka fmi (not adjusted for the finite number of imps)
+  fmi <- (1 + 1/m) * b/t
+  return(fmi)
+}
+
+fit_models <- function(multi_dt, mod){
+  # Given a list of complete datasets it fits a model described
+  # in mod 
+  models <- lapply(X = multi_dt,
+                   FUN = function(x) lm(mod, data = x))
+  return(models)
+}
+
+get_pool_EST <- function(fits){
+  ## Description
+  # Given a list of imputed datasets under the same imputation model
+  # it returns the pooled estiamtes of the regression coefs
   ## For internals
   # fake_data <- nhanes
   # colnames(fake_data) <- c("y", "z1", "z2", "z3")
-  # imp <- mice(fake_data, print = FALSE, m = 10, seed = 24415) 
+  # imp <- mice(fake_data, print = FALSE, m = 10, seed = 24415)
   # imp_dats <- mice::complete(imp, "all")
   # multi_dt = imp_dats
-  
-  ## Fit model
-  models <- lapply(X = multi_dt,
-                   FUN = function(x) lm(parms$formula, data = x))
-  
-  ## Extract info
-  summa_models <- lapply(X = models,
+  summa_models <- lapply(X = fits,
                          FUN = function(x) summary(x))
-  
   coefs <- t(sapply(X = summa_models,
-                  FUN = function(x) coef(x)[, "Estimate"]))
-  
-  all_vcov <- lapply(X = summa_models,
-                  FUN = function(x) vcov(x))
-  
-  ## Preliminary computations
-  m <- length(multi_dt)
-  
-  Q_bar <- colMeans(coefs[1:(nrow(coefs)/2), ])
+                    FUN = function(x) coef(x)[, "Estimate"]))
+  Q_bar <- colMeans(coefs)
+  return(Q_bar)
+}
 
+get_pool_CI <- function(fits){
+  ## Description
+  # Given a list of imputed datasets under the same imputation model
+  # it returns the pooled CIs of the regression coefs
+  ## For internals
+  # fake_data <- nhanes
+  # colnames(fake_data) <- c("y", "z1", "z2", "z3")
+  # imp <- mice(fake_data, print = FALSE, m = 10, seed = 24415)
+  # imp_dats <- mice::complete(imp, "all")
+  # multi_dt = imp_dats
+  m <- length(fits)
+  
+  summa_models <- lapply(X = fits,
+                         FUN = function(x) summary(x))
+  ## Coef estimates ##
+  coefs <- t(sapply(X = summa_models,
+                    FUN = function(x) coef(x)[, "Estimate"]))
+  Q_bar <- colMeans(coefs)
+  
+  ## Variances
+  all_vcov <- lapply(X = summa_models,
+                     FUN = function(x) vcov(x))
+  
   U_bar <- diag(Reduce('+', all_vcov) / m)
   
-  B <- diag( 1 / (m-1) * t(coefs - Q_bar) %*% (coefs - Q_bar) )
+  B <- diag(1 / (m-1) * (t(coefs) - Q_bar) %*% t(t(coefs) - Q_bar))
   
   T <- U_bar + B + B/m
   
-  lambda <- (B+B/m)/T
-  
-  riv <- (B+B/m)/U_bar
-  
-  # degrees of freedom
-  nu_old <- (m-1)*(1+1/riv**2)
-  nu_com <- parms$n - parms$k
-  nu_obs <- ( (nu_com+1) / (nu_com+3) ) * nu_com*(1-lambda)
-  nu <- nu_old*nu_obs / (nu_old+nu_obs)
-  
+  ## Degrees of freedom
+  nu <- .miDf(length(fits), b = B, t = T, summa_models[[1]]$df[2])
+ 
   ## CI computation
-  t_nu <- qt((1-parms$alphaCI)/2, 
-             df = nu, 
-             lower.tail = FALSE)
+  t_nu <- qt(1 - (1-parms$alphaCI)/2, 
+             df = nu)
   
   CI <- data.frame(lwr = Q_bar - t_nu * sqrt(T), 
                    upr = Q_bar + t_nu * sqrt(T))
+  return(CI = CI)
+}
+
+get_50_best <- function(Xy_mis, S){
+  ## Description
+  # Given a dataset with missing univariate values, and the true active set
+  # of the imputation model, it returns an index for the columns of the
+  # dataset that selects the imputation target variable, the active set
+  # and the first 50-length(active set) predictors for highest correlation
+  # with the target variable.
+  ## For internals
+  var50_must <- c(S+1, ncol(Xy_mis))
+  cortgt <- cor(Xy_mis[, -var50_must], use = "pairwise.complete.obs")[, "z1"]
+  var50_opt <- sort(abs(cortgt), decreasing = TRUE)
+  var50_opt <- var50_opt[2 : (50-length(S))]
+  var50_opt <- which(colnames(Xy_mis) %in% names(var50_opt))
+  var50 <- c(1, var50_must, var50_opt)
   
-  ## Output
-  return(list(est = Q_bar,
-              CI = CI))
+  return(var50)
+}
+
+# Results -----------------------------------------------------------------
+
+bias_est <- function(x, x_true) {
+  # returns the bias of an esitmate x
+  x - x_true
+} 
+
+check_cover <- function(x){ # 1 is the same value for all parameters
+  # given a 2 x (p+1) matrix containing lower and uper CI bounds
+  # it checks the shared parameter value 1 is included or not in
+  # the interval
+  return(x[, 1] < 1 & x[, 2] > 1)
 }

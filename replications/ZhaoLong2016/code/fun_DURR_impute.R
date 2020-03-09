@@ -1,9 +1,10 @@
 ### Title:    imputeHD-comp impute w/ Regu Freq Regr DURR
 ### Author:   Edoardo Costantini
 ### Created:  2020-01-8
-### Modified: 2020-02-21
+### Modified: 2020-02-24
 ### Notes:    function to impute data according to DURR method following 
-###           reference paper Deng et al 2016
+###           reference papers Zhao Long 2016 (for univariate miss) and 
+###           Deng et al 2016 (for multivariate miss)
   
 impute_DURR <- function(Xy_mis, cond, chains=5, iters=1, reg_type="lasso"){
   ## Description
@@ -27,9 +28,7 @@ impute_DURR <- function(Xy_mis, cond, chains=5, iters=1, reg_type="lasso"){
   ## output: an object containing iters number of imputed datasets (imputed_datasets)
   
   ## Body
-
-# Gen data ----------------------------------------------------------------
-
+  # Prep objects
   Z        = Xy_mis
   Zm <- init_dt_i(Z, missing_type(Z))
   
@@ -37,11 +36,13 @@ impute_DURR <- function(Xy_mis, cond, chains=5, iters=1, reg_type="lasso"){
   vmis_ind <- r != nrow(Z)
   p_imp <- sum(vmis_ind)
   p  <- ncol(Z) # number of variables [indexed with j]
+  
   imputed_datasets <- vector("list", chains)
+  names(imputed_datasets) <- seq(1, chains)
   
   for (m in 1:chains) {
     
-    print(paste0("Chain: ", m, " of ", chains))
+    print(paste0("DURR Chain: ", m, " of ", chains))
     
     for(i in 1:iters) {
       
@@ -52,7 +53,7 @@ impute_DURR <- function(Xy_mis, cond, chains=5, iters=1, reg_type="lasso"){
         J <- which(vmis_ind)[j]
         glmfam <- detect_family(Zm[, J])
         
-        Zy <- process_4regu(Z = Z, Zm = Zm, j_th = J, parms = parms)
+        Zy <- process_4DURR(Z = Z, Zm = Zm, j_th = J, parms = parms)
         
         Wstar_mj <- Zy$Wstar_mj
         zstar_j <- Zy$zstar_j
@@ -73,13 +74,13 @@ impute_DURR <- function(Xy_mis, cond, chains=5, iters=1, reg_type="lasso"){
 # Impute ------------------------------------------------------------------
         
         if(glmfam == "gaussian"){
-          zm_j <- make_imp_gaus(regu.mod, Wstar_mj, zstar_j, Wm_mj, parms)
+          zm_j <- imp_gaus_DURR(regu.mod, Wstar_mj, zstar_j, Wm_mj, parms)
         }
         if(glmfam == "binomial"){
-          zm_j <- make_imp_dich(regu.mod, Wstar_mj, zstar_j, Wm_mj, parms)
+          zm_j <- imp_dich_DURR(regu.mod, Wstar_mj, zstar_j, Wm_mj, parms)
         }
         if(glmfam == "multinomial"){
-          zm_j <- make_imp_multi(regu.mod, Wstar_mj, zstar_j, Wm_mj, parms)
+          zm_j <- imp_multi_DURR(regu.mod, Wstar_mj, zstar_j, Wm_mj, parms)
         }
 
 # Append ------------------------------------------------------------------

@@ -14,6 +14,7 @@
 library(tidyverse)
 library(gimme)    # for expand.grid.unique
 library(PcAux)
+library(mice)
 
 # Prep data ---------------------------------------------------------------
 
@@ -71,8 +72,9 @@ K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names 
   
   ## Exampole ##
   # Get to know the package with a p < n dataset
-    data(iris2)
-    md.pattern(iris2)
+    data(iris2, package = "PcAux")
+    dim(iris2)
+    md.pattern(iris2, plot = FALSE)
     
     # First, load and prepare your data:
     cleanData <- prepData(rawData   = iris2,
@@ -80,6 +82,7 @@ K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names 
                                                        # in the initial, single imputation model
                                                        # (if interactType = 2L in the createPcAux functions
                                                        # these would also be the interactions included for that PCA)
+                                                       # NULL includes every variable as moderator
                           nomVars   = "Species",       # nominal variables (R: unodered factors)
                           ordVars   = "Petal.Width",   # ordinal variables (R: ordered factors)
                           idVars    = "ID",
@@ -93,14 +96,17 @@ K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names 
                                                # (see detials)
                             maxPolyPow = 3L,   # maximum power used when constructing 
                                                # the polynomial terms
-                            nComps    = c(3, 2))
+                            nComps    = c(5, 2))
+    
+    str(pcAuxOut)
+    pcAuxOut$pcAux
     
     # use PC auxiliaries as the predictors in a multiple imputation run:
     miOut <- miWithPcAux(rawData   = iris2,
                          pcAuxData = pcAuxOut,
                          nImps     = 5)
     getImpData(miOut)
-    
+    miOut$miceObject$predictorMatrix # only the pcs are used to impute
     # or work directly with the PC auxiliaries by appending them to the original data
     outData <- mergePcAux(pcAuxData = pcAuxOut, rawData = iris2)
     

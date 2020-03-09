@@ -48,6 +48,8 @@ supported, highdimensionality etc.)
 	* Limitations:
 		* number of iterations as for DURR
 		* find an efficient crossvalidation for elastic net
+		* weakness: when using this method it might happen that p > n variables are selected
+			making the apporach fail.
 	* Packages: none, R function to perform imputation is operational
 
 * **Bayesian LASSO** following Zhao Long 2016;
@@ -113,7 +115,7 @@ supported, highdimensionality etc.)
 		  iteration (needs more thought); what about ICA?
 
 * **MICE-Random Forest (DONE)** following Shah et al 2014 (same as bart but the difference is how the 
-	conditional mean is found)
+	conditional mean is found) and DooveEtAl 2014
 
 	*Implementation status:*
 	* Variables supported: 
@@ -125,7 +127,7 @@ supported, highdimensionality etc.)
 			from the mice package based on Shah et al 2014, available in my forked version of the mice package.
 	* Notes: uses random forests to define the mean of the predictive distribution of the missing values and uses the
 		out of bag mean squared error as variance. It differs from the regular mice::mice.impute.rf() in the following 
-		way: The main diﬀerence is in how the multiple trees in the forest are used to impute the missing values: 
+		way: The main difference is in how the multiple trees in the forest are used to impute the missing values: 
 		in Shah et al’s algorithm for continuous variables, the missing value is sampled from a normal distribution 
 		centred around the aggregated predicted value for the ’test’ data (imputation model X values for the unobserved 
 		Y values) and the out-of-bag error is used as variance, while their categorical variable algorithm samples one 
@@ -133,7 +135,7 @@ supported, highdimensionality etc.)
 		each value of y_miss_j is sampled from a donor pool deﬁned by all of the y_obs_j that end up in the k leafs 
 		deﬁned by the k trees in the random forest.
 		The advantage comes from:
-		* ensamble learning algorithm
+		* ensamble learning algorithm (not relying on a single tree, which is a greedy approach)
 		* prediction improvement: reduces prediction variance, but also prediction bias
 
 * **MissForest (DONE)**
