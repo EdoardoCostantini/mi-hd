@@ -28,7 +28,6 @@ impute_BLAS <- function(Xy_mis, chains = 5, iter_bl = 1e3, burn_bl = 1e2){
                       T = iter_bl,       
                       # number of posterior samples to keep
                       thin = burn_bl,   
-                      # automatic decision on the skip before sample is collected
                       RJ = TRUE,
                       rao.s2 = TRUE,
                       normalize = TRUE,
@@ -42,7 +41,7 @@ impute_BLAS <- function(Xy_mis, chains = 5, iter_bl = 1e3, burn_bl = 1e2){
   sample_indx <- sample(burn_bl : nrow(model$beta), chains)
   beta_dot <- model$beta[sample_indx, ]
   b_dot <- cbind(model$mu[sample_indx], beta_dot)
-  
+
   sigma_dot_2 <- model$s2[sample_indx]
   
   y_dat <- apply(b_dot, 1, function(x) {rnorm(nrow(X_mis), 

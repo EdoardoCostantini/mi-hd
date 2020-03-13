@@ -23,7 +23,7 @@ source("./subroutines.R")
 # Fixed Parameters --------------------------------------------------------
 
 parms <- list()
-parms$dt_rep  <- 50 # 500 on original
+parms$dt_rep  <- 500 # 500 on original
 parms$chains  <- 10
 parms$iters   <- 1
 parms$n       <- 100
@@ -37,8 +37,8 @@ parms$S_all   <- list(q4=(c(2,3,50,51)-1),
 parms$formula <- "y ~ z1 + z2 + z3"
 parms$alphaCI <- .95 # confidence level for parameters CI
 parms$k       <- 3 # number of predictors for analysis model
-parms$iter_bl <- 40 # 1e3
-parms$burn_bl <- 1/10 * parms$iter_bl #
+parms$iter_bl <- 40 # 1e3 but actually no differences
+parms$burn_bl <- 1/10 * parms$iter_bl
 
 parms$k_IURR <- 0 # k value to bias coef sampling covariance matrix in IURR
                   # procedure to solve possible issues of singularity
@@ -48,8 +48,6 @@ parms$methods <- c("DURR", "IURR", "Blas", "MI_T", "MI_50", "CC")
 
 parms$seed     <- 20200309
 parms$nStreams <- 1000
-
-
 
 # Conditions --------------------------------------------------------------
 

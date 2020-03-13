@@ -6,7 +6,7 @@
 source("./functions.R")
 source("./init.R")
 
-out <- readRDS("../output/pooled_ZL2016-mc-20200305_1131.rds")
+out <- readRDS("../output/pooled_ZL2016-mc-20200309_1936.rds")
 
 # P = 200 condition
 
@@ -22,8 +22,7 @@ for (i in 1:parms$dt_rep) {
 
 bias_out <- round(Reduce("+", store_sum)/parms$dt_rep, 3)
 
-t(bias_out)
-as.data.frame(t(bias_out))[2]
+bias_b1 <- as.data.frame(t(bias_out))[2]
 
 # Average Coverage --------------------------------------------------------
 
@@ -35,5 +34,9 @@ for (i in 1:parms$dt_rep) {
 
 CI_out <- Reduce("+", store_sum)/parms$dt_rep
 
-t(CI_out)
-as.data.frame(t(CI_out))[2]
+rownames(CI_out) <- rownames(bias_out)
+CI_b1 <- as.data.frame(t(CI_out))[2]
+
+resu <- cbind(bias_b1, CI_b1)
+colnames(resu) <- c("bias", "ci")
+resu
