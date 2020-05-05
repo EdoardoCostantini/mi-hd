@@ -23,11 +23,13 @@ impute_BLAS <- function(Xy_mis, chains = 5, iter_bl = 1e3, burn_bl = 1e2){
   X <- as.matrix(Xy_mis[, -j])
   
   # Sample parameters from posterior ----------------------------------------
-  
-  model <- blasso(X = X_obs, y = y_obs,
-                      T = iter_bl,       
+  ############################### #
+  ### Version monomvn::blasso ### #
+  ############################### #
+  model <- monomvn::blasso(X = X_obs, y = y_obs,
+                      T = iter_bl,
                       # number of posterior samples to keep
-                      thin = burn_bl,   
+                      thin = burn_bl,
                       RJ = TRUE,
                       rao.s2 = TRUE,
                       normalize = TRUE,
@@ -37,12 +39,32 @@ impute_BLAS <- function(Xy_mis, chains = 5, iter_bl = 1e3, burn_bl = 1e2){
                       mprior = c(1, 1), # rho prior: Beta(g,h)
                       verb = 1 #verbosity lvl
   )
-  
+
   sample_indx <- sample(burn_bl : nrow(model$beta), chains)
   beta_dot <- model$beta[sample_indx, ]
   b_dot <- cbind(model$mu[sample_indx], beta_dot)
 
   sigma_dot_2 <- model$s2[sample_indx]
+  # ############################### #
+  
+  # blOut <- bl(data       = as.data.frame(cbind(y_obs, X_obs)),
+  #             y          = "y_obs",
+  #             X          = setdiff(colnames(Xy_mis), c("y_obs")),
+  #             iterations   = c(100, 100, 100),
+  #             # Here thre numbers aprox, tuning sampling
+  #             sampleSizes  = list(rep(100, 2),  # burn-in, retain for approximation 
+  #                                 rep(1e3, 2), # burn-in, retain tuning
+  #                                 rep(1e3, 2)) # burn-in, retain sampling bigger or same size
+  #             # Approximates gets in the right neighbour, tuning improves, and sampling
+  #             # 100 for burn in
+  #             # Look into Gelman book for the thre approach
+  # )
+  # 
+  # modelbeta <- getParams(blOut, 1)$beta
+  # sample_indx <- sample(burn_bl : nrow(modelbeta), chains)
+  # beta_dot <- modelbeta[sample_indx, ]
+  # b_dot <- beta_dot
+  # sigma_dot_2 <- getParams(blOut, 1)$sigma[sample_indx]
   
   y_dat <- apply(b_dot, 1, function(x) {rnorm(nrow(X_mis), 
                                               mean = (cbind(1, X) %*% x), 

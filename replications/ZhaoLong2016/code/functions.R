@@ -15,7 +15,8 @@ genData <- function(par_conds, parms){
   
   # Extract fixed parameters
   n     <- parms$n
-  b     <- rep(parms$b, (4))
+  b     <- rep(parms$b, 3)
+  b0    <- parms$b
   y_var <- parms$y_var
   ActSet<- which(names(parms$S_all) == paste0("q", q)) # active set (AS) indx
   stnr  <- parms$stnr[ActSet] # seòecion of signal-to-noise for given AS
@@ -34,10 +35,10 @@ genData <- function(par_conds, parms){
   # Gen Z
   Z <- cbind(z1, Z_m1)
   colnames(Z) <- paste0("z", 1:ncol(Z))
-  Z_desing <- cbind(rep(1, nrow(Z)), Z)
+  Z_desing <- Z
   
   # Gen Y
-  y <- rnorm(n, Z_desing[, 1:4] %*% b, sqrt(y_var))
+  y <- rnorm(n, b0 + Z_desing[, 1:3] %*% b, sqrt(y_var))
   
   return( as.data.frame(cbind(Z, y)) )
 }
@@ -453,6 +454,8 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   
   return(y_imp)
 }
+
+.lambda <- function(x) (x + 1) / (x + 3)
 
 .miDf <- function(m, b, t, dfCom) {
   fmi   <- .fmi(m, b, t)

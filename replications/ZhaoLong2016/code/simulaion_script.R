@@ -4,11 +4,23 @@
 ### Modified: 2020-03-03
 
 library(parallel) # detectCores(); makeCluster()
-
+rm(list=ls())
 source("./init.R")
 
 ## Data directory for storage
-outDir <- "../output/"
+
+# Progress report file ----------------------------------------------------
+file.create(paste0(parms$outDir, parms$report_file_name))
+
+cat(paste0("SIMULATION PROGRESS REPORT",
+           "\n",
+           "Date: ", Sys.Date(),
+           "\n",
+           "Description: ", parms$description,
+           "\n"),
+    file = paste0(parms$outDir, parms$report_file_name),
+    sep = "\n",
+    append = TRUE)
 
 # mcApply parallel --------------------------------------------------------
 
@@ -21,8 +33,6 @@ out <- mclapply(X        = 1 : parms$dt_rep,
 # Save output -------------------------------------------------------------
 
 saveRDS(out,
-        paste0(outDir,
-               "pooled_ZL2016-mc-",
-               format(Sys.time(), "%Y%m%d_%H%M"),
-               ".rds")
+        paste0(parms$outDir,
+               parms$results_file_name)
 )

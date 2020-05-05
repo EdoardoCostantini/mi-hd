@@ -46,7 +46,7 @@ impute_DURR <- function(Xy_mis, cond, chains=5, iters=1, reg_type="lasso"){
     
     for(i in 1:iters) {
       
-      print(paste0("Iteration status: ", i, " of ", iters))
+      # print(paste0("Iteration status: ", i, " of ", iters))
       
       for (j in 1:p_imp) { 
         # j <- 5

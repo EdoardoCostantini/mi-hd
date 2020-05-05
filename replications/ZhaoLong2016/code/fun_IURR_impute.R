@@ -39,7 +39,7 @@ impute_IURR <- function(Xy_mis, cond, chains=5, reg_type="lasso"){
   
   for (m in 1:chains) {
     
-    print(paste0("DURR Chain: ", m, " of ", chains))
+    print(paste0("IURR Chain: ", m, " of ", chains))
     
     j <- which(colSums(is.na(Xy_mis)) != 0)
     O <- 1 * (!is.na(Xy_mis))

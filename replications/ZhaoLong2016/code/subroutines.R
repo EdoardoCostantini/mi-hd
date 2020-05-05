@@ -2,7 +2,8 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-02-20
 ### Modified: 2020-02-20
-
+rp <- 1
+i <- 1
 # Functions ---------------------------------------------------------------
 
 ## Run one replication of the simulation:
@@ -15,6 +16,13 @@ doRep <- function(rp, conds, parms) {
   .lec.SetPackageSeed(rep(parms$seed, 6))
   .lec.CreateStream(c(1 : parms$nStreams)) # create 1000 streams
   .lec.CurrentStream(rp) # use the rp sequence out of the 1000
+  
+  ## Progress report - Start
+  parms$rep_counter <- parms$rep_counter + 1 # increase progres report counter
+  cat(paste0(Sys.time(), " - Starts Repetition: ", rp, 
+             "\n"),
+      file = paste0(parms$outDir, parms$report_file_name),
+      append = TRUE)
   
   ## Do the calculations for each set of crossed conditions:
   prb <- vector("list", nrow(conds))
@@ -40,7 +48,9 @@ doRep <- function(rp, conds, parms) {
       }
       
     }
+    
   }
+  ## Return Function output  
   return(prb)
 }
 
@@ -54,6 +64,7 @@ runCell <- function(cond, m = 5, iters = 1) {
   # source("./fun_DURR_impute.R")
   # source("./fun_IURR_impute.R")
   # source("./fun_BLasso_impute.R")
+  # source("./fun_blassoHans_impute.R")
   # m = parms$chains
   # iters = 1
   # cond <- conds[1, ]
@@ -82,11 +93,18 @@ runCell <- function(cond, m = 5, iters = 1) {
                                 chains = m, 
                                 reg_type = "lasso")
   
-  # Impute according to Blasso method
-  imp_BLasso <- impute_BLAS(Xy_mis = Xy_mis, 
-                            chains = m, 
-                            iter_bl = parms$iter_bl, 
-                            burn_bl = parms$burn_bl)
+  # Impute according to Hans Blasso method
+  imp_BLasso <- impute_BLAS_hans(Xy = Xy, Xy_mis = Xy_mis, 
+                                 chains = m, 
+                                 iter_bl = parms$iter_bl, 
+                                 burn_bl = parms$burn_bl)
+
+  # Impute according to park casella Blasso method
+  imp_BLasso_old <- impute_BLAS(Xy_mis = Xy_mis, 
+                                chains = m, 
+                                iter_bl = 40, 
+                                burn_bl = 10)
+  
   
   # MICE w/ true model
   S <- parms$S_all[[ which(paste0("q", cond[3]) == names(parms$S_all)) ]]
@@ -112,6 +130,7 @@ runCell <- function(cond, m = 5, iters = 1) {
   fits_md <- lapply(list(imp_DURR_lasso,
                          imp_IURR_lasso,
                          imp_BLasso,
+                         imp_BLasso_old,
                          imp_MI_T,
                          imp_MI_50), 
                     fit_models, mod = parms$formula)
@@ -142,7 +161,8 @@ runCell <- function(cond, m = 5, iters = 1) {
                  pool_conf = pool_CI,
                  miss_descrps = miss_descrps,
                  cond_bias = cond_bias,
-                 cond_CIco = cond_CIco)
+                 cond_CIco = cond_CIco,
+                 parms = parms)
   
   return(output)
 }
