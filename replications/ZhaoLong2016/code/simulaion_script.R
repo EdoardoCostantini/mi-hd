@@ -3,7 +3,6 @@
 ### Created:  2020-03-03
 ### Modified: 2020-03-03
 
-library(parallel) # detectCores(); makeCluster()
 rm(list=ls())
 source("./init.R")
 

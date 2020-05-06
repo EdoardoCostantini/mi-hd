@@ -6,7 +6,7 @@
 # data generation ---------------------------------------------------------
 
 genData <- function(par_conds, parms){
-  # par_conds <- conds[1,] # example for par_conds
+  # par_conds <- conds[3,] # example for par_conds
   
   # Extract condition parameters
   p   <- par_conds[[1]]
@@ -15,32 +15,36 @@ genData <- function(par_conds, parms){
   
   # Extract fixed parameters
   n     <- parms$n
-  b     <- rep(parms$b, 3)
-  b0    <- parms$b
-  y_var <- parms$y_var
-  ActSet<- which(names(parms$S_all) == paste0("q", q)) # active set (AS) indx
-  stnr  <- parms$stnr[ActSet] # seòecion of signal-to-noise for given AS
-  S     <- parms$S_all[[ActSet]] # variables for AS (predictors)
   
-  # Gen Z-1
+  # for z1 generation (variable with missing values)
+  ActSet <- which(names(parms$S_all) == paste0("q", q)) # active set (AS) indx
+  stnr   <- parms$stnr[ActSet] # selecion of signal-to-noise for given AS
+  S      <- parms$S_all[[ActSet]] # variables for AS (predictors)
+  z1_var <- parms$z1_var
+  
+  # Gen Z_m1 (fully observed covariates)
   Z_m1 <- rmvnorm(n, rep(0, (p-1)), AR1((p-1), rho))
   
-  # Gen z1
-  a0 <- 1 # Based on specification of DengEtAl because Zhao was not clear
-  a <- rep(1, length(S)) * stnr
+  # Gen z1 (variable that will have missingness imposed)
+  a0 <- 1 # Based on specification of DengEtAl because Zaho was not clear
+  a  <- rep(1, length(S)) * stnr
   z1 <- rnorm(n, 
-              mean = a0 * Z_m1[, S] %*% a, 
-              sd = sqrt(1))
-  # lm(z1 ~ -1 + Z_m1[, S])
-  # Gen Z
-  Z <- cbind(z1, Z_m1)
-  colnames(Z) <- paste0("z", 1:ncol(Z))
-  Z_desing <- Z
+              a0 * Z_m1[, S] %*% a, 
+              sqrt(z1_var))
   
-  # Gen Y
-  y <- rnorm(n, b0 + Z_desing[, 1:3] %*% b, sqrt(y_var))
+  # Gen X (entire fully observed data)
+  X <- cbind(z1, Z_m1)
+    colnames(X) <- paste0("z", 1:ncol(X))
   
-  return( as.data.frame(cbind(Z, y)) )
+  # Gen y
+  y_b   <- rep(parms$b, 3)
+  y_b0  <- parms$b
+  y_var <- parms$y_var
+  y     <- rnorm(n, 
+                 y_b0 + X[, 1:3] %*% y_b, 
+                 sqrt(y_var))
+  
+  return( as.data.frame(cbind(X, y)) )
 }
 
 imposeMiss <- function(Xy, parms){
@@ -569,4 +573,36 @@ check_cover <- function(x){ # 1 is the same value for all parameters
   # it checks the shared parameter value 1 is included or not in
   # the interval
   return(x[, 1] < 1 & x[, 2] > 1)
+}
+
+extract_results <- function(cond_name, output, dt_rep){
+  # Example input
+  # cond_name <- names(out[[1]])[1]
+  # output <- out
+  # dt_rep = out[[1]]$cond_200_4$parms$dt_rep
+  
+  # Bias
+  store_sum <- vector("list", dt_rep)
+  
+  for (i in 1:dt_rep) {
+    store_sum[[i]] <- output[[i]][[cond_name]]$cond_bias
+  }
+  
+  bias_out <- round(Reduce("+", store_sum)/dt_rep, 3)
+  bias_b1 <- as.data.frame(t(bias_out))[2] # only interested in b1
+  
+  # Average Coverage
+  store_sum <- vector("list", dt_rep)
+  
+  for (i in 1:dt_rep) {
+    store_sum[[i]] <- output[[i]][[cond_name]]$cond_CIco
+  }
+  
+  CI_out <- Reduce("+", store_sum)/dt_rep
+  rownames(CI_out) <- rownames(bias_out)
+  CI_b1 <- as.data.frame(t(CI_out))[2]
+  
+  resu <- cbind(bias_b1, CI_b1)
+  colnames(resu) <- c("bias", "ci")
+  return(resu)
 }

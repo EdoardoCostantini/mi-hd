@@ -2,8 +2,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-02-20
 ### Modified: 2020-02-20
-rp <- 1
-i <- 1
+
 # Functions ---------------------------------------------------------------
 
 ## Run one replication of the simulation:
@@ -25,8 +24,9 @@ doRep <- function(rp, conds, parms) {
       append = TRUE)
   
   ## Do the calculations for each set of crossed conditions:
-  prb <- vector("list", nrow(conds))
-  names(prb) <- paste0("cond_", paste0(conds[, 1], "_",  conds[, 3]) )
+  rp_out <- vector("list", nrow(conds)) # store output of repetition
+    names(rp_out) <- paste0("cond_", paste0(conds[, 1], "_",  conds[, 3]) )
+    
   for(i in 1 : nrow(conds)) {
     # Perform runCell until you get no error
     # there are some cases where the dataset that you have generated
@@ -38,12 +38,12 @@ doRep <- function(rp, conds, parms) {
     
     while(exit_while == "no"){
       
-      prb[[i]] <- try(runCell(cond = conds[i, ], 
+      rp_out[[i]] <- try(runCell(cond = conds[i, ], 
                               m = parms$chains, 
                               iters = parms$iters), 
                       silent = TRUE)
       
-      if (class(prb[[i]]) != "try-error") {
+      if (class(rp_out[[i]]) != "try-error") {
         exit_while <- "yes"
       }
       
@@ -51,7 +51,7 @@ doRep <- function(rp, conds, parms) {
     
   }
   ## Return Function output  
-  return(prb)
+  return(rp_out)
 }
 
 runCell <- function(cond, m = 5, iters = 1) {
@@ -98,13 +98,6 @@ runCell <- function(cond, m = 5, iters = 1) {
                                  chains = m, 
                                  iter_bl = parms$iter_bl, 
                                  burn_bl = parms$burn_bl)
-
-  # Impute according to park casella Blasso method
-  imp_BLasso_old <- impute_BLAS(Xy_mis = Xy_mis, 
-                                chains = m, 
-                                iter_bl = 40, 
-                                burn_bl = 10)
-  
   
   # MICE w/ true model
   S <- parms$S_all[[ which(paste0("q", cond[3]) == names(parms$S_all)) ]]
@@ -130,7 +123,6 @@ runCell <- function(cond, m = 5, iters = 1) {
   fits_md <- lapply(list(imp_DURR_lasso,
                          imp_IURR_lasso,
                          imp_BLasso,
-                         imp_BLasso_old,
                          imp_MI_T,
                          imp_MI_50), 
                     fit_models, mod = parms$formula)

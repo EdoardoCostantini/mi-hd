@@ -8,49 +8,56 @@ rm(list = ls())
 source("./functions.R")
 source("./init.R")
 
-out <- readRDS("../output/pooled_ZL2016-mc-20200309_1936.rds") # last valid DO NOT DELETE
-# old version, so it does not have the dt_rep stored inside. If you want to get
-# the resutls you need to write 500 for the store_sum repetitions
-out <- readRDS("../output/pooled_ZL2016-mc-20200319_1032.rds") # last valid
-out <- readRDS("../output/pooled_ZL2016-mc-20200504_1703.rds") # last valid
+out_old <- readRDS("../output/pooled_ZL2016-mc-20200309_1936.rds") # DO NOT DELETE
+  # old version, so it does not have the dt_rep stored inside. If you want to get
+  # the resutls you need to write 500 for the store_sum repetitions
+  # old valid (pre correct blasso) keep to comapre results with fixed blasso
+  # and previous incorrect blasso
+out <- readRDS("../output/pooled_ZL2016-mc-20200505_1529.rds") # to work on multiple conditions results
 
-# P = 200 condition
+# Results from simulation -------------------------------------------------
+# Old
+res_old <- lapply(1:4, function(x){
+  extract_results(cond_name = names(out_old[[1]])[x], 
+                  output = out_old, 
+                  dt_rep = 500)
+})
+names(res_old) <- names(out[[1]]) 
+res_old
 
-(cond_name <- names(out[[1]])[1])
+# New
+res <- lapply(1:4, function(x){
+  extract_results(cond_name = names(out[[1]])[x], 
+                  output = out, 
+                  dt_rep = out[[1]]$cond_200_4$parms$dt_rep)
+})
+names(res) <- names(out[[1]]) 
+res
 
-# Average Bias ------------------------------------------------------------
+# Results from paper ------------------------------------------------------
+results_paper <- list(cond_200_4 = data.frame(bias_p = c(.074, .017, -.023, 
+                                                       -.008, -.356, -.206),
+                                              ci_p = c(.894, .930, .946,
+                                                     .938, .378, .630)),
+                      cond_1000_4 = data.frame(bias_p = c(.066, .030, -.030, 
+                                                        -.008, -.356, -.206),
+                                               ci_p = c(.904, .918, .934,
+                                                      .938, .378, .630)),
+                      cond_200_20 = data.frame(bias_p = c(.053, -.012, -.037, 
+                                                        -.046, -.264, -.224),
+                                               ci_p = c(.886, .918, .942,
+                                                      .940, .530, .412)),
+                      cond_1000_20 = data.frame(bias_p = c(.032, -.003, -.056, 
+                                                         -.046, -.264, -.224),
+                                                ci_p = c(.914, .934, .956,
+                                                       .940, .530, .412))
+)
 
-store_sum <- vector("list", out[[1]]$cond_200_4$parms$dt_rep)
+# Compare paper and simulation study --------------------------------------
 
-for (i in 1:parms$dt_rep) {
-  store_sum[[i]] <- out[[i]][[cond_name]]$cond_bias
+compare <- vector("list", length(out[[1]]))
+  names(compare) <- names(out[[1]]) 
+for (i in 1:length(out[[1]])) {
+  compare[[i]] <- cbind(res[[i]], results_paper[[i]], res_old[[i]])
 }
-
-bias_out <- round(Reduce("+", store_sum)/parms$dt_rep, 3)
-
-bias_b1 <- as.data.frame(t(bias_out))[2]
-
-# Average Coverage --------------------------------------------------------
-
-store_sum <- vector("list", out[[1]]$cond_200_4$parms$dt_rep)
-
-for (i in 1:parms$dt_rep) {
-  store_sum[[i]] <- out[[i]][[cond_name]]$cond_CIco
-}
-
-CI_out <- Reduce("+", store_sum)/parms$dt_rep
-
-rownames(CI_out) <- rownames(bias_out)
-CI_b1 <- as.data.frame(t(CI_out))[2]
-
-resu <- cbind(bias_b1, CI_b1)
-colnames(resu) <- c("bias", "ci")
-resu
-
-# Compare to paper
-paper <- data.frame(bias = resu$bias,
-                    bias_p = c(.074, .017, -.023, -.023, -.008, -.356, -.206),
-                    ci = resu$ci,
-                    ci_p = c(.894, .930, .946, .946,  .938, .378, .630))
-rownames(paper) <- rownames(resu)
-paper
+compare

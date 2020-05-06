@@ -1,10 +1,9 @@
 ### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
 ### Author:   Edoardo Costantini
-### Created:  2020-02-26
-### Modified: 2020-02-26
+### Created:  2020-05-04
 ### Notes:    Function can be used only for univariate missingness imputation
 
-impute_BLAS <- function(Xy_mis, chains = 5, iter_bl = 1e3, burn_bl = 1e2){
+impute_BLAS_hans <- function(Xy, Xy_mis, chains = 5, iter_bl = 1e3, burn_bl = 1e2){
   
   # Prep data ---------------------------------------------------------------
   # chains = m
@@ -16,62 +15,47 @@ impute_BLAS <- function(Xy_mis, chains = 5, iter_bl = 1e3, burn_bl = 1e2){
   j <- which(colSums(is.na(Xy_mis)) != 0)
   O <- 1 * (!is.na(Xy_mis))
   
-  y_obs <- as.vector(Xy_mis[O[, j] == 1, j])
-  y_mis <- as.vector(Xy_mis[O[, j] == 0, j])
-  X_obs <- as.matrix(Xy_mis[O[, j] == 1, -j])
-  X_mis <- as.matrix(Xy_mis[O[, j] == 0, -j])
-  X <- as.matrix(Xy_mis[, -j])
+  zj <- Xy_mis[, j] - mean(Xy[, j])
+  Z <- Xy_mis[ , -j]
+  for (i in 1:ncol(Z)) {
+      Z[, i] <- (Z[, i] - mean(Z[, i])) / sd(Z[, i])
+  }
+  Xy_mis_scale <- Xy_mis
+  Xy_mis_scale[, j] <- zj
+  Xy_mis_scale[, -j] <- Z
+  zj_obs <- as.vector(Xy_mis_scale[O[, j] == 1, j])
+  zj_mis <- as.vector(Xy_mis_scale[O[, j] == 0, j])
+  Z_obs <- as.matrix(Xy_mis_scale[O[, j] == 1, -j])
+  Z_mis <- as.matrix(Xy_mis_scale[O[, j] == 0, -j])
+  
+  beta0 <- rep(0, ncol(Z_obs))
   
   # Sample parameters from posterior ----------------------------------------
-  ############################### #
-  ### Version monomvn::blasso ### #
-  ############################### #
-  model <- monomvn::blasso(X = X_obs, y = y_obs,
-                      T = iter_bl,
-                      # number of posterior samples to keep
-                      thin = burn_bl,
-                      RJ = TRUE,
-                      rao.s2 = TRUE,
-                      normalize = TRUE,
-                      lambda2 = 0.1, # initial lasso penality
-                      ab = c(.1, .1), # sigma**2 prior: IG(a,b)
-                      rd = c(.01, .01), # lamba prior: Gamma(r,s)
-                      mprior = c(1, 1), # rho prior: Beta(g,h)
-                      verb = 1 #verbosity lvl
-  )
+  
+  model <- blasso::blasso.vs(zj_obs, Z_obs,
+                             iters = iter_bl+burn_bl, 
+                             beta = beta0, 
+                             beta.prior = "scaled", 
+                             sig2 = 1, sig2prior = c(a = .1, b = .1),
+                             tau = 1, tauprior = c(r = .01, s = .01), 
+                             phi = .5, phiprior = c(h = 1, g = 1),
+                             fixsig = FALSE, fixtau = FALSE, fixphi = FALSE)
 
   sample_indx <- sample(burn_bl : nrow(model$beta), chains)
   beta_dot <- model$beta[sample_indx, ]
   b_dot <- cbind(model$mu[sample_indx], beta_dot)
 
-  sigma_dot_2 <- model$s2[sample_indx]
-  # ############################### #
+  sigma_dot_2 <- model$sig2[sample_indx]
   
-  # blOut <- bl(data       = as.data.frame(cbind(y_obs, X_obs)),
-  #             y          = "y_obs",
-  #             X          = setdiff(colnames(Xy_mis), c("y_obs")),
-  #             iterations   = c(100, 100, 100),
-  #             # Here thre numbers aprox, tuning sampling
-  #             sampleSizes  = list(rep(100, 2),  # burn-in, retain for approximation 
-  #                                 rep(1e3, 2), # burn-in, retain tuning
-  #                                 rep(1e3, 2)) # burn-in, retain sampling bigger or same size
-  #             # Approximates gets in the right neighbour, tuning improves, and sampling
-  #             # 100 for burn in
-  #             # Look into Gelman book for the thre approach
-  # )
-  # 
-  # modelbeta <- getParams(blOut, 1)$beta
-  # sample_indx <- sample(burn_bl : nrow(modelbeta), chains)
-  # beta_dot <- modelbeta[sample_indx, ]
-  # b_dot <- beta_dot
-  # sigma_dot_2 <- getParams(blOut, 1)$sigma[sample_indx]
-  
-  y_dat <- apply(b_dot, 1, function(x) {rnorm(nrow(X_mis), 
-                                              mean = (cbind(1, X) %*% x), 
+  zj_imp <- apply(b_dot, 1, function(b) {rnorm(nrow(Z_mis), 
+                                              mean = (Z_mis %*% b), 
                                               sd = sqrt(sigma_dot_2))} )
+  # Rescale zj_imp
+  zj_imp <- zj_imp + mean(Xy[, j])
+  
   for(i in 1:chains){
     imputed_datasets[[i]] <- Xy_mis
-    imputed_datasets[[i]][O[, j] == 0, j] <- y_dat[, i]
+    imputed_datasets[[i]][O[, j] == 0, j] <- zj_imp[, i]
   }
   
   return(imputed_datasets)
