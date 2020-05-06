@@ -36,10 +36,14 @@ supported, highdimensionality etc.)
 		  of two parameters required by EN is extremely time consuming
 	* Packages: none; R function to perform imputation is operational
 	* Notes: Implemented the Elastic net exclusively because it reduces to LASSO or RIDGE that performs better. Theoretically,
-		 EN is better at selecting variables from a group of variables that are hihgly correlated. As we are thinking of 
+		 EN is better at selecting variables from a group of variables that are highly correlated. As we are thinking of 
 		 surveys as applications, EN seems theoretically more apt to the task beacuse of its grouping effect: if there are 
 		 predictors that are highly correlated, then EN would tend to push their coefficient to be the same, while LASSO 
 		 would tend to keep just one of them.
+	* Doubts: Iterations and saving datasets for multivaraite missingness. I currently implemented this with parallel chains. 
+		However, Deng et al 2016 seem to suggest that there is only 1 chain that converges after so many iterations and 
+		that the last M dataset can be kept as multiple imputed datasets. Isn't there dependency that we want to avoid in 
+		this method?
 
 	*Implementation status: IURR*
 	* Imputation Model Variables supported: 

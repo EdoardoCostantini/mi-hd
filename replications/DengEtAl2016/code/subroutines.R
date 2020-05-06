@@ -64,6 +64,7 @@ runCell <- function(cond, m = 5, iters = 1) {
   # source("./fun_DURR_impute.R")
   # source("./fun_IURR_impute.R")
   # source("./fun_BLasso_impute.R")
+  # source("./fun_blassoHans_impute.R")
   # m = parms$chains
   # iters = 1
   # cond <- conds[1, ]
@@ -74,7 +75,7 @@ runCell <- function(cond, m = 5, iters = 1) {
   Xy <- genData(cond, parms)
   Xy_mis <- imposeMiss(Xy, parms)$Xy_miss
   
-  miss_descrps <- mean(is.na(Xy_mis[, "z1"]))
+  miss_descrps <- mean(rowSums(is.na(Xy_mis)) != 0) # check correct miss %
   
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
@@ -82,15 +83,24 @@ runCell <- function(cond, m = 5, iters = 1) {
   # Impute according to DURR method
   imp_DURR_lasso <- impute_DURR(Xy_mis = Xy_mis, 
                                 cond = cond, 
-                                chains = m, 
+                                m = m, 
                                 iters = iters, 
                                 reg_type="lasso")
+  
+  imp_DURR_lasso_dat <- vector("list", m)
+  for (i in 1:m) {
+    imp_DURR_lasso_dat[[i]] <- imp_DURR_lasso[[i]]$imp_dat
+  }
   
   # Impute according to IURR method
   imp_IURR_lasso <- impute_IURR(Xy_mis = Xy_mis, 
                                 cond = cond, 
                                 chains = m, 
                                 reg_type = "lasso")
+  imp_IURR_lasso_dat <- vector("list", m)
+  for (i in 1:m) {
+    imp_IURR_lasso_dat[[i]] <- imp_DURR_lasso[[i]]$imp_dat
+  }
   
   # Impute according to Hans Blasso method
   imp_BLasso <- impute_BLAS_hans(Xy = Xy, Xy_mis = Xy_mis, 
@@ -103,6 +113,9 @@ runCell <- function(cond, m = 5, iters = 1) {
   varTRUE <- c(1, (S+1), ncol(Xy_mis))
   imp_MI_T_mids <- mice::mice(Xy_mis[, varTRUE], 
                                 # not elegant way of selecting y and active set
+                              #######
+                              ####### USE PREDICTOR MATRIX #######
+                              #######
                               m = m,
                               maxit = iters,
                               method = "norm")
