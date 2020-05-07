@@ -6,7 +6,7 @@
 ###           reference papers Zhao Long 2016 (for univariate miss) and 
 ###           Deng et al 2016 (for multivariate miss)
 
-impute_DURR <- function(Xy_mis, cond, m = 5, iters=10, reg_type="lasso"){
+impute_DURR <- function(Xy_mis, chains=5, iters=5, reg_type="lasso"){
   ## Description
   ## Packages required by function
   # library(glmnet)     # for regularized regressions
@@ -23,7 +23,7 @@ impute_DURR <- function(Xy_mis, cond, m = 5, iters=10, reg_type="lasso"){
   # Z0       = init_dt_i(Z, missing_type(Z)) # initialized dataset
   # reg_type = c("el", "lasso")[2]           # imputation model penality type
   # iters    = 5                             # number of iterations
-  # m        = 2                             # number of imputed datasets (how many to keep)
+  # chains        = 2                             # number of imputed datasets (how many to keep)
   ## output: an object containing iters number of imputed datasets (imputed_datasets)
   
   ## Body
@@ -46,10 +46,13 @@ impute_DURR <- function(Xy_mis, cond, m = 5, iters=10, reg_type="lasso"){
   imputed_datasets <- vector("list", iters)
     names(imputed_datasets) <- seq(1, iters)
     
-  imp_res <- lapply(1:m, function(x){
+  # Time performance
+  start.time <- Sys.time()
+  
+  imp_res <- lapply(1:chains, function(x){
     Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
     for(i in 1:iters) {
-      print(paste0("DURR - Chain: ", x, "/", m, "; Iter: ", i, "/", iters))
+      print(paste0("DURR - Chain: ", x, "/", chains, "; Iter: ", i, "/", iters))
       for (j in 1:p_imp) {
         J <- which(vmis_ind)[j]
         glmfam <- detect_family(Zm[, J])
@@ -88,12 +91,21 @@ impute_DURR <- function(Xy_mis, cond, m = 5, iters=10, reg_type="lasso"){
         Zm[is.na(Z[, J]), J] <- zm_j
       }
     }  
+    
+    
     # Store results
     return(list(imp_dat = Zm,
-                imp_val = imputed_values))
+                imp_val = imputed_values)
+           )
   })
   
-  return(imp_res)
+  end.time <- Sys.time()
+  
+  return(list(imp_res = imp_res,
+              time = difftime(end.time, 
+                              start.time, 
+                              units = "mins"))
+         )
   
 }
   

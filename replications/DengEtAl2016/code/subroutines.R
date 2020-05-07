@@ -39,8 +39,7 @@ doRep <- function(rp, conds, parms) {
     while(exit_while == "no"){
       
       rp_out[[i]] <- try(runCell(cond = conds[i, ], 
-                              m = parms$chains, 
-                              iters = parms$iters), 
+                                 parms = parms), 
                       silent = TRUE)
       
       if (class(rp_out[[i]]) != "try-error") {
@@ -54,7 +53,7 @@ doRep <- function(rp, conds, parms) {
   return(rp_out)
 }
 
-runCell <- function(cond, m = 5, iters = 1) {
+runCell <- function(cond, parms) {
   ## Description
   # Generates data for 1 condition and performs imutations according to
   # DURR, IURR, BLasso, and basic methods.
@@ -64,9 +63,6 @@ runCell <- function(cond, m = 5, iters = 1) {
   # source("./fun_DURR_impute.R")
   # source("./fun_IURR_impute.R")
   # source("./fun_BLasso_impute.R")
-  # source("./fun_blassoHans_impute.R")
-  # m = parms$chains
-  # iters = 1
   # cond <- conds[1, ]
   
   ## Data ------------------------------------------------------------------ ##
@@ -81,62 +77,81 @@ runCell <- function(cond, m = 5, iters = 1) {
   # Impute m times the data w/ missing values w/ different methods
   
   # Impute according to DURR method
-  imp_DURR_lasso <- impute_DURR(Xy_mis = Xy_mis, 
-                                cond = cond, 
-                                m = m, 
-                                iters = iters, 
+  imp_DURR_lasso <- impute_DURR(Xy_mis = Xy_mis,
+                                chains = parms$chains, 
+                                iters = parms$chains, 
                                 reg_type="lasso")
   
-  imp_DURR_lasso_dat <- vector("list", m)
-  for (i in 1:m) {
-    imp_DURR_lasso_dat[[i]] <- imp_DURR_lasso[[i]]$imp_dat
+  imp_DURR_lasso_dat <- vector("list", parms$chains)
+    names(imp_DURR_lasso_dat) <- seq(1:parms$chains)
+  for (i in 1:parms$chains) {
+    imp_DURR_lasso_dat[[i]] <- imp_DURR_lasso$imp_res[[i]]$imp_dat
   }
-  
+    
   # Impute according to IURR method
   imp_IURR_lasso <- impute_IURR(Xy_mis = Xy_mis, 
-                                cond = cond, 
-                                chains = m, 
+                                chains = parms$chains, 
+                                iters = parms$iters,
                                 reg_type = "lasso")
-  imp_IURR_lasso_dat <- vector("list", m)
-  for (i in 1:m) {
-    imp_IURR_lasso_dat[[i]] <- imp_DURR_lasso[[i]]$imp_dat
+  
+  imp_IURR_lasso_dat <- vector("list", parms$chains)
+    names(imp_IURR_lasso_dat) <- seq(1:parms$chains)
+  for (i in 1:parms$chains) {
+    imp_IURR_lasso_dat[[i]] <- imp_DURR_lasso$imp_res[[i]]$imp_dat
   }
   
   # Impute according to Hans Blasso method
-  imp_BLasso <- impute_BLAS_hans(Xy = Xy, Xy_mis = Xy_mis, 
-                                 chains = m, 
+  imp_blasso <- impute_BLAS_hans(Xy = Xy, Xy_mis = Xy_mis, 
+                                 chains = parms$chains, 
+                                 iters = parms$iters,
                                  iter_bl = parms$iter_bl, 
                                  burn_bl = parms$burn_bl)
   
+  imp_blasso_dat <- vector("list", parms$chains)
+    names(imp_blasso_dat) <- seq(1:parms$chains)
+  for (i in 1:parms$chains) {
+    imp_blasso_dat[[i]] <- imp_blasso$imp_res[[i]]$imp_dat
+  }
+  
+  # MICE-RF 
+  start.time <- Sys.time()
+  imp_MI_RF_mids <- mice::mice(Xy_mis, 
+                               m = parms$chains,
+                               maxit = parms$iters,
+                               meth = "rf", ntree = parms$rfntree)
+  end.time <- Sys.time()
+  imp_MI_RF_mids$time <- difftime(end.time, start.time, units = "mins")
+  
+  imp_MI_RF <- mice::complete(imp_MI_RF_mids, "all")
+  
   # MICE w/ true model
   S <- parms$S_all[[ which(paste0("q", cond[3]) == names(parms$S_all)) ]]
-  varTRUE <- c(1, (S+1), ncol(Xy_mis))
-  imp_MI_T_mids <- mice::mice(Xy_mis[, varTRUE], 
-                                # not elegant way of selecting y and active set
-                              #######
-                              ####### USE PREDICTOR MATRIX #######
-                              #######
-                              m = m,
-                              maxit = iters,
-                              method = "norm")
-  imp_MI_T <- mice::complete(imp_MI_T_mids, "all")
+  MI_ture_pred <- c((S+1), ncol(Xy_mis))
   
-  # MICE-50 w/ ridge prior
-  var50 <- get_50_best(Xy_mis = Xy_mis, S = S) # gets50 most corr w/ z1 (+ z1)
-  imp_MI_50_mids <- mice::mice(Xy_mis[, var50],
-                               m = m,
-                               maxit = iters,
-                               ridge = 1e-5,
-                               method = "norm")
-  imp_MI_50 <- mice::complete(imp_MI_50_mids, "all")
+  predMat <- matrix(rep(0, ncol(Xy)^2), ncol = ncol(Xy), 
+                    dimnames = list(colnames(Xy), colnames(Xy)))
+  predMat[, MI_ture_pred] <- 1
+  
+  start.time <- Sys.time()
+  
+  imp_MI_T_mids <- mice::mice(Xy_mis, 
+                              predictorMatrix = predMat,
+                              m = parms$chains,
+                              maxit = parms$iters,
+                              method = "norm")
+  
+  end.time <- Sys.time()
+  imp_MI_T_mids$time <- difftime(end.time, start.time, units = "mins")
+  
+  imp_MI_T <- mice::complete(imp_MI_T_mids, "all")
   
   ## Analyse --------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
-  fits_md <- lapply(list(imp_DURR_lasso,
-                         imp_IURR_lasso,
-                         imp_BLasso,
-                         imp_MI_T,
-                         imp_MI_50), 
+  fits_md <- lapply(list(imp_DURR_lasso_dat,
+                         imp_IURR_lasso_dat,
+                         imp_blasso_dat,
+                         imp_MI_RF,
+                         imp_MI_T), 
                     fit_models, mod = parms$formula)
   
   # CC (complete case analysis)
@@ -160,13 +175,20 @@ runCell <- function(cond, m = 5, iters = 1) {
   cond_bias <- sapply(pool_EST, bias_est, x_true = parms$b)
   cond_CIco <- sapply(pool_CI, check_cover)
   
+  # aggregate times
+  imp_time <- c(DURR = imp_DURR_lasso$time,
+                IURR = imp_IURR_lasso$time,
+                blasso = imp_blasso$time,
+                MICE_RF = imp_MI_RF_mids$time,
+                MICE_TR = imp_MI_T_mids$time)
+  
   ## Store output ---------------------------------------------------------- ##
   output <- list(pool_est = pool_EST,
                  pool_conf = pool_CI,
                  miss_descrps = miss_descrps,
                  cond_bias = cond_bias,
                  cond_CIco = cond_CIco,
+                 run_time_min = imp_time,
                  parms = parms)
-  
   return(output)
 }

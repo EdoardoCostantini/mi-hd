@@ -40,7 +40,7 @@ parms$S_all   <- list(q4=(c(2,3,50,51)-1),
 parms$formula <- "y ~ z1 + z2 + z3"
 parms$alphaCI <- .95 # confidence level for parameters CI
 parms$k       <- 3 # number of predictors for analysis model
-parms$iter_bl <- 1e3 # 1e3 but actually no differences
+parms$iter_bl <- 1e3
 parms$burn_bl <- 5 * parms$iter_bl
 
 parms$k_IURR <- 0 # k value to bias coef sampling covariance matrix in IURR

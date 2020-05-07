@@ -28,10 +28,11 @@ parms <- list()
 
 # Itereations, repetitions, etc
 parms$dt_rep  <- 500 # replications for averaging results (500 goal)
-parms$chains  <- 10  # number of imputed datasets to pool esitmaes from
-parms$iters   <- 1   # number of iterations for the MI procedure
-parms$iter_bl <- 1e3 # blasso samples
-parms$burn_bl <- 5 * parms$iter_bl # blasso burnin
+parms$chains  <- 2  # number of imputed datasets to pool esitmaes from
+parms$iters   <- 2   # number of iterations for the MI procedure
+parms$iter_bl <- 1 # blasso samples (everything else is in burnin)
+parms$burn_bl <- 1e3 * parms$iter_bl # blasso burnin
+parms$rfntree <- 10 # default value as no indication is given in paper
 
 # Data Gen
 parms$n       <- 100 # number of cases for data generation
@@ -85,8 +86,8 @@ parms$description <- c("In each repetition, 1 dataset is created for each condit
 
 # Conditions --------------------------------------------------------------
 
-p   <- c(200, 1000)   # number of variables
+p   <- c(200) #, 1000)   # number of variables
 rho <- c(0)   # autoregressive structure
-q   <- c(4, 20)   # c(4, 20)  # active set (num of variables are true predictors of y)
+q   <- c(4) #, 20)   # c(4, 20)  # active set (num of variables are true predictors of y)
 
 conds <- as.matrix(expand.grid(p, rho, q))

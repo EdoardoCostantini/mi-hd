@@ -7,7 +7,7 @@
 ###           Deng et al 2016 (for multivariate miss). The function is a bit
 ###           more complex than it needs: it supports multivariate miss.
 
-impute_IURR <- function(Xy_mis, cond, chains=5, reg_type="lasso"){
+impute_IURR <- function(Xy_mis, cond, chains=5, iters=5, reg_type="lasso"){
   # # Description
   # # Packages required by function
   # library(glmnet)     # for regularized regressions
@@ -49,10 +49,13 @@ impute_IURR <- function(Xy_mis, cond, chains=5, reg_type="lasso"){
   
   O <- !is.na(Z) # matrix index of observed values
   
-  imp_res <- lapply(1:m, function(x){
+  # Time performance
+  start.time <- Sys.time()
+  
+  imp_res <- lapply(1:chains, function(x){
     Zm <- init_dt_i(Z, missing_type(Z)) # initialize data
     for (i in 1:iters) {
-      print(paste0("IURR - Chain: ", x, "/", m, "; Iter: ", i, "/", iters))
+      print(paste0("IURR - Chain: ", x, "/", chains, "; Iter: ", i, "/", iters))
       for (j in 1:p_imp) {
         # Select data
         y_obs <- z_j_obs  <- as.vector(Zm[O[, j] == TRUE, j])
@@ -81,9 +84,16 @@ impute_IURR <- function(Xy_mis, cond, chains=5, reg_type="lasso"){
         Zm[!O[, j], j] <- zm_j
       }
     }
+    
     # Store results
     return(list(imp_dat = Zm,
-                imp_val = imputed_values))
+                imp_val = imputed_values)
+           )
   })
-  return(imp_res)
+  end.time <- Sys.time()
+  return(list(imp_res = imp_res,
+              time = difftime(end.time, 
+                              start.time, 
+                              units = "mins"))
+  )
 }

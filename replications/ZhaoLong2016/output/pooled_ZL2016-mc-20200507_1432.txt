@@ -1,0 +1,56 @@
+SIMULATION PROGRESS REPORT
+Date: 2020-05-07
+Description: In each repetition, 1 dataset is created for each condition.
+      Imputation methods are used on that condition-specific dataset.
+      Results are therefore given per dataset in condition
+
+2020-05-07 14:32:37 - Starts Repetition: 3
+2020-05-07 14:32:37 - Starts Repetition: 1
+2020-05-07 14:32:37 - Starts Repetition: 8
+2020-05-07 14:32:37 - Starts Repetition: 2
+2020-05-07 14:32:37 - Starts Repetition: 9
+2020-05-07 14:32:37 - Starts Repetition: 7
+2020-05-07 14:32:37 - Starts Repetition: 10
+2020-05-07 14:32:37 - Starts Repetition: 5
+2020-05-07 14:32:37 - Starts Repetition: 6
+2020-05-07 14:32:37 - Starts Repetition: 4
+2020-05-07 14:34:46 - Starts Repetition: 12
+2020-05-07 14:34:48 - Starts Repetition: 11
+2020-05-07 14:34:49 - Starts Repetition: 20
+2020-05-07 14:34:49 - Starts Repetition: 13
+2020-05-07 14:34:49 - Starts Repetition: 14
+2020-05-07 14:34:50 - Starts Repetition: 16
+2020-05-07 14:34:58 - Starts Repetition: 18
+2020-05-07 14:34:59 - Starts Repetition: 15
+2020-05-07 14:35:00 - Starts Repetition: 17
+2020-05-07 14:35:11 - Starts Repetition: 19
+2020-05-07 14:36:54 - Starts Repetition: 22
+2020-05-07 14:36:57 - Starts Repetition: 23
+2020-05-07 14:36:58 - Starts Repetition: 30
+2020-05-07 14:36:59 - Starts Repetition: 26
+2020-05-07 14:37:00 - Starts Repetition: 24
+2020-05-07 14:37:07 - Starts Repetition: 21
+2020-05-07 14:37:08 - Starts Repetition: 25
+2020-05-07 14:37:10 - Starts Repetition: 27
+2020-05-07 14:37:16 - Starts Repetition: 29
+2020-05-07 14:37:18 - Starts Repetition: 28
+2020-05-07 14:39:01 - Starts Repetition: 32
+2020-05-07 14:39:03 - Starts Repetition: 36
+2020-05-07 14:39:04 - Starts Repetition: 33
+2020-05-07 14:39:04 - Starts Repetition: 40
+2020-05-07 14:39:12 - Starts Repetition: 35
+2020-05-07 14:39:17 - Starts Repetition: 37
+2020-05-07 14:39:21 - Starts Repetition: 39
+2020-05-07 14:39:26 - Starts Repetition: 31
+2020-05-07 14:39:31 - Starts Repetition: 34
+2020-05-07 14:39:33 - Starts Repetition: 38
+2020-05-07 14:41:07 - Starts Repetition: 42
+2020-05-07 14:41:08 - Starts Repetition: 46
+2020-05-07 14:41:11 - Starts Repetition: 43
+2020-05-07 14:41:21 - Starts Repetition: 47
+2020-05-07 14:41:22 - Starts Repetition: 50
+2020-05-07 14:41:26 - Starts Repetition: 49
+2020-05-07 14:41:36 - Starts Repetition: 44
+2020-05-07 14:41:38 - Starts Repetition: 45
+2020-05-07 14:41:40 - Starts Repetition: 48
+2020-05-07 14:41:44 - Starts Repetition: 41

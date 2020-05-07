@@ -13,11 +13,11 @@ out_old <- readRDS("../output/pooled_ZL2016-mc-20200309_1936.rds") # DO NOT DELE
   # the resutls you need to write 500 for the store_sum repetitions
   # old valid (pre correct blasso) keep to comapre results with fixed blasso
   # and previous incorrect blasso
-out <- readRDS("../output/pooled_ZL2016-mc-20200505_1529.rds") # to work on multiple conditions results
+out <- readRDS("../output/pooled_ZL2016-mc-20200505_1529.rds")
 
 # Results from simulation -------------------------------------------------
 # Old
-res_old <- lapply(1:4, function(x){
+res_old <- lapply(1:4, function(x){ 
   extract_results(cond_name = names(out_old[[1]])[x], 
                   output = out_old, 
                   dt_rep = 500)
