@@ -11,9 +11,10 @@ source("./functions.R")
 
   cond <- conds[1,]
   obj <- NULL
-  for (i in 1:1e3) {
+  for (i in 1:parms$dt_rep) {
     Xy <- genData(cond, parms)
-    obj[i] <- mean(imposeMiss(Xy, parms)$nR)
+    Xy_mis <- imposeMiss(Xy, parms)$Xy_miss
+    obj[i] <- mean(rowSums(is.na(Xy_mis)) != 0)
   }
-  mean(obj)
-  # Should be .3 missingness on this variable on average
+  round(mean(obj), 1) # approximately .4
+  # Should be .4 missingness on this variable on average

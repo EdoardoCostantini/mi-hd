@@ -55,6 +55,9 @@ supported, highdimensionality etc.)
 		* weakness: when using this method it might happen that p > n variables are selected
 			making the apporach fail.
 	* Packages: none, R function to perform imputation is operational
+	* Doubts: The sampling of sigma2. in your code there is no variation in the parameter sigma_j^2. You keep the 
+		value estiamted with the lasso model. Ask Kyle for help.
+
 
 * **Bayesian LASSO** following Zhao Long 2016;
 	* Imputation Model Variables supported: 
