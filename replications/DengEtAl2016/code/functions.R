@@ -5,50 +5,96 @@
 
 # data generation ---------------------------------------------------------
 
-genData <- function(par_conds, parms){
+genData <- function(cnd, parms){
   # par_conds <- conds[1,] # example for par_conds
   
-  # Extract condition parameters
-  p   <- par_conds[[1]]
-  rho <- par_conds[[2]]
-  q   <- par_conds[[3]]
-  p_z_m <- length(parms$z_m_id) # number of vairables will have missing
-  p_Z <- p-p_z_m # number of fully observed covariates
+  # # Extract condition parameters
+  # p   <- par_conds[[1]]
+  # rho <- par_conds[[2]]
+  # q   <- par_conds[[3]]
+  # p_z_m <- length(parms$z_m_id) # number of vairables will have missing
+  # p_Z <- p-p_z_m # number of fully observed covariates
+  # 
+  # # Extract fixed parameters
+  # n     <- parms$n
+  # 
+  # # Gen Z_full (fully observed covariates)
+  # Z_full <- rmvnorm(n, rep(0, p_Z), AR1(p_Z, rho))
+  # 
+  # Z_mis <- matrix(rep(NA, p_z_m*n),
+  #             ncol = p_z_m)
+  # Z <- cbind(Z_mis, Z_full)
+  # 
+  # # Gen z_m (variables that will have missingness imposed)
+  # ActSet <- which(names(parms$S_all) == paste0("q", q)) # active set (AS) indx
+  # stnr   <- parms$stnr[ActSet] # selecion of signal-to-noise for given AS
+  # S      <- parms$S_all[[ActSet]] # Active set vairables for z_m generation
+  # a  <- rep(1, length(S)) * stnr
+  # z_m <- sapply(1:p_z_m, function(x) {
+  #   rnorm(n, 1 + Z[, S] %*% a, sqrt(parms$z_m_var))
+  # })
+  # 
+  # # Gen X (entire fully observed data)
+  # X <- cbind(z_m, Z_full)
+  #   colnames(X) <- paste0("z", 1:ncol(X))
+  # 
+  # # Gen y
+  # y_b   <- rep(parms$b, parms$k)
+  # y_b0  <- parms$b
+  # y     <- rnorm(n, 
+  #                y_b0 + X[, 1:parms$k] %*% y_b, 
+  #                sqrt(parms$y_var))
+  #   # I'm making the decision of considereing as the standard deviation
+  #   # instead of vairance. Reason is that otherwise the CC case is as good
+  #   # as the GS analaysis. We want a dataset up that makes it worth to 
+  #   # perform imputation: ie that bridges between the GS and the bad treatment
+  #   # of complete case analysis (CC)
+  # 
+  # For internals
+  # cnd <- conds[1,]
   
-  # Extract fixed parameters
-  n     <- parms$n
+  p_Zm <- length(parms$z_m_id) # number of variables w/ missing values
+  p_Zf <- cnd["p"] - p_Zm      # number of fully observed variables
   
-  # Gen Z_m1 (fully observed covariates)
-  Z_m1 <- rmvnorm(n, rep(0, p_Z), AR1((p_Z), rho))
+  # Gen Zf(ully observed)
+  Zf <- rmvnorm(n     = parms$n, 
+                mean  = rep(0, p_Zf), 
+                sigma = AR1(p_Zf, rho = cnd["rho"]) )
   
-  # Gen z_m (variables that will have missingness imposed)
-  ActSet <- which(names(parms$S_all) == paste0("q", q)) # active set (AS) indx
-  stnr   <- parms$stnr[ActSet] # selecion of signal-to-noise for given AS
-  S      <- parms$S_all[[ActSet]] # ACtive set vairables for z_m generation
-  z_m_var <- parms$z_m_var
-  a  <- rep(1, length(S)) * stnr
-  z_m <- sapply(1:p_z_m, function(x) {
-    rnorm(n, 1 + Z_m1[, S] %*% a, sqrt(z_m_var))
-  } 
+  # Append empty Zm(issing values on these variables)
+  Zm <- matrix(rep(NA, p_Zm*parms$n),
+               ncol = p_Zm)
+  Z <- cbind(Zm, Zf)
+  
+  # Fill Zm with true values
+  AS_indx <- which(names(parms$S_all) == paste0("q", cnd["q"])) # active set (AS) indx
+  Zs <- Z[, parms$S_all[[AS_indx]]] # Active set
+  a <- rep(1, ncol(Zs)) * parms$stnr[AS_indx]
+  
+  Zm <- sapply(1:p_Zm, 
+               function(x) {
+                 rnorm(parms$n, 1 + Zs %*% a, sqrt(parms$z_m_var))
+               }
   )
   
-  # Gen X (entire fully observed data)
-  X <- cbind(z_m, Z_m1)
-    colnames(X) <- paste0("z", 1:ncol(X))
+  # Replace in dataset Z the new true values
+  Z <- cbind(Zm, Zf)
+    colnames(Z) <- paste0("z", 1:ncol(Z))
   
-  # Gen y
-  y_b   <- rep(parms$b, parms$k)
-  y_b0  <- parms$b
-  y_var <- parms$y_var
-  y     <- rnorm(n, 
-                 y_b0 + X[, 1:parms$k] %*% y_b, 
-                 sqrt(y_var))
+  # Generate y
+  b0 <- parms$b
+  b <- rep(parms$b, parms$k)
+  y <- rnorm(parms$n, 
+             mean = b0 + Z[, 1:parms$k] %*% b,
+             sd = sqrt(parms$y_var))
   
-  return( as.data.frame(cbind(X, y)) )
+  return( as.data.frame(cbind(Z, y)) )
 }
 
 # Example use
-# Xy <- genData(par_conds, parms)
+# set.seed(1234)
+# Xy <- genData(conds[1, ], parms)
+# lm(y ~ z1 + z2 + z3 + z4 + z5, data = Xy) # true y model
 
 imposeMiss <- function(Xy, parms){
   # Given a fully observed dataset and param object containing the regression
@@ -58,24 +104,20 @@ imposeMiss <- function(Xy, parms){
   
   n <- nrow(Xy)
   coefs <- parms$b_miss_model
-  var_mismech <- c("z2", "z3", "y")
-  Xy <- as.matrix(Xy)
+  Xy_miss <- as.matrix(Xy)
+  nR <- sapply(1:length(parms$z_m_id), function(d){
+    logit_miss <- cbind(1, Xy_miss[, parms$detlamod[[d]]]) %*% coefs
+    prb_miss <- exp(logit_miss)/(1+exp(logit_miss))
+    nR <- rbinom(n, 1, prb_miss) == 1
+    return(nR)
+  }
+  )
   
-  logit_miss <- sapply(1:3, function(x){
-    cbind(1, Xy[, parms$detlamod[[x]]]) %*% coefs
-  })
-  
-  prb_miss <- exp(logit_miss)/(1+exp(logit_miss))
-  
-  nR <- sapply(1:3, function(x){
-    rbinom(n, 1, prb_miss[, x]) == 1
-  })
-  
-  for (i in 1:3) {
-    Xy[nR[, i], parms$z_m_id[i]] <- NA
+  for (i in 1:length(parms$z_m_id)) {
+    Xy_miss[nR[, i], parms$z_m_id[i]] <- NA
   }
   
-  return(list(Xy_miss = as.data.frame(Xy),
+  return(list(Xy_miss = as.data.frame(Xy_miss),
               nR = nR) )
 }
 
@@ -262,6 +304,10 @@ rr_est_lasso <- function(X, y, parms){
     # data("Boston", package = "MASS")
     # X <- model.matrix(medv~., Boston)
     # y <- Boston$medv
+  ## Internals from simualtion
+  # X = Wm_j_obs
+  # y = z_j_obs
+  # parms = parms
   
   cv_lasso <- cv.glmnet(X, y,
                         family = "gaussian",
@@ -440,13 +486,25 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   #   cv <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
   # model <- glmnet(X_tr, y_tr, alpha = 1, lambda = cv$lambda.min)
   
+  # model = regu.mod
+  # X_tr = Wm_j_obs
+  # y_tr = z_j_obs
+  # X_te = Wm_mj 
+  # y_te = zm_mj
+  # parms = parms
+  
   ## Body ##
   
   lasso.coef <- as.matrix(coef(model))
-  S_hat <- row.names(lasso.coef)[lasso.coef != 0][-1] # estimated active set
+  lasso.coef.n0 <- row.names(lasso.coef)[lasso.coef != 0]
+  S_hat <- lasso.coef.n0[-1] # estimated active set (get rid of intercept)
   
   # Estimate Imputation model on observed z_j
-  lm_fit <- lm(y_tr ~ X_tr[, S_hat])
+  if(identical(lasso.coef.n0, "(Intercept)")){
+    lm_fit <- lm(y_tr ~ 1)
+  } else {
+    lm_fit <- lm(y_tr ~ X_tr[, S_hat])
+  }
   
   theta_MLE <- coef(lm_fit)
   Sigma_MLE <- vcov(lm_fit)
@@ -460,10 +518,15 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
     # sigma. Later fix this!
   
   # Get imputations
-  y_imp <- rnorm(n = nrow(X_te),
-                 mean = (model.matrix( ~ X_te[, S_hat]) %*% theta_m_j),
-                 sd = sigma_m_j)
-  
+  if(identical(lasso.coef.n0, "(Intercept)")){
+    y_imp <- rnorm(n = nrow(X_te),
+                   mean = theta_m_j,
+                   sd = sigma_m_j)
+  } else {
+    y_imp <- rnorm(n = nrow(X_te),
+                   mean = (model.matrix( ~ X_te[, S_hat]) %*% theta_m_j),
+                   sd = sigma_m_j)
+  }
   return(y_imp)
 }
 
@@ -551,24 +614,6 @@ get_pool_CI <- function(fits){
   return(CI = CI)
 }
 
-get_50_best <- function(Xy_mis, S){
-  ## Description
-  # Given a dataset with missing univariate values, and the true active set
-  # of the imputation model, it returns an index for the columns of the
-  # dataset that selects the imputation target variable, the active set
-  # and the first 50-length(active set) predictors for highest correlation
-  # with the target variable.
-  ## For internals
-  var50_must <- c(S+1, ncol(Xy_mis))
-  cortgt <- cor(Xy_mis[, -var50_must], use = "pairwise.complete.obs")[, "z1"]
-  var50_opt <- sort(abs(cortgt), decreasing = TRUE)
-  var50_opt <- var50_opt[2 : (50-length(S))]
-  var50_opt <- which(colnames(Xy_mis) %in% names(var50_opt))
-  var50 <- c(1, var50_must, var50_opt)
-  
-  return(var50)
-}
-
 # Results -----------------------------------------------------------------
 
 bias_est <- function(x, x_true) {
@@ -597,7 +642,8 @@ extract_results <- function(cond_name, output, dt_rep){
   }
   
   bias_out <- round(Reduce("+", store_sum)/dt_rep, 3)
-  bias_b1 <- as.data.frame(t(bias_out))[2] # only interested in b1
+  # bias_b1 <- as.data.frame(t(bias_out))[2] # only interested in b1
+  bias <- as.data.frame(t(bias_out))#[1:4]
   
   # Average Coverage
   store_sum <- vector("list", dt_rep)
@@ -607,10 +653,13 @@ extract_results <- function(cond_name, output, dt_rep){
   }
   
   CI_out <- Reduce("+", store_sum)/dt_rep
-  rownames(CI_out) <- rownames(bias_out)
-  CI_b1 <- as.data.frame(t(CI_out))[2]
+    rownames(CI_out) <- rownames(bias_out)
+  # CI_b1 <- as.data.frame(t(CI_out))[2]
+  CI <- as.data.frame(t(CI_out))#[1:4]
   
-  resu <- cbind(bias_b1, CI_b1)
-  colnames(resu) <- c("bias", "ci")
+  # resu <- cbind(bias_b1, CI_b1)
+  # colnames(resu) <- c("bias", "ci")
+  resu <- list(bias = bias, 
+               CI = round(CI, 3))
   return(resu)
 }

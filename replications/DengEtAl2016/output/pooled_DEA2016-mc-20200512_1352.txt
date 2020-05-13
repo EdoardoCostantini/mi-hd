@@ -1,0 +1,23 @@
+SIMULATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+      Imputation methods are used on that condition-specific dataset.
+      Results are therefore given per dataset in condition
+
+------
+Starts at: 2020-05-12 13:52:51
+------
+
+2020-05-12 13:52:51 - Starts Repetition: 2
+2020-05-12 13:52:51 - Starts Repetition: 1
+2020-05-12 13:53:01 | Reptetition 2: DURR done
+2020-05-12 13:53:01 | Reptetition 1: DURR done
+2020-05-12 13:53:09 | Reptetition 2: IURR done
+2020-05-12 13:53:10 | Reptetition 1: IURR done
+2020-05-12 13:53:10 | Reptetition 2: MICE-TRUE done
+2020-05-12 13:53:11 | Reptetition 1: MICE-TRUE done
+
+------
+Ends at: 2020-05-12 13:53:11
+Run time: 0.006 h
+------
+

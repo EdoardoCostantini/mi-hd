@@ -1,4 +1,4 @@
-### Title:    Replication Zhao Long 2016 - Compare methods
+### Title:    Replication Deng Et Al 2016 - Compare methods
 ### Author:   Edoardo Costantini
 ### Created:  2020-02-10
 ### Modified: 2020-02-14
@@ -8,16 +8,24 @@ rm(list = ls())
 source("./functions.R")
 source("./init.R")
 
-out_old <- readRDS("../output/pooled_ZL2016-mc-20200309_1936.rds") # DO NOT DELETE
-  # old version, so it does not have the dt_rep stored inside. If you want to get
-  # the resutls you need to write 500 for the store_sum repetitions
-  # old valid (pre correct blasso) keep to comapre results with fixed blasso
-  # and previous incorrect blasso
-out <- readRDS("../output/pooled_ZL2016-mc-20200505_1529.rds") # to work on multiple conditions results
+out_old <- readRDS("../output/pooled_ZL2016-mc-20200512_1139.rds")
+out <- readRDS("../output/pooled_ZL2016-mc-20200512_1145.rds")  # different seed
+out <- readRDS("../output/pooled_DEA2016-mc-20200512_2020.rds") # Including Bayesian lasso
+
+# Simulation description
+str(out[[1]]$cond_200_4$parms)
 
 # Results from simulation -------------------------------------------------
-# Old
-res_old <- lapply(1:4, function(x){
+
+# Time
+res_time <- NULL
+for (i in 1:out[[1]]$cond_200_4$parms$dt_rep) {
+  res_time <- rbind(res_time, out[[i]]$cond_200_4$run_time_min)
+}
+round(colMeans(res_time), 3)
+
+# Rsults on a different seed
+res_old <- lapply(1:4, function(x){ 
   extract_results(cond_name = names(out_old[[1]])[x], 
                   output = out_old, 
                   dt_rep = 500)
@@ -33,6 +41,34 @@ res <- lapply(1:4, function(x){
 })
 names(res) <- names(out[[1]]) 
 res
+
+cbind(res_old[[1]], res[[1]])
+
+
+# Convergence -------------------------------------------------------------
+length(out)
+
+# Make a function in the future
+dt_rep <- 10
+plot(out[[dt_rep]]$cond_200_4$imp_values$MICE_TR)
+imp_meth <- c("DURR", "IURR", "blasso")
+chain1 <- 1
+par(mfrow = c(2, 3))
+for (m in 1:length(imp_meth)) {
+  for (v in 1:length(parms$z_m_id)) {
+    imps_4plot <- out[[dt_rep]]$cond_200_4$imp_values[[imp_meth[m]]][[chain1]][[v]]
+    mean_imp <- colMeans(imps_4plot)
+    plot(1:parms$iters, mean_imp, type = "l",
+         main = paste0(imp_meth[m], " Mean Imputations"),
+         ylim = c(mean(mean_imp)-4*sd(mean_imp), mean(mean_imp)+4*sd(mean_imp)),
+         ylab = paste0("z", v), xlab = "Iteration")
+    for (i in 1:(parms$chains-1)) {
+      imps_4plot <- out[[dt_rep]]$cond_200_4$imp_values[[imp_meth[m]]][[i]][[v]]
+      mean_imp <- colMeans(imps_4plot)
+      lines(1:parms$iters, mean_imp)
+    }
+  }
+}
 
 # Results from paper ------------------------------------------------------
 results_paper <- list(cond_200_4 = data.frame(bias_p = c(.074, .017, -.023, 

@@ -6,7 +6,7 @@
 # data generation ---------------------------------------------------------
 
 genData <- function(par_conds, parms){
-  # par_conds <- conds[3,] # example for par_conds
+  # par_conds <- conds[1,] # example for par_conds
   
   # Extract condition parameters
   p   <- par_conds[[1]]
@@ -23,13 +23,14 @@ genData <- function(par_conds, parms){
   z1_var <- parms$z1_var
   
   # Gen Z_m1 (fully observed covariates)
+  # set.seed(1234)
   Z_m1 <- rmvnorm(n, rep(0, (p-1)), AR1((p-1), rho))
   
   # Gen z1 (variable that will have missingness imposed)
   a0 <- 1 # Based on specification of DengEtAl because Zaho was not clear
   a  <- rep(1, length(S)) * stnr
   z1 <- rnorm(n, 
-              a0 * Z_m1[, S] %*% a, 
+              a0 + Z_m1[, S] %*% a, 
               sqrt(z1_var))
   
   # Gen X (entire fully observed data)
@@ -46,6 +47,10 @@ genData <- function(par_conds, parms){
   
   return( as.data.frame(cbind(X, y)) )
 }
+
+# set.seed(1234)
+# Xy <- genData(conds[1, ], parms)
+# lm(y ~ z1 + z2 + z3 + z4 + z5, data = Xy) # true y model
 
 imposeMiss <- function(Xy, parms){
   # Given a fully observed dataset and param object containing the regression
@@ -68,7 +73,7 @@ imposeMiss <- function(Xy, parms){
   return(list(Xy_miss = as.data.frame(Xy),
               nR = nR) )
 }
-
+# Xy_miss[,1:3]
 # generic functions -------------------------------------------------------
 
 detect_family <- function(x){

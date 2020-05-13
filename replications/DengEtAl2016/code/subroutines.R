@@ -1,4 +1,4 @@
-### Title:    Replication Zhao Long 2016 - Functions
+### Title:    Replication Deng Et Al 2016 - Functions
 ### Author:   Edoardo Costantini
 ### Created:  2020-02-20
 ### Modified: 2020-02-20
@@ -17,7 +17,7 @@ doRep <- function(rp, conds, parms) {
   .lec.CurrentStream(rp) # use the rp sequence out of the 1000
   
   ## Progress report - Start
-  parms$rep_counter <- parms$rep_counter + 1 # increase progres report counter
+  # parms$rep_counter <- parms$rep_counter + 1 # increase progres report counter
   cat(paste0(Sys.time(), " - Starts Repetition: ", rp, 
              "\n"),
       file = paste0(parms$outDir, parms$report_file_name),
@@ -37,9 +37,10 @@ doRep <- function(rp, conds, parms) {
     exit_while <- "no"
     
     while(exit_while == "no"){
-      
+
       rp_out[[i]] <- try(runCell(cond = conds[i, ], 
-                                 parms = parms), 
+                                 parms = parms,
+                                 rep_status = rp), 
                       silent = TRUE)
       
       if (class(rp_out[[i]]) != "try-error") {
@@ -53,7 +54,7 @@ doRep <- function(rp, conds, parms) {
   return(rp_out)
 }
 
-runCell <- function(cond, parms) {
+runCell <- function(cond, parms, rep_status) {
   ## Description
   # Generates data for 1 condition and performs imutations according to
   # DURR, IURR, BLasso, and basic methods.
@@ -67,10 +68,9 @@ runCell <- function(cond, parms) {
   
   ## Data ------------------------------------------------------------------ ##
   # Gen 1 dataset w/ missing values; 1 fully-obs data for out-of-sample rmse
-  
   Xy <- genData(cond, parms)
   Xy_mis <- imposeMiss(Xy, parms)$Xy_miss
-  
+
   miss_descrps <- mean(rowSums(is.na(Xy_mis)) != 0) # check correct miss %
   
   ## Imputation ------------------------------------------------------------ ##
@@ -78,94 +78,98 @@ runCell <- function(cond, parms) {
   
   # Impute according to DURR method
   imp_DURR_lasso <- impute_DURR(Xy_mis = Xy_mis,
-                                chains = parms$chains, 
-                                iters = parms$chains, 
-                                reg_type="lasso")
-  
-  imp_DURR_lasso_dat <- vector("list", parms$chains)
-    names(imp_DURR_lasso_dat) <- seq(1:parms$chains)
-  for (i in 1:parms$chains) {
-    imp_DURR_lasso_dat[[i]] <- imp_DURR_lasso$imp_res[[i]]$imp_dat
-  }
+                                chains = parms$chains,
+                                iters = parms$iters,
+                                reg_type="lasso",
+                                parms = parms)
+
+  cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": DURR done",
+             "\n"),
+      file = paste0(parms$outDir, parms$report_file_name),
+      append = TRUE)
     
   # Impute according to IURR method
-  imp_IURR_lasso <- impute_IURR(Xy_mis = Xy_mis, 
-                                chains = parms$chains, 
+  imp_IURR_lasso <- impute_IURR(Xy_mis = Xy_mis,
+                                chains = parms$chains,
                                 iters = parms$iters,
-                                reg_type = "lasso")
-  
-  imp_IURR_lasso_dat <- vector("list", parms$chains)
-    names(imp_IURR_lasso_dat) <- seq(1:parms$chains)
-  for (i in 1:parms$chains) {
-    imp_IURR_lasso_dat[[i]] <- imp_DURR_lasso$imp_res[[i]]$imp_dat
-  }
-  
+                                reg_type = "lasso",
+                                parms = parms)
+
+  cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": IURR done",
+             "\n"),
+      file = paste0(parms$outDir, parms$report_file_name),
+      append = TRUE)
+
   # Impute according to Hans Blasso method
-  imp_blasso <- impute_BLAS_hans(Xy = Xy, Xy_mis = Xy_mis, 
-                                 chains = parms$chains, 
+  imp_blasso <- impute_BLAS_hans(Xy = Xy, Xy_mis = Xy_mis,
+                                 chains = parms$chains,
                                  iters = parms$iters,
-                                 iter_bl = parms$iter_bl, 
-                                 burn_bl = parms$burn_bl)
-  
-  imp_blasso_dat <- vector("list", parms$chains)
-    names(imp_blasso_dat) <- seq(1:parms$chains)
-  for (i in 1:parms$chains) {
-    imp_blasso_dat[[i]] <- imp_blasso$imp_res[[i]]$imp_dat
-  }
-  
-  # MICE-RF 
-  start.time <- Sys.time()
-  imp_MI_RF_mids <- mice::mice(Xy_mis, 
-                               m = parms$chains,
-                               maxit = parms$iters,
-                               meth = "rf", ntree = parms$rfntree)
-  end.time <- Sys.time()
-  imp_MI_RF_mids$time <- difftime(end.time, start.time, units = "mins")
-  
-  imp_MI_RF <- mice::complete(imp_MI_RF_mids, "all")
+                                 iter_bl = parms$iter_bl,
+                                 burn_bl = parms$burn_bl,
+                                 parms = parms)
+
+  cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": blasso done",
+             "\n"),
+      file = paste0(parms$outDir, parms$report_file_name),
+      append = TRUE)
+
+  # # MICE-RF 
+  # imp_MICE_RF <- impute_MICE_RF(Xy_mis = Xy_mis, 
+  #                               chains = parms$chains, 
+  #                               iters = parms$iters, 
+  #                               rfntree = parms$rfntree)
+  # 
+  # cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": MICE-RF done",
+  #            "\n"),
+  #     file = paste0(parms$outDir, parms$report_file_name),
+  #     append = TRUE)
   
   # MICE w/ true model
-  S <- parms$S_all[[ which(paste0("q", cond[3]) == names(parms$S_all)) ]]
-  MI_ture_pred <- c((S+1), ncol(Xy_mis))
+  imp_MICE_TR <- impute_MICE_TR(Xy_mis = Xy_mis, 
+                                AS_size = cond[3],
+                                chains = parms$chains, 
+                                iters = parms$iters, 
+                                parms = parms)
   
-  predMat <- matrix(rep(0, ncol(Xy)^2), ncol = ncol(Xy), 
-                    dimnames = list(colnames(Xy), colnames(Xy)))
-  predMat[, MI_ture_pred] <- 1
+  cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": MICE-TRUE done",
+             "\n"),
+      file = paste0(parms$outDir, parms$report_file_name),
+      append = TRUE)
   
-  start.time <- Sys.time()
+  ## Convergence ----------------------------------------------------------- ##
   
-  imp_MI_T_mids <- mice::mice(Xy_mis, 
-                              predictorMatrix = predMat,
-                              m = parms$chains,
-                              maxit = parms$iters,
-                              method = "norm")
-  
-  end.time <- Sys.time()
-  imp_MI_T_mids$time <- difftime(end.time, start.time, units = "mins")
-  
-  imp_MI_T <- mice::complete(imp_MI_T_mids, "all")
+  imp_values <- list(DURR = imp_DURR_lasso$imps,
+                     IURR = imp_IURR_lasso$imps,
+                     blasso = imp_blasso$imps,
+                     MICE_TR = imp_MICE_TR$mids)
   
   ## Analyse --------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
-  fits_md <- lapply(list(imp_DURR_lasso_dat,
-                         imp_IURR_lasso_dat,
-                         imp_blasso_dat,
-                         imp_MI_RF,
-                         imp_MI_T), 
+  fits_md <- lapply(list(imp_DURR_lasso$dats,
+                         imp_IURR_lasso$dats,
+                         # imp_blasso$dats,
+                         # imp_MICE_RF$dats,
+                         imp_MICE_TR$dats), 
                     fit_models, mod = parms$formula)
+  
+  # Gold Standard
+  lm_fit_gs <- lm(parms$formula, data = Xy)
+  bs_gs <- coef(lm_fit_gs)
+  CI_gs <- confint(lm_fit_gs)
   
   # CC (complete case analysis)
   lm_fit_cc <- lm(parms$formula, data = Xy_mis, na.action = na.omit)
   bs_cc <- coef(lm_fit_cc)
+  CI_cc <- confint(lm_fit_cc)
   
   ## Pooling --------------------------------------------------------------- ##
   # For each imp method, pool estimates across the m datasets
   pool_EST <- lapply(fits_md, get_pool_EST)
   pool_CI  <- lapply(fits_md, get_pool_CI)
   
-  # append CC results
-  pool_EST[[length(pool_EST)+1]] <- coef(lm_fit_cc)
-  pool_CI[[length(pool_CI)+1]] <- confint(lm_fit_cc)
+  # append GS and CC results
+  pool_EST <- c(pool_EST, list(bs_gs, bs_cc))
+  pool_CI <- c(pool_CI, list(CI_gs, CI_cc))
   
   # give meaningful names
   names(pool_EST) <- parms$methods
@@ -176,11 +180,11 @@ runCell <- function(cond, parms) {
   cond_CIco <- sapply(pool_CI, check_cover)
   
   # aggregate times
-  imp_time <- c(DURR = imp_DURR_lasso$time,
-                IURR = imp_IURR_lasso$time,
-                blasso = imp_blasso$time,
-                MICE_RF = imp_MI_RF_mids$time,
-                MICE_TR = imp_MI_T_mids$time)
+  imp_time <- c(DURR    = imp_DURR_lasso$time,
+                IURR    = imp_IURR_lasso$time,
+                blasso  = imp_blasso$time,
+                # MICE_RF = imp_MICE_RF$time,
+                MICE_TR = imp_MICE_TR$time)
   
   ## Store output ---------------------------------------------------------- ##
   output <- list(pool_est = pool_EST,
@@ -189,6 +193,7 @@ runCell <- function(cond, parms) {
                  cond_bias = cond_bias,
                  cond_CIco = cond_CIco,
                  run_time_min = imp_time,
+                 imp_values = imp_values, 
                  parms = parms)
   return(output)
 }

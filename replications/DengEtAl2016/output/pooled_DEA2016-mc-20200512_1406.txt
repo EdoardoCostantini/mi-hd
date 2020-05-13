@@ -1,0 +1,75 @@
+SIMULATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+      Imputation methods are used on that condition-specific dataset.
+      Results are therefore given per dataset in condition
+
+------
+Starts at: 2020-05-12 14:06:45
+------
+
+2020-05-12 14:06:45 - Starts Repetition: 1
+2020-05-12 14:06:45 - Starts Repetition: 6
+2020-05-12 14:06:45 - Starts Repetition: 5
+2020-05-12 14:06:45 - Starts Repetition: 3
+2020-05-12 14:06:45 - Starts Repetition: 2
+2020-05-12 14:06:45 - Starts Repetition: 7
+2020-05-12 14:06:45 - Starts Repetition: 9
+2020-05-12 14:06:45 - Starts Repetition: 13
+2020-05-12 14:06:45 - Starts Repetition: 4
+2020-05-12 14:06:45 - Starts Repetition: 8
+2020-05-12 14:06:45 - Starts Repetition: 11
+2020-05-12 14:06:45 - Starts Repetition: 12
+2020-05-12 14:06:45 - Starts Repetition: 14
+2020-05-12 14:06:45 - Starts Repetition: 10
+2020-05-12 14:06:45 - Starts Repetition: 15
+2020-05-12 14:09:10 | Reptetition 13: DURR done
+2020-05-12 14:09:14 | Reptetition 10: DURR done
+2020-05-12 14:09:15 | Reptetition 6: DURR done
+2020-05-12 14:09:15 | Reptetition 5: DURR done
+2020-05-12 14:09:16 | Reptetition 2: DURR done
+2020-05-12 14:09:16 | Reptetition 14: DURR done
+2020-05-12 14:09:16 | Reptetition 3: DURR done
+2020-05-12 14:09:18 | Reptetition 11: DURR done
+2020-05-12 14:09:19 | Reptetition 12: DURR done
+2020-05-12 14:09:19 | Reptetition 4: DURR done
+2020-05-12 14:09:20 | Reptetition 1: DURR done
+2020-05-12 14:09:21 | Reptetition 7: DURR done
+2020-05-12 14:09:21 | Reptetition 8: DURR done
+2020-05-12 14:09:21 | Reptetition 9: DURR done
+2020-05-12 14:09:22 | Reptetition 15: DURR done
+2020-05-12 14:11:24 | Reptetition 13: IURR done
+2020-05-12 14:11:33 | Reptetition 10: IURR done
+2020-05-12 14:11:33 | Reptetition 6: IURR done
+2020-05-12 14:11:34 | Reptetition 13: MICE-TRUE done
+2020-05-12 14:11:34 | Reptetition 5: IURR done
+2020-05-12 14:11:36 | Reptetition 14: IURR done
+2020-05-12 14:11:39 | Reptetition 3: IURR done
+2020-05-12 14:11:39 | Reptetition 2: IURR done
+2020-05-12 14:11:43 | Reptetition 11: IURR done
+2020-05-12 14:11:43 | Reptetition 10: MICE-TRUE done
+2020-05-12 14:11:43 | Reptetition 6: MICE-TRUE done
+2020-05-12 14:11:44 | Reptetition 12: IURR done
+2020-05-12 14:11:44 | Reptetition 5: MICE-TRUE done
+2020-05-12 14:11:46 | Reptetition 14: MICE-TRUE done
+2020-05-12 14:11:47 | Reptetition 4: IURR done
+2020-05-12 14:11:48 | Reptetition 9: IURR done
+2020-05-12 14:11:48 | Reptetition 3: MICE-TRUE done
+2020-05-12 14:11:48 | Reptetition 1: IURR done
+2020-05-12 14:11:48 | Reptetition 2: MICE-TRUE done
+2020-05-12 14:11:49 | Reptetition 8: IURR done
+2020-05-12 14:11:49 | Reptetition 7: IURR done
+2020-05-12 14:11:49 | Reptetition 15: IURR done
+2020-05-12 14:11:50 | Reptetition 11: MICE-TRUE done
+2020-05-12 14:11:51 | Reptetition 12: MICE-TRUE done
+2020-05-12 14:11:53 | Reptetition 4: MICE-TRUE done
+2020-05-12 14:11:54 | Reptetition 9: MICE-TRUE done
+2020-05-12 14:11:54 | Reptetition 1: MICE-TRUE done
+2020-05-12 14:11:54 | Reptetition 8: MICE-TRUE done
+2020-05-12 14:11:55 | Reptetition 7: MICE-TRUE done
+2020-05-12 14:11:55 | Reptetition 15: MICE-TRUE done
+
+------
+Ends at: 2020-05-12 14:11:55
+Run time: 0.086 h
+------
+

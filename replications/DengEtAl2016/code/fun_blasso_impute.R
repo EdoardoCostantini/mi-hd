@@ -3,10 +3,11 @@
 ### Created:  2020-05-04
 ### Notes:    Function can be used only for univariate missingness imputation
 
-impute_BLAS_hans <- function(Xy, Xy_mis, chains=5, iters=5, iter_bl = 1e3, burn_bl = 1e2){
+impute_BLAS_hans <- function(Xy, Xy_mis, chains=5, iters=5, iter_bl = 1, burn_bl = 1e3, parms){
   
   # Prep data ---------------------------------------------------------------
-  # chains = m
+  # chains = 2
+  # iters = 2
   # iter_bl = 1
   # burn_bl = 1e3
   
@@ -18,16 +19,19 @@ impute_BLAS_hans <- function(Xy, Xy_mis, chains=5, iters=5, iter_bl = 1e3, burn_
   p_imp <- sum(vmis_ind)
   
   # To store imputed values and check convergence
-  imputed_values <- vector("list", p_imp)
-    names(imputed_values) <- names(which(r != nrow(Z)))
-  for (v in 1:p_imp) {
-    imputed_values[[v]] <- matrix(rep(NA, (iters*(nrow(Z)-r[v]))), 
-                                  ncol = iters)
-  }
+  imp_blasso_val <- vector("list", parms$chains)
+    names(imp_blasso_val) <- seq(1:parms$chains)
+  # empty storing objects for imputate values
+  imps <- vector("list", p_imp)
+    names(imps) <- names(which(r != nrow(Z)))
+    for (v in 1:p_imp) {
+      imps[[v]] <- matrix(rep(NA, (iters*(nrow(Z)-r[v]))), 
+                          ncol = iters)
+    }
   
   # To store multiply imputed datasets
-  imputed_datasets <- vector("list", iters)
-    names(imputed_datasets) <- seq(1, iters)
+  imp_blasso_dat <- vector("list", parms$chains)
+    names(imp_blasso_dat) <- seq(1:parms$chains)
   
   O <- !is.na(Z)
   
@@ -35,10 +39,12 @@ impute_BLAS_hans <- function(Xy, Xy_mis, chains=5, iters=5, iter_bl = 1e3, burn_
   start.time <- Sys.time()
   
   # For one chain of imputatuions
-  imp_res <- lapply(1:chains, function(x){
+  for (cc in 1:chains) {
+    
     Zm <- init_dt_i(Z, missing_type(Z)) # initialize data for each chain
+    
     for (i in 1:iters) {
-      print(paste0("BLASSO - Chain: ", x, "/", chains, "; Iter: ", i, "/", iters))
+      print(paste0("BLASSO - Chain: ", cc, "/", chains, "; Iter: ", i, "/", iters))
       for (j in 1:p_imp) {
         zj_obs <- as.vector(Zm[O[, j] == TRUE, j])
         zj_mis <- as.vector(Zm[O[, j] == FALSE, j])
@@ -65,19 +71,20 @@ impute_BLAS_hans <- function(Xy, Xy_mis, chains=5, iters=5, iter_bl = 1e3, burn_
                         mean = (Z_mis %*% theta_hat), 
                         sd = sqrt(sigma_hat_2))
         # Append imputation
-        imputed_values[[j]][, i] <- zj_imp
+        imps[[j]][, i] <- zj_imp
         Zm[!O[, j], j] <- zj_imp
       }
     }
     
-    # Store results
-    return(list(imp_dat = Zm,
-                imp_val = imputed_values)
-           )
+    imp_blasso_dat[[cc]] <- Zm
+    imp_blasso_val[[cc]] <- imps
+    
   }
-  )
+  
   end.time <- Sys.time()
-  return(list(imp_res = imp_res,
+  
+  return(list(dats = imp_blasso_dat,
+              imps = imp_blasso_val,
               time = difftime(end.time, 
                               start.time, 
                               units = "mins"))

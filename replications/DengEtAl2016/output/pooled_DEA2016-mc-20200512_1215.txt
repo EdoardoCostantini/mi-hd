@@ -1,0 +1,603 @@
+SIMULATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+      Imputation methods are used on that condition-specific dataset.
+      Results are therefore given per dataset in condition
+
+------
+Starts at: 2020-05-12 12:15:43
+------
+
+2020-05-12 12:15:43 - Starts Repetition: 2
+2020-05-12 12:15:43 - Starts Repetition: 1
+2020-05-12 12:15:43 - Starts Repetition: 4
+2020-05-12 12:15:43 - Starts Repetition: 6
+2020-05-12 12:15:43 - Starts Repetition: 3
+2020-05-12 12:15:43 - Starts Repetition: 10
+2020-05-12 12:15:43 - Starts Repetition: 5
+2020-05-12 12:15:43 - Starts Repetition: 11
+2020-05-12 12:15:43 - Starts Repetition: 8
+2020-05-12 12:15:43 - Starts Repetition: 14
+2020-05-12 12:15:43 - Starts Repetition: 7
+2020-05-12 12:15:43 - Starts Repetition: 9
+2020-05-12 12:15:43 - Starts Repetition: 12
+2020-05-12 12:15:43 - Starts Repetition: 13
+2020-05-12 12:15:43 - Starts Repetition: 15
+2020-05-12 12:18:12 | Reptetition 13: DURR done
+2020-05-12 12:18:16 | Reptetition 10: DURR done
+2020-05-12 12:18:17 | Reptetition 5: DURR done
+2020-05-12 12:18:17 | Reptetition 14: DURR done
+2020-05-12 12:18:18 | Reptetition 6: DURR done
+2020-05-12 12:18:19 | Reptetition 3: DURR done
+2020-05-12 12:18:19 | Reptetition 2: DURR done
+2020-05-12 12:18:20 | Reptetition 11: DURR done
+2020-05-12 12:18:22 | Reptetition 12: DURR done
+2020-05-12 12:18:22 | Reptetition 4: DURR done
+2020-05-12 12:18:23 | Reptetition 7: DURR done
+2020-05-12 12:18:23 | Reptetition 1: DURR done
+2020-05-12 12:18:23 | Reptetition 8: DURR done
+2020-05-12 12:18:24 | Reptetition 9: DURR done
+2020-05-12 12:18:24 | Reptetition 15: DURR done
+2020-05-12 12:20:26 | Reptetition 13: IURR done
+2020-05-12 12:20:35 | Reptetition 10: IURR done
+2020-05-12 12:20:36 | Reptetition 6: IURR done
+2020-05-12 12:20:37 | Reptetition 5: IURR done
+2020-05-12 12:20:38 | Reptetition 13: MICE-TRUE done
+2020-05-12 12:20:38 | Reptetition 14: IURR done
+2020-05-12 12:20:38 - Starts Repetition: 28
+2020-05-12 12:20:42 | Reptetition 3: IURR done
+2020-05-12 12:20:43 | Reptetition 2: IURR done
+2020-05-12 12:20:45 | Reptetition 11: IURR done
+2020-05-12 12:20:46 | Reptetition 12: IURR done
+2020-05-12 12:20:46 | Reptetition 10: MICE-TRUE done
+2020-05-12 12:20:46 - Starts Repetition: 25
+2020-05-12 12:20:46 | Reptetition 6: MICE-TRUE done
+2020-05-12 12:20:47 - Starts Repetition: 21
+2020-05-12 12:20:48 | Reptetition 14: MICE-TRUE done
+2020-05-12 12:20:49 - Starts Repetition: 29
+2020-05-12 12:20:50 | Reptetition 4: IURR done
+2020-05-12 12:20:50 | Reptetition 9: IURR done
+2020-05-12 12:20:51 | Reptetition 1: IURR done
+2020-05-12 12:20:52 | Reptetition 7: IURR done
+2020-05-12 12:20:52 | Reptetition 8: IURR done
+2020-05-12 12:20:52 | Reptetition 15: IURR done
+2020-05-12 12:20:55 | Reptetition 11: MICE-TRUE done
+2020-05-12 12:20:55 | Reptetition 12: MICE-TRUE done
+2020-05-12 12:20:55 - Starts Repetition: 26
+2020-05-12 12:20:55 - Starts Repetition: 27
+2020-05-12 12:20:59 | Reptetition 9: MICE-TRUE done
+2020-05-12 12:21:00 | Reptetition 1: MICE-TRUE done
+2020-05-12 12:21:00 - Starts Repetition: 24
+2020-05-12 12:21:00 - Starts Repetition: 16
+2020-05-12 12:21:00 | Reptetition 7: MICE-TRUE done
+2020-05-12 12:21:01 - Starts Repetition: 22
+2020-05-12 12:21:01 | Reptetition 8: MICE-TRUE done
+2020-05-12 12:21:01 - Starts Repetition: 23
+2020-05-12 12:21:01 | Reptetition 15: MICE-TRUE done
+2020-05-12 12:21:02 - Starts Repetition: 30
+2020-05-12 12:22:37 | Reptetition 28: DURR done
+2020-05-12 12:22:40 | Reptetition 25: DURR done
+2020-05-12 12:22:43 | Reptetition 21: DURR done
+2020-05-12 12:22:45 | Reptetition 29: DURR done
+2020-05-12 12:22:46 | Reptetition 27: DURR done
+2020-05-12 12:22:49 | Reptetition 30: DURR done
+2020-05-12 12:22:56 | Reptetition 23: DURR done
+2020-05-12 12:22:56 | Reptetition 26: DURR done
+2020-05-12 12:22:57 | Reptetition 22: DURR done
+2020-05-12 12:22:58 | Reptetition 24: DURR done
+2020-05-12 12:22:58 | Reptetition 16: DURR done
+2020-05-12 12:24:26 | Reptetition 28: IURR done
+2020-05-12 12:24:27 | Reptetition 25: IURR done
+2020-05-12 12:24:29 | Reptetition 30: IURR done
+2020-05-12 12:24:31 | Reptetition 27: IURR done
+2020-05-12 12:24:34 | Reptetition 21: IURR done
+2020-05-12 12:24:34 | Reptetition 28: MICE-TRUE done
+2020-05-12 12:24:34 - Starts Repetition: 43
+2020-05-12 12:24:35 | Reptetition 29: IURR done
+2020-05-12 12:24:35 | Reptetition 25: MICE-TRUE done
+2020-05-12 12:24:36 - Starts Repetition: 40
+2020-05-12 12:24:37 | Reptetition 30: MICE-TRUE done
+2020-05-12 12:24:38 - Starts Repetition: 45
+2020-05-12 12:24:39 | Reptetition 27: MICE-TRUE done
+2020-05-12 12:24:39 - Starts Repetition: 42
+2020-05-12 12:24:42 | Reptetition 21: MICE-TRUE done
+2020-05-12 12:24:42 - Starts Repetition: 36
+2020-05-12 12:24:43 | Reptetition 29: MICE-TRUE done
+2020-05-12 12:24:43 - Starts Repetition: 44
+2020-05-12 12:24:46 | Reptetition 23: IURR done
+2020-05-12 12:24:51 | Reptetition 22: IURR done
+2020-05-12 12:24:51 | Reptetition 16: IURR done
+2020-05-12 12:24:52 | Reptetition 24: IURR done
+2020-05-12 12:24:54 | Reptetition 23: MICE-TRUE done
+2020-05-12 12:24:54 - Starts Repetition: 38
+2020-05-12 12:24:57 | Reptetition 26: IURR done
+2020-05-12 12:24:59 | Reptetition 22: MICE-TRUE done
+2020-05-12 12:24:59 - Starts Repetition: 37
+2020-05-12 12:24:59 | Reptetition 16: MICE-TRUE done
+2020-05-12 12:25:00 - Starts Repetition: 31
+2020-05-12 12:25:00 | Reptetition 24: MICE-TRUE done
+2020-05-12 12:25:00 - Starts Repetition: 39
+2020-05-12 12:25:05 | Reptetition 26: MICE-TRUE done
+2020-05-12 12:25:05 - Starts Repetition: 41
+2020-05-12 12:26:28 | Reptetition 45: DURR done
+2020-05-12 12:26:32 | Reptetition 43: DURR done
+2020-05-12 12:26:33 | Reptetition 42: DURR done
+2020-05-12 12:26:35 | Reptetition 40: DURR done
+2020-05-12 12:26:37 | Reptetition 36: DURR done
+2020-05-12 12:26:38 | Reptetition 44: DURR done
+2020-05-12 12:26:49 | Reptetition 38: DURR done
+2020-05-12 12:26:54 | Reptetition 37: DURR done
+2020-05-12 12:26:54 | Reptetition 31: DURR done
+2020-05-12 12:26:58 | Reptetition 41: DURR done
+2020-05-12 12:27:03 | Reptetition 39: DURR done
+2020-05-12 12:28:23 | Reptetition 45: IURR done
+2020-05-12 12:28:32 | Reptetition 42: IURR done
+2020-05-12 12:28:32 | Reptetition 45: MICE-TRUE done
+2020-05-12 12:28:33 - Starts Repetition: 60
+2020-05-12 12:28:35 | Reptetition 43: IURR done
+2020-05-12 12:28:35 | Reptetition 36: IURR done
+2020-05-12 12:28:41 | Reptetition 44: IURR done
+2020-05-12 12:28:41 | Reptetition 42: MICE-TRUE done
+2020-05-12 12:28:41 - Starts Repetition: 57
+2020-05-12 12:28:44 | Reptetition 36: MICE-TRUE done
+2020-05-12 12:28:44 | Reptetition 43: MICE-TRUE done
+2020-05-12 12:28:44 - Starts Repetition: 51
+2020-05-12 12:28:44 - Starts Repetition: 58
+2020-05-12 12:28:45 | Reptetition 40: IURR done
+2020-05-12 12:28:49 | Reptetition 44: MICE-TRUE done
+2020-05-12 12:28:50 - Starts Repetition: 59
+2020-05-12 12:28:51 | Reptetition 38: IURR done
+2020-05-12 12:28:54 | Reptetition 41: IURR done
+2020-05-12 12:28:54 | Reptetition 37: IURR done
+2020-05-12 12:28:54 | Reptetition 40: MICE-TRUE done
+2020-05-12 12:28:54 - Starts Repetition: 55
+2020-05-12 12:28:55 | Reptetition 31: IURR done
+2020-05-12 12:29:00 | Reptetition 38: MICE-TRUE done
+2020-05-12 12:29:00 - Starts Repetition: 53
+2020-05-12 12:29:02 | Reptetition 41: MICE-TRUE done
+2020-05-12 12:29:03 | Reptetition 37: MICE-TRUE done
+2020-05-12 12:29:03 - Starts Repetition: 56
+2020-05-12 12:29:03 - Starts Repetition: 52
+2020-05-12 12:29:04 | Reptetition 31: MICE-TRUE done
+2020-05-12 12:29:04 - Starts Repetition: 46
+2020-05-12 12:29:14 | Reptetition 39: IURR done
+2020-05-12 12:29:23 | Reptetition 39: MICE-TRUE done
+2020-05-12 12:29:24 - Starts Repetition: 54
+2020-05-12 12:30:42 | Reptetition 60: DURR done
+2020-05-12 12:30:47 | Reptetition 58: DURR done
+2020-05-12 12:30:47 | Reptetition 57: DURR done
+2020-05-12 12:30:50 | Reptetition 51: DURR done
+2020-05-12 12:30:57 | Reptetition 59: DURR done
+2020-05-12 12:31:01 | Reptetition 55: DURR done
+2020-05-12 12:31:06 | Reptetition 53: DURR done
+2020-05-12 12:31:08 | Reptetition 52: DURR done
+2020-05-12 12:31:13 | Reptetition 46: DURR done
+2020-05-12 12:31:14 | Reptetition 56: DURR done
+2020-05-12 12:31:26 | Reptetition 54: DURR done
+2020-05-12 12:32:42 | Reptetition 58: IURR done
+2020-05-12 12:32:47 | Reptetition 60: IURR done
+2020-05-12 12:32:48 | Reptetition 57: IURR done
+2020-05-12 12:32:51 | Reptetition 51: IURR done
+2020-05-12 12:32:51 | Reptetition 58: MICE-TRUE done
+2020-05-12 12:32:52 - Starts Repetition: 73
+2020-05-12 12:32:56 | Reptetition 60: MICE-TRUE done
+2020-05-12 12:32:56 | Reptetition 57: MICE-TRUE done
+2020-05-12 12:32:57 - Starts Repetition: 75
+2020-05-12 12:32:57 - Starts Repetition: 72
+2020-05-12 12:33:00 | Reptetition 51: MICE-TRUE done
+2020-05-12 12:33:00 - Starts Repetition: 66
+2020-05-12 12:33:01 | Reptetition 55: IURR done
+2020-05-12 12:33:01 | Reptetition 59: IURR done
+2020-05-12 12:33:03 | Reptetition 53: IURR done
+2020-05-12 12:33:09 | Reptetition 52: IURR done
+2020-05-12 12:33:09 | Reptetition 55: MICE-TRUE done
+2020-05-12 12:33:10 - Starts Repetition: 70
+2020-05-12 12:33:10 | Reptetition 59: MICE-TRUE done
+2020-05-12 12:33:10 - Starts Repetition: 74
+2020-05-12 12:33:12 | Reptetition 53: MICE-TRUE done
+2020-05-12 12:33:13 - Starts Repetition: 68
+2020-05-12 12:33:17 | Reptetition 46: IURR done
+2020-05-12 12:33:18 | Reptetition 52: MICE-TRUE done
+2020-05-12 12:33:18 - Starts Repetition: 67
+2020-05-12 12:33:22 | Reptetition 54: IURR done
+2020-05-12 12:33:25 | Reptetition 56: IURR done
+2020-05-12 12:33:27 | Reptetition 46: MICE-TRUE done
+2020-05-12 12:33:27 - Starts Repetition: 61
+2020-05-12 12:33:31 | Reptetition 54: MICE-TRUE done
+2020-05-12 12:33:31 - Starts Repetition: 69
+2020-05-12 12:33:34 | Reptetition 56: MICE-TRUE done
+2020-05-12 12:33:34 - Starts Repetition: 71
+2020-05-12 12:34:57 | Reptetition 73: DURR done
+2020-05-12 12:35:08 | Reptetition 66: DURR done
+2020-05-12 12:35:08 | Reptetition 72: DURR done
+2020-05-12 12:35:09 | Reptetition 75: DURR done
+2020-05-12 12:35:18 | Reptetition 70: DURR done
+2020-05-12 12:35:23 | Reptetition 74: DURR done
+2020-05-12 12:35:26 | Reptetition 68: DURR done
+2020-05-12 12:35:33 | Reptetition 67: DURR done
+2020-05-12 12:35:35 | Reptetition 61: DURR done
+2020-05-12 12:35:36 | Reptetition 69: DURR done
+2020-05-12 12:35:46 | Reptetition 71: DURR done
+2020-05-12 12:37:00 | Reptetition 73: IURR done
+2020-05-12 12:37:08 | Reptetition 73: MICE-TRUE done
+2020-05-12 12:37:08 | Reptetition 66: IURR done
+2020-05-12 12:37:08 - Starts Repetition: 88
+2020-05-12 12:37:14 | Reptetition 72: IURR done
+2020-05-12 12:37:15 | Reptetition 70: IURR done
+2020-05-12 12:37:17 | Reptetition 66: MICE-TRUE done
+2020-05-12 12:37:17 - Starts Repetition: 81
+2020-05-12 12:37:18 | Reptetition 75: IURR done
+2020-05-12 12:37:22 | Reptetition 74: IURR done
+2020-05-12 12:37:22 | Reptetition 72: MICE-TRUE done
+2020-05-12 12:37:22 - Starts Repetition: 87
+2020-05-12 12:37:23 | Reptetition 70: MICE-TRUE done
+2020-05-12 12:37:23 | Reptetition 61: IURR done
+2020-05-12 12:37:23 - Starts Repetition: 85
+2020-05-12 12:37:24 | Reptetition 69: IURR done
+2020-05-12 12:37:27 | Reptetition 75: MICE-TRUE done
+2020-05-12 12:37:27 - Starts Repetition: 90
+2020-05-12 12:37:30 | Reptetition 74: MICE-TRUE done
+2020-05-12 12:37:30 - Starts Repetition: 89
+2020-05-12 12:37:31 | Reptetition 61: MICE-TRUE done
+2020-05-12 12:37:31 | Reptetition 68: IURR done
+2020-05-12 12:37:32 - Starts Repetition: 76
+2020-05-12 12:37:32 | Reptetition 69: MICE-TRUE done
+2020-05-12 12:37:32 - Starts Repetition: 84
+2020-05-12 12:37:33 | Reptetition 67: IURR done
+2020-05-12 12:37:38 | Reptetition 71: IURR done
+2020-05-12 12:37:39 | Reptetition 68: MICE-TRUE done
+2020-05-12 12:37:40 - Starts Repetition: 83
+2020-05-12 12:37:41 | Reptetition 67: MICE-TRUE done
+2020-05-12 12:37:41 - Starts Repetition: 82
+2020-05-12 12:37:46 | Reptetition 71: MICE-TRUE done
+2020-05-12 12:37:46 - Starts Repetition: 86
+2020-05-12 12:39:08 | Reptetition 88: DURR done
+2020-05-12 12:39:16 | Reptetition 81: DURR done
+2020-05-12 12:39:18 | Reptetition 85: DURR done
+2020-05-12 12:39:18 | Reptetition 87: DURR done
+2020-05-12 12:39:24 | Reptetition 90: DURR done
+2020-05-12 12:39:24 | Reptetition 84: DURR done
+2020-05-12 12:39:28 | Reptetition 76: DURR done
+2020-05-12 12:39:32 | Reptetition 89: DURR done
+2020-05-12 12:39:36 | Reptetition 82: DURR done
+2020-05-12 12:39:40 | Reptetition 83: DURR done
+2020-05-12 12:39:46 | Reptetition 86: DURR done
+2020-05-12 12:41:05 | Reptetition 88: IURR done
+2020-05-12 12:41:07 | Reptetition 85: IURR done
+2020-05-12 12:41:09 | Reptetition 87: IURR done
+2020-05-12 12:41:09 | Reptetition 84: IURR done
+2020-05-12 12:41:11 | Reptetition 81: IURR done
+2020-05-12 12:41:13 | Reptetition 88: MICE-TRUE done
+2020-05-12 12:41:13 - Starts Repetition: 103
+2020-05-12 12:41:14 | Reptetition 90: IURR done
+2020-05-12 12:41:15 | Reptetition 85: MICE-TRUE done
+2020-05-12 12:41:16 - Starts Repetition: 100
+2020-05-12 12:41:17 | Reptetition 87: MICE-TRUE done
+2020-05-12 12:41:17 | Reptetition 76: IURR done
+2020-05-12 12:41:17 - Starts Repetition: 102
+2020-05-12 12:41:18 | Reptetition 84: MICE-TRUE done
+2020-05-12 12:41:18 - Starts Repetition: 99
+2020-05-12 12:41:19 | Reptetition 81: MICE-TRUE done
+2020-05-12 12:41:20 - Starts Repetition: 96
+2020-05-12 12:41:22 | Reptetition 82: IURR done
+2020-05-12 12:41:22 | Reptetition 90: MICE-TRUE done
+2020-05-12 12:41:23 - Starts Repetition: 105
+2020-05-12 12:41:25 | Reptetition 76: MICE-TRUE done
+2020-05-12 12:41:25 - Starts Repetition: 91
+2020-05-12 12:41:30 | Reptetition 82: MICE-TRUE done
+2020-05-12 12:41:30 - Starts Repetition: 97
+2020-05-12 12:41:31 | Reptetition 89: IURR done
+2020-05-12 12:41:36 | Reptetition 83: IURR done
+2020-05-12 12:41:38 | Reptetition 86: IURR done
+2020-05-12 12:41:39 | Reptetition 89: MICE-TRUE done
+2020-05-12 12:41:39 - Starts Repetition: 104
+2020-05-12 12:41:44 | Reptetition 83: MICE-TRUE done
+2020-05-12 12:41:45 - Starts Repetition: 98
+2020-05-12 12:41:47 | Reptetition 86: MICE-TRUE done
+2020-05-12 12:41:47 - Starts Repetition: 101
+2020-05-12 12:43:09 | Reptetition 103: DURR done
+2020-05-12 12:43:11 | Reptetition 102: DURR done
+2020-05-12 12:43:14 | Reptetition 99: DURR done
+2020-05-12 12:43:15 | Reptetition 96: DURR done
+2020-05-12 12:43:18 | Reptetition 105: DURR done
+2020-05-12 12:43:19 | Reptetition 100: DURR done
+2020-05-12 12:43:24 | Reptetition 91: DURR done
+2020-05-12 12:43:30 | Reptetition 97: DURR done
+2020-05-12 12:43:38 | Reptetition 104: DURR done
+2020-05-12 12:43:44 | Reptetition 101: DURR done
+2020-05-12 12:43:47 | Reptetition 98: DURR done
+2020-05-12 12:44:58 | Reptetition 102: IURR done
+2020-05-12 12:44:59 | Reptetition 96: IURR done
+2020-05-12 12:45:00 | Reptetition 103: IURR done
+2020-05-12 12:45:01 | Reptetition 99: IURR done
+2020-05-12 12:45:07 | Reptetition 102: MICE-TRUE done
+2020-05-12 12:45:07 - Starts Repetition: 117
+2020-05-12 12:45:08 | Reptetition 96: MICE-TRUE done
+2020-05-12 12:45:09 - Starts Repetition: 111
+2020-05-12 12:45:09 | Reptetition 103: MICE-TRUE done
+2020-05-12 12:45:09 - Starts Repetition: 118
+2020-05-12 12:45:11 | Reptetition 99: MICE-TRUE done
+2020-05-12 12:45:11 - Starts Repetition: 114
+2020-05-12 12:45:13 | Reptetition 105: IURR done
+2020-05-12 12:45:20 | Reptetition 91: IURR done
+2020-05-12 12:45:22 | Reptetition 100: IURR done
+2020-05-12 12:45:23 | Reptetition 105: MICE-TRUE done
+2020-05-12 12:45:23 - Starts Repetition: 120
+2020-05-12 12:45:27 | Reptetition 97: IURR done
+2020-05-12 12:45:29 | Reptetition 91: MICE-TRUE done
+2020-05-12 12:45:29 - Starts Repetition: 106
+2020-05-12 12:45:31 | Reptetition 104: IURR done
+2020-05-12 12:45:32 | Reptetition 100: MICE-TRUE done
+2020-05-12 12:45:32 - Starts Repetition: 115
+2020-05-12 12:45:36 | Reptetition 101: IURR done
+2020-05-12 12:45:36 | Reptetition 97: MICE-TRUE done
+2020-05-12 12:45:36 - Starts Repetition: 112
+2020-05-12 12:45:41 | Reptetition 104: MICE-TRUE done
+2020-05-12 12:45:41 - Starts Repetition: 119
+2020-05-12 12:45:45 | Reptetition 101: MICE-TRUE done
+2020-05-12 12:45:45 - Starts Repetition: 116
+2020-05-12 12:45:51 | Reptetition 98: IURR done
+2020-05-12 12:46:00 | Reptetition 98: MICE-TRUE done
+2020-05-12 12:46:00 - Starts Repetition: 113
+2020-05-12 12:47:14 | Reptetition 117: DURR done
+2020-05-12 12:47:15 | Reptetition 114: DURR done
+2020-05-12 12:47:16 | Reptetition 118: DURR done
+2020-05-12 12:47:17 | Reptetition 111: DURR done
+2020-05-12 12:47:31 | Reptetition 120: DURR done
+2020-05-12 12:47:34 | Reptetition 106: DURR done
+2020-05-12 12:47:38 | Reptetition 115: DURR done
+2020-05-12 12:47:42 | Reptetition 112: DURR done
+2020-05-12 12:47:45 | Reptetition 119: DURR done
+2020-05-12 12:47:55 | Reptetition 116: DURR done
+2020-05-12 12:48:04 | Reptetition 113: DURR done
+2020-05-12 12:49:08 | Reptetition 114: IURR done
+2020-05-12 12:49:11 | Reptetition 117: IURR done
+2020-05-12 12:49:12 | Reptetition 118: IURR done
+2020-05-12 12:49:17 | Reptetition 114: MICE-TRUE done
+2020-05-12 12:49:17 - Starts Repetition: 129
+2020-05-12 12:49:19 | Reptetition 111: IURR done
+2020-05-12 12:49:20 | Reptetition 117: MICE-TRUE done
+2020-05-12 12:49:20 - Starts Repetition: 132
+2020-05-12 12:49:21 | Reptetition 118: MICE-TRUE done
+2020-05-12 12:49:22 - Starts Repetition: 133
+2020-05-12 12:49:28 | Reptetition 106: IURR done
+2020-05-12 12:49:28 | Reptetition 111: MICE-TRUE done
+2020-05-12 12:49:28 - Starts Repetition: 126
+2020-05-12 12:49:30 | Reptetition 120: IURR done
+2020-05-12 12:49:36 | Reptetition 106: MICE-TRUE done
+2020-05-12 12:49:37 - Starts Repetition: 121
+2020-05-12 12:49:38 | Reptetition 112: IURR done
+2020-05-12 12:49:39 | Reptetition 115: IURR done
+2020-05-12 12:49:39 | Reptetition 120: MICE-TRUE done
+2020-05-12 12:49:39 - Starts Repetition: 135
+2020-05-12 12:49:40 | Reptetition 119: IURR done
+2020-05-12 12:49:47 | Reptetition 112: MICE-TRUE done
+2020-05-12 12:49:47 - Starts Repetition: 127
+2020-05-12 12:49:47 | Reptetition 115: MICE-TRUE done
+2020-05-12 12:49:48 - Starts Repetition: 130
+2020-05-12 12:49:48 | Reptetition 119: MICE-TRUE done
+2020-05-12 12:49:49 - Starts Repetition: 134
+2020-05-12 12:49:58 | Reptetition 113: IURR done
+2020-05-12 12:49:59 | Reptetition 116: IURR done
+2020-05-12 12:50:09 | Reptetition 113: MICE-TRUE done
+2020-05-12 12:50:09 - Starts Repetition: 128
+2020-05-12 12:50:10 | Reptetition 116: MICE-TRUE done
+2020-05-12 12:50:10 - Starts Repetition: 131
+2020-05-12 12:51:23 | Reptetition 129: DURR done
+2020-05-12 12:51:28 | Reptetition 132: DURR done
+2020-05-12 12:51:30 | Reptetition 133: DURR done
+2020-05-12 12:51:37 | Reptetition 126: DURR done
+2020-05-12 12:51:47 | Reptetition 135: DURR done
+2020-05-12 12:51:50 | Reptetition 121: DURR done
+2020-05-12 12:51:56 | Reptetition 127: DURR done
+2020-05-12 12:51:56 | Reptetition 130: DURR done
+2020-05-12 12:51:57 | Reptetition 134: DURR done
+2020-05-12 12:52:15 | Reptetition 128: DURR done
+2020-05-12 12:52:16 | Reptetition 131: DURR done
+2020-05-12 12:53:17 | Reptetition 129: IURR done
+2020-05-12 12:53:26 | Reptetition 129: MICE-TRUE done
+2020-05-12 12:53:26 | Reptetition 132: IURR done
+2020-05-12 12:53:26 - Starts Repetition: 144
+2020-05-12 12:53:27 | Reptetition 133: IURR done
+2020-05-12 12:53:34 | Reptetition 132: MICE-TRUE done
+2020-05-12 12:53:35 - Starts Repetition: 147
+2020-05-12 12:53:36 | Reptetition 133: MICE-TRUE done
+2020-05-12 12:53:36 - Starts Repetition: 148
+2020-05-12 12:53:37 | Reptetition 126: IURR done
+2020-05-12 12:53:41 | Reptetition 135: IURR done
+2020-05-12 12:53:45 | Reptetition 126: MICE-TRUE done
+2020-05-12 12:53:46 - Starts Repetition: 141
+2020-05-12 12:53:50 | Reptetition 135: MICE-TRUE done
+2020-05-12 12:53:50 - Starts Repetition: 150
+2020-05-12 12:53:54 | Reptetition 127: IURR done
+2020-05-12 12:53:54 | Reptetition 130: IURR done
+2020-05-12 12:53:55 | Reptetition 134: IURR done
+2020-05-12 12:54:00 | Reptetition 121: IURR done
+2020-05-12 12:54:04 | Reptetition 127: MICE-TRUE done
+2020-05-12 12:54:04 | Reptetition 130: MICE-TRUE done
+2020-05-12 12:54:05 - Starts Repetition: 142
+2020-05-12 12:54:05 - Starts Repetition: 145
+2020-05-12 12:54:06 | Reptetition 134: MICE-TRUE done
+2020-05-12 12:54:06 - Starts Repetition: 149
+2020-05-12 12:54:10 | Reptetition 121: MICE-TRUE done
+2020-05-12 12:54:10 - Starts Repetition: 136
+2020-05-12 12:54:15 | Reptetition 128: IURR done
+2020-05-12 12:54:17 | Reptetition 131: IURR done
+2020-05-12 12:54:24 | Reptetition 128: MICE-TRUE done
+2020-05-12 12:54:24 - Starts Repetition: 143
+2020-05-12 12:54:26 | Reptetition 131: MICE-TRUE done
+2020-05-12 12:54:26 - Starts Repetition: 146
+2020-05-12 12:55:30 | Reptetition 144: DURR done
+2020-05-12 12:55:43 | Reptetition 147: DURR done
+2020-05-12 12:55:45 | Reptetition 148: DURR done
+2020-05-12 12:55:53 | Reptetition 150: DURR done
+2020-05-12 12:55:55 | Reptetition 141: DURR done
+2020-05-12 12:56:06 | Reptetition 149: DURR done
+2020-05-12 12:56:10 | Reptetition 142: DURR done
+2020-05-12 12:56:11 | Reptetition 136: DURR done
+2020-05-12 12:56:13 | Reptetition 145: DURR done
+2020-05-12 12:56:26 | Reptetition 143: DURR done
+2020-05-12 12:56:31 | Reptetition 146: DURR done
+2020-05-12 12:57:27 | Reptetition 144: IURR done
+2020-05-12 12:57:36 | Reptetition 144: MICE-TRUE done
+2020-05-12 12:57:36 - Starts Repetition: 159
+2020-05-12 12:57:43 | Reptetition 147: IURR done
+2020-05-12 12:57:47 | Reptetition 150: IURR done
+2020-05-12 12:57:51 | Reptetition 147: MICE-TRUE done
+2020-05-12 12:57:52 - Starts Repetition: 162
+2020-05-12 12:57:52 | Reptetition 148: IURR done
+2020-05-12 12:57:56 | Reptetition 150: MICE-TRUE done
+2020-05-12 12:57:56 - Starts Repetition: 165
+2020-05-12 12:57:58 | Reptetition 141: IURR done
+2020-05-12 12:58:01 | Reptetition 148: MICE-TRUE done
+2020-05-12 12:58:01 - Starts Repetition: 163
+2020-05-12 12:58:03 | Reptetition 149: IURR done
+2020-05-12 12:58:07 | Reptetition 141: MICE-TRUE done
+2020-05-12 12:58:08 - Starts Repetition: 156
+2020-05-12 12:58:12 | Reptetition 149: MICE-TRUE done
+2020-05-12 12:58:12 - Starts Repetition: 164
+2020-05-12 12:58:12 | Reptetition 136: IURR done
+2020-05-12 12:58:13 | Reptetition 142: IURR done
+2020-05-12 12:58:19 | Reptetition 145: IURR done
+2020-05-12 12:58:21 | Reptetition 136: MICE-TRUE done
+2020-05-12 12:58:21 - Starts Repetition: 151
+2020-05-12 12:58:21 | Reptetition 142: MICE-TRUE done
+2020-05-12 12:58:22 - Starts Repetition: 157
+2020-05-12 12:58:26 | Reptetition 143: IURR done
+2020-05-12 12:58:28 | Reptetition 145: MICE-TRUE done
+2020-05-12 12:58:28 - Starts Repetition: 160
+2020-05-12 12:58:35 | Reptetition 143: MICE-TRUE done
+2020-05-12 12:58:35 - Starts Repetition: 158
+2020-05-12 12:58:38 | Reptetition 146: IURR done
+2020-05-12 12:58:46 | Reptetition 146: MICE-TRUE done
+2020-05-12 12:58:47 - Starts Repetition: 161
+2020-05-12 12:59:43 | Reptetition 159: DURR done
+2020-05-12 12:59:54 | Reptetition 162: DURR done
+2020-05-12 12:59:57 | Reptetition 165: DURR done
+2020-05-12 13:00:09 | Reptetition 163: DURR done
+2020-05-12 13:00:09 | Reptetition 156: DURR done
+2020-05-12 13:00:19 | Reptetition 164: DURR done
+2020-05-12 13:00:23 | Reptetition 151: DURR done
+2020-05-12 13:00:28 | Reptetition 157: DURR done
+2020-05-12 13:00:33 | Reptetition 160: DURR done
+2020-05-12 13:00:37 | Reptetition 158: DURR done
+2020-05-12 13:00:55 | Reptetition 161: DURR done
+2020-05-12 13:01:43 | Reptetition 159: IURR done
+2020-05-12 13:01:48 | Reptetition 165: IURR done
+2020-05-12 13:01:48 | Reptetition 162: IURR done
+2020-05-12 13:01:51 | Reptetition 159: MICE-TRUE done
+2020-05-12 13:01:52 - Starts Repetition: 174
+2020-05-12 13:01:57 | Reptetition 165: MICE-TRUE done
+2020-05-12 13:01:57 - Starts Repetition: 180
+2020-05-12 13:01:57 | Reptetition 162: MICE-TRUE done
+2020-05-12 13:01:58 - Starts Repetition: 177
+2020-05-12 13:02:05 | Reptetition 156: IURR done
+2020-05-12 13:02:13 | Reptetition 163: IURR done
+2020-05-12 13:02:14 | Reptetition 156: MICE-TRUE done
+2020-05-12 13:02:14 - Starts Repetition: 171
+2020-05-12 13:02:20 | Reptetition 164: IURR done
+2020-05-12 13:02:20 | Reptetition 151: IURR done
+2020-05-12 13:02:22 | Reptetition 163: MICE-TRUE done
+2020-05-12 13:02:22 - Starts Repetition: 178
+2020-05-12 13:02:28 | Reptetition 157: IURR done
+2020-05-12 13:02:29 | Reptetition 164: MICE-TRUE done
+2020-05-12 13:02:29 - Starts Repetition: 179
+2020-05-12 13:02:29 | Reptetition 151: MICE-TRUE done
+2020-05-12 13:02:29 - Starts Repetition: 166
+2020-05-12 13:02:33 | Reptetition 158: IURR done
+2020-05-12 13:02:34 | Reptetition 160: IURR done
+2020-05-12 13:02:37 | Reptetition 157: MICE-TRUE done
+2020-05-12 13:02:37 - Starts Repetition: 172
+2020-05-12 13:02:42 | Reptetition 158: MICE-TRUE done
+2020-05-12 13:02:42 - Starts Repetition: 173
+2020-05-12 13:02:43 | Reptetition 160: MICE-TRUE done
+2020-05-12 13:02:43 - Starts Repetition: 175
+2020-05-12 13:03:02 | Reptetition 161: IURR done
+2020-05-12 13:03:11 | Reptetition 161: MICE-TRUE done
+2020-05-12 13:03:12 - Starts Repetition: 176
+2020-05-12 13:03:59 | Reptetition 174: DURR done
+2020-05-12 13:04:02 | Reptetition 177: DURR done
+2020-05-12 13:04:04 | Reptetition 180: DURR done
+2020-05-12 13:04:18 | Reptetition 171: DURR done
+2020-05-12 13:04:28 | Reptetition 178: DURR done
+2020-05-12 13:04:31 | Reptetition 166: DURR done
+2020-05-12 13:04:32 | Reptetition 179: DURR done
+2020-05-12 13:04:40 | Reptetition 172: DURR done
+2020-05-12 13:04:45 | Reptetition 175: DURR done
+2020-05-12 13:04:45 | Reptetition 173: DURR done
+2020-05-12 13:05:18 | Reptetition 176: DURR done
+2020-05-12 13:06:02 | Reptetition 177: IURR done
+2020-05-12 13:06:03 | Reptetition 174: IURR done
+2020-05-12 13:06:08 | Reptetition 180: IURR done
+2020-05-12 13:06:11 | Reptetition 177: MICE-TRUE done
+2020-05-12 13:06:12 - Starts Repetition: 192
+2020-05-12 13:06:12 | Reptetition 174: MICE-TRUE done
+2020-05-12 13:06:12 - Starts Repetition: 189
+2020-05-12 13:06:16 | Reptetition 171: IURR done
+2020-05-12 13:06:17 | Reptetition 180: MICE-TRUE done
+2020-05-12 13:06:17 - Starts Repetition: 195
+2020-05-12 13:06:25 | Reptetition 171: MICE-TRUE done
+2020-05-12 13:06:25 - Starts Repetition: 186
+2020-05-12 13:06:25 | Reptetition 166: IURR done
+2020-05-12 13:06:29 | Reptetition 179: IURR done
+2020-05-12 13:06:30 | Reptetition 178: IURR done
+2020-05-12 13:06:34 | Reptetition 166: MICE-TRUE done
+2020-05-12 13:06:34 - Starts Repetition: 181
+2020-05-12 13:06:36 | Reptetition 172: IURR done
+2020-05-12 13:06:38 | Reptetition 179: MICE-TRUE done
+2020-05-12 13:06:38 - Starts Repetition: 194
+2020-05-12 13:06:39 | Reptetition 178: MICE-TRUE done
+2020-05-12 13:06:39 - Starts Repetition: 193
+2020-05-12 13:06:41 | Reptetition 173: IURR done
+2020-05-12 13:06:42 | Reptetition 175: IURR done
+2020-05-12 13:06:45 | Reptetition 172: MICE-TRUE done
+2020-05-12 13:06:45 - Starts Repetition: 187
+2020-05-12 13:06:50 | Reptetition 173: MICE-TRUE done
+2020-05-12 13:06:50 - Starts Repetition: 188
+2020-05-12 13:06:51 | Reptetition 175: MICE-TRUE done
+2020-05-12 13:06:51 - Starts Repetition: 190
+2020-05-12 13:07:22 | Reptetition 176: IURR done
+2020-05-12 13:07:32 | Reptetition 176: MICE-TRUE done
+2020-05-12 13:07:32 - Starts Repetition: 191
+2020-05-12 13:08:16 | Reptetition 192: DURR done
+2020-05-12 13:08:19 | Reptetition 189: DURR done
+2020-05-12 13:08:22 | Reptetition 195: DURR done
+2020-05-12 13:08:27 | Reptetition 186: DURR done
+2020-05-12 13:08:40 | Reptetition 181: DURR done
+2020-05-12 13:08:45 | Reptetition 194: DURR done
+2020-05-12 13:08:49 | Reptetition 193: DURR done
+2020-05-12 13:08:50 | Reptetition 187: DURR done
+2020-05-12 13:08:52 | Reptetition 188: DURR done
+2020-05-12 13:08:59 | Reptetition 190: DURR done
+2020-05-12 13:09:39 | Reptetition 191: DURR done
+2020-05-12 13:10:15 | Reptetition 192: IURR done
+2020-05-12 13:10:17 | Reptetition 189: IURR done
+2020-05-12 13:10:18 | Reptetition 195: IURR done
+2020-05-12 13:10:21 | Reptetition 186: IURR done
+2020-05-12 13:10:23 | Reptetition 192: MICE-TRUE done
+2020-05-12 13:10:25 | Reptetition 189: MICE-TRUE done
+2020-05-12 13:10:26 | Reptetition 195: MICE-TRUE done
+2020-05-12 13:10:29 | Reptetition 186: MICE-TRUE done
+2020-05-12 13:10:39 | Reptetition 181: IURR done
+2020-05-12 13:10:40 | Reptetition 188: IURR done
+2020-05-12 13:10:41 | Reptetition 194: IURR done
+2020-05-12 13:10:41 | Reptetition 187: IURR done
+2020-05-12 13:10:45 | Reptetition 181: MICE-TRUE done
+2020-05-12 13:10:45 - Starts Repetition: 196
+2020-05-12 13:10:46 | Reptetition 188: MICE-TRUE done
+2020-05-12 13:10:47 | Reptetition 194: MICE-TRUE done
+2020-05-12 13:10:47 | Reptetition 187: MICE-TRUE done
+2020-05-12 13:10:49 | Reptetition 193: IURR done
+2020-05-12 13:10:50 | Reptetition 190: IURR done
+2020-05-12 13:10:54 | Reptetition 193: MICE-TRUE done
+2020-05-12 13:10:55 | Reptetition 190: MICE-TRUE done
+2020-05-12 13:11:13 | Reptetition 191: IURR done
+2020-05-12 13:11:17 | Reptetition 191: MICE-TRUE done
+2020-05-12 13:11:50 | Reptetition 196: DURR done
+2020-05-12 13:12:50 | Reptetition 196: IURR done
+2020-05-12 13:12:54 | Reptetition 196: MICE-TRUE done
+
+------
+Ends at: 2020-05-12 13:23:27
+Run time: 1.129 h
+------
+

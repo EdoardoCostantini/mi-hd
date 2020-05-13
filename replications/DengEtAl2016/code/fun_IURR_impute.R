@@ -7,7 +7,7 @@
 ###           Deng et al 2016 (for multivariate miss). The function is a bit
 ###           more complex than it needs: it supports multivariate miss.
 
-impute_IURR <- function(Xy_mis, cond, chains=5, iters=5, reg_type="lasso"){
+impute_IURR <- function(Xy_mis, cond, chains=5, iters=5, reg_type="lasso", parms){
   # # Description
   # # Packages required by function
   # library(glmnet)     # for regularized regressions
@@ -23,8 +23,8 @@ impute_IURR <- function(Xy_mis, cond, chains=5, iters=5, reg_type="lasso"){
   # Xy <- genData(cond, parms)
   # # Xy_mis  = iris2[,-c(1,7)] # alternative
   # reg_type = c("el", "lasso")[2]           # imputation model penality type
-  # iters    = 1                             # number of iterations
-  # chains   = 5                             # number of imputed datasets
+  # chains   = 10                             # number of imputed datasets
+  # iters    = 20                             # number of iterations
   # # output: an object containing iters number of imputed datasets (imputed_datasets)
   
   ## Body
@@ -36,26 +36,32 @@ impute_IURR <- function(Xy_mis, cond, chains=5, iters=5, reg_type="lasso"){
   p_imp <- sum(vmis_ind)
   
   # To store imputed values and check convergence
-  imputed_values <- vector("list", p_imp)
-    names(imputed_values) <- names(which(r != nrow(Z)))
+  imp_IURR_val <- vector("list", parms$chains)
+    names(imp_IURR_val) <- seq(1:parms$chains)
+  # empty storing objects for imputate values
+  imps <- vector("list", p_imp)
+    names(imps) <- names(which(r != nrow(Z)))
   for (v in 1:p_imp) {
-    imputed_values[[v]] <- matrix(rep(NA, (iters*(nrow(Z)-r[v]))), 
-                                  ncol = iters)
+    imps[[v]] <- matrix(rep(NA, (iters*(nrow(Z)-r[v]))), 
+                        ncol = iters)
   }
   
   # To store multiply imputed datasets
-  imputed_datasets <- vector("list", iters)
-    names(imputed_datasets) <- seq(1, iters)
+  imp_IURR_dat <- vector("list", parms$chains)
+    names(imp_IURR_dat) <- seq(1:parms$chains)
   
   O <- !is.na(Z) # matrix index of observed values
   
   # Time performance
   start.time <- Sys.time()
   
-  imp_res <- lapply(1:chains, function(x){
+  success <- NULL # stores TRUE/FALSE for success/failure of rr_est_function
+  for (cc in 1:chains) {
+    
     Zm <- init_dt_i(Z, missing_type(Z)) # initialize data
+    
     for (i in 1:iters) {
-      print(paste0("IURR - Chain: ", x, "/", chains, "; Iter: ", i, "/", iters))
+      print(paste0("IURR - Chain: ", cc, "/", chains, "; Iter: ", i, "/", iters))
       for (j in 1:p_imp) {
         # Select data
         y_obs <- z_j_obs  <- as.vector(Zm[O[, j] == TRUE, j])
@@ -64,13 +70,24 @@ impute_IURR <- function(Xy_mis, cond, chains=5, iters=5, reg_type="lasso"){
         X_mis <- Wm_mj    <- as.matrix(Zm[O[, j] == FALSE, -j])
         
         # Fit regularized regression
-        # Lasso
-        if(reg_type == "lasso"){
-          regu.mod <- rr_est_lasso(X = Wm_j_obs, y = z_j_obs, parms = parms)
-        }
-        # Elastic net
-        if(reg_type == "el"){
-          regu.mod <- rr_est_elanet(X = Wm_j_obs, y = zstar_j, parms = parms)
+        # Requirement for procedure is that selected n > p as the ML apporaches
+        # used later in the estiamtion require this.
+        IURR_fwd_cond <- FALSE
+        while (IURR_fwd_cond == FALSE) {
+          
+          # Lasso
+          if(reg_type == "lasso"){
+            regu.mod <- rr_est_lasso(X = Wm_j_obs, y = z_j_obs, parms = parms)
+          }
+          
+          # Elastic net
+          if(reg_type == "el"){
+            regu.mod <- rr_est_elanet(X = Wm_j_obs, y = zstar_j, parms = parms)
+          }
+          
+          IURR_fwd_cond <- length(z_j_obs) > sum(coef(regu.mod) != 0)
+          success <- c(success, IURR_fwd_cond)
+          
         }
         
         # Impute
@@ -80,20 +97,24 @@ impute_IURR <- function(Xy_mis, cond, chains=5, iters=5, reg_type="lasso"){
                               parms = parms)
         
         # Append imputation
-        imputed_values[[j]][, i] <- zm_j
+        imps[[j]][, i] <- zm_j
         Zm[!O[, j], j] <- zm_j
       }
     }
     
-    # Store results
-    return(list(imp_dat = Zm,
-                imp_val = imputed_values)
-           )
-  })
+    imp_IURR_dat[[cc]] <- Zm
+    imp_IURR_val[[cc]] <- imps
+    
+  }
+  
   end.time <- Sys.time()
-  return(list(imp_res = imp_res,
+  
+  return(list(dats = imp_IURR_dat,
+              imps = imp_IURR_val,
               time = difftime(end.time, 
                               start.time, 
-                              units = "mins"))
+                              units = "mins"),
+              succ_ratio = mean(success))
   )
+  
 }

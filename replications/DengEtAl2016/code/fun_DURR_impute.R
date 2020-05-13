@@ -6,7 +6,7 @@
 ###           reference papers Zhao Long 2016 (for univariate miss) and 
 ###           Deng et al 2016 (for multivariate miss)
 
-impute_DURR <- function(Xy_mis, chains=5, iters=5, reg_type="lasso"){
+impute_DURR <- function(Xy_mis, chains=5, iters=5, reg_type="lasso", parms){
   ## Description
   ## Packages required by function
   # library(glmnet)     # for regularized regressions
@@ -23,7 +23,7 @@ impute_DURR <- function(Xy_mis, chains=5, iters=5, reg_type="lasso"){
   # Z0       = init_dt_i(Z, missing_type(Z)) # initialized dataset
   # reg_type = c("el", "lasso")[2]           # imputation model penality type
   # iters    = 5                             # number of iterations
-  # chains        = 2                             # number of imputed datasets (how many to keep)
+  # chains   = 2                             # number of imputed datasets (how many to keep)
   ## output: an object containing iters number of imputed datasets (imputed_datasets)
   
   ## Body
@@ -35,24 +35,29 @@ impute_DURR <- function(Xy_mis, chains=5, iters=5, reg_type="lasso"){
   p_imp <- sum(vmis_ind)
   
   # To store imputed values and check convergence
-  imputed_values <- vector("list", p_imp)
-    names(imputed_values) <- names(which(r != nrow(Z)))
+  imp_DURR_val <- vector("list", parms$chains)
+    names(imp_DURR_val) <- seq(1:parms$chains)
+  # empty storing objects for imputate values
+  imps <- vector("list", p_imp)
+  names(imps) <- names(which(r != nrow(Z)))
   for (v in 1:p_imp) {
-    imputed_values[[v]] <- matrix(rep(NA, (iters*(nrow(Z)-r[v]))), 
-                                  ncol = iters)
+    imps[[v]] <- matrix(rep(NA, (iters*(nrow(Z)-r[v]))), 
+                        ncol = iters)
   }
-  
+    
   # To store multiply imputed datasets
-  imputed_datasets <- vector("list", iters)
-    names(imputed_datasets) <- seq(1, iters)
+  imp_DURR_dat <- vector("list", parms$chains)
+    names(imp_DURR_dat) <- seq(1:parms$chains)
     
   # Time performance
   start.time <- Sys.time()
   
-  imp_res <- lapply(1:chains, function(x){
+  for (cc in 1:chains) {
+    
     Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
+    
     for(i in 1:iters) {
-      print(paste0("DURR - Chain: ", x, "/", chains, "; Iter: ", i, "/", iters))
+      print(paste0("DURR - Chain: ", cc, "/", chains, "; Iter: ", i, "/", iters))
       for (j in 1:p_imp) {
         J <- which(vmis_ind)[j]
         glmfam <- detect_family(Zm[, J])
@@ -75,7 +80,7 @@ impute_DURR <- function(Xy_mis, chains=5, iters=5, reg_type="lasso"){
           regu.mod <- rr_est_elanet(X = Wstar_mj, y = zstar_j, parms = parms)
         }
         
-        # Predict z_j_mis (i.e. obtain imputations)
+        # Predict z_j_mis (i.e. obtain imputations (imps))
         if(glmfam == "gaussian"){
           zm_j <- imp_gaus_DURR(regu.mod, Wstar_mj, zstar_j, Wm_mj, parms)
         }
@@ -87,26 +92,22 @@ impute_DURR <- function(Xy_mis, chains=5, iters=5, reg_type="lasso"){
         }
         
         # Append imputation
-        imputed_values[[j]][, i] <- zm_j
+        imps[[j]][, i] <- zm_j
         Zm[is.na(Z[, J]), J] <- zm_j
       }
     }  
-    
-    
-    # Store results
-    return(list(imp_dat = Zm,
-                imp_val = imputed_values)
-           )
-  })
+    imp_DURR_dat[[cc]] <- Zm
+    imp_DURR_val[[cc]] <- imps
+  }
   
   end.time <- Sys.time()
   
-  return(list(imp_res = imp_res,
+  return(list(dats = imp_DURR_dat,
+              imps = imp_DURR_val,
               time = difftime(end.time, 
                               start.time, 
                               units = "mins"))
-         )
-  
+  )
 }
   
   
