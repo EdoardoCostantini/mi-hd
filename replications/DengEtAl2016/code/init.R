@@ -25,7 +25,6 @@ source("./fun_MICE_RF_impute.R")
 source("./fun_MICE_TR_impute.R")
 source("./subroutines.R")
 
-
 # Choose replication ------------------------------------------------------
 
 paper <- 2 # 1 = ZL2016, 2 = DEA2016
@@ -35,7 +34,7 @@ paper <- 2 # 1 = ZL2016, 2 = DEA2016
 parms <- list()
 
 # Itereations, repetitions, etc
-parms$dt_rep  <- 200 # replications for averaging results (200 goal)
+parms$dt_rep  <- c(500, 200)[paper] # replications for averaging results (200 goal)
 parms$chains  <- 10 # number of imputed datasets to pool esitmaes from (10)
 parms$iters   <- c(1, 20)[paper]
   # number of iterations for the MI procedure (20)
@@ -79,8 +78,9 @@ parms$alphaCI <- .95 # confidence level for parameters CI
 parms$k_IURR <- 0 # k value to bias coef sampling covariance matrix in IURR
                   # procedure to solve possible issues of singularity
 
-parms$methods <- c("DURR", "IURR", "blasso", "MI_T", "GS", "CC") # "blasso", "MICE-RF", "MI_T", "GS", "CC")
+parms$methods <- c("DURR", "IURR", "blasso", "MI_T", "GS", "CC")
   # for naming objects, hence order is important (CC always last)
+  # c("DURR", "IURR", "blasso", "MICE_RF", "MI_T", "GS", "CC") # complete correct order
 
 # Replicability related
 parms$seed     <- 20200512 #20200309
@@ -105,9 +105,11 @@ parms$description <- c("In each repetition, 1 dataset is created for each condit
 
 # Conditions --------------------------------------------------------------
 
-p   <- c(200) #, 1000)   # number of variables
+p   <- list(c(200), # number of variables
+            c(200))[[paper]]
 rho <- c(0, 0.1)[paper]   # autoregressive structure
-q   <- c(4) #, 20)   # c(4, 20)  # active set (num of variables are true predictors of y)
+q   <- list(c(4, 20),
+            c(4))[[paper]] #, 20)   # c(4, 20)  # active set (num of variables are true predictors of y)
 
 conds <- as.matrix(expand.grid(p, rho, q))
   colnames(conds) <- c("p", "rho", "q")

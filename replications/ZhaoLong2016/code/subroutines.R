@@ -71,19 +71,10 @@ runCell <- function(cond, m = 5, iters = 1) {
   ## Data ------------------------------------------------------------------ ##
   # Gen 1 dataset w/ missing values; 1 fully-obs data for out-of-sample rmse
   
-  # Xy <- genData(cond, parms)
-  # Xy_mis <- imposeMiss(Xy, parms)$Xy_miss
-  # 
-  # miss_descrps <- mean(is.na(Xy_mis[, "z1"]))
-  
-  # 
-  set.seed(1234)
   Xy <- genData(cond, parms)
-  # Xy_mis <- imposeMiss(Xy, parms)$Xy_miss
-  Xy_mis <- imposeMiss(Xy, parms)
-  Xy_mis$nR
-  Xy_mis <- Xy_mis$Xy_miss
-  miss_descrps <- mean(rowSums(is.na(Xy_mis)) != 0) # check correct miss %
+  Xy_mis <- imposeMiss(Xy, parms)$Xy_miss
+
+  miss_descrps <- mean(is.na(Xy_mis[, "z1"]))
   
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods

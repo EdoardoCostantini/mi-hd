@@ -60,7 +60,7 @@ genData <- function(cnd, parms){
   Zf <- rmvnorm(n     = parms$n, 
                 mean  = rep(0, p_Zf), 
                 sigma = AR1(p_Zf, rho = cnd["rho"]) )
-  
+  AR1(5, rho = .3)
   # Append empty Zm(issing values on these variables)
   Zm <- matrix(rep(NA, p_Zm*parms$n),
                ncol = p_Zm)
@@ -105,6 +105,7 @@ imposeMiss <- function(Xy, parms){
   n <- nrow(Xy)
   coefs <- parms$b_miss_model
   Xy_miss <- as.matrix(Xy)
+  d <- 2
   nR <- sapply(1:length(parms$z_m_id), function(d){
     logit_miss <- cbind(1, Xy_miss[, parms$detlamod[[d]]]) %*% coefs
     prb_miss <- exp(logit_miss)/(1+exp(logit_miss))
@@ -383,18 +384,15 @@ imp_gaus_DURR <- function(model, X_tr, y_tr, X_te, parms){
   # model <- glmnet(X_tr, y_tr, alpha = 1, lambda = cv$lambda.min)
   
   ## Body ##
-  
-  s2hat_mj <- mean((predict(model, X_tr) - y_tr)**2) 
+  s2hat   <- mean((predict(model, X_tr) - y_tr)**2) 
     # according to paper this is the estimate
-  X_te     <- model.matrix(rep(1, nrow(X_te)) ~., data.frame(X_te))[, -1]
+  X_te    <- model.matrix(rep(1, nrow(X_te)) ~., data.frame(X_te))[, -1]
     # create a prediction matrix (for possible dummy coded needed),
     # -1 no need for intercept
-  yhat_te  <- rnorm(n = nrow(X_te),
-                    mean = predict(model, X_te), 
-                    sd = sqrt(s2hat_mj))
-  z.m_j_mis <- yhat_te
-  
-  return(z.m_j_mis)
+  yhat_te <- rnorm(n =    nrow(X_te),
+                   mean = predict(model, X_te), 
+                   sd =   sqrt(s2hat))
+  return(yhat_te)
 }
 
 imp_dich_DURR <- function(model, X_tr, y_tr, X_te, parms){
@@ -472,10 +470,10 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   # according to IURR method
   
   ## For internals ##
-  
+
   # data("Boston", package = "MASS")
   # train_ind <- Boston$medv %>%
-  #   createDataPartition(p = 0.8, list = FALSE)
+  #   caret::createDataPartition(p = 0.8, list = FALSE)
   # train  <- Boston[train_ind, ]
   # test <- Boston[-train_ind, ]
   # 
@@ -495,39 +493,68 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   
   ## Body ##
   
-  lasso.coef <- as.matrix(coef(model))
-  lasso.coef.n0 <- row.names(lasso.coef)[lasso.coef != 0]
-  S_hat <- lasso.coef.n0[-1] # estimated active set (get rid of intercept)
+  # Select predictors based on rr
+    rr_coef <- as.matrix(coef(model)) # regularized regression coefs
+    rr_coef_no0 <- row.names(rr_coef)[rr_coef != 0]
+    AS <- rr_coef_no0[-1] # predictors active set
   
-  # Estimate Imputation model on observed z_j
-  if(identical(lasso.coef.n0, "(Intercept)")){
-    lm_fit <- lm(y_tr ~ 1)
-  } else {
-    lm_fit <- lm(y_tr ~ X_tr[, S_hat])
-  }
-  
-  theta_MLE <- coef(lm_fit)
-  Sigma_MLE <- vcov(lm_fit)
-  
-  # Sample parameters for prediction/imputation
-  theta_m_j <- MASS::mvrnorm(1, 
-                             theta_MLE, 
-                             Sigma_MLE + diag(ncol(Sigma_MLE)) * parms$k_IURR )
-  sigma_m_j <- sigma(lm_fit)
-    # This is not correct. I'm using the OLS estiamtes with no variation in
-    # sigma. Later fix this!
-  
-  # Get imputations
-  if(identical(lasso.coef.n0, "(Intercept)")){
-    y_imp <- rnorm(n = nrow(X_te),
-                   mean = theta_m_j,
-                   sd = sigma_m_j)
-  } else {
-    y_imp <- rnorm(n = nrow(X_te),
-                   mean = (model.matrix( ~ X_te[, S_hat]) %*% theta_m_j),
-                   sd = sigma_m_j)
-  }
+  # MLE estimate of model parameters
+    
+  # 1. define starting values
+    if(identical(rr_coef_no0, "(Intercept)")){
+      lm_fit <- lm(y_tr ~ 1)
+      X_mle <- model.matrix(y_tr ~ 1)
+    } else {
+      X_mle <- model.matrix(y_tr ~ X_tr[, AS])
+      lm_fit <- lm(y_tr ~ X_tr[, AS])
+    }
+    startV <- c(coef(lm_fit), sigma(lm_fit))
+    
+  # 2. optimize loss function
+    MLE_fit <- optim(startV, 
+                     .lm_loss,
+                     method="BFGS",
+                     hessian=T,
+                     y = y_tr, X = X_mle)
+    
+  # 3. obtain estimates
+    theta <- MLE_fit$par
+    OI <- solve(MLE_fit$hessian) # parameters cov maatrix
+    
+  # Sample parameters for posterior predictive distribution
+    pdraws_par <- MASS::mvrnorm(1, 
+                                mu = MLE_fit$par, 
+                                Sigma = OI)
+    
+  # Sample posterior predictive distribution
+    if(identical(rr_coef_no0, "(Intercept)")){
+      y_imp <- rnorm(n = nrow(X_te),
+                     mean = pdraws_par[1],
+                     sd = pdraws_par[2])
+    } else {
+      X_ppd <- model.matrix( ~ X_te[, AS]) # X for posterior pred dist
+      b_ppd <- pdraws_par[-length(pdraws_par)] # betas for posterior pred dist
+      sigma_ppd <- tail(pdraws_par, 1) # sigma for posterior pred dist
+      y_imp <- rnorm(n = nrow(X_te),
+                     mean = X_ppd %*% b_ppd,
+                     sd = sigma_ppd)
+    }
   return(y_imp)
+}
+
+.lm_loss <-function(theta, y, X){
+  n <- nrow(X)
+  k <- ncol(X)
+  beta <- theta[1:k]
+  sigma <- theta[k+1]
+  if(sigma < 0) {
+    dev <- 10000000
+  } else {
+    ll <- dnorm(y, mean = X %*% beta, sd = sigma, log = TRUE)
+    dev <- -2 * sum(ll)
+  }
+  # Return 
+  return(dev)
 }
 
 .lambda <- function(x) (x + 1) / (x + 3)

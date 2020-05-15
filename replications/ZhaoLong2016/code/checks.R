@@ -46,9 +46,26 @@ source("./functions.R")
 # Check data-generation ---------------------------------------------------
 # Compare with same code in check of DengEtAl2016 to see that the data 
 # generated is the same when using same parameters
+  rm(list=ls())
+  getwd()
+  source("./init.R")
   set.seed(1234)
   Xy <- genData(conds[1, ], parms)
   colMeans(Xy)
-  Xy_miss <- imposeMiss(Xy, parms)$Xy_miss
-  mean(rowSums(is.na(Xy_miss)) != 0) # check correct miss %
+  Xy_mis <- imposeMiss(Xy, parms)$Xy_miss
+  mean(rowSums(is.na(Xy_mis)) != 0) # check correct miss %
   
+  # Try imputation with DURR with same seed on same data to check 
+  # equivalence of code
+  imp_DURR_lasso <- impute_DURR(Xy_mis = Xy_mis,
+                                chains = parms$chains,
+                                iters = parms$iters,
+                                reg_type="lasso")
+  imp_DURR_lasso$`1`$z1
+  
+  imp_IURR_lasso <- impute_IURR(Xy_mis = Xy_mis, 
+                                cond = cond, 
+                                chains = parms$chains, 
+                                reg_type = "lasso")
+  imp_IURR_lasso$`1`$z1
+  getwd()

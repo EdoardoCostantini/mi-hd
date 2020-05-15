@@ -75,7 +75,7 @@ runCell <- function(cond, parms, rep_status) {
   
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
-  
+
   # Impute according to DURR method
   imp_DURR_lasso <- impute_DURR(Xy_mis = Xy_mis,
                                 chains = parms$chains,
@@ -87,7 +87,7 @@ runCell <- function(cond, parms, rep_status) {
              "\n"),
       file = paste0(parms$outDir, parms$report_file_name),
       append = TRUE)
-    
+
   # Impute according to IURR method
   imp_IURR_lasso <- impute_IURR(Xy_mis = Xy_mis,
                                 chains = parms$chains,
@@ -113,24 +113,24 @@ runCell <- function(cond, parms, rep_status) {
       file = paste0(parms$outDir, parms$report_file_name),
       append = TRUE)
 
-  # # MICE-RF 
-  # imp_MICE_RF <- impute_MICE_RF(Xy_mis = Xy_mis, 
-  #                               chains = parms$chains, 
-  #                               iters = parms$iters, 
-  #                               rfntree = parms$rfntree)
-  # 
-  # cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": MICE-RF done",
-  #            "\n"),
-  #     file = paste0(parms$outDir, parms$report_file_name),
-  #     append = TRUE)
+  # # MICE-RF
+  imp_MICE_RF <- impute_MICE_RF(Xy_mis = Xy_mis,
+                                chains = parms$chains,
+                                iters = parms$iters,
+                                rfntree = parms$rfntree)
+
+  cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": MICE-RF done",
+             "\n"),
+      file = paste0(parms$outDir, parms$report_file_name),
+      append = TRUE)
   
   # MICE w/ true model
-  imp_MICE_TR <- impute_MICE_TR(Xy_mis = Xy_mis, 
+  imp_MICE_TR <- impute_MICE_TR(Xy_mis = Xy_mis,
                                 AS_size = cond[3],
-                                chains = parms$chains, 
-                                iters = parms$iters, 
+                                chains = parms$chains,
+                                iters = parms$iters,
                                 parms = parms)
-  
+
   cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": MICE-TRUE done",
              "\n"),
       file = paste0(parms$outDir, parms$report_file_name),
@@ -141,14 +141,15 @@ runCell <- function(cond, parms, rep_status) {
   imp_values <- list(DURR = imp_DURR_lasso$imps,
                      IURR = imp_IURR_lasso$imps,
                      blasso = imp_blasso$imps,
+                     MICE_RF = imp_MICE_RF$imps,
                      MICE_TR = imp_MICE_TR$mids)
   
   ## Analyse --------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
   fits_md <- lapply(list(imp_DURR_lasso$dats,
                          imp_IURR_lasso$dats,
-                         # imp_blasso$dats,
-                         # imp_MICE_RF$dats,
+                         imp_blasso$dats,
+                         imp_MICE_RF$dats,
                          imp_MICE_TR$dats), 
                     fit_models, mod = parms$formula)
   
@@ -183,7 +184,7 @@ runCell <- function(cond, parms, rep_status) {
   imp_time <- c(DURR    = imp_DURR_lasso$time,
                 IURR    = imp_IURR_lasso$time,
                 blasso  = imp_blasso$time,
-                # MICE_RF = imp_MICE_RF$time,
+                MICE_RF = imp_MICE_RF$time,
                 MICE_TR = imp_MICE_TR$time)
   
   ## Store output ---------------------------------------------------------- ##

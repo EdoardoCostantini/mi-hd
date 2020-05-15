@@ -1,0 +1,75 @@
+SIMULATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+      Imputation methods are used on that condition-specific dataset.
+      Results are therefore given per dataset in condition
+
+------
+Starts at: 2020-05-13 11:09:44
+------
+
+2020-05-13 11:09:45 - Starts Repetition: 5
+2020-05-13 11:09:45 - Starts Repetition: 7
+2020-05-13 11:09:45 - Starts Repetition: 4
+2020-05-13 11:09:45 - Starts Repetition: 3
+2020-05-13 11:09:45 - Starts Repetition: 2
+2020-05-13 11:09:45 - Starts Repetition: 6
+2020-05-13 11:09:45 - Starts Repetition: 8
+2020-05-13 11:09:45 - Starts Repetition: 9
+2020-05-13 11:09:45 - Starts Repetition: 1
+2020-05-13 11:09:45 - Starts Repetition: 10
+2020-05-13 11:11:43 | Reptetition 10: DURR done
+2020-05-13 11:11:43 | Reptetition 6: DURR done
+2020-05-13 11:11:44 | Reptetition 2: DURR done
+2020-05-13 11:11:44 | Reptetition 5: DURR done
+2020-05-13 11:11:45 | Reptetition 3: DURR done
+2020-05-13 11:11:47 | Reptetition 4: DURR done
+2020-05-13 11:11:47 | Reptetition 1: DURR done
+2020-05-13 11:11:47 | Reptetition 8: DURR done
+2020-05-13 11:11:47 | Reptetition 7: DURR done
+2020-05-13 11:11:48 | Reptetition 9: DURR done
+2020-05-13 11:13:29 | Reptetition 10: IURR done
+2020-05-13 11:13:30 | Reptetition 6: IURR done
+2020-05-13 11:13:31 | Reptetition 5: IURR done
+2020-05-13 11:13:34 | Reptetition 3: IURR done
+2020-05-13 11:13:34 | Reptetition 2: IURR done
+2020-05-13 11:13:41 | Reptetition 4: IURR done
+2020-05-13 11:13:42 | Reptetition 1: IURR done
+2020-05-13 11:13:42 | Reptetition 8: IURR done
+2020-05-13 11:13:43 | Reptetition 9: IURR done
+2020-05-13 11:13:43 | Reptetition 7: IURR done
+2020-05-13 11:16:25 | Reptetition 6: blasso done
+2020-05-13 11:16:26 | Reptetition 10: blasso done
+2020-05-13 11:16:26 | Reptetition 5: blasso done
+2020-05-13 11:16:27 | Reptetition 3: blasso done
+2020-05-13 11:16:31 | Reptetition 2: blasso done
+2020-05-13 11:16:34 | Reptetition 9: blasso done
+2020-05-13 11:16:35 | Reptetition 7: blasso done
+2020-05-13 11:16:36 | Reptetition 1: blasso done
+2020-05-13 11:16:40 | Reptetition 8: blasso done
+2020-05-13 11:16:43 | Reptetition 4: blasso done
+2020-05-13 11:46:07 | Reptetition 9: MICE-RF done
+2020-05-13 11:46:19 | Reptetition 9: MICE-TRUE done
+2020-05-13 11:47:02 | Reptetition 7: MICE-RF done
+2020-05-13 11:47:12 | Reptetition 7: MICE-TRUE done
+2020-05-13 11:47:13 | Reptetition 8: MICE-RF done
+2020-05-13 11:47:16 | Reptetition 1: MICE-RF done
+2020-05-13 11:47:22 | Reptetition 5: MICE-RF done
+2020-05-13 11:47:22 | Reptetition 8: MICE-TRUE done
+2020-05-13 11:47:24 | Reptetition 1: MICE-TRUE done
+2020-05-13 11:47:29 | Reptetition 6: MICE-RF done
+2020-05-13 11:47:30 | Reptetition 5: MICE-TRUE done
+2020-05-13 11:47:30 | Reptetition 10: MICE-RF done
+2020-05-13 11:47:36 | Reptetition 6: MICE-TRUE done
+2020-05-13 11:47:37 | Reptetition 10: MICE-TRUE done
+2020-05-13 11:47:44 | Reptetition 3: MICE-RF done
+2020-05-13 11:47:49 | Reptetition 4: MICE-RF done
+2020-05-13 11:47:51 | Reptetition 3: MICE-TRUE done
+2020-05-13 11:47:53 | Reptetition 2: MICE-RF done
+2020-05-13 11:47:55 | Reptetition 4: MICE-TRUE done
+2020-05-13 11:47:59 | Reptetition 2: MICE-TRUE done
+
+------
+Ends at: 2020-05-13 11:47:59
+Run time: 0.637 h
+------
+

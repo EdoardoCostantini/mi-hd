@@ -54,8 +54,7 @@ impute_BLAS_hans <- function(Xy, Xy_mis, chains=5, iters=5, iter_bl = 1, burn_bl
         beta0 <- rep(0, ncol(Z_obs)) # starting vbalues for gibbs sampler
         # step 1: take posterior sample for theta_hat_m_j
         model <- blasso::blasso.vs(Y = zj_obs, X = Z_obs,
-                                   iters = iter_bl, 
-                                   burn = burn_bl,
+                                   iters = 1, 
                                    beta = beta0, 
                                    beta.prior = "scaled", 
                                    sig2 = 1, sig2prior = c(a = .1, b = .1),
@@ -63,6 +62,11 @@ impute_BLAS_hans <- function(Xy, Xy_mis, chains=5, iters=5, iter_bl = 1, burn_bl
                                    phi = .5, phiprior = c(h = 1, g = 1),
                                    fixsig = FALSE, fixtau = FALSE, fixphi = FALSE,
                                    noisy = FALSE) # silent progress
+        # Gibbs sampler needs to nest the 1 sample per variable per iteration
+        # check if blasso.vs akllows for taking 1 sample, then udpate everything 
+        # absed on it. Imputation of every vairable is the target of the gibbs sampler
+        # most inernal  then oop over variable need to impte, that is one gibss sampler
+        # multiple chians here are just for convergnece checks. Sample from the pool cof converged 
         theta_hat <- as.vector(model$beta)
         sigma_hat_2 <- model$sig2
         

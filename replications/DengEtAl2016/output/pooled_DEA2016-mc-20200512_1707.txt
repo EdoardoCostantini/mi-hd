@@ -1,9 +1,0 @@
-2020-05-12 17:23:13 | Reptetition 1: DURR done
-2020-05-12 17:23:15 | Reptetition 1: IURR done
-2020-05-12 17:23:15 | Reptetition 1: MICE-TRUE done
-2020-05-12 17:23:52 | Reptetition 1: DURR done
-2020-05-12 17:23:54 | Reptetition 1: IURR done
-2020-05-12 17:23:54 | Reptetition 1: MICE-TRUE done
-2020-05-12 17:25:05 | Reptetition 1: DURR done
-2020-05-12 17:26:05 | Reptetition 1: IURR done
-2020-05-12 17:26:10 | Reptetition 1: MICE-TRUE done
