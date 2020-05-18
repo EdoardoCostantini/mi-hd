@@ -34,7 +34,7 @@ paper <- 2 # 1 = ZL2016, 2 = DEA2016
 parms <- list()
 
 # Itereations, repetitions, etc
-parms$dt_rep  <- c(500, 200)[paper] # replications for averaging results (200 goal)
+parms$dt_rep  <- c(500, 500)[paper] # replications for averaging results (200 goal)
 parms$chains  <- 5 # number of parallel chains for convergence check
 parms$ndt     <- 10 # number of imputed datasets to pool esitmaes from (10)
 parms$iters   <- c(1, 20)[paper]

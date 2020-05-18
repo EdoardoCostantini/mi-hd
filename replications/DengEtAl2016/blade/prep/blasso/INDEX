@@ -1,0 +1,5 @@
+blasso                  Gibbs sampler for Bayesian Lasso regression
+                        model.
+blasso-package          blasso: MCMC for Bayesian Lasso Regression
+blasso.vs               Variable selection Gibbs sampler for Bayesian
+                        Lasso regression model.

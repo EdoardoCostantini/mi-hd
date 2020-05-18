@@ -1,6 +1,6 @@
-### Title:    Replication Deng Et Al 2016 - Simulation script
+### Title:    Replication Deng Et Al 2016 - Simulation script w/ parallel for windows
 ### Author:   Edoardo Costantini
-### Created:  2020-05-05
+### Created:  2020-05-16
 
 rm(list=ls())
 source("./init.R")
@@ -24,11 +24,21 @@ cat(paste0("SIMULATION PROGRESS REPORT",
 
 sim_start <- Sys.time()
 
-  out <- mclapply(X        = 1 : parms$dt_rep,
-                  FUN      = doRep,
-                  conds    = conds,
-                  parms    = parms,
-                  mc.cores = ( 10 ) )
+## Create a cluster object:
+clus <- makeCluster(2)
+
+## Two different ways to source a script on the worker nodes:
+clusterEvalQ(cl = clus, expr = source("init.R"))
+
+## Run the computations in parallel on the 'clus' object:
+out <- parLapply(cl = clus, 
+                 X = 1 : parms$dt_rep,
+                 fun = doRep, 
+                 conds = conds, 
+                 parms = parms)
+
+## Kill the cluster:
+stopCluster(clus)
 
 sim_ends <- Sys.time()
 

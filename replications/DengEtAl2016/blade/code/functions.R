@@ -6,6 +6,50 @@
 # data generation ---------------------------------------------------------
 
 genData <- function(cnd, parms){
+  # par_conds <- conds[1,] # example for par_conds
+  
+  # # Extract condition parameters
+  # p   <- par_conds[[1]]
+  # rho <- par_conds[[2]]
+  # q   <- par_conds[[3]]
+  # p_z_m <- length(parms$z_m_id) # number of vairables will have missing
+  # p_Z <- p-p_z_m # number of fully observed covariates
+  # 
+  # # Extract fixed parameters
+  # n     <- parms$n
+  # 
+  # # Gen Z_full (fully observed covariates)
+  # Z_full <- rmvnorm(n, rep(0, p_Z), AR1(p_Z, rho))
+  # 
+  # Z_mis <- matrix(rep(NA, p_z_m*n),
+  #             ncol = p_z_m)
+  # Z <- cbind(Z_mis, Z_full)
+  # 
+  # # Gen z_m (variables that will have missingness imposed)
+  # ActSet <- which(names(parms$S_all) == paste0("q", q)) # active set (AS) indx
+  # stnr   <- parms$stnr[ActSet] # selecion of signal-to-noise for given AS
+  # S      <- parms$S_all[[ActSet]] # Active set vairables for z_m generation
+  # a  <- rep(1, length(S)) * stnr
+  # z_m <- sapply(1:p_z_m, function(x) {
+  #   rnorm(n, 1 + Z[, S] %*% a, sqrt(parms$z_m_var))
+  # })
+  # 
+  # # Gen X (entire fully observed data)
+  # X <- cbind(z_m, Z_full)
+  #   colnames(X) <- paste0("z", 1:ncol(X))
+  # 
+  # # Gen y
+  # y_b   <- rep(parms$b, parms$k)
+  # y_b0  <- parms$b
+  # y     <- rnorm(n, 
+  #                y_b0 + X[, 1:parms$k] %*% y_b, 
+  #                sqrt(parms$y_var))
+  #   # I'm making the decision of considereing as the standard deviation
+  #   # instead of vairance. Reason is that otherwise the CC case is as good
+  #   # as the GS analaysis. We want a dataset up that makes it worth to 
+  #   # perform imputation: ie that bridges between the GS and the bad treatment
+  #   # of complete case analysis (CC)
+  # 
   # For internals
   # cnd <- conds[1,]
   
@@ -16,8 +60,8 @@ genData <- function(cnd, parms){
   Zf <- rmvnorm(n     = parms$n, 
                 mean  = rep(0, p_Zf), 
                 sigma = AR1(p_Zf, rho = cnd["rho"]) )
-
-  # Append empty Zm(issing values on p_Zm variables)
+  AR1(5, rho = .3)
+  # Append empty Zm(issing values on these variables)
   Zm <- matrix(rep(NA, p_Zm*parms$n),
                ncol = p_Zm)
   Z <- cbind(Zm, Zf)
@@ -61,6 +105,7 @@ imposeMiss <- function(Xy, parms){
   n <- nrow(Xy)
   coefs <- parms$b_miss_model
   Xy_miss <- as.matrix(Xy)
+  d <- 2
   nR <- sapply(1:length(parms$z_m_id), function(d){
     logit_miss <- cbind(1, Xy_miss[, parms$detlamod[[d]]]) %*% coefs
     prb_miss <- exp(logit_miss)/(1+exp(logit_miss))
@@ -124,6 +169,8 @@ missing_type <- function(Z){
   return(output)
 }
 
+
+
 init_dt_i <- function(Z0, missVarInfo){
   # Input: (1) a dataset with missing values; (2) and object produced by function missing_type
   #   examples:
@@ -165,12 +212,12 @@ init_dt_i <- function(Z0, missVarInfo){
   }
   
   return(Z0)  # an initialized dataset
-  # when dataset has been itialized, m=0, so Z0 = {z0_1, z0_2, ... , z0_l, z_l+1, ... , z_p}
+  # when dataset hass been itialized, m=0, so Z0 = {z0_1, z0_2, ... , z0_l, z_l+1, ... , z_p}
   # each z_j of this data will be the m-1 "previous iteration" version at the beginning of 
   # the variable loop (for j in 1:l) and the current iteration data at the end
 }
 
-# process_4IURR <- function(Z, Zm, j_th, parms){
+# process_4DURR <- function(Z, Zm, j_th, parms){
 #   ## Description:
 #   # Given a datset with missing values, an imputed version from a previous
 #   # iteration of imputation, and the index of the variable under imputation
@@ -182,26 +229,70 @@ init_dt_i <- function(Z0, missVarInfo){
 #   # Z <- iris2[,-c(1,7)] # original data w/ missing values
 #   # Zm <- init_dt_i(Z, missing_type(Z)) # result of previous iteration
 #   # j_th <- 1
+# 
+#   ry <- !is.na(Z[, j_th]) # indexing observed values on y
 #   
-#   ## Step 0. Prepare data for j-th variable imputation
-#   ry <- !is.na(Z[, j_th]) # indexing obserrved values on y
-#   Wm_j  <- Zm[,-j_th]     # predictors for imp model from inizialized dataset (m-1) [ALL CASES]  
-#   zm_j  <- Zm[,j_th]      # outcome for imp model from inizialized dataset (m-1)    [ALL CASES]
-#   Wm_mj <- Wm_j[!ry, ] # predictor rows for cases with missing z_j               [OBSERVED and IMPUTED]
-#   zm_mj <- zm_j[!ry]   # current (m) draw of z_j for cases with missing z_j      [IMPUTED/MISSING CASES]
+#   # For estimation of imputation model
+#   Wm_j  <- Zm[,-j_th]
+#   zm_j  <- Zm[, j_th]
 #   
-#   # Select cases for imputation model
-#   z_j_obs  <- Zm[, j_th][!is.na(Z[, j_th])]   # observed components of j-th variable [OBSERVED VALUES]
-#   Wm_j_obs <- Zm[, -j_th][!is.na(Z[, j_th]),] # current (m) components of the predictors cooresponding 
-#                                         # to observed cases on j-th variable [OBSERVED and IMPUTED VALUES]
+#   # For prediction based on imputation model
+#   Wm_mj <- Wm_j[!ry, ]  # Xs for j-th var w/ originally missing values
+#   zm_mj <- zm_j[!ry]    # imputation of j-th var at i-1 iteration
 #   
-#   Zy <- (list(Wm_j_obs = as.matrix(Wm_j_obs),
-#               z_j_obs = as.vector(z_j_obs),
-#               Wm_mj = as.matrix(Wm_mj),
-#               zm_mj = as.vector(zm_mj))) 
+#   # Generate bootstrap sample
+#   indx_boSample <- sample(1:nrow(Wm_j), nrow(Wm_j), replace = TRUE)
+#   W.star.m_j    <- Wm_j[indx_boSample, ]
+#   z.star_j      <- zm_j[indx_boSample]
+#   
+#   # but select only real observed values out of such sample
+#   z.star_j_obs     <- z.star_j[!is.na(Z[indx_boSample, j_th])]         # OBSERVED values on j-th
+#   W.star.m_j_obs   <- W.star.m_j[!is.na(Z[indx_boSample, j_th]), ] # Xs for j-th var originally observed values [OBSERVED and i-1 IMPUTATIONS]
+#   
+#   # Data for regularized models
+#   Zx <- model.matrix(z.star_j_obs~., data.frame(z.star_j_obs, W.star.m_j_obs))[,-1]
+#   zy <- z.star_j_obs
+#   
+#   Zy <- (list(Wstar_mj = Zx,
+#               zstar_j = zy,
+#               Wm_mj = Wm_mj,
+#               zm_mj = zm_mj)) 
 #   
 #   return(Zy)
 # }
+
+process_4IURR <- function(Z, Zm, j_th, parms){
+  ## Description:
+  # Given a datset with missing values, an imputed version from a previous
+  # iteration of imputation, and the index of the variable under imputation
+  # it returns a dataset with observed values on the variable under imputation
+  # and corresponding values on the other X variables either observed or 
+  # previously imputed.
+  ## For internals:
+  # data(iris2) # example dataset from PcAux package
+  # Z <- iris2[,-c(1,7)] # original data w/ missing values
+  # Zm <- init_dt_i(Z, missing_type(Z)) # result of previous iteration
+  # j_th <- 1
+  
+  ## Step 0. Prepare data for j-th variable imputation
+  ry <- !is.na(Z[, j_th]) # indexing obserrved values on y
+  Wm_j  <- Zm[,-j_th]     # predictors for imp model from inizialized dataset (m-1) [ALL CASES]  
+  zm_j  <- Zm[,j_th]      # outcome for imp model from inizialized dataset (m-1)    [ALL CASES]
+  Wm_mj <- Wm_j[!ry, ] # predictor rows for cases with missing z_j               [OBSERVED and IMPUTED]
+  zm_mj <- zm_j[!ry]   # current (m) draw of z_j for cases with missing z_j      [IMPUTED/MISSING CASES]
+  
+  # Select cases for imputation model
+  z_j_obs  <- Zm[, j_th][!is.na(Z[, j_th])]   # observed components of j-th variable [OBSERVED VALUES]
+  Wm_j_obs <- Zm[, -j_th][!is.na(Z[, j_th]),] # current (m) components of the predictors cooresponding 
+                                        # to observed cases on j-th variable [OBSERVED and IMPUTED VALUES]
+  
+  Zy <- (list(Wm_j_obs = as.matrix(Wm_j_obs),
+              z_j_obs = as.vector(z_j_obs),
+              Wm_mj = as.matrix(Wm_mj),
+              zm_mj = as.vector(zm_mj))) 
+  
+  return(Zy)
+}
 
 
 # Estimation --------------------------------------------------------------
@@ -296,7 +387,7 @@ imp_gaus_DURR <- function(model, X_tr, y_tr, X_te, parms){
   s2hat   <- mean((predict(model, X_tr) - y_tr)**2) 
     # according to paper this is the estimate
   X_te    <- model.matrix(rep(1, nrow(X_te)) ~., data.frame(X_te))[, -1]
-    # create a prediction matrix (for possible factor cooding needed),
+    # create a prediction matrix (for possible dummy coded needed),
     # -1 no need for intercept
   yhat_te <- rnorm(n =    nrow(X_te),
                    mean = predict(model, X_te), 

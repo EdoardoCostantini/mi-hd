@@ -58,6 +58,6 @@ results_paper <- list(cond_200_4 = data.frame(bias_p = c(.074, .017, -.023,
 compare_b1 <- vector("list", length(out[[1]]))
   names(compare_b1) <- names(out[[1]]) 
 for (i in 1:length(out[[1]])) {
-  compare_b1[[i]] <- cbind(results_paper[[i]], res_old[[i]], res[[i]])
+  compare_b1[[i]] <- cbind(res_old[[i]], res[[i]], results_paper[[i]])
 }
 compare_b1

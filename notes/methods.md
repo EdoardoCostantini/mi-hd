@@ -21,7 +21,7 @@ supported, highdimensionality etc.)
 	that is on your computer in the R-packages folder (under projects). Now you need to do the same you did 
 	for the Random forests.
 
-* **Frequentist regularized-MICE (DONE)** (directly and indirectly) following Deng et al 2016;
+* **Frequentist regularized-MICE ** (directly and indirectly) following Deng et al 2016;
 	There are no references to specific packages that implemented the methods but there are detailed 
 	descriptions of how to make regularized multiple imputations.
 	
@@ -40,10 +40,9 @@ supported, highdimensionality etc.)
 		 surveys as applications, EN seems theoretically more apt to the task beacuse of its grouping effect: if there are 
 		 predictors that are highly correlated, then EN would tend to push their coefficient to be the same, while LASSO 
 		 would tend to keep just one of them.
-	* Doubts: Iterations and saving datasets for multivaraite missingness. I currently implemented this with parallel chains. 
-		However, Deng et al 2016 seem to suggest that there is only 1 chain that converges after so many iterations and 
-		that the last M dataset can be kept as multiple imputed datasets. Isn't there dependency that we want to avoid in 
-		this method?
+	* Doubts: Iterations and saving datasets. Main issue: how to perform Thinning if I have 20 iterations, 
+		convergence is assumed after 10 iterations and I need 10 datasets? Will I not always select the last 
+		10 imputed datasets?
 
 	*Implementation status: IURR*
 	* Imputation Model Variables supported: 
@@ -65,8 +64,34 @@ supported, highdimensionality etc.)
 		* DVs: continuous.
 	* Limitations:
 		* cannot impute dichotomous or polytomous variables at the moment: needs a different algorithm 
-	* Packages: 'monomvn' R package implements the BLasso parameters selection part, I wrote code for implementing the
-		MICE-like imputation algorithm.
+	* Packages: blasso package from Chris(?) Hans is availe at his personal website (archive version)
+	* Problems:
+		* Multivariate implementation: gibbs sampler nesting. From the language of ZahoLong2016 (p. 2026-7), in univariate case
+		you need to a) formulate the Bayesian Linear Model for the variable with missing values; 2) simulate 
+		draws for the model parameters (get 1000 iterations after burn in); 3) randomly draw from these 1000 draws
+		M (number of final imputed datasets), and use them to obtain draw from predictive distirbution to impute 
+		values for each observation with (univariate) missing value. This is exactly what I do in my ZahoLong2016 
+		replication. For the multivariate extension that is proposed tin ZhaoLong2016 the langugae suggests "posit a
+		hierarchical Bayesian model for each conditonal distribution" from which I got the idea of having to draw many
+		posterior samples for 1 imputation round on 1 vairbale to be imputed.
+		* Initally wrong:
+			* Extremely inefficeint sampling of posterior parameters - If you think about a MICE algorithm
+			for exmaple from van Buuren 2018 p. 120, you can see your mistake as generating a posterior 
+			distribution for parameters in point 6, to keep just one. This is extreamely inefficient: the 
+			multivairate distirbution you are trying to replicate is at a higher level, it's the multivariate
+			distirbution of the missing values and model paramters. So drawing from the posterior distirbution
+			at step 6, is simply drawing 1 value for each parameter from their conditonal distirbution, then 
+			using them for drawing imputation in step 7. These two steps are then repeated for each variable
+			with missing values. Once these two steps have been repeated for each vairable with missing values
+			one iteration of the gibbs sampler, to apporximate the multivariate distribution of the missing values
+			conditinoal on the objserved data, is complete.
+
+			* Wrong chain division: chains are only for convergence checks, not to obtain the multiply 
+			imputed datasets. In van Buuren 2018 p. 120, the fact that Algorithm 4.3 is said to be repeated
+			in parallel m times is what made you think that parallel chains starting from the same intial 
+			imputations are needed to have multiple imputed datasets. In reality, this is one way of doing it.
+			However, you can also derive your imputation from one single chain, using thinning to select some
+			imputations after convergence is reached. THis latter format is the one suggested by Zhao Long 2016.
 	* Notes: 
 		* The lasso penalty is proportional to the log density of a laplacian distribution (or double exponential) (see 
 		Tibshirani1996 section 5) and this distribution has a shape with mass in the center and in the tails meaning
