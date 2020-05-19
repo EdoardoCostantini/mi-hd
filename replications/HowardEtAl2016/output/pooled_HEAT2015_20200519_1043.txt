@@ -1,0 +1,1115 @@
+SIMULATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+      Imputation methods are used on that condition-specific dataset.
+      Results are therefore given per dataset in condition
+
+------
+Starts at: 2020-05-19 10:43:52
+------
+
+2020-05-19 10:43:52 - Starts Repetition: 4
+2020-05-19 10:43:52 - Starts Repetition: 5
+2020-05-19 10:43:52 - Starts Repetition: 2
+2020-05-19 10:43:52 - Starts Repetition: 3
+2020-05-19 10:43:52 - Starts Repetition: 7
+2020-05-19 10:43:52 - Starts Repetition: 1
+2020-05-19 10:43:52 - Starts Repetition: 6
+2020-05-19 10:43:52 - Starts Repetition: 9
+2020-05-19 10:43:52 - Starts Repetition: 8
+2020-05-19 10:43:52 - Starts Repetition: 10
+2020-05-19 10:43:54 | Reptetition 4: GSp done
+2020-05-19 10:43:54 | Reptetition 2: GSp done
+2020-05-19 10:43:54 | Reptetition 1: GSp done
+2020-05-19 10:43:54 | Reptetition 3: GSp done
+2020-05-19 10:43:54 | Reptetition 8: GSp done
+2020-05-19 10:43:54 | Reptetition 10: GSp done
+2020-05-19 10:43:54 | Reptetition 9: GSp done
+2020-05-19 10:43:54 | Reptetition 7: GSp done
+2020-05-19 10:43:54 | Reptetition 6: GSp done
+2020-05-19 10:43:54 | Reptetition 5: GSp done
+2020-05-19 10:43:56 | Reptetition 4: GSs done
+2020-05-19 10:43:56 | Reptetition 3: GSs done
+2020-05-19 10:43:56 | Reptetition 2: GSs done
+2020-05-19 10:43:56 | Reptetition 4: NAV done
+2020-05-19 10:43:56 | Reptetition 7: GSs done
+2020-05-19 10:43:56 | Reptetition 8: GSs done
+2020-05-19 10:43:56 | Reptetition 3: NAV done
+2020-05-19 10:43:56 | Reptetition 5: GSs done
+2020-05-19 10:43:56 | Reptetition 10: GSs done
+2020-05-19 10:43:56 | Reptetition 6: GSs done
+2020-05-19 10:43:56 | Reptetition 1: GSs done
+2020-05-19 10:43:56 | Reptetition 9: GSs done
+2020-05-19 10:43:56 | Reptetition 2: NAV done
+2020-05-19 10:43:56 | Reptetition 7: NAV done
+2020-05-19 10:43:56 | Reptetition 10: NAV done
+2020-05-19 10:43:56 | Reptetition 8: NAV done
+2020-05-19 10:43:56 | Reptetition 6: NAV done
+2020-05-19 10:43:56 | Reptetition 1: NAV done
+2020-05-19 10:43:56 | Reptetition 5: NAV done
+2020-05-19 10:43:56 | Reptetition 9: NAV done
+2020-05-19 10:44:00 | Reptetition 7: IAV done
+2020-05-19 10:44:00 | Reptetition 3: IAV done
+2020-05-19 10:44:00 | Reptetition 4: IAV done
+2020-05-19 10:44:00 | Reptetition 6: IAV done
+2020-05-19 10:44:00 | Reptetition 7: PCA done
+2020-05-19 10:44:00 | Reptetition 5: IAV done
+2020-05-19 10:44:00 | Reptetition 3: PCA done
+2020-05-19 10:44:00 | Reptetition 4: PCA done
+2020-05-19 10:44:00 | Reptetition 6: PCA done
+2020-05-19 10:44:00 | Reptetition 9: IAV done
+2020-05-19 10:44:00 | Reptetition 1: IAV done
+2020-05-19 10:44:00 | Reptetition 5: PCA done
+2020-05-19 10:44:00 | Reptetition 8: IAV done
+2020-05-19 10:44:00 | Reptetition 9: PCA done
+2020-05-19 10:44:00 | Reptetition 10: IAV done
+2020-05-19 10:44:00 | Reptetition 1: PCA done
+2020-05-19 10:44:00 | Reptetition 8: PCA done
+2020-05-19 10:44:00 | Reptetition 10: PCA done
+2020-05-19 10:44:00 | Reptetition 2: IAV done
+2020-05-19 10:44:00 | Reptetition 2: PCA done
+2020-05-19 10:44:02 | Reptetition 7: GSp done
+2020-05-19 10:44:02 | Reptetition 3: GSp done
+2020-05-19 10:44:02 | Reptetition 4: GSp done
+2020-05-19 10:44:03 | Reptetition 7: GSs done
+2020-05-19 10:44:03 | Reptetition 4: GSs done
+2020-05-19 10:44:03 | Reptetition 7: NAV done
+2020-05-19 10:44:03 | Reptetition 6: GSp done
+2020-05-19 10:44:03 | Reptetition 4: NAV done
+2020-05-19 10:44:03 | Reptetition 1: GSp done
+2020-05-19 10:44:03 | Reptetition 9: GSp done
+2020-05-19 10:44:03 | Reptetition 8: GSp done
+2020-05-19 10:44:03 | Reptetition 10: GSp done
+2020-05-19 10:44:03 | Reptetition 5: GSp done
+2020-05-19 10:44:03 | Reptetition 2: GSp done
+2020-05-19 10:44:03 | Reptetition 8: GSs done
+2020-05-19 10:44:03 | Reptetition 8: NAV done
+2020-05-19 10:44:03 | Reptetition 2: GSs done
+2020-05-19 10:44:03 | Reptetition 2: NAV done
+2020-05-19 10:44:03 | Reptetition 3: GSs done
+2020-05-19 10:44:04 | Reptetition 3: NAV done
+2020-05-19 10:44:04 | Reptetition 6: GSs done
+2020-05-19 10:44:04 | Reptetition 1: GSs done
+2020-05-19 10:44:04 | Reptetition 6: NAV done
+2020-05-19 10:44:04 | Reptetition 9: GSs done
+2020-05-19 10:44:04 | Reptetition 5: GSs done
+2020-05-19 10:44:04 | Reptetition 1: NAV done
+2020-05-19 10:44:04 | Reptetition 10: GSs done
+2020-05-19 10:44:04 | Reptetition 5: NAV done
+2020-05-19 10:44:04 | Reptetition 9: NAV done
+2020-05-19 10:44:04 | Reptetition 10: NAV done
+2020-05-19 10:44:08 | Reptetition 4: IAV done
+2020-05-19 10:44:08 | Reptetition 7: IAV done
+2020-05-19 10:44:08 | Reptetition 4: PCA done
+2020-05-19 10:44:08 | Reptetition 3: IAV done
+2020-05-19 10:44:08 | Reptetition 7: PCA done
+2020-05-19 10:44:08 | Reptetition 5: IAV done
+2020-05-19 10:44:08 | Reptetition 3: PCA done
+2020-05-19 10:44:08 | Reptetition 6: IAV done
+2020-05-19 10:44:08 | Reptetition 1: IAV done
+2020-05-19 10:44:08 | Reptetition 5: PCA done
+2020-05-19 10:44:08 - Starts Repetition: 14
+2020-05-19 10:44:08 | Reptetition 8: IAV done
+2020-05-19 10:44:08 | Reptetition 6: PCA done
+2020-05-19 10:44:08 | Reptetition 1: PCA done
+2020-05-19 10:44:08 - Starts Repetition: 17
+2020-05-19 10:44:08 - Starts Repetition: 13
+2020-05-19 10:44:08 | Reptetition 8: PCA done
+2020-05-19 10:44:08 | Reptetition 2: IAV done
+2020-05-19 10:44:09 - Starts Repetition: 15
+2020-05-19 10:44:09 | Reptetition 10: IAV done
+2020-05-19 10:44:09 - Starts Repetition: 16
+2020-05-19 10:44:09 | Reptetition 2: PCA done
+2020-05-19 10:44:09 | Reptetition 9: IAV done
+2020-05-19 10:44:09 - Starts Repetition: 11
+2020-05-19 10:44:09 | Reptetition 10: PCA done
+2020-05-19 10:44:09 - Starts Repetition: 18
+2020-05-19 10:44:09 | Reptetition 9: PCA done
+2020-05-19 10:44:09 - Starts Repetition: 12
+2020-05-19 10:44:09 - Starts Repetition: 20
+2020-05-19 10:44:09 - Starts Repetition: 19
+2020-05-19 10:44:10 | Reptetition 14: GSp done
+2020-05-19 10:44:10 | Reptetition 14: GSs done
+2020-05-19 10:44:10 | Reptetition 14: NAV done
+2020-05-19 10:44:10 | Reptetition 13: GSp done
+2020-05-19 10:44:10 | Reptetition 13: GSs done
+2020-05-19 10:44:10 | Reptetition 13: NAV done
+2020-05-19 10:44:11 | Reptetition 11: GSp done
+2020-05-19 10:44:11 | Reptetition 17: GSp done
+2020-05-19 10:44:11 | Reptetition 11: GSs done
+2020-05-19 10:44:11 | Reptetition 17: GSs done
+2020-05-19 10:44:11 | Reptetition 11: NAV done
+2020-05-19 10:44:11 | Reptetition 17: NAV done
+2020-05-19 10:44:11 | Reptetition 15: GSp done
+2020-05-19 10:44:11 | Reptetition 16: GSp done
+2020-05-19 10:44:11 | Reptetition 15: GSs done
+2020-05-19 10:44:11 | Reptetition 16: GSs done
+2020-05-19 10:44:11 | Reptetition 15: NAV done
+2020-05-19 10:44:11 | Reptetition 16: NAV done
+2020-05-19 10:44:11 | Reptetition 18: GSp done
+2020-05-19 10:44:12 | Reptetition 18: GSs done
+2020-05-19 10:44:12 | Reptetition 12: GSp done
+2020-05-19 10:44:12 | Reptetition 18: NAV done
+2020-05-19 10:44:12 | Reptetition 12: GSs done
+2020-05-19 10:44:12 | Reptetition 12: NAV done
+2020-05-19 10:44:12 | Reptetition 20: GSp done
+2020-05-19 10:44:12 | Reptetition 19: GSp done
+2020-05-19 10:44:12 | Reptetition 20: GSs done
+2020-05-19 10:44:12 | Reptetition 19: GSs done
+2020-05-19 10:44:12 | Reptetition 20: NAV done
+2020-05-19 10:44:12 | Reptetition 19: NAV done
+2020-05-19 10:44:15 | Reptetition 13: IAV done
+2020-05-19 10:44:16 | Reptetition 13: PCA done
+2020-05-19 10:44:16 | Reptetition 14: IAV done
+2020-05-19 10:44:16 | Reptetition 15: IAV done
+2020-05-19 10:44:16 | Reptetition 17: IAV done
+2020-05-19 10:44:16 | Reptetition 14: PCA done
+2020-05-19 10:44:16 | Reptetition 15: PCA done
+2020-05-19 10:44:16 | Reptetition 17: PCA done
+2020-05-19 10:44:16 | Reptetition 16: IAV done
+2020-05-19 10:44:16 | Reptetition 16: PCA done
+2020-05-19 10:44:16 | Reptetition 11: IAV done
+2020-05-19 10:44:16 | Reptetition 18: IAV done
+2020-05-19 10:44:16 | Reptetition 11: PCA done
+2020-05-19 10:44:16 | Reptetition 18: PCA done
+2020-05-19 10:44:16 | Reptetition 12: IAV done
+2020-05-19 10:44:16 | Reptetition 12: PCA done
+2020-05-19 10:44:17 | Reptetition 19: IAV done
+2020-05-19 10:44:17 | Reptetition 20: IAV done
+2020-05-19 10:44:17 | Reptetition 19: PCA done
+2020-05-19 10:44:17 | Reptetition 20: PCA done
+2020-05-19 10:44:17 | Reptetition 13: GSp done
+2020-05-19 10:44:17 | Reptetition 14: GSp done
+2020-05-19 10:44:18 | Reptetition 14: GSs done
+2020-05-19 10:44:18 | Reptetition 14: NAV done
+2020-05-19 10:44:18 | Reptetition 13: GSs done
+2020-05-19 10:44:18 | Reptetition 11: GSp done
+2020-05-19 10:44:18 | Reptetition 13: NAV done
+2020-05-19 10:44:19 | Reptetition 15: GSp done
+2020-05-19 10:44:19 | Reptetition 17: GSp done
+2020-05-19 10:44:19 | Reptetition 15: GSs done
+2020-05-19 10:44:19 | Reptetition 17: GSs done
+2020-05-19 10:44:19 | Reptetition 11: GSs done
+2020-05-19 10:44:19 | Reptetition 15: NAV done
+2020-05-19 10:44:19 | Reptetition 17: NAV done
+2020-05-19 10:44:19 | Reptetition 11: NAV done
+2020-05-19 10:44:19 | Reptetition 16: GSp done
+2020-05-19 10:44:20 | Reptetition 16: GSs done
+2020-05-19 10:44:20 | Reptetition 18: GSp done
+2020-05-19 10:44:20 | Reptetition 16: NAV done
+2020-05-19 10:44:20 | Reptetition 18: GSs done
+2020-05-19 10:44:20 | Reptetition 12: GSp done
+2020-05-19 10:44:20 | Reptetition 18: NAV done
+2020-05-19 10:44:20 | Reptetition 19: GSp done
+2020-05-19 10:44:20 | Reptetition 12: GSs done
+2020-05-19 10:44:20 | Reptetition 20: GSp done
+2020-05-19 10:44:20 | Reptetition 12: NAV done
+2020-05-19 10:44:20 | Reptetition 19: GSs done
+2020-05-19 10:44:20 | Reptetition 19: NAV done
+2020-05-19 10:44:20 | Reptetition 20: GSs done
+2020-05-19 10:44:20 | Reptetition 20: NAV done
+2020-05-19 10:44:23 | Reptetition 14: IAV done
+2020-05-19 10:44:23 | Reptetition 13: IAV done
+2020-05-19 10:44:23 | Reptetition 14: PCA done
+2020-05-19 10:44:23 | Reptetition 13: PCA done
+2020-05-19 10:44:23 - Starts Repetition: 24
+2020-05-19 10:44:24 - Starts Repetition: 23
+2020-05-19 10:44:24 | Reptetition 15: IAV done
+2020-05-19 10:44:24 | Reptetition 11: IAV done
+2020-05-19 10:44:24 | Reptetition 15: PCA done
+2020-05-19 10:44:24 | Reptetition 17: IAV done
+2020-05-19 10:44:24 | Reptetition 11: PCA done
+2020-05-19 10:44:24 | Reptetition 18: IAV done
+2020-05-19 10:44:24 | Reptetition 17: PCA done
+2020-05-19 10:44:24 | Reptetition 16: IAV done
+2020-05-19 10:44:24 - Starts Repetition: 25
+2020-05-19 10:44:24 | Reptetition 18: PCA done
+2020-05-19 10:44:24 - Starts Repetition: 21
+2020-05-19 10:44:24 | Reptetition 16: PCA done
+2020-05-19 10:44:24 | Reptetition 19: IAV done
+2020-05-19 10:44:24 - Starts Repetition: 27
+2020-05-19 10:44:24 | Reptetition 20: IAV done
+2020-05-19 10:44:24 | Reptetition 12: IAV done
+2020-05-19 10:44:24 - Starts Repetition: 28
+2020-05-19 10:44:24 | Reptetition 19: PCA done
+2020-05-19 10:44:24 | Reptetition 20: PCA done
+2020-05-19 10:44:24 | Reptetition 12: PCA done
+2020-05-19 10:44:25 - Starts Repetition: 26
+2020-05-19 10:44:25 | Reptetition 24: GSp done
+2020-05-19 10:44:25 - Starts Repetition: 29
+2020-05-19 10:44:25 - Starts Repetition: 30
+2020-05-19 10:44:25 | Reptetition 24: GSs done
+2020-05-19 10:44:25 - Starts Repetition: 22
+2020-05-19 10:44:25 | Reptetition 23: GSp done
+2020-05-19 10:44:25 | Reptetition 24: NAV done
+2020-05-19 10:44:25 | Reptetition 23: GSs done
+2020-05-19 10:44:26 | Reptetition 23: NAV done
+2020-05-19 10:44:26 | Reptetition 21: GSp done
+2020-05-19 10:44:26 | Reptetition 21: GSs done
+2020-05-19 10:44:26 | Reptetition 25: GSp done
+2020-05-19 10:44:26 | Reptetition 21: NAV done
+2020-05-19 10:44:26 | Reptetition 25: GSs done
+2020-05-19 10:44:26 | Reptetition 25: NAV done
+2020-05-19 10:44:27 | Reptetition 27: GSp done
+2020-05-19 10:44:27 | Reptetition 27: GSs done
+2020-05-19 10:44:27 | Reptetition 27: NAV done
+2020-05-19 10:44:27 | Reptetition 28: GSp done
+2020-05-19 10:44:27 | Reptetition 26: GSp done
+2020-05-19 10:44:27 | Reptetition 28: GSs done
+2020-05-19 10:44:27 | Reptetition 28: NAV done
+2020-05-19 10:44:27 | Reptetition 26: GSs done
+2020-05-19 10:44:27 | Reptetition 26: NAV done
+2020-05-19 10:44:27 | Reptetition 29: GSp done
+2020-05-19 10:44:27 | Reptetition 30: GSp done
+2020-05-19 10:44:27 | Reptetition 22: GSp done
+2020-05-19 10:44:27 | Reptetition 29: GSs done
+2020-05-19 10:44:27 | Reptetition 30: GSs done
+2020-05-19 10:44:27 | Reptetition 29: NAV done
+2020-05-19 10:44:27 | Reptetition 22: GSs done
+2020-05-19 10:44:27 | Reptetition 30: NAV done
+2020-05-19 10:44:27 | Reptetition 22: NAV done
+2020-05-19 10:44:30 | Reptetition 24: IAV done
+2020-05-19 10:44:30 | Reptetition 24: PCA done
+2020-05-19 10:44:30 | Reptetition 23: IAV done
+2020-05-19 10:44:31 | Reptetition 23: PCA done
+2020-05-19 10:44:31 | Reptetition 25: IAV done
+2020-05-19 10:44:31 | Reptetition 21: IAV done
+2020-05-19 10:44:31 | Reptetition 25: PCA done
+2020-05-19 10:44:31 | Reptetition 27: IAV done
+2020-05-19 10:44:31 | Reptetition 21: PCA done
+2020-05-19 10:44:31 | Reptetition 27: PCA done
+2020-05-19 10:44:32 | Reptetition 26: IAV done
+2020-05-19 10:44:32 | Reptetition 28: IAV done
+2020-05-19 10:44:32 | Reptetition 26: PCA done
+2020-05-19 10:44:32 | Reptetition 23: GSp done
+2020-05-19 10:44:32 | Reptetition 24: GSp done
+2020-05-19 10:44:32 | Reptetition 28: PCA done
+2020-05-19 10:44:32 | Reptetition 24: GSs done
+2020-05-19 10:44:32 | Reptetition 24: NAV done
+2020-05-19 10:44:32 | Reptetition 29: IAV done
+2020-05-19 10:44:32 | Reptetition 30: IAV done
+2020-05-19 10:44:32 | Reptetition 22: IAV done
+2020-05-19 10:44:32 | Reptetition 29: PCA done
+2020-05-19 10:44:32 | Reptetition 30: PCA done
+2020-05-19 10:44:32 | Reptetition 22: PCA done
+2020-05-19 10:44:33 | Reptetition 23: GSs done
+2020-05-19 10:44:33 | Reptetition 23: NAV done
+2020-05-19 10:44:33 | Reptetition 27: GSp done
+2020-05-19 10:44:33 | Reptetition 27: GSs done
+2020-05-19 10:44:33 | Reptetition 27: NAV done
+2020-05-19 10:44:33 | Reptetition 25: GSp done
+2020-05-19 10:44:34 | Reptetition 25: GSs done
+2020-05-19 10:44:34 | Reptetition 21: GSp done
+2020-05-19 10:44:34 | Reptetition 25: NAV done
+2020-05-19 10:44:34 | Reptetition 21: GSs done
+2020-05-19 10:44:34 | Reptetition 21: NAV done
+2020-05-19 10:44:34 | Reptetition 29: GSp done
+2020-05-19 10:44:34 | Reptetition 26: GSp done
+2020-05-19 10:44:34 | Reptetition 29: GSs done
+2020-05-19 10:44:34 | Reptetition 26: GSs done
+2020-05-19 10:44:34 | Reptetition 28: GSp done
+2020-05-19 10:44:35 | Reptetition 29: NAV done
+2020-05-19 10:44:35 | Reptetition 26: NAV done
+2020-05-19 10:44:35 | Reptetition 28: GSs done
+2020-05-19 10:44:35 | Reptetition 28: NAV done
+2020-05-19 10:44:35 | Reptetition 30: GSp done
+2020-05-19 10:44:35 | Reptetition 22: GSp done
+2020-05-19 10:44:35 | Reptetition 30: GSs done
+2020-05-19 10:44:35 | Reptetition 22: GSs done
+2020-05-19 10:44:35 | Reptetition 30: NAV done
+2020-05-19 10:44:35 | Reptetition 22: NAV done
+2020-05-19 10:44:37 | Reptetition 24: IAV done
+2020-05-19 10:44:37 | Reptetition 24: PCA done
+2020-05-19 10:44:38 - Starts Repetition: 34
+2020-05-19 10:44:38 | Reptetition 23: IAV done
+2020-05-19 10:44:38 | Reptetition 23: PCA done
+2020-05-19 10:44:38 - Starts Repetition: 33
+2020-05-19 10:44:38 | Reptetition 25: IAV done
+2020-05-19 10:44:38 | Reptetition 25: PCA done
+2020-05-19 10:44:39 - Starts Repetition: 35
+2020-05-19 10:44:39 | Reptetition 27: IAV done
+2020-05-19 10:44:39 | Reptetition 27: PCA done
+2020-05-19 10:44:39 | Reptetition 26: IAV done
+2020-05-19 10:44:39 - Starts Repetition: 37
+2020-05-19 10:44:39 | Reptetition 26: PCA done
+2020-05-19 10:44:39 | Reptetition 34: GSp done
+2020-05-19 10:44:39 | Reptetition 28: IAV done
+2020-05-19 10:44:40 - Starts Repetition: 36
+2020-05-19 10:44:40 | Reptetition 29: IAV done
+2020-05-19 10:44:40 | Reptetition 34: GSs done
+2020-05-19 10:44:40 | Reptetition 28: PCA done
+2020-05-19 10:44:40 | Reptetition 34: NAV done
+2020-05-19 10:44:40 | Reptetition 21: IAV done
+2020-05-19 10:44:40 | Reptetition 29: PCA done
+2020-05-19 10:44:40 | Reptetition 21: PCA done
+2020-05-19 10:44:40 | Reptetition 30: IAV done
+2020-05-19 10:44:40 | Reptetition 33: GSp done
+2020-05-19 10:44:40 | Reptetition 22: IAV done
+2020-05-19 10:44:40 - Starts Repetition: 38
+2020-05-19 10:44:40 | Reptetition 33: GSs done
+2020-05-19 10:44:40 | Reptetition 30: PCA done
+2020-05-19 10:44:40 - Starts Repetition: 39
+2020-05-19 10:44:40 | Reptetition 33: NAV done
+2020-05-19 10:44:40 | Reptetition 22: PCA done
+2020-05-19 10:44:40 - Starts Repetition: 31
+2020-05-19 10:44:40 - Starts Repetition: 40
+2020-05-19 10:44:40 | Reptetition 35: GSp done
+2020-05-19 10:44:40 - Starts Repetition: 32
+2020-05-19 10:44:40 | Reptetition 35: GSs done
+2020-05-19 10:44:40 | Reptetition 35: NAV done
+2020-05-19 10:44:41 | Reptetition 37: GSp done
+2020-05-19 10:44:41 | Reptetition 37: GSs done
+2020-05-19 10:44:41 | Reptetition 37: NAV done
+2020-05-19 10:44:41 | Reptetition 36: GSp done
+2020-05-19 10:44:41 | Reptetition 38: GSp done
+2020-05-19 10:44:41 | Reptetition 36: GSs done
+2020-05-19 10:44:42 | Reptetition 38: GSs done
+2020-05-19 10:44:42 | Reptetition 39: GSp done
+2020-05-19 10:44:42 | Reptetition 36: NAV done
+2020-05-19 10:44:42 | Reptetition 38: NAV done
+2020-05-19 10:44:42 | Reptetition 39: GSs done
+2020-05-19 10:44:42 | Reptetition 31: GSp done
+2020-05-19 10:44:42 | Reptetition 39: NAV done
+2020-05-19 10:44:42 | Reptetition 32: GSp done
+2020-05-19 10:44:42 | Reptetition 32: GSs done
+2020-05-19 10:44:42 | Reptetition 32: NAV done
+2020-05-19 10:44:42 | Reptetition 40: GSp done
+2020-05-19 10:44:42 | Reptetition 31: GSs done
+2020-05-19 10:44:42 | Reptetition 31: NAV done
+2020-05-19 10:44:42 | Reptetition 40: GSs done
+2020-05-19 10:44:42 | Reptetition 40: NAV done
+2020-05-19 10:44:45 | Reptetition 33: IAV done
+2020-05-19 10:44:45 | Reptetition 34: IAV done
+2020-05-19 10:44:45 | Reptetition 33: PCA done
+2020-05-19 10:44:45 | Reptetition 34: PCA done
+2020-05-19 10:44:45 | Reptetition 35: IAV done
+2020-05-19 10:44:45 | Reptetition 35: PCA done
+2020-05-19 10:44:46 | Reptetition 37: IAV done
+2020-05-19 10:44:46 | Reptetition 37: PCA done
+2020-05-19 10:44:47 | Reptetition 33: GSp done
+2020-05-19 10:44:47 | Reptetition 35: GSp done
+2020-05-19 10:44:47 | Reptetition 34: GSp done
+2020-05-19 10:44:47 | Reptetition 33: GSs done
+2020-05-19 10:44:47 | Reptetition 39: IAV done
+2020-05-19 10:44:47 | Reptetition 33: NAV done
+2020-05-19 10:44:47 | Reptetition 38: IAV done
+2020-05-19 10:44:47 | Reptetition 35: GSs done
+2020-05-19 10:44:47 | Reptetition 34: GSs done
+2020-05-19 10:44:47 | Reptetition 35: NAV done
+2020-05-19 10:44:47 | Reptetition 39: PCA done
+2020-05-19 10:44:47 | Reptetition 36: IAV done
+2020-05-19 10:44:47 | Reptetition 34: NAV done
+2020-05-19 10:44:47 | Reptetition 38: PCA done
+2020-05-19 10:44:47 | Reptetition 32: IAV done
+2020-05-19 10:44:47 | Reptetition 36: PCA done
+2020-05-19 10:44:47 | Reptetition 32: PCA done
+2020-05-19 10:44:47 | Reptetition 31: IAV done
+2020-05-19 10:44:47 | Reptetition 31: PCA done
+2020-05-19 10:44:47 | Reptetition 37: GSp done
+2020-05-19 10:44:48 | Reptetition 37: GSs done
+2020-05-19 10:44:48 | Reptetition 40: IAV done
+2020-05-19 10:44:48 | Reptetition 37: NAV done
+2020-05-19 10:44:48 | Reptetition 40: PCA done
+2020-05-19 10:44:48 | Reptetition 39: GSp done
+2020-05-19 10:44:49 | Reptetition 38: GSp done
+2020-05-19 10:44:49 | Reptetition 36: GSp done
+2020-05-19 10:44:49 | Reptetition 39: GSs done
+2020-05-19 10:44:49 | Reptetition 39: NAV done
+2020-05-19 10:44:49 | Reptetition 38: GSs done
+2020-05-19 10:44:49 | Reptetition 36: GSs done
+2020-05-19 10:44:49 | Reptetition 38: NAV done
+2020-05-19 10:44:49 | Reptetition 32: GSp done
+2020-05-19 10:44:49 | Reptetition 36: NAV done
+2020-05-19 10:44:49 | Reptetition 32: GSs done
+2020-05-19 10:44:49 | Reptetition 31: GSp done
+2020-05-19 10:44:49 | Reptetition 32: NAV done
+2020-05-19 10:44:49 | Reptetition 40: GSp done
+2020-05-19 10:44:49 | Reptetition 40: GSs done
+2020-05-19 10:44:49 | Reptetition 31: GSs done
+2020-05-19 10:44:49 | Reptetition 40: NAV done
+2020-05-19 10:44:49 | Reptetition 31: NAV done
+2020-05-19 10:44:52 | Reptetition 33: IAV done
+2020-05-19 10:44:52 | Reptetition 33: PCA done
+2020-05-19 10:44:52 | Reptetition 34: IAV done
+2020-05-19 10:44:52 - Starts Repetition: 43
+2020-05-19 10:44:52 | Reptetition 34: PCA done
+2020-05-19 10:44:52 | Reptetition 35: IAV done
+2020-05-19 10:44:52 | Reptetition 35: PCA done
+2020-05-19 10:44:53 - Starts Repetition: 44
+2020-05-19 10:44:53 | Reptetition 37: IAV done
+2020-05-19 10:44:53 - Starts Repetition: 45
+2020-05-19 10:44:53 | Reptetition 37: PCA done
+2020-05-19 10:44:53 - Starts Repetition: 47
+2020-05-19 10:44:53 | Reptetition 36: IAV done
+2020-05-19 10:44:54 | Reptetition 36: PCA done
+2020-05-19 10:44:54 | Reptetition 32: IAV done
+2020-05-19 10:44:54 - Starts Repetition: 46
+2020-05-19 10:44:54 | Reptetition 32: PCA done
+2020-05-19 10:44:54 | Reptetition 38: IAV done
+2020-05-19 10:44:54 | Reptetition 38: PCA done
+2020-05-19 10:44:54 | Reptetition 45: GSp done
+2020-05-19 10:44:54 | Reptetition 39: IAV done
+2020-05-19 10:44:54 | Reptetition 43: GSp done
+2020-05-19 10:44:54 - Starts Repetition: 42
+2020-05-19 10:44:54 | Reptetition 45: GSs done
+2020-05-19 10:44:54 | Reptetition 43: GSs done
+2020-05-19 10:44:54 | Reptetition 45: NAV done
+2020-05-19 10:44:54 | Reptetition 44: GSp done
+2020-05-19 10:44:54 | Reptetition 39: PCA done
+2020-05-19 10:44:54 | Reptetition 40: IAV done
+2020-05-19 10:44:54 | Reptetition 43: NAV done
+2020-05-19 10:44:54 | Reptetition 44: GSs done
+2020-05-19 10:44:54 | Reptetition 47: GSp done
+2020-05-19 10:44:54 | Reptetition 31: IAV done
+2020-05-19 10:44:54 | Reptetition 44: NAV done
+2020-05-19 10:44:54 - Starts Repetition: 48
+2020-05-19 10:44:54 | Reptetition 40: PCA done
+2020-05-19 10:44:55 | Reptetition 47: GSs done
+2020-05-19 10:44:55 | Reptetition 31: PCA done
+2020-05-19 10:44:55 | Reptetition 47: NAV done
+2020-05-19 10:44:55 - Starts Repetition: 49
+2020-05-19 10:44:55 - Starts Repetition: 50
+2020-05-19 10:44:55 - Starts Repetition: 41
+2020-05-19 10:44:55 | Reptetition 46: GSp done
+2020-05-19 10:44:56 | Reptetition 42: GSp done
+2020-05-19 10:44:56 | Reptetition 42: GSs done
+2020-05-19 10:44:56 | Reptetition 42: NAV done
+2020-05-19 10:44:56 | Reptetition 46: GSs done
+2020-05-19 10:44:56 | Reptetition 48: GSp done
+2020-05-19 10:44:56 | Reptetition 46: NAV done
+2020-05-19 10:44:56 | Reptetition 48: GSs done
+2020-05-19 10:44:56 | Reptetition 49: GSp done
+2020-05-19 10:44:56 | Reptetition 48: NAV done
+2020-05-19 10:44:56 | Reptetition 49: GSs done
+2020-05-19 10:44:56 | Reptetition 50: GSp done
+2020-05-19 10:44:56 | Reptetition 49: NAV done
+2020-05-19 10:44:56 | Reptetition 50: GSs done
+2020-05-19 10:44:56 | Reptetition 41: GSp done
+2020-05-19 10:44:56 | Reptetition 50: NAV done
+2020-05-19 10:44:57 | Reptetition 41: GSs done
+2020-05-19 10:44:57 | Reptetition 41: NAV done
+2020-05-19 10:44:59 | Reptetition 43: IAV done
+2020-05-19 10:44:59 | Reptetition 43: PCA done
+2020-05-19 10:44:59 | Reptetition 45: IAV done
+2020-05-19 10:45:00 | Reptetition 45: PCA done
+2020-05-19 10:45:00 | Reptetition 44: IAV done
+2020-05-19 10:45:00 | Reptetition 44: PCA done
+2020-05-19 10:45:00 | Reptetition 47: IAV done
+2020-05-19 10:45:00 | Reptetition 47: PCA done
+2020-05-19 10:45:01 | Reptetition 46: IAV done
+2020-05-19 10:45:01 | Reptetition 46: PCA done
+2020-05-19 10:45:01 | Reptetition 48: IAV done
+2020-05-19 10:45:01 | Reptetition 45: GSp done
+2020-05-19 10:45:01 | Reptetition 42: IAV done
+2020-05-19 10:45:01 | Reptetition 48: PCA done
+2020-05-19 10:45:01 | Reptetition 45: GSs done
+2020-05-19 10:45:01 | Reptetition 43: GSp done
+2020-05-19 10:45:01 | Reptetition 42: PCA done
+2020-05-19 10:45:01 | Reptetition 45: NAV done
+2020-05-19 10:45:01 | Reptetition 43: GSs done
+2020-05-19 10:45:01 | Reptetition 43: NAV done
+2020-05-19 10:45:01 | Reptetition 49: IAV done
+2020-05-19 10:45:01 | Reptetition 47: GSp done
+2020-05-19 10:45:01 | Reptetition 49: PCA done
+2020-05-19 10:45:01 | Reptetition 44: GSp done
+2020-05-19 10:45:02 | Reptetition 47: GSs done
+2020-05-19 10:45:02 | Reptetition 41: IAV done
+2020-05-19 10:45:02 | Reptetition 47: NAV done
+2020-05-19 10:45:02 | Reptetition 44: GSs done
+2020-05-19 10:45:02 | Reptetition 50: IAV done
+2020-05-19 10:45:02 | Reptetition 41: PCA done
+2020-05-19 10:45:02 | Reptetition 44: NAV done
+2020-05-19 10:45:02 | Reptetition 50: PCA done
+2020-05-19 10:45:02 | Reptetition 46: GSp done
+2020-05-19 10:45:02 | Reptetition 46: GSs done
+2020-05-19 10:45:03 | Reptetition 46: NAV done
+2020-05-19 10:45:03 | Reptetition 48: GSp done
+2020-05-19 10:45:03 | Reptetition 42: GSp done
+2020-05-19 10:45:03 | Reptetition 48: GSs done
+2020-05-19 10:45:03 | Reptetition 42: GSs done
+2020-05-19 10:45:03 | Reptetition 48: NAV done
+2020-05-19 10:45:03 | Reptetition 42: NAV done
+2020-05-19 10:45:03 | Reptetition 49: GSp done
+2020-05-19 10:45:03 | Reptetition 49: GSs done
+2020-05-19 10:45:03 | Reptetition 49: NAV done
+2020-05-19 10:45:03 | Reptetition 41: GSp done
+2020-05-19 10:45:03 | Reptetition 50: GSp done
+2020-05-19 10:45:03 | Reptetition 50: GSs done
+2020-05-19 10:45:03 | Reptetition 50: NAV done
+2020-05-19 10:45:04 | Reptetition 41: GSs done
+2020-05-19 10:45:04 | Reptetition 41: NAV done
+2020-05-19 10:45:06 | Reptetition 43: IAV done
+2020-05-19 10:45:06 | Reptetition 45: IAV done
+2020-05-19 10:45:07 | Reptetition 43: PCA done
+2020-05-19 10:45:07 | Reptetition 44: IAV done
+2020-05-19 10:45:07 | Reptetition 45: PCA done
+2020-05-19 10:45:07 | Reptetition 44: PCA done
+2020-05-19 10:45:07 - Starts Repetition: 53
+2020-05-19 10:45:07 | Reptetition 47: IAV done
+2020-05-19 10:45:07 - Starts Repetition: 55
+2020-05-19 10:45:07 - Starts Repetition: 54
+2020-05-19 10:45:07 | Reptetition 47: PCA done
+2020-05-19 10:45:07 | Reptetition 46: IAV done
+2020-05-19 10:45:07 - Starts Repetition: 57
+2020-05-19 10:45:07 | Reptetition 46: PCA done
+2020-05-19 10:45:08 - Starts Repetition: 56
+2020-05-19 10:45:08 | Reptetition 48: IAV done
+2020-05-19 10:45:08 | Reptetition 42: IAV done
+2020-05-19 10:45:08 | Reptetition 48: PCA done
+2020-05-19 10:45:08 | Reptetition 42: PCA done
+2020-05-19 10:45:08 | Reptetition 54: GSp done
+2020-05-19 10:45:08 | Reptetition 50: IAV done
+2020-05-19 10:45:08 | Reptetition 55: GSp done
+2020-05-19 10:45:08 - Starts Repetition: 58
+2020-05-19 10:45:08 | Reptetition 54: GSs done
+2020-05-19 10:45:08 | Reptetition 55: GSs done
+2020-05-19 10:45:08 - Starts Repetition: 52
+2020-05-19 10:45:09 | Reptetition 54: NAV done
+2020-05-19 10:45:09 | Reptetition 50: PCA done
+2020-05-19 10:45:09 | Reptetition 55: NAV done
+2020-05-19 10:45:09 | Reptetition 49: IAV done
+2020-05-19 10:45:09 | Reptetition 53: GSp done
+2020-05-19 10:45:09 | Reptetition 57: GSp done
+2020-05-19 10:45:09 | Reptetition 53: GSs done
+2020-05-19 10:45:09 | Reptetition 53: NAV done
+2020-05-19 10:45:09 | Reptetition 49: PCA done
+2020-05-19 10:45:09 | Reptetition 57: GSs done
+2020-05-19 10:45:09 - Starts Repetition: 60
+2020-05-19 10:45:09 | Reptetition 57: NAV done
+2020-05-19 10:45:09 | Reptetition 56: GSp done
+2020-05-19 10:45:09 | Reptetition 56: GSs done
+2020-05-19 10:45:09 - Starts Repetition: 59
+2020-05-19 10:45:09 | Reptetition 41: IAV done
+2020-05-19 10:45:09 | Reptetition 56: NAV done
+2020-05-19 10:45:09 | Reptetition 41: PCA done
+2020-05-19 10:45:10 - Starts Repetition: 51
+2020-05-19 10:45:10 | Reptetition 58: GSp done
+2020-05-19 10:45:10 | Reptetition 52: GSp done
+2020-05-19 10:45:10 | Reptetition 58: GSs done
+2020-05-19 10:45:10 | Reptetition 52: GSs done
+2020-05-19 10:45:10 | Reptetition 58: NAV done
+2020-05-19 10:45:10 | Reptetition 52: NAV done
+2020-05-19 10:45:10 | Reptetition 60: GSp done
+2020-05-19 10:45:10 | Reptetition 60: GSs done
+2020-05-19 10:45:10 | Reptetition 60: NAV done
+2020-05-19 10:45:10 | Reptetition 59: GSp done
+2020-05-19 10:45:10 | Reptetition 59: GSs done
+2020-05-19 10:45:11 | Reptetition 59: NAV done
+2020-05-19 10:45:11 | Reptetition 51: GSp done
+2020-05-19 10:45:11 | Reptetition 51: GSs done
+2020-05-19 10:45:11 | Reptetition 51: NAV done
+2020-05-19 10:45:14 | Reptetition 57: IAV done
+2020-05-19 10:45:14 | Reptetition 57: PCA done
+2020-05-19 10:45:14 | Reptetition 53: IAV done
+2020-05-19 10:45:14 | Reptetition 54: IAV done
+2020-05-19 10:45:14 | Reptetition 55: IAV done
+2020-05-19 10:45:14 | Reptetition 53: PCA done
+2020-05-19 10:45:14 | Reptetition 55: PCA done
+2020-05-19 10:45:14 | Reptetition 54: PCA done
+2020-05-19 10:45:14 | Reptetition 56: IAV done
+2020-05-19 10:45:14 | Reptetition 56: PCA done
+2020-05-19 10:45:15 | Reptetition 52: IAV done
+2020-05-19 10:45:15 | Reptetition 52: PCA done
+2020-05-19 10:45:15 | Reptetition 58: IAV done
+2020-05-19 10:45:15 | Reptetition 57: GSp done
+2020-05-19 10:45:15 | Reptetition 57: GSs done
+2020-05-19 10:45:15 | Reptetition 58: PCA done
+2020-05-19 10:45:15 | Reptetition 57: NAV done
+2020-05-19 10:45:15 | Reptetition 53: GSp done
+2020-05-19 10:45:15 | Reptetition 60: IAV done
+2020-05-19 10:45:15 | Reptetition 54: GSp done
+2020-05-19 10:45:15 | Reptetition 55: GSp done
+2020-05-19 10:45:15 | Reptetition 53: GSs done
+2020-05-19 10:45:16 | Reptetition 60: PCA done
+2020-05-19 10:45:16 | Reptetition 53: NAV done
+2020-05-19 10:45:16 | Reptetition 55: GSs done
+2020-05-19 10:45:16 | Reptetition 54: GSs done
+2020-05-19 10:45:16 | Reptetition 55: NAV done
+2020-05-19 10:45:16 | Reptetition 54: NAV done
+2020-05-19 10:45:16 | Reptetition 56: GSp done
+2020-05-19 10:45:16 | Reptetition 59: IAV done
+2020-05-19 10:45:16 | Reptetition 56: GSs done
+2020-05-19 10:45:16 | Reptetition 56: NAV done
+2020-05-19 10:45:16 | Reptetition 59: PCA done
+2020-05-19 10:45:16 | Reptetition 51: IAV done
+2020-05-19 10:45:16 | Reptetition 52: GSp done
+2020-05-19 10:45:16 | Reptetition 51: PCA done
+2020-05-19 10:45:16 | Reptetition 52: GSs done
+2020-05-19 10:45:17 | Reptetition 52: NAV done
+2020-05-19 10:45:17 | Reptetition 58: GSp done
+2020-05-19 10:45:17 | Reptetition 58: GSs done
+2020-05-19 10:45:17 | Reptetition 58: NAV done
+2020-05-19 10:45:17 | Reptetition 60: GSp done
+2020-05-19 10:45:17 | Reptetition 60: GSs done
+2020-05-19 10:45:17 | Reptetition 60: NAV done
+2020-05-19 10:45:17 | Reptetition 59: GSp done
+2020-05-19 10:45:18 | Reptetition 59: GSs done
+2020-05-19 10:45:18 | Reptetition 59: NAV done
+2020-05-19 10:45:18 | Reptetition 51: GSp done
+2020-05-19 10:45:18 | Reptetition 51: GSs done
+2020-05-19 10:45:18 | Reptetition 51: NAV done
+2020-05-19 10:45:21 | Reptetition 54: IAV done
+2020-05-19 10:45:21 | Reptetition 57: IAV done
+2020-05-19 10:45:21 | Reptetition 54: PCA done
+2020-05-19 10:45:21 | Reptetition 53: IAV done
+2020-05-19 10:45:21 | Reptetition 57: PCA done
+2020-05-19 10:45:21 | Reptetition 55: IAV done
+2020-05-19 10:45:21 | Reptetition 53: PCA done
+2020-05-19 10:45:21 | Reptetition 55: PCA done
+2020-05-19 10:45:21 - Starts Repetition: 64
+2020-05-19 10:45:21 | Reptetition 56: IAV done
+2020-05-19 10:45:21 - Starts Repetition: 67
+2020-05-19 10:45:21 | Reptetition 56: PCA done
+2020-05-19 10:45:21 - Starts Repetition: 63
+2020-05-19 10:45:21 - Starts Repetition: 65
+2020-05-19 10:45:21 - Starts Repetition: 66
+2020-05-19 10:45:22 | Reptetition 52: IAV done
+2020-05-19 10:45:22 | Reptetition 52: PCA done
+2020-05-19 10:45:22 | Reptetition 58: IAV done
+2020-05-19 10:45:22 - Starts Repetition: 62
+2020-05-19 10:45:22 | Reptetition 58: PCA done
+2020-05-19 10:45:22 | Reptetition 60: IAV done
+2020-05-19 10:45:22 | Reptetition 60: PCA done
+2020-05-19 10:45:22 | Reptetition 59: IAV done
+2020-05-19 10:45:22 | Reptetition 64: GSp done
+2020-05-19 10:45:22 - Starts Repetition: 68
+2020-05-19 10:45:22 | Reptetition 67: GSp done
+2020-05-19 10:45:23 | Reptetition 64: GSs done
+2020-05-19 10:45:23 | Reptetition 59: PCA done
+2020-05-19 10:45:23 | Reptetition 67: GSs done
+2020-05-19 10:45:23 | Reptetition 63: GSp done
+2020-05-19 10:45:23 | Reptetition 64: NAV done
+2020-05-19 10:45:23 | Reptetition 67: NAV done
+2020-05-19 10:45:23 | Reptetition 63: GSs done
+2020-05-19 10:45:23 | Reptetition 65: GSp done
+2020-05-19 10:45:23 | Reptetition 63: NAV done
+2020-05-19 10:45:23 | Reptetition 66: GSp done
+2020-05-19 10:45:23 | Reptetition 65: GSs done
+2020-05-19 10:45:23 | Reptetition 65: NAV done
+2020-05-19 10:45:23 | Reptetition 66: GSs done
+2020-05-19 10:45:23 - Starts Repetition: 69
+2020-05-19 10:45:23 | Reptetition 66: NAV done
+2020-05-19 10:45:23 | Reptetition 51: IAV done
+2020-05-19 10:45:23 - Starts Repetition: 70
+2020-05-19 10:45:23 | Reptetition 51: PCA done
+2020-05-19 10:45:24 - Starts Repetition: 61
+2020-05-19 10:45:24 | Reptetition 62: GSp done
+2020-05-19 10:45:24 | Reptetition 62: GSs done
+2020-05-19 10:45:24 | Reptetition 62: NAV done
+2020-05-19 10:45:24 | Reptetition 68: GSp done
+2020-05-19 10:45:24 | Reptetition 68: GSs done
+2020-05-19 10:45:24 | Reptetition 68: NAV done
+2020-05-19 10:45:24 | Reptetition 69: GSp done
+2020-05-19 10:45:24 | Reptetition 69: GSs done
+2020-05-19 10:45:25 | Reptetition 69: NAV done
+2020-05-19 10:45:25 | Reptetition 70: GSp done
+2020-05-19 10:45:25 | Reptetition 61: GSp done
+2020-05-19 10:45:25 | Reptetition 70: GSs done
+2020-05-19 10:45:25 | Reptetition 70: NAV done
+2020-05-19 10:45:25 | Reptetition 61: GSs done
+2020-05-19 10:45:25 | Reptetition 61: NAV done
+2020-05-19 10:45:28 | Reptetition 67: IAV done
+2020-05-19 10:45:28 | Reptetition 64: IAV done
+2020-05-19 10:45:28 | Reptetition 67: PCA done
+2020-05-19 10:45:28 | Reptetition 64: PCA done
+2020-05-19 10:45:28 | Reptetition 65: IAV done
+2020-05-19 10:45:28 | Reptetition 63: IAV done
+2020-05-19 10:45:28 | Reptetition 65: PCA done
+2020-05-19 10:45:28 | Reptetition 63: PCA done
+2020-05-19 10:45:28 | Reptetition 66: IAV done
+2020-05-19 10:45:28 | Reptetition 62: IAV done
+2020-05-19 10:45:29 | Reptetition 66: PCA done
+2020-05-19 10:45:29 | Reptetition 62: PCA done
+2020-05-19 10:45:29 | Reptetition 67: GSp done
+2020-05-19 10:45:29 | Reptetition 68: IAV done
+2020-05-19 10:45:29 | Reptetition 64: GSp done
+2020-05-19 10:45:29 | Reptetition 67: GSs done
+2020-05-19 10:45:29 | Reptetition 64: GSs done
+2020-05-19 10:45:29 | Reptetition 68: PCA done
+2020-05-19 10:45:29 | Reptetition 67: NAV done
+2020-05-19 10:45:29 | Reptetition 64: NAV done
+2020-05-19 10:45:30 | Reptetition 69: IAV done
+2020-05-19 10:45:30 | Reptetition 65: GSp done
+2020-05-19 10:45:30 | Reptetition 63: GSp done
+2020-05-19 10:45:30 | Reptetition 61: IAV done
+2020-05-19 10:45:30 | Reptetition 69: PCA done
+2020-05-19 10:45:30 | Reptetition 70: IAV done
+2020-05-19 10:45:30 | Reptetition 65: GSs done
+2020-05-19 10:45:30 | Reptetition 63: GSs done
+2020-05-19 10:45:30 | Reptetition 61: PCA done
+2020-05-19 10:45:30 | Reptetition 65: NAV done
+2020-05-19 10:45:30 | Reptetition 63: NAV done
+2020-05-19 10:45:30 | Reptetition 70: PCA done
+2020-05-19 10:45:30 | Reptetition 66: GSp done
+2020-05-19 10:45:30 | Reptetition 62: GSp done
+2020-05-19 10:45:30 | Reptetition 66: GSs done
+2020-05-19 10:45:30 | Reptetition 62: GSs done
+2020-05-19 10:45:30 | Reptetition 66: NAV done
+2020-05-19 10:45:30 | Reptetition 62: NAV done
+2020-05-19 10:45:31 | Reptetition 68: GSp done
+2020-05-19 10:45:31 | Reptetition 68: GSs done
+2020-05-19 10:45:31 | Reptetition 69: GSp done
+2020-05-19 10:45:31 | Reptetition 68: NAV done
+2020-05-19 10:45:31 | Reptetition 61: GSp done
+2020-05-19 10:45:31 | Reptetition 69: GSs done
+2020-05-19 10:45:31 | Reptetition 69: NAV done
+2020-05-19 10:45:32 | Reptetition 70: GSp done
+2020-05-19 10:45:32 | Reptetition 61: GSs done
+2020-05-19 10:45:32 | Reptetition 70: GSs done
+2020-05-19 10:45:32 | Reptetition 61: NAV done
+2020-05-19 10:45:32 | Reptetition 70: NAV done
+2020-05-19 10:45:35 | Reptetition 64: IAV done
+2020-05-19 10:45:35 | Reptetition 64: PCA done
+2020-05-19 10:45:35 | Reptetition 67: IAV done
+2020-05-19 10:45:35 | Reptetition 66: IAV done
+2020-05-19 10:45:35 | Reptetition 67: PCA done
+2020-05-19 10:45:35 | Reptetition 66: PCA done
+2020-05-19 10:45:35 - Starts Repetition: 74
+2020-05-19 10:45:35 | Reptetition 63: IAV done
+2020-05-19 10:45:35 | Reptetition 62: IAV done
+2020-05-19 10:45:35 | Reptetition 65: IAV done
+2020-05-19 10:45:35 - Starts Repetition: 77
+2020-05-19 10:45:35 | Reptetition 63: PCA done
+2020-05-19 10:45:35 | Reptetition 62: PCA done
+2020-05-19 10:45:35 - Starts Repetition: 76
+2020-05-19 10:45:35 | Reptetition 65: PCA done
+2020-05-19 10:45:36 - Starts Repetition: 73
+2020-05-19 10:45:36 - Starts Repetition: 72
+2020-05-19 10:45:36 - Starts Repetition: 75
+2020-05-19 10:45:37 | Reptetition 74: GSp done
+2020-05-19 10:45:37 | Reptetition 74: GSs done
+2020-05-19 10:45:37 | Reptetition 68: IAV done
+2020-05-19 10:45:37 | Reptetition 74: NAV done
+2020-05-19 10:45:37 | Reptetition 69: IAV done
+2020-05-19 10:45:37 | Reptetition 70: IAV done
+2020-05-19 10:45:37 | Reptetition 77: GSp done
+2020-05-19 10:45:37 | Reptetition 61: IAV done
+2020-05-19 10:45:37 | Reptetition 76: GSp done
+2020-05-19 10:45:37 | Reptetition 68: PCA done
+2020-05-19 10:45:37 | Reptetition 77: GSs done
+2020-05-19 10:45:37 | Reptetition 76: GSs done
+2020-05-19 10:45:37 | Reptetition 70: PCA done
+2020-05-19 10:45:37 | Reptetition 69: PCA done
+2020-05-19 10:45:37 | Reptetition 77: NAV done
+2020-05-19 10:45:37 | Reptetition 61: PCA done
+2020-05-19 10:45:37 | Reptetition 76: NAV done
+2020-05-19 10:45:37 | Reptetition 72: GSp done
+2020-05-19 10:45:37 | Reptetition 73: GSp done
+2020-05-19 10:45:37 | Reptetition 75: GSp done
+2020-05-19 10:45:37 - Starts Repetition: 78
+2020-05-19 10:45:37 | Reptetition 72: GSs done
+2020-05-19 10:45:37 | Reptetition 73: GSs done
+2020-05-19 10:45:37 | Reptetition 75: GSs done
+2020-05-19 10:45:37 - Starts Repetition: 79
+2020-05-19 10:45:37 | Reptetition 72: NAV done
+2020-05-19 10:45:37 - Starts Repetition: 80
+2020-05-19 10:45:37 | Reptetition 73: NAV done
+2020-05-19 10:45:37 | Reptetition 75: NAV done
+2020-05-19 10:45:37 - Starts Repetition: 71
+2020-05-19 10:45:39 | Reptetition 78: GSp done
+2020-05-19 10:45:39 | Reptetition 79: GSp done
+2020-05-19 10:45:39 | Reptetition 78: GSs done
+2020-05-19 10:45:39 | Reptetition 71: GSp done
+2020-05-19 10:45:39 | Reptetition 78: NAV done
+2020-05-19 10:45:39 | Reptetition 79: GSs done
+2020-05-19 10:45:39 | Reptetition 79: NAV done
+2020-05-19 10:45:39 | Reptetition 80: GSp done
+2020-05-19 10:45:39 | Reptetition 80: GSs done
+2020-05-19 10:45:39 | Reptetition 80: NAV done
+2020-05-19 10:45:39 | Reptetition 71: GSs done
+2020-05-19 10:45:40 | Reptetition 71: NAV done
+2020-05-19 10:45:42 | Reptetition 74: IAV done
+2020-05-19 10:45:42 | Reptetition 74: PCA done
+2020-05-19 10:45:43 | Reptetition 77: IAV done
+2020-05-19 10:45:43 | Reptetition 72: IAV done
+2020-05-19 10:45:43 | Reptetition 77: PCA done
+2020-05-19 10:45:43 | Reptetition 76: IAV done
+2020-05-19 10:45:43 | Reptetition 72: PCA done
+2020-05-19 10:45:43 | Reptetition 73: IAV done
+2020-05-19 10:45:43 | Reptetition 76: PCA done
+2020-05-19 10:45:43 | Reptetition 75: IAV done
+2020-05-19 10:45:43 | Reptetition 73: PCA done
+2020-05-19 10:45:43 | Reptetition 75: PCA done
+2020-05-19 10:45:44 | Reptetition 74: GSp done
+2020-05-19 10:45:44 | Reptetition 74: GSs done
+2020-05-19 10:45:44 | Reptetition 74: NAV done
+2020-05-19 10:45:44 | Reptetition 78: IAV done
+2020-05-19 10:45:44 | Reptetition 77: GSp done
+2020-05-19 10:45:44 | Reptetition 80: IAV done
+2020-05-19 10:45:44 | Reptetition 72: GSp done
+2020-05-19 10:45:44 | Reptetition 79: IAV done
+2020-05-19 10:45:44 | Reptetition 78: PCA done
+2020-05-19 10:45:44 | Reptetition 77: GSs done
+2020-05-19 10:45:44 | Reptetition 76: GSp done
+2020-05-19 10:45:44 | Reptetition 72: GSs done
+2020-05-19 10:45:44 | Reptetition 80: PCA done
+2020-05-19 10:45:44 | Reptetition 79: PCA done
+2020-05-19 10:45:44 | Reptetition 77: NAV done
+2020-05-19 10:45:44 | Reptetition 71: IAV done
+2020-05-19 10:45:44 | Reptetition 72: NAV done
+2020-05-19 10:45:44 | Reptetition 73: GSp done
+2020-05-19 10:45:44 | Reptetition 76: GSs done
+2020-05-19 10:45:44 | Reptetition 75: GSp done
+2020-05-19 10:45:44 | Reptetition 71: PCA done
+2020-05-19 10:45:45 | Reptetition 73: GSs done
+2020-05-19 10:45:45 | Reptetition 76: NAV done
+2020-05-19 10:45:45 | Reptetition 75: GSs done
+2020-05-19 10:45:45 | Reptetition 73: NAV done
+2020-05-19 10:45:45 | Reptetition 75: NAV done
+2020-05-19 10:45:46 | Reptetition 78: GSp done
+2020-05-19 10:45:46 | Reptetition 80: GSp done
+2020-05-19 10:45:46 | Reptetition 79: GSp done
+2020-05-19 10:45:46 | Reptetition 78: GSs done
+2020-05-19 10:45:46 | Reptetition 80: GSs done
+2020-05-19 10:45:46 | Reptetition 71: GSp done
+2020-05-19 10:45:46 | Reptetition 79: GSs done
+2020-05-19 10:45:46 | Reptetition 78: NAV done
+2020-05-19 10:45:46 | Reptetition 80: NAV done
+2020-05-19 10:45:46 | Reptetition 79: NAV done
+2020-05-19 10:45:47 | Reptetition 71: GSs done
+2020-05-19 10:45:47 | Reptetition 71: NAV done
+2020-05-19 10:45:49 | Reptetition 74: IAV done
+2020-05-19 10:45:49 | Reptetition 74: PCA done
+2020-05-19 10:45:50 - Starts Repetition: 84
+2020-05-19 10:45:50 | Reptetition 77: IAV done
+2020-05-19 10:45:50 | Reptetition 75: IAV done
+2020-05-19 10:45:50 | Reptetition 77: PCA done
+2020-05-19 10:45:50 | Reptetition 76: IAV done
+2020-05-19 10:45:50 | Reptetition 76: PCA done
+2020-05-19 10:45:50 | Reptetition 75: PCA done
+2020-05-19 10:45:50 - Starts Repetition: 87
+2020-05-19 10:45:50 | Reptetition 73: IAV done
+2020-05-19 10:45:50 - Starts Repetition: 85
+2020-05-19 10:45:50 - Starts Repetition: 86
+2020-05-19 10:45:50 | Reptetition 73: PCA done
+2020-05-19 10:45:51 - Starts Repetition: 83
+2020-05-19 10:45:51 | Reptetition 72: IAV done
+2020-05-19 10:45:51 | Reptetition 84: GSp done
+2020-05-19 10:45:51 | Reptetition 72: PCA done
+2020-05-19 10:45:51 | Reptetition 84: GSs done
+2020-05-19 10:45:51 | Reptetition 84: NAV done
+2020-05-19 10:45:51 | Reptetition 78: IAV done
+2020-05-19 10:45:51 - Starts Repetition: 82
+2020-05-19 10:45:51 | Reptetition 78: PCA done
+2020-05-19 10:45:51 | Reptetition 80: IAV done
+2020-05-19 10:45:52 | Reptetition 71: IAV done
+2020-05-19 10:45:52 | Reptetition 87: GSp done
+2020-05-19 10:45:52 | Reptetition 80: PCA done
+2020-05-19 10:45:52 - Starts Repetition: 88
+2020-05-19 10:45:52 | Reptetition 86: GSp done
+2020-05-19 10:45:52 | Reptetition 87: GSs done
+2020-05-19 10:45:52 | Reptetition 71: PCA done
+2020-05-19 10:45:52 | Reptetition 87: NAV done
+2020-05-19 10:45:52 | Reptetition 86: GSs done
+2020-05-19 10:45:52 | Reptetition 86: NAV done
+2020-05-19 10:45:52 | Reptetition 79: IAV done
+2020-05-19 10:45:52 - Starts Repetition: 90
+2020-05-19 10:45:52 | Reptetition 79: PCA done
+2020-05-19 10:45:52 - Starts Repetition: 81
+2020-05-19 10:45:52 | Reptetition 83: GSp done
+2020-05-19 10:45:52 | Reptetition 85: GSp done
+2020-05-19 10:45:52 | Reptetition 85: GSs done
+2020-05-19 10:45:52 - Starts Repetition: 89
+2020-05-19 10:45:52 | Reptetition 83: GSs done
+2020-05-19 10:45:52 | Reptetition 85: NAV done
+2020-05-19 10:45:52 | Reptetition 83: NAV done
+2020-05-19 10:45:53 | Reptetition 82: GSp done
+2020-05-19 10:45:53 | Reptetition 82: GSs done
+2020-05-19 10:45:53 | Reptetition 82: NAV done
+2020-05-19 10:45:53 | Reptetition 88: GSp done
+2020-05-19 10:45:53 | Reptetition 88: GSs done
+2020-05-19 10:45:53 | Reptetition 88: NAV done
+2020-05-19 10:45:53 | Reptetition 90: GSp done
+2020-05-19 10:45:53 | Reptetition 81: GSp done
+2020-05-19 10:45:53 | Reptetition 90: GSs done
+2020-05-19 10:45:54 | Reptetition 90: NAV done
+2020-05-19 10:45:54 | Reptetition 89: GSp done
+2020-05-19 10:45:54 | Reptetition 89: GSs done
+2020-05-19 10:45:54 | Reptetition 89: NAV done
+2020-05-19 10:45:54 | Reptetition 81: GSs done
+2020-05-19 10:45:54 | Reptetition 81: NAV done
+2020-05-19 10:45:57 | Reptetition 84: IAV done
+2020-05-19 10:45:57 | Reptetition 84: PCA done
+2020-05-19 10:45:57 | Reptetition 87: IAV done
+2020-05-19 10:45:57 | Reptetition 87: PCA done
+2020-05-19 10:45:57 | Reptetition 86: IAV done
+2020-05-19 10:45:57 | Reptetition 85: IAV done
+2020-05-19 10:45:57 | Reptetition 86: PCA done
+2020-05-19 10:45:57 | Reptetition 85: PCA done
+2020-05-19 10:45:58 | Reptetition 83: IAV done
+2020-05-19 10:45:58 | Reptetition 83: PCA done
+2020-05-19 10:45:58 | Reptetition 84: GSp done
+2020-05-19 10:45:58 | Reptetition 84: GSs done
+2020-05-19 10:45:58 | Reptetition 84: NAV done
+2020-05-19 10:45:58 | Reptetition 82: IAV done
+2020-05-19 10:45:59 | Reptetition 82: PCA done
+2020-05-19 10:45:59 | Reptetition 87: GSp done
+2020-05-19 10:45:59 | Reptetition 88: IAV done
+2020-05-19 10:45:59 | Reptetition 87: GSs done
+2020-05-19 10:45:59 | Reptetition 81: IAV done
+2020-05-19 10:45:59 | Reptetition 87: NAV done
+2020-05-19 10:45:59 | Reptetition 88: PCA done
+2020-05-19 10:45:59 | Reptetition 86: GSp done
+2020-05-19 10:45:59 | Reptetition 85: GSp done
+2020-05-19 10:45:59 | Reptetition 90: IAV done
+2020-05-19 10:45:59 | Reptetition 81: PCA done
+2020-05-19 10:45:59 | Reptetition 86: GSs done
+2020-05-19 10:45:59 | Reptetition 83: GSp done
+2020-05-19 10:45:59 | Reptetition 90: PCA done
+2020-05-19 10:45:59 | Reptetition 86: NAV done
+2020-05-19 10:45:59 | Reptetition 83: GSs done
+2020-05-19 10:45:59 | Reptetition 89: IAV done
+2020-05-19 10:45:59 | Reptetition 83: NAV done
+2020-05-19 10:45:59 | Reptetition 89: PCA done
+2020-05-19 10:46:00 | Reptetition 85: GSs done
+2020-05-19 10:46:00 | Reptetition 85: NAV done
+2020-05-19 10:46:00 | Reptetition 82: GSp done
+2020-05-19 10:46:00 | Reptetition 82: GSs done
+2020-05-19 10:46:00 | Reptetition 82: NAV done
+2020-05-19 10:46:01 | Reptetition 88: GSp done
+2020-05-19 10:46:01 | Reptetition 81: GSp done
+2020-05-19 10:46:01 | Reptetition 88: GSs done
+2020-05-19 10:46:01 | Reptetition 90: GSp done
+2020-05-19 10:46:01 | Reptetition 88: NAV done
+2020-05-19 10:46:01 | Reptetition 81: GSs done
+2020-05-19 10:46:01 | Reptetition 90: GSs done
+2020-05-19 10:46:01 | Reptetition 81: NAV done
+2020-05-19 10:46:01 | Reptetition 90: NAV done
+2020-05-19 10:46:01 | Reptetition 89: GSp done
+2020-05-19 10:46:01 | Reptetition 89: GSs done
+2020-05-19 10:46:01 | Reptetition 89: NAV done
+2020-05-19 10:46:04 | Reptetition 84: IAV done
+2020-05-19 10:46:04 | Reptetition 84: PCA done
+2020-05-19 10:46:04 - Starts Repetition: 94
+2020-05-19 10:46:05 | Reptetition 87: IAV done
+2020-05-19 10:46:05 | Reptetition 87: PCA done
+2020-05-19 10:46:05 | Reptetition 86: IAV done
+2020-05-19 10:46:05 | Reptetition 85: IAV done
+2020-05-19 10:46:05 - Starts Repetition: 97
+2020-05-19 10:46:05 | Reptetition 85: PCA done
+2020-05-19 10:46:05 | Reptetition 83: IAV done
+2020-05-19 10:46:06 | Reptetition 86: PCA done
+2020-05-19 10:46:06 - Starts Repetition: 95
+2020-05-19 10:46:06 | Reptetition 94: GSp done
+2020-05-19 10:46:06 | Reptetition 83: PCA done
+2020-05-19 10:46:06 | Reptetition 94: GSs done
+2020-05-19 10:46:06 | Reptetition 94: NAV done
+2020-05-19 10:46:06 - Starts Repetition: 96
+2020-05-19 10:46:06 - Starts Repetition: 93
+2020-05-19 10:46:06 | Reptetition 88: IAV done
+2020-05-19 10:46:06 | Reptetition 88: PCA done
+2020-05-19 10:46:06 | Reptetition 81: IAV done
+2020-05-19 10:46:06 | Reptetition 82: IAV done
+2020-05-19 10:46:06 | Reptetition 97: GSp done
+2020-05-19 10:46:06 | Reptetition 97: GSs done
+2020-05-19 10:46:06 | Reptetition 81: PCA done
+2020-05-19 10:46:07 | Reptetition 82: PCA done
+2020-05-19 10:46:07 | Reptetition 97: NAV done
+2020-05-19 10:46:07 - Starts Repetition: 98
+2020-05-19 10:46:07 - Starts Repetition: 91
+2020-05-19 10:46:07 | Reptetition 90: IAV done
+2020-05-19 10:46:07 - Starts Repetition: 92
+2020-05-19 10:46:07 | Reptetition 95: GSp done
+2020-05-19 10:46:07 | Reptetition 89: IAV done
+2020-05-19 10:46:07 | Reptetition 90: PCA done
+2020-05-19 10:46:07 | Reptetition 95: GSs done
+2020-05-19 10:46:07 | Reptetition 95: NAV done
+2020-05-19 10:46:07 | Reptetition 89: PCA done
+2020-05-19 10:46:07 | Reptetition 96: GSp done
+2020-05-19 10:46:07 - Starts Repetition: 100
+2020-05-19 10:46:07 | Reptetition 93: GSp done
+2020-05-19 10:46:07 | Reptetition 96: GSs done
+2020-05-19 10:46:07 | Reptetition 93: GSs done
+2020-05-19 10:46:07 | Reptetition 96: NAV done
+2020-05-19 10:46:07 - Starts Repetition: 99
+2020-05-19 10:46:07 | Reptetition 93: NAV done
+2020-05-19 10:46:08 | Reptetition 98: GSp done
+2020-05-19 10:46:08 | Reptetition 98: GSs done
+2020-05-19 10:46:08 | Reptetition 98: NAV done
+2020-05-19 10:46:09 | Reptetition 92: GSp done
+2020-05-19 10:46:09 | Reptetition 92: GSs done
+2020-05-19 10:46:09 | Reptetition 92: NAV done
+2020-05-19 10:46:09 | Reptetition 100: GSp done
+2020-05-19 10:46:09 | Reptetition 91: GSp done
+2020-05-19 10:46:09 | Reptetition 91: GSs done
+2020-05-19 10:46:09 | Reptetition 100: GSs done
+2020-05-19 10:46:09 | Reptetition 99: GSp done
+2020-05-19 10:46:09 | Reptetition 91: NAV done
+2020-05-19 10:46:09 | Reptetition 100: NAV done
+2020-05-19 10:46:09 | Reptetition 99: GSs done
+2020-05-19 10:46:09 | Reptetition 99: NAV done
+2020-05-19 10:46:11 | Reptetition 94: IAV done
+2020-05-19 10:46:11 | Reptetition 94: PCA done
+2020-05-19 10:46:12 | Reptetition 94: GSp done
+2020-05-19 10:46:12 | Reptetition 94: GSs done
+2020-05-19 10:46:12 | Reptetition 94: NAV done
+2020-05-19 10:46:13 | Reptetition 97: IAV done
+2020-05-19 10:46:13 | Reptetition 97: PCA done
+2020-05-19 10:46:13 | Reptetition 95: IAV done
+2020-05-19 10:46:13 | Reptetition 93: IAV done
+2020-05-19 10:46:13 | Reptetition 93: PCA done
+2020-05-19 10:46:13 | Reptetition 95: PCA done
+2020-05-19 10:46:14 | Reptetition 96: IAV done
+2020-05-19 10:46:14 | Reptetition 96: PCA done
+2020-05-19 10:46:14 | Reptetition 91: IAV done
+2020-05-19 10:46:14 | Reptetition 98: IAV done
+2020-05-19 10:46:14 | Reptetition 91: PCA done
+2020-05-19 10:46:14 | Reptetition 98: PCA done
+2020-05-19 10:46:14 | Reptetition 92: IAV done
+2020-05-19 10:46:14 | Reptetition 92: PCA done
+2020-05-19 10:46:14 | Reptetition 97: GSp done
+2020-05-19 10:46:15 | Reptetition 97: GSs done
+2020-05-19 10:46:15 | Reptetition 100: IAV done
+2020-05-19 10:46:15 | Reptetition 97: NAV done
+2020-05-19 10:46:15 | Reptetition 93: GSp done
+2020-05-19 10:46:15 | Reptetition 100: PCA done
+2020-05-19 10:46:15 | Reptetition 95: GSp done
+2020-05-19 10:46:15 | Reptetition 99: IAV done
+2020-05-19 10:46:15 | Reptetition 93: GSs done
+2020-05-19 10:46:15 | Reptetition 95: GSs done
+2020-05-19 10:46:15 | Reptetition 93: NAV done
+2020-05-19 10:46:15 | Reptetition 99: PCA done
+2020-05-19 10:46:15 | Reptetition 95: NAV done
+2020-05-19 10:46:15 | Reptetition 96: GSp done
+2020-05-19 10:46:15 | Reptetition 96: GSs done
+2020-05-19 10:46:16 | Reptetition 96: NAV done
+2020-05-19 10:46:16 | Reptetition 98: GSp done
+2020-05-19 10:46:16 | Reptetition 98: GSs done
+2020-05-19 10:46:16 | Reptetition 98: NAV done
+2020-05-19 10:46:16 | Reptetition 92: GSp done
+2020-05-19 10:46:16 | Reptetition 92: GSs done
+2020-05-19 10:46:16 | Reptetition 92: NAV done
+2020-05-19 10:46:17 | Reptetition 100: GSp done
+2020-05-19 10:46:17 | Reptetition 91: GSp done
+2020-05-19 10:46:17 | Reptetition 100: GSs done
+2020-05-19 10:46:17 | Reptetition 99: GSp done
+2020-05-19 10:46:17 | Reptetition 91: GSs done
+2020-05-19 10:46:17 | Reptetition 100: NAV done
+2020-05-19 10:46:17 | Reptetition 99: GSs done
+2020-05-19 10:46:17 | Reptetition 91: NAV done
+2020-05-19 10:46:17 | Reptetition 99: NAV done
+2020-05-19 10:46:19 | Reptetition 94: IAV done
+2020-05-19 10:46:19 | Reptetition 94: PCA done
+2020-05-19 10:46:21 | Reptetition 93: IAV done
+2020-05-19 10:46:21 | Reptetition 97: IAV done
+2020-05-19 10:46:21 | Reptetition 93: PCA done
+2020-05-19 10:46:21 | Reptetition 97: PCA done
+2020-05-19 10:46:21 | Reptetition 96: IAV done
+2020-05-19 10:46:21 | Reptetition 96: PCA done
+2020-05-19 10:46:21 | Reptetition 95: IAV done
+2020-05-19 10:46:21 | Reptetition 95: PCA done
+2020-05-19 10:46:21 | Reptetition 98: IAV done
+2020-05-19 10:46:21 | Reptetition 91: IAV done
+2020-05-19 10:46:22 | Reptetition 98: PCA done
+2020-05-19 10:46:22 | Reptetition 91: PCA done
+2020-05-19 10:46:22 | Reptetition 92: IAV done
+2020-05-19 10:46:22 | Reptetition 100: IAV done
+2020-05-19 10:46:22 | Reptetition 92: PCA done
+2020-05-19 10:46:22 | Reptetition 100: PCA done
+2020-05-19 10:46:22 | Reptetition 99: IAV done
+2020-05-19 10:46:22 | Reptetition 99: PCA done
+
+------
+Ends at: 2020-05-19 10:46:22
+Run time: 0.042 h
+------
+
