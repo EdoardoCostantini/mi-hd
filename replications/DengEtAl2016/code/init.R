@@ -25,26 +25,22 @@ source("./fun_MICE_RF_impute.R")
 source("./fun_MICE_TR_impute.R")
 source("./subroutines.R")
 
-# Choose replication ------------------------------------------------------
-
-paper <- 2 # 1 = ZL2016, 2 = DEA2016
-
 # Fixed Parameters --------------------------------------------------------
 
 parms <- list()
 
 # Itereations, repetitions, etc
-parms$dt_rep  <- c(500, 200)[paper] # replications for averaging results (200 goal)
-parms$chains  <- 5 # number of parallel chains for convergence check
-parms$ndt     <- 10 # number of imputed datasets to pool esitmaes from (10)
-parms$iters   <- c(1, 20)[paper]
-parms$burnin_imp <- 10 # how many imputation iterations should be discarded
-parms$thin    <- 1 
+parms$dt_rep     <- 2 # replications for averaging results (200 goal)
+parms$chains     <- 5 # number of parallel chains for convergence check
+parms$iters      <- 2#20
+parms$burnin_imp <- 0#10 # how many imputation iterations should be discarded
+parms$ndt        <- 2#10 # number of imputed datasets to pool esitmaes from (10)
+parms$thin       <- 1 
   # every how many iterations should you keep the imputation for a dataset
   # Example: of 20 iterations, I burn the first 10 I need for convergence
   # then, I keep 1 set of imputations every "thin"
   # number of iterations for the MI procedure (20)
-parms$pos_dt <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
+parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
 parms$keep_dt <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # keep 1 dataset every thin
 
 parms$iter_bl <- 1  # blasso samples (everything else is in burnin)
@@ -58,36 +54,31 @@ parms$n       <- 100 # number of cases for data generation
 parms$Z_o_mu  <- 0 # mean for gen of fully observed variables
 
 # z_m gen (covariates that will have missingness)
-parms$z_m_id  <- list(c(1), c(1, 2, 3))[[paper]]
-parms$z_m_var <- c(1, 4)[paper] # error variance for z_m generation
-parms$S_all   <- list(list(q4=(c(2,3,50,51)),
-                           q20=(c(2:11, 50:59))),
-                      list(q4=(c(4, 5, 50, 51)),
-                           q20=(c(4:13, 50:59))) )[[paper]]
+parms$z_m_id  <- c(1, 2, 3)
+parms$z_m_var <- 4 # error variance for z_m generation
+parms$S_all   <- list(q4 = (c(4, 5, 50, 51)),
+                      q20=(c(4:13, 50:59)))
 parms$stnr    <- c(1, sqrt(.2)) # signal to noise ratio for alpha coefs
 
 # y gen
-parms$y_var   <- c(3, 6)[paper] # error variance for y generation
+parms$y_var   <- 6 # error variance for y generation
 parms$b       <- 1   # betas and intercept in linear model to gen y
-parms$formula <- c("y ~ z1 + z2 + z3",   # analysis model
-                   "y ~ z1 + z2 + z3 + z4 + z5")[paper]
-parms$k       <- c(3, 5)[paper] # number of predictors for analysis model
+parms$formula <- c("y ~ z1 + z2 + z3 + z4 + z5")
+parms$k       <- 5 # number of predictors for analysis model
 
 # impose missingness
-parms$b_miss_model <- list(c(-1, -.1, 2, -2), # betas for generation of missingness 
-                           c(-1, -1, 2, -1))[[paper]]
+parms$b_miss_model <- c(-1, -1, 2, -1)
 # predictors logit model miss impose
-parms$detlamod <- list(list(c("z2", "z3", "y")),
-                       list(c("z4", "z5", "y"), 
-                            c("z4", "z51", "y"),
-                            c("z50", "z51", "y")) )[[paper]]
+parms$detlamod <- list(c("z4", "z5", "y"), 
+                       c("z4", "z51", "y"),
+                       c("z50", "z51", "y"))
 
 # Generic
 parms$alphaCI <- .95 # confidence level for parameters CI
 parms$k_IURR <- 0 # k value to bias coef sampling covariance matrix in IURR
                   # procedure to solve possible issues of singularity
 
-parms$methods <- c("DURR", "IURR", "blasso", "MICE-RF", "MI_T", "GS", "CC")
+parms$methods <- c("DURR", "IURR", "blasso", "MI_T", "GS", "CC")
   # for naming objects, hence order is important (CC always last)
   # c("DURR", "IURR", "blasso", "MICE_RF", "MI_T", "GS", "CC") # complete correct order
 
@@ -98,14 +89,10 @@ parms$nStreams <- 1000
 # Output and Progres report related
 parms$outDir <- "../output/"
 parms$start_time <- format(Sys.time(), "%Y%m%d_%H%M")
-parms$report_file_name <- paste0("pooled_",
-                                 c("ZL2016", "DEA2016")[paper],
-                                 "-mc-", 
+parms$report_file_name <- paste0("pooled_DEA2016-mc-", 
                                  parms$start_time, 
                                  ".txt")
-parms$results_file_name <- paste0("pooled_",
-                                  c("ZL2016", "DEA2016")[paper],
-                                  "-mc-", 
+parms$results_file_name <- paste0("pooled_DEA2016-mc-", 
                                   parms$start_time,
                                   ".rds")
 parms$description <- c("In each repetition, 1 dataset is created for each condition.
@@ -114,11 +101,9 @@ parms$description <- c("In each repetition, 1 dataset is created for each condit
 
 # Conditions --------------------------------------------------------------
 
-p   <- list(c(200), # number of variables
-            c(200))[[paper]]
-rho <- c(0, 0.1)[paper]   # autoregressive structure
-q   <- list(c(4, 20),
-            c(4))[[paper]] #, 20)   # c(4, 20)  # active set (num of variables are true predictors of y)
+p   <- c(200) # number of variables
+rho <- c(0.1) # autoregressive structure
+q   <- c(4) # c(4, 20)  # active set (num of variables are true predictors of y)
 
 conds <- as.matrix(expand.grid(p, rho, q))
   colnames(conds) <- c("p", "rho", "q")

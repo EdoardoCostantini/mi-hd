@@ -8,23 +8,6 @@
 
 impute_DURR <- function(Z, O, cond, reg_type="lasso", parms){
   ## Description
-  ## Packages required by function
-  # library(glmnet)     # for regularized regressions
-  # library(tidyverse)  # for piping
-  # library(caret)      # for trainControl
-  # library(PcAux)      # for iris data
-  ## Other functions needed:
-  # source("./init.R")
-  # source("./functions.R")
-  ## Input: a simulation condition, number of chians and iterations, reg type
-  ## For internals:
-  # cond     = conds[1,]
-  # # Z      = iris2[,-c(1,7)] # alternative
-  # Z0       = init_dt_i(Z, missing_type(Z)) # initialized dataset
-  # reg_type = c("el", "lasso")[2]           # imputation model penality type
-  # iters    = 5                             # number of iterations
-  # chains   = 2                             # number of imputed datasets (how many to keep)
-  ## output: an object containing iters number of imputed datasets (imputed_datasets)
   
   # Z = Xy_mis
   # O <- as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
@@ -57,6 +40,7 @@ impute_DURR <- function(Z, O, cond, reg_type="lasso", parms){
     })
     
     Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
+      imp_DURR_dat$`1` <- Zm
       for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, i], i]
 
     for (m in 2:parms$iters) {

@@ -30,6 +30,7 @@ impute_BLAS_hans <- function(Z, O, parms){
       names(imp_blasso_dat) <- seq(1:parms$iters)
     
     Zm <- init_dt_i(Z, missing_type(Z)) # initialize data for each chain
+      imp_blasso_dat$`1` <- Zm
     # Empty storing objects for MCMC samples
     # For each, I need one slot per imputaiton model
     Beta.out <- lapply(1:p_imp, matrix, data= NA, nrow=parms$iters, ncol=ncol(Z)-1)

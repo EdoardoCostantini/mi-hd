@@ -78,7 +78,7 @@ runCell <- function(cond, parms, rep_status) {
                                 O = as.data.frame(O),
                                 reg_type = "lasso",
                                 parms = parms)
-
+  
   cat(paste0(Sys.time(), " | Reptetition ", rep_status, ": DURR done",
              "\n"),
       file = paste0(parms$outDir, parms$report_file_name),

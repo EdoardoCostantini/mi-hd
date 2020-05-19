@@ -41,6 +41,7 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms){
     })
     
     Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
+      imp_IURR_dat$`1` <- Zm
       for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, i], i]
     
     for (m in 2:parms$iters) {
