@@ -10,6 +10,8 @@
 ###             run. The idea is that we are not worried about standard error at tgis level. We simply 
 ###             want a full dataset for the PCA computation.
 
+rm(list = ls())
+
 # load packages
 library(tidyverse)
 library(gimme)    # for expand.grid.unique
@@ -23,156 +25,164 @@ source("./dataGen_test.R")
   set.seed(20191120)
 dt <- missDataGen(n=100, p=10)
   dt_c <- dt[[1]] # fully observed
-  dt_i <- dt[[2]] # with missings
-    dim(dt_i)
-    mice::md.pattern(dt_i)
+  Z <- dt[[2]][,-c(1:3)] # with missings
+    dim(Z)
+    mice::md.pattern(Z)
 
 # Define variables with missings
-K <- ncol(dt_i)-sum(tail(mice::md.pattern(dt_i),1) == 0) # number of variables needing imputation
-K_names <- names(which(colSums(apply(dt_i, 2, is.na)) != 0)) # select the names of these k variables
+K <- ncol(Z)-sum(tail(mice::md.pattern(Z),1) == 0) # number of variables needing imputation
+K_names <- names(which(colSums(apply(Z, 2, is.na)) != 0)) # select the names of these k variables
 
 
 # Imputation (try my self) ------------------------------------------------
-
-  # Data preparetion
-  # Obtain all combinationa and polynomial terms for auxiliary variables
-  # FIX; for now it only supports suqared terms
-    aux_data <- dt_i[, !names(dt_i) %in% K_names]
-    ip_terms <- expand.grid.unique(names(aux_data), names(aux_data), include.equals = T)
-    for (t in 1:nrow(ip_terms)) {
-      selected <- inter_terms[t,]
-      terms_prod <- data.frame(aux_data[, selected[1]]*aux_data[, selected[2]])
-      colnames(terms_prod) <- paste0(selected[1], "*", selected[2])
-      aux_data <- cbind(aux_data, terms_prod)
-    }
-    
-    esp <- 3
-    for (v in 1:ncol(aux_data)) {
-      v <- 1
-      rep(names(aux_data)[v], esp)
-    }
-    
-  # PCs extraction
-    pr_out <- prcomp(aux_data, scale = TRUE)
-    pr_out$x
-    pr_var <- pr_out$sdev**2
-    p_pr_var <- pr_var/sum(pr_var) # proportion of variance explained by component
-    PCs_index<- round(cumsum(p_pr_var), 1) <= .5 # selects PCs that approximately explain 50% of the variabce together
+  ycont_formula <- c("yI ~ V1 + V2 + V3 + V4") # some model of interest
+  # Select auxiliary variables (PCA target)
+  Z_aux <- Z[, -which(sapply(names(Z), grepl, x = ycont_formula))]
   
-  # Inlcude auxiliary PCs in the imputation
-    dt_i_PCaux <- cbind(dt_i[,1:5], pr_out$x[,PCs_index])
-    
-  # Impute with mice
-    imp <- mice::mice(dt_i[,1:ncol(dt_i)], method = "norm.nob", m = 5)
-    imputedList <- complete(imp, "all")
-    lapply(imputedList, head)
+  # 1. Single Imputation of auxiliary vairbales if missing
+  Z_aux_mids <- mice(Z_aux, m = 1, maxit = 1, method = "norm.nob")
+  Z_aux_fil <- complete(Z_aux_mids)
+  
+  # 2. Create Set of Auxiliary vairables interactions and polynomials
+  varCombs <- combn(names(Z_aux), 2, simplify = FALSE)
+  interact <- data.frame(
+    sapply(1:length(varCombs),
+           function(x) Z_aux[ , varCombs[[x]][1]] * Z_aux[ , varCombs[[x]][2]])
+  )
+  
+  polynom2 <- sapply(Z_aux, function(x) x^2)
+  
+  Z_aux <- cbind(Z_aux, interact, polynom2)
+  
+  # Extract PCs
+  ncol(Z_aux)
+  pr.out <- prcomp(Z_aux, scale = TRUE)
+  exp_var <- pr.out$sdev^2/sum(pr.out$sdev^2)*100
+  Z_pca <- pr.out$x[, cumsum(exp_var) < 50]
+  Z_mod <- Z[, which(sapply(names(Z), grepl, x = ycont_formula))]
+  
+  # Impute
+  imp_PCA_mids <- mice::mice(cbind(Z_mod, Z_pca),
+                             m = 5,
+                             maxit = 10,
+                             ridge = 1e-5,
+                             method = "norm")
+  imputedList <- complete(imp, "all")
+  lapply(imputedList, head)
 
 # Imputation w/ PcAux package ---------------------------------------------
   library(PcAux)
   
-  ## Exampole ##
-  # Get to know the package with a p < n dataset
-    data(iris2, package = "PcAux")
-    dim(iris2)
-    md.pattern(iris2, plot = FALSE)
-    
-    # First, load and prepare your data:
-    cleanData <- prepData(rawData   = iris2,
-                          moderators = NULL,           # names of any moderator variables to include 
-                                                       # in the initial, single imputation model
-                                                       # (if interactType = 2L in the createPcAux functions
-                                                       # these would also be the interactions included for that PCA)
-                                                       # NULL includes every variable as moderator
-                          nomVars   = "Species",       # nominal variables (R: unodered factors)
-                          ordVars   = "Petal.Width",   # ordinal variables (R: ordered factors)
-                          idVars    = "ID",
-                          dropVars  = "Junk",          # list variables you want to get rid of
-                          groupVars = "Species")
-    
-    # Next, create a set of principal component auxiliary variables:
-    pcAuxOut <- createPcAux(pcAuxData = cleanData,
-                            interactType = 1L, # any of the values in 0, 1, 2, 3 
-                                               # indicating the interaction order
-                                               # (see detials)
-                            maxPolyPow = 3L,   # maximum power used when constructing 
-                                               # the polynomial terms
-                            nComps    = c(5, 2))
-    
-    str(pcAuxOut)
-    pcAuxOut$pcAux
-    
-    # use PC auxiliaries as the predictors in a multiple imputation run:
-    miOut <- miWithPcAux(rawData   = iris2,
-                         pcAuxData = pcAuxOut,
-                         nImps     = 5)
-    getImpData(miOut)
-    miOut$miceObject$predictorMatrix # only the pcs are used to impute
-    # or work directly with the PC auxiliaries by appending them to the original data
-    outData <- mergePcAux(pcAuxData = pcAuxOut, rawData = iris2)
-    
-    # and then only the PC aux will be used for imputation with mice
-    predMat <- makePredMatrix(mergedData = outData)
-    
-  ## With highdimensional data ##
-    source("./dataGen_test.R")
-      set.seed(20191120)
-    dt <- missDataGen(n=50, p=10)
-      dt_c <- dt[[1]] # fully observed
-      dt_i <- dt[[2]] # with missings
-      dim(dt_i)
-    mice::md.pattern(dt_i)
-    
-    # Data
-    Z <- dt_i    # dataset with missing values
-    p <- ncol(Z) # number of variables [INDEX with j]
-    n <- nrow(Z) # number of observations
-      colnames(Z) <- paste0(rep("z_", p), seq(1, p))
-    r <- colSums(apply(Z, 2, function (x) {!is.na(x)} )) # vector with number of observed values in a j variable
-    # Define variables with missings
-    l <- ncol(Z)-sum(tail(mice::md.pattern(Z),1) == 0) # number of variables needing imputation
-    l_names <- names(which(colSums(apply(Z, 2, is.na)) != 0)) # select the names of these k variables
-    # Define names of variables w/ missing values (general and by measurment scale)
-    vartypes <- rbind(lapply(lapply(Z[, names(Z) %in% l_names], class), paste, collapse = " "))
-      contVars <- colnames(vartypes)[vartypes == "numeric"] # names of continuous variables for selection
-      factVars <- colnames(vartypes)[vartypes == "factor"] # includes factors and ordered factors
-      ordeVars <- colnames(vartypes)[vartypes == "ordered factor"] # includes factors and ordered factors
-    
-    # First, load and prepare your data:
-    cleanData <- prepData(rawData   = Z,
-                          nomVars = factVars,
-                          ordVars = ordeVars,
-                          moderators = c(names(Z))) # all interactions
-    
-    # Note on moderators: by inlcuding all variable names in the moderator arguments,
-    # you obtain the following
-    varCombs <- combn(names(Z), 2, simplify = FALSE)
-    interact <- data.frame(
-      lapply(varCombs,
-             function(x, dat) dat[ , x[1]] * dat[ , x[2]],
-             dat = Z)
-    )
-    ncol(interact)
-    
-    # Next, create a set of principal component auxiliary variables:
-    pcAuxOut <- createPcAux(pcAuxData = cleanData,
-                            interactType = 2L,
-                            maxPolyPow = 3L,
-                            nomVars = factVars,
-                            ordVars = ordeVars,
-                            nComps    = c(3, 2))
-    # Imputations
-    miOut <- miWithPcAux(rawData   = Z,
-                         pcAuxData = pcAuxOut,
-                         nomVars = factVars,
-                         ordVars = ordeVars,
-                         nImps     = 5)
-    getImpData(miOut)
-
-    # or work directly with the PC auxiliaries by appending them to the original data
-    outData <- mergePcAux(pcAuxData = pcAuxOut, rawData = dt_i)
+  # Prepare all-variables data set
+  # The step (prepData) involves:
+  # 1: castData: cast variables to declared types
+  #             a) Flag variable types
+  #             b) Cast all variables to the appropriate measurement level
+  #             c) Dummy code nominal variables if in creatPcAux()
+  #             d) Center continuous variables (not scaled)
+  # 2. cleanData: Find and (possibly) remove problematic data columns 
+  #               (i.e., variables with few or no observations/constants)
+  # 3. findCollin: Flag variables with perfect bivariate correlations
+  # Step 2 and 3 are skipped in simulation mode (simMode = TRUE)
+  cleanData <- prepData(rawData   = Z,
+                        moderators = NULL, 
+                         # moderators for initial single imputation
+                         # NULL makes it everything
+                        simMode = TRUE, # this measn that only cast data is applyed
+                        verbose = TRUE) 
+  cleanData$data
   
-    # and then only the PC aux will be used for imputation with mice
-    predMat <- makePredMatrix(mergedData = outData)
+  # Create PCs
+  # 1. pcAuxData$computeInteract(): Compute interactions for use during initial imputation:
+  # 2. pcAuxData$computePoly(): Compute polynomials for use during initial imputation
+  # 3. doSingleImputation(map = pcAuxData): Execute the initial, single imputation
+  # 4. doPCA(map = pcAuxData): Extract the linear principal component scores
+  #     a) extracts linear components (i.e. polynomial terms are exluded before extraction)
+  #         - ordinal factors are cast to numeric
+  #         - nominal are cast to dummies
+  #         - prcomp(targetData, scale = TRUE, retx  = TRUE)
+  #         - extract component scores based on variance or number
+  #     b) extracts non-linear components if required
+  
+  pcAuxOut <- createPcAux(pcAuxData = cleanData,
+                          interactType = 1L, 
+                            # inclusion of itneractions int eh intial single imputation
+                            # all two-way interactions between the observed variables 
+                            # and the variables specified in the moderators argument 
+                            # of prepData
+                          maxPolyPow = 3L,   # maximum power used when constructing 
+                          # the polynomial terms
+                          nComps    = c(5, 5))
+  
+  # Perform imputations of interest
+  # 1. mergePcAux: Combine principal component auxiliaries with raw data
+  PCaux_Data <- mergePcAux(pcAuxData = pcAuxOut,
+                           rawData   = Z,
+                           nComps    = c(5, 0))
+  # 2. construct predictor matrix for mice: 
+    nLin    <- length(grep("^linPC\\d", colnames(PCaux_Data)))
+    nNonLin <- length(grep("^nonLinPC\\d", colnames(PCaux_Data)))
     
+    predMat <- makePredMatrix(mergedData   = PCaux_Data,
+                              nLinear      = nLin,
+                              nNonLinear   = nNonLin)
+  # 3. Impute data
+    mice(PCaux_Data,
+         m               = 5,
+         maxit           = 1L,
+         predictorMatrix = predMat)
     
-    
+  # Use all of it in a function
+  miOut <- miWithPcAux(rawData   = Z,
+                       pcAuxData = pcAuxOut, # object produced by createPcAux
+                       nImps     = 5,
+                       nComps = c(5, 0))
+  
+
+# Real data examples ------------------------------------------------------
+# > Iris data ####
+  data(iris2, package = "PcAux")
+  dim(iris2)
+  md.pattern(iris2, plot = FALSE)
+  
+  # First, load and prepare your data:
+  cleanData <- prepData(rawData   = iris2,
+                        moderators = NULL,           # names of any moderator variables to include 
+                                                     # in the initial, single imputation model
+                                                     # (if interactType = 2L in the createPcAux functions
+                                                     # these would also be the interactions included for that PCA)
+                                                     # NULL includes every variable as moderator
+                        nomVars   = "Species",       # nominal variables (R: unodered factors)
+                        ordVars   = "Petal.Width",   # ordinal variables (R: ordered factors)
+                        idVars    = "ID",
+                        dropVars  = "Junk",          # list variables you want to get rid of
+                        groupVars = "Species")
+  
+  # Next, create a set of principal component auxiliary variables:
+  pcAuxOut <- createPcAux(pcAuxData = cleanData,
+                          interactType = 1L, # any of the values in 0, 1, 2, 3 
+                                             # indicating the interaction order
+                                             # (see detials)
+                          maxPolyPow = 3L,   # maximum power used when constructing 
+                                             # the polynomial terms
+                          nComps    = c(.6, .6))
+  
+  PCaux_Data <- mergePcAux(pcAuxData = pcAuxOut,
+                           rawData   = iris2,
+                           nComps    = c(.6, .6))
+  
+  pcAuxOut
+  str(pcAuxOut)
+  pcAuxOut$pcAux
+  
+  # use PC auxiliaries as the predictors in a multiple imputation run:
+  miOut <- miWithPcAux(rawData   = iris2,
+                       pcAuxData = pcAuxOut,
+                       nImps     = 5)
+  getImpData(miOut)
+  miOut$miceObject$predictorMatrix # only the pcs are used to impute
+  # or work directly with the PC auxiliaries by appending them to the original data
+  outData <- mergePcAux(pcAuxData = pcAuxOut, rawData = iris2)
+  
+  # and then only the PC aux will be used for imputation with mice
+  predMat <- makePredMatrix(mergedData = outData)

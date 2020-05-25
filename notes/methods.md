@@ -14,7 +14,10 @@ supported, highdimensionality etc.)
 	* Variables supported: continuous, dichotomous, and categorical covaraites
 		* IVs continuous, dichotomous, categorical, ordinal as numeric (and mixed!);
 		* DVs continuous, dichotomous, categorical, ordinal as numeric;
-	* Limitations: none
+	* Limitations: not apt for high dimensional data. When running the mice package function with cart method
+		you obtain the df logged warning saying that: "The degrees of freedom can become negative, usually because 
+		there are too many predictors relative to the number of observed values for the target. In that 
+		case, the degrees of freedom are set to 1, and a note is written to loggedEvents" (van Buuren 2018)
 	* Software/Packages: 'mice' basic mice imputation function with a 'cart' option does everything you need; 
 	you have also implemented a version of it that uses bayesian bootstrap. You want to include your version 
 	in the mice package. You have created  the mice.impute.cart.bb.R script in the miceImpHDv package version
@@ -110,18 +113,23 @@ supported, highdimensionality etc.)
 		* DVs: continuous, dichotomous, and categorical DVs (you simply run mice on a
 			low-dimensional dataset of DV and IVs + auxiliary)
 	* Limitations:  
-		* A priori knowledge of analysis model - Related to this issue, the method proposed by
+		* A priori knowledge of analysis model - The method proposed by
 		  Howard et al 2015 extracts PCs only form the auxiliary vairables and not from the real or otherwise
 		  selected predictors in the models and then uses the predictors + auxiliary Principal Components for
 		  the actual imputation. This however, does not allow to automatically include interaction effects and
-		  squared terms between real / selected predictors and auxiliary vairables. In the implementation
+		  squared terms between ture / selected predictors and auxiliary vairables. In the implementation
 		  I perfromed here I decided to extract PCs
 		  form the auxiliary variables which have no missing values and then use the predictors + auxiliary PCs
 		  for imputation with regular MICE. This is howver undesirable as we are not exlpoiting the full potential
 		  of PCA for dimension reduction; this would still require to manually specify interactions and squared 
 		  terms between real/selected predictors in the imputation model; we need to assume that we know the analysis 
-		  model (ie which vairables are auxiliary and which variables are predicotrs at least) before we 
+		  model (ie which variables are auxiliary and which variables are predicotrs at least) before we 
 		  perform the imputation, which is not ideal.
+		* The initial round of imputations to obtain a filled in dataset from which to extract PCs needs to be 
+		  low dimensional at the moment. 1) Howard paper does not provide ideas on how to initalize when data for
+		  PC extraction is n < P; 2) PcAux 'createPcAux' function fails because internal 'doSIngleImputation' function 
+		  requires low dimensional data. Solution: extrapolate code to create a version of it that uses known analysis
+		  model for inital imputation or assume auxialiry vairbales are fully observed
 	* Packages/Software: 
 		* PcAux package implements Howards et al 2015
 		* look into the missMDA function of the R package 'factominer'. It might be doing something close

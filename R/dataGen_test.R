@@ -7,7 +7,7 @@
 
 # Functions for data generation
   #f = function(x1,x2,x3,x4,x5) {10*sin(pi*x1*x2) + 20*(x3-.5)**2 + 10*x4 + 5*x5}
-  f = function(x1,x2,x3,x4,x5) {1 + 10*x1 + 20*x2 + 30*x3 + 40*x4 + 50*x5}
+  f = function(x1,x2,x3,x4) {1 + 10*x1 + 20*x2 + 30*x3 + 40*x4}
   pr = function(n,x) {rbinom(n, size = 1, prob = exp(x-2)/(1+exp(x-2))) }
   replace_na <- function(x, r) {replace(x, r==1, NA)}
   
@@ -42,7 +42,7 @@
     Z <- rnorm(n, 0, 1)
     
     # Continuous DV
-    y = f(X[,1],X[,2],X[,3],X[,4],X[,5]) + Z
+    y = f(X[,1],X[,2],X[,3],X[,4]) + Z
     
     # Dichotomous Responses
     y_dicho <- factor(pr(n, (5*X[,2]+3*X[,5])), labels = c("A", "B"))
@@ -70,9 +70,9 @@
     
     # Missingness
     # Following a simple MAR mechanisms where the missingness on the
-    # first 5 predictors, and the tree dependent variables depends on
-    # the values of the 6th variable
-    R <- as.data.frame(split(pr(n*9, X[, 6]), 1:(4+5) )) # missingness for 3 Ys and first 5 Xs
+    # first 4 predictors, and the tree dependent variables depends on
+    # the values of the 5th and 6th variable
+    R <- as.data.frame(split(pr(n*9, X[, 5]+X[, 6]), 1:(4+5) )) # missingness for 3 Ys and first 5 Xs
     yI    <- replace(y, R[,1]==1, NA)
     y_dichoI <- replace(y_dicho, R[,2]==1, NA)
     y_categI <- replace(y_categ, R[,3]==1, NA)
@@ -87,45 +87,3 @@
                 incomplete_cont = cbind( yI, Xinc))
            )
   }
-
-# # Do it out of function (to save the data)
-# # dimensionality
-#   n = 100 # sample size
-#   p = 200 # number of predictors (relevant + junk)
-#   
-# 
-# # Predictors
-#   set.seed(20191113)
-#   X <- as.data.frame(mvtnorm::rmvnorm(n, 
-#                                       mean = rep(0, p), 
-#                                       sigma=diag(rep(1, p))) )
-#   round(apply(X, 2, var),1)
-#   round(cor(X), 2) # just at random you get some correlation between certail predictors
-#   
-# # Noise
-#   Z <- rnorm(n, 0, 1)
-# 
-# # Dependent
-#   # Model based on an example (Firedman) reported by Xu et al 2016 for the BART paper
-#   y = f(X[,1],X[,2],X[,3],X[,4],X[,5]) + Z
-# 
-# # Missingness
-#   # Following a simple MAR mechanisms where the missingness on the
-#   # first 5 predictors depends on the values of the 6th variable
-#   R <- as.data.frame(split(rep( pr(n, X[, 6]), 6), 1:(1+ncol(X[,1:5])) )) # missingness for Y and first 5 Xs
-#   yinc <- replace(y, R[,1]==1, NA)
-#   Xinc <- X # initialize matrix for incomplete dataset
-#   for (p in 1:ncol(X[,2:6])) {
-#     Xinc[,p] <- replace(X[,p], R[,p]==1, NA)
-#   }
-# 
-# # Missing data type
-#   sum(rowSums(is.na(cbind(yinc, Xinc[, 1:5]))) != 0)/n # percetnage of cases with missing values 
-#   mice::md.pattern(cbind(yinc, Xinc[, 1:5]))           # missing data patterns
-#   mice::md.pairs(cbind(yinc, Xinc[, 1:5]))
-# 
-# # Save data
-#   out <- list(complete = cbind(y, X), 
-#               incomplete = cbind(yinc, Xinc))
-#   saveRDS(out,"../data/data_tryout.rds")
-  

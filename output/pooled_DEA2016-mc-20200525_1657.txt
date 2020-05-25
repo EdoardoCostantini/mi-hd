@@ -1,0 +1,70 @@
+SIMULATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+      Imputation methods are used on that condition-specific dataset.
+      Results are therefore given per dataset in condition
+
+------
+Starts at: 2020-05-25 16:57:51
+------
+
+2020-05-25 16:57:51 - Starts Repetition: 1
+2020-05-25 16:57:51 - Starts Repetition: 2
+2020-05-25 16:57:51 - Starts Repetition: 4
+2020-05-25 16:57:51 - Starts Repetition: 3
+2020-05-25 16:57:51 - Starts Repetition: 5
+2020-05-25 16:57:53 | Reptetition 5: DURR lasso done
+2020-05-25 16:57:53 | Reptetition 2: DURR lasso done
+2020-05-25 16:57:53 | Reptetition 3: DURR lasso done
+2020-05-25 16:57:53 | Reptetition 4: DURR lasso done
+2020-05-25 16:57:53 | Reptetition 1: DURR lasso done
+2020-05-25 17:00:25 | Reptetition 5: DURR elastic net done
+2020-05-25 17:00:25 | Reptetition 2: DURR elastic net done
+2020-05-25 17:00:26 | Reptetition 4: DURR elastic net done
+2020-05-25 17:00:26 | Reptetition 3: DURR elastic net done
+2020-05-25 17:00:27 | Reptetition 1: DURR elastic net done
+2020-05-25 17:00:27 | Reptetition 5: IURR lasso done
+2020-05-25 17:00:27 | Reptetition 2: IURR lasso done
+2020-05-25 17:00:28 | Reptetition 3: IURR lasso done
+2020-05-25 17:00:28 | Reptetition 4: IURR lasso done
+2020-05-25 17:00:29 | Reptetition 1: IURR lasso done
+2020-05-25 17:03:08 | Reptetition 5: IURR elastic net done
+2020-05-25 17:03:08 | Reptetition 5: blasso done
+2020-05-25 17:03:11 | Reptetition 2: IURR elastic net done
+2020-05-25 17:03:11 | Reptetition 2: blasso done
+2020-05-25 17:03:12 | Reptetition 3: IURR elastic net done
+2020-05-25 17:03:12 | Reptetition 3: blasso done
+2020-05-25 17:03:13 | Reptetition 4: IURR elastic net done
+2020-05-25 17:03:13 | Reptetition 4: blasso done
+2020-05-25 17:03:13 | Reptetition 5: MICE-PCA done
+2020-05-25 17:03:15 | Reptetition 1: IURR elastic net done
+2020-05-25 17:03:15 | Reptetition 1: blasso done
+2020-05-25 17:03:16 | Reptetition 2: MICE-PCA done
+2020-05-25 17:03:18 | Reptetition 3: MICE-PCA done
+2020-05-25 17:03:18 | Reptetition 4: MICE-PCA done
+2020-05-25 17:03:21 | Reptetition 1: MICE-PCA done
+2020-05-25 17:03:40 | Reptetition 5: MICE-CART done
+2020-05-25 17:03:44 | Reptetition 2: MICE-CART done
+2020-05-25 17:03:45 | Reptetition 3: MICE-CART done
+2020-05-25 17:03:46 | Reptetition 4: MICE-CART done
+2020-05-25 17:03:48 | Reptetition 1: MICE-CART done
+2020-05-25 17:04:08 | Reptetition 5: MICE-CARTbb done
+2020-05-25 17:04:12 | Reptetition 2: MICE-CARTbb done
+2020-05-25 17:04:13 | Reptetition 4: MICE-CARTbb done
+2020-05-25 17:04:14 | Reptetition 3: MICE-CARTbb done
+2020-05-25 17:04:15 | Reptetition 1: MICE-CARTbb done
+2020-05-25 17:04:35 | Reptetition 5: MICE-RF done
+2020-05-25 17:04:35 | Reptetition 5: MICE-TR done
+2020-05-25 17:04:40 | Reptetition 2: MICE-RF done
+2020-05-25 17:04:40 | Reptetition 4: MICE-RF done
+2020-05-25 17:04:40 | Reptetition 2: MICE-TR done
+2020-05-25 17:04:40 | Reptetition 4: MICE-TR done
+2020-05-25 17:04:41 | Reptetition 3: MICE-RF done
+2020-05-25 17:04:41 | Reptetition 1: MICE-RF done
+2020-05-25 17:04:41 | Reptetition 3: MICE-TR done
+2020-05-25 17:04:41 | Reptetition 1: MICE-TR done
+
+------
+Ends at: 2020-05-25 17:04:41
+Run time: 0.114 h
+------
+
