@@ -329,19 +329,19 @@ imp_dich_DURR <- function(model, X_tr, y_tr, X_te, parms){
   # X_te <- model.matrix(g2~., test)[,-1]
   # y_tr <- train$g2
   #   cv <- cv.glmnet(X_tr, y_tr, family = "binomial", alpha = 1)
-  # model <- glmnet(X_tr, y_tr, 
+  # model <- glmnet(X_tr, y_tr,
   #                 family = "binomial", alpha = 1, lambda = cv$lambda.min)
   
   ## Body ##
   
   X_te <- model.matrix(rep(1, nrow(X_te)) ~ X_te)[, -1]
-  py1       <- predict(model, X_te, type = "response") 
-  z.m_j_mis <- rbinom(nrow(py1), 1, py1)
-  # Clumsy way of fixing the levels
-  z.m_j_mis <- factor(z.m_j_mis) # return to original labels
-  levels(z.m_j_mis) <- levels(y_tr)
+  py1  <- predict(model, X_te, type = "response") # probability y = 1
+  y_prd <- rbinom(nrow(X_te), 1, py1)             # random draw
   
-  return(z.m_j_mis)
+  # Fixing outcome levels
+  y_prd <- factor(y_prd, levels(y_tr)) # return to original levels
+  
+  return(y_prd)
 }
 
 imp_multi_DURR <- function(model, X_tr, y_tr, X_te, parms){

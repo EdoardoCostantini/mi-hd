@@ -36,36 +36,51 @@ impute_PCA <- function(Z, parms = parms){
       contVars <- names(vartypes)[vartypes == "numeric"]
       factVars <- names(vartypes)[vartypes == "factor"]
       ordeVars <- names(vartypes)[vartypes == "ordered factor"]
-      
     
     # 1. Single Imputation of auxiliary vairbales if missing 
-    # (fully observed axuliaries at the moment)
-    # Z_aux_mids <- mice(Z_aux, m = 1, maxit = 1, method = "norm.nob")
-    # Z_aux <- complete(Z_aux_mids)
+    # (doesn't do anything if Z_aux is fully observed)
+    if(sum(is.na(Z_aux)) != 0){
+      predMatrix <- quickpred(Z_aux, mincor = parms$PCA_mincor)
+      Z_aux_mids <- mice(Z_aux, m = 1, maxit = 1, 
+                         predictorMatrix = predMatrix,
+                         method = "norm.nob")
+      Z_aux <- complete(Z_aux_mids)
+    }
     
     # 2. Create Set of Auxiliary variables interactions and polynomials
-    interact <- computeInteract(Z_aux, 
-                                idVars = colnames(Z_aux),
-                                ordVars = ordeVars,
-                                nomVars = factVars,
-                                moderators = colnames(Z_aux) )
+    if(parms$PCA_inter == TRUE){
+      interact <- computeInteract(Z_aux,
+                                  idVars = colnames(Z_aux),
+                                  ordVars = ordeVars,
+                                  nomVars = factVars,
+                                  moderators = colnames(Z_aux) )
+
+    } else {
+      interact <- NULL
+    }
     
-    polynom <- computePoly(Z_aux, 
-                           ordVars = ordeVars,
-                           nomVars = factVars,
-                           maxPower = 2L)
-    
-    Z_aux <- cbind(Z_aux, interact, polynom)
-    
+    if(parms$PCA_poly == TRUE){
+      polynom <- computePoly(Z_aux, 
+                             ordVars = ordeVars,
+                             nomVars = factVars,
+                             maxPower = parms$PCA_maxpw)    
+    } else {
+      polynom <- NULL
+    }
+
+    DA_list <- list(Z_aux, interact, polynom)
+    Z_aux <- do.call(cbind, 
+                     DA_list[lapply(DA_list, length) != 0])
+
     # Extract PCs
-    pcaOut <- prcomp(Z_aux, scale = TRUE, retx  = TRUE)
+    pcaOut <- prcomp(Z_aux, scale = TRUE, retx = TRUE)
     
     ## Compute and store the cumulative proportion of variance explained by
     ## the component scores:
     rSquared <- cumsum(pcaOut$sdev^2) / sum(pcaOut$sdev^2)
     
     ## Extract the principal component scores:
-    Z_pca   <- pcaOut$x[, rSquared < .75]
+    Z_pca   <- pcaOut$x[, rSquared < parms$PCA_pcthresh]
     
     # Impute
     imp_PCA_mids <- mice::mice(cbind(Z_mod, Z_pca),

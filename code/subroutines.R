@@ -218,6 +218,7 @@ runCell <- function(cond, parms, rep_status) {
                  cond_CIco = cond_CIco,
                  run_time_min = imp_time,
                  imp_values = imp_values, 
+                 cond = cond,
                  parms = parms)
   return(output)
 }

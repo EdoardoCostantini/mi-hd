@@ -79,27 +79,32 @@ parms$detlamod <- list(c("z4", "z5", "y"),
                        c("z50", "z51", "y"))
 
 # Generic
-parms$polyTerms <- c(2, 3) # required polynomial terms for PCA imputation
-parms$alphaCI <- .95 # confidence level for parameters CI
-parms$k_IURR <- 0 # k value to bias coef sampling covariance matrix in IURR
-                  # procedure to solve possible issues of singularity
 parms$meth_sel <- data.frame(DURR_la = TRUE,
-                             DURR_el = TRUE,
+                             DURR_el = FALSE,
                              IURR_la = TRUE,
-                             IURR_el = TRUE,
+                             IURR_el = FALSE,
                              blasso  = TRUE,
-                             MI_PCA  = TRUE,
-                             MI_CART = TRUE,
-                             MI_CTBB = TRUE,
-                             MI_RF   = TRUE,
+                             MI_PCA  = FALSE,
+                             MI_CART = FALSE,
+                             MI_CTBB = FALSE,
+                             MI_RF   = FALSE,
                              MI_T    = TRUE,
                              GS      = TRUE,
                              CC      = TRUE
                              )
-parms$methods <- c("DURR", "IURR", "blasso", "MI_PCA", "MI_T", "GS", "CC")
 parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
-  # for naming objects, hence order is important (CC always last)
-  # c("DURR", "IURR", "blasso", "MICE_RF", "MI_T", "GS", "CC") # complete correct order
+  # (GS, CC always last, alwyas present)
+
+parms$alphaCI <- .95 # confidence level for parameters CI
+parms$k_IURR <- 0 # k value to bias coef sampling covariance matrix in IURR
+                  # procedure to solve possible issues of singularity
+
+# PCA method related
+parms$PCA_inter    <- TRUE # whether you want two way variables interactions
+parms$PCA_poly     <- TRUE # whether you want poly terms 
+parms$PCA_mincor   <- .3 # mincor for qucikpred for single imputation auxiliary vars
+parms$PCA_maxpw    <- 2L # polynomials order
+parms$PCA_pcthresh <- .5 # proportion of vairance for selection of PCs
 
 # Replicability related
 parms$seed     <- 20200512 #20200309
