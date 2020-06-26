@@ -16,12 +16,12 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
     p  <- ncol(Z) # number of variables [indexed with j]
     
     p_imp <- length(parms$z_m_id) # variables with missing values
-    r  <- colSums(O[parms$z_m_id]) # variable-wise count of observed values
-    nr  <- colSums(!O[parms$z_m_id]) # variable-wise count of observed values
+    r     <- colSums(O[1:p_imp]) # variable-wise count of observed values
+    nr    <- colSums(!O[1:p_imp]) # variable-wise count of observed values
     
     # To store imputed values and check convergence
     imp_IURR_val <- vector("list", parms$chains)
-      names(imp_IURR_val) <- seq(1:parms$chains)
+     names(imp_IURR_val) <- seq(1:parms$chains)
   
     # Time performance
     start.time <- Sys.time()
@@ -49,11 +49,15 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
                      "; Iter: ", m, "/", parms$iters))
         for (j in 1:p_imp) {
           # Select data
-          y_obs <- z_j_obs  <- as.vector(Zm[O[, j] == TRUE, j])
-          y_mis <- zm_mj    <- as.vector(Zm[O[, j] == FALSE, j]) # useless
+          y_obs <- z_j_obs  <- Zm[O[, j] == TRUE, j]
+          y_mis <- zm_mj    <- Zm[O[, j] == FALSE, j] # useless
           X_obs <- Wm_j_obs <- as.matrix(Zm[O[, j] == TRUE, -j])
+            X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
           X_mis <- Wm_mj    <- as.matrix(Zm[O[, j] == FALSE, -j])
+            X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
           
+          glmfam <- detect_family(Zm[, j])
+            
           # Fit regularized regression
           # Requirement for procedure is that selected n > p as the ML apporaches
           # used later in the estiamtion require this.
@@ -62,24 +66,37 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
             
             # Lasso
             if(reg_type == "lasso"){
-              regu.mod <- rr_est_lasso(X = X_obs, y = y_obs, parms = parms)
+              regu.mod <- rr_est_lasso(X = X_obs, y = y_obs, 
+                                       parms = parms, fam = glmfam)
             }
             
             # Elastic net
             if(reg_type == "el"){
-              regu.mod <- rr_est_elanet(X = X_obs, y = y_obs, parms = parms)
+              regu.mod <- rr_est_elanet(X = X_obs, y = y_obs, 
+                                        parms = parms, fam = glmfam)
             }
             
-            IURR_fwd_cond <- length(z_j_obs) > sum(coef(regu.mod) != 0)
+            IURR_fwd_cond <- length(y_obs) > sum(coef(regu.mod) != 0)
             success <- c(success, IURR_fwd_cond)
             
           }
           
-          # Impute
-          zm_j <- imp_gaus_IURR(model = regu.mod,
-                                X_tr = Wm_j_obs, y_tr = z_j_obs,
-                                X_te = Wm_mj, y_te = zm_mj, 
-                                parms = parms)
+          # 3. Predict zm_j (i.e. obtain imputations (imps))
+          if(glmfam == "gaussian"){
+            zm_j <- imp_gaus_IURR(model = regu.mod,
+                                  X_tr = X_obs, y_tr = y_obs,
+                                  X_te = X_mis, y_te = y_mis, 
+                                  parms = parms)
+          }
+          if(glmfam == "binomial"){
+            zm_j <- imp_dich_DURR(model = regu.mod,
+                                  X_tr = X_obs, y_tr = y_obs,
+                                  X_te = X_mis, 
+                                  parms = parms)
+          }
+          if(glmfam == "multinomial"){
+            zm_j <- imp_multi_DURR(regu.mod, X_obs_bs, y_obs_bs, X_mis, parms)
+          }
           
           # Append imputation
           Zm[!O[, j], j] <- zm_j # update data

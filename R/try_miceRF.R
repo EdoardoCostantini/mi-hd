@@ -11,6 +11,7 @@ library(tidyverse)
 library(randomForest)
 library(mice)
 library(miceImpHDv) # modified version of mice with different Random Forest Algorithm
+library(CALIBERrfimpute)
 
 # Load all purpose functions
 source("./functions_allpurp.R")
@@ -38,3 +39,4 @@ source("./functions_allpurp.R")
   table(rf1==rf2)
   table(rf1==rf3)
   table(rf2==rf3)
+  

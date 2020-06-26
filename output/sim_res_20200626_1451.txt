@@ -1,0 +1,125 @@
+SIMULATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+        Imputation methods are used on that condition-specific dataset.
+        Results are therefore given per dataset in condition
+
+------
+Starts at: 2020-06-26 14:51:19
+------
+
+2020-06-26 14:51:19 - Starts Repetition: 1
+2020-06-26 14:51:19 - Starts Repetition: 2
+2020-06-26 14:51:19 - Starts Repetition: 3
+2020-06-26 14:51:19 - Starts Repetition: 4
+2020-06-26 14:51:19 - Starts Repetition: 5
+2020-06-26 14:51:19 - Starts Repetition: 6
+2020-06-26 14:51:19 - Starts Repetition: 7
+2020-06-26 14:51:19 - Starts Repetition: 8
+2020-06-26 14:51:19 - Starts Repetition: 9
+2020-06-26 14:51:19 - Starts Repetition: 10
+2020-06-26 14:51:20 | Reptetition 1: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 5: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 9: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 8: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 2: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 7: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 6: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 4: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 10: DURR ridge done
+2020-06-26 14:51:20 | Reptetition 3: DURR ridge done
+2020-06-26 14:51:31 | Reptetition 7: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 7: DURR elastic net done
+2020-06-26 14:51:31 | Reptetition 8: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 8: DURR elastic net done
+2020-06-26 14:51:31 | Reptetition 4: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 4: DURR elastic net done
+2020-06-26 14:51:31 | Reptetition 3: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 3: DURR elastic net done
+2020-06-26 14:51:31 | Reptetition 6: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 6: DURR elastic net done
+2020-06-26 14:51:31 | Reptetition 9: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 9: DURR elastic net done
+2020-06-26 14:51:31 | Reptetition 10: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 10: DURR elastic net done
+2020-06-26 14:51:31 | Reptetition 2: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 2: DURR elastic net done
+2020-06-26 14:51:31 | Reptetition 1: DURR lasso done
+2020-06-26 14:51:31 | Reptetition 1: DURR elastic net done
+2020-06-26 14:51:32 | Reptetition 5: DURR lasso done
+2020-06-26 14:51:32 | Reptetition 5: DURR elastic net done
+2020-06-26 14:51:44 | Reptetition 3: IURR lasso done
+2020-06-26 14:51:44 | Reptetition 3: IURR elastic net done
+2020-06-26 14:51:45 | Reptetition 4: IURR lasso done
+2020-06-26 14:51:45 | Reptetition 4: IURR elastic net done
+2020-06-26 14:51:45 | Reptetition 10: IURR lasso done
+2020-06-26 14:51:45 | Reptetition 10: IURR elastic net done
+2020-06-26 14:51:45 | Reptetition 2: IURR lasso done
+2020-06-26 14:51:45 | Reptetition 2: IURR elastic net done
+2020-06-26 14:51:45 | Reptetition 8: IURR lasso done
+2020-06-26 14:51:45 | Reptetition 8: IURR elastic net done
+2020-06-26 14:51:45 | Reptetition 1: IURR lasso done
+2020-06-26 14:51:45 | Reptetition 1: IURR elastic net done
+2020-06-26 14:51:46 | Reptetition 5: IURR lasso done
+2020-06-26 14:51:46 | Reptetition 5: IURR elastic net done
+2020-06-26 14:51:46 | Reptetition 3: blasso done
+2020-06-26 14:51:46 | Reptetition 4: blasso done
+2020-06-26 14:51:47 | Reptetition 10: blasso done
+2020-06-26 14:51:47 | Reptetition 9: IURR lasso done
+2020-06-26 14:51:47 | Reptetition 9: IURR elastic net done
+2020-06-26 14:51:47 | Reptetition 2: blasso done
+2020-06-26 14:51:47 | Reptetition 8: blasso done
+2020-06-26 14:51:47 | Reptetition 1: blasso done
+2020-06-26 14:51:48 | Reptetition 5: blasso done
+2020-06-26 14:51:49 | Reptetition 9: blasso done
+2020-06-26 14:51:51 | Reptetition 3: MICE-PCA done
+2020-06-26 14:51:52 | Reptetition 2: MICE-PCA done
+2020-06-26 14:51:52 | Reptetition 7: IURR lasso done
+2020-06-26 14:51:52 | Reptetition 7: IURR elastic net done
+2020-06-26 14:51:52 | Reptetition 8: MICE-PCA done
+2020-06-26 14:51:53 | Reptetition 6: IURR lasso done
+2020-06-26 14:51:53 | Reptetition 6: IURR elastic net done
+2020-06-26 14:51:54 | Reptetition 9: MICE-PCA done
+2020-06-26 14:51:54 | Reptetition 7: blasso done
+2020-06-26 14:51:55 | Reptetition 6: blasso done
+2020-06-26 14:51:56 | Reptetition 10: MICE-PCA done
+2020-06-26 14:51:56 | Reptetition 4: MICE-PCA done
+2020-06-26 14:51:57 | Reptetition 3: MICE-CART done
+2020-06-26 14:51:57 | Reptetition 1: MICE-PCA done
+2020-06-26 14:51:57 | Reptetition 2: MICE-CART done
+2020-06-26 14:51:58 | Reptetition 5: MICE-PCA done
+2020-06-26 14:51:58 | Reptetition 8: MICE-CART done
+2020-06-26 14:51:59 | Reptetition 7: MICE-PCA done
+2020-06-26 14:51:59 | Reptetition 6: MICE-PCA done
+2020-06-26 14:52:00 | Reptetition 9: MICE-CART done
+2020-06-26 14:52:02 | Reptetition 3: Random Forest done
+2020-06-26 14:52:02 | Reptetition 4: MICE-CART done
+2020-06-26 14:52:02 | Reptetition 10: MICE-CART done
+2020-06-26 14:52:02 | Reptetition 2: Random Forest done
+2020-06-26 14:52:02 | Reptetition 8: Random Forest done
+2020-06-26 14:52:03 | Reptetition 1: MICE-CART done
+2020-06-26 14:52:03 | Reptetition 5: MICE-CART done
+2020-06-26 14:52:04 | Reptetition 9: Random Forest done
+2020-06-26 14:52:05 | Reptetition 7: MICE-CART done
+2020-06-26 14:52:05 | Reptetition 6: MICE-CART done
+2020-06-26 14:52:06 | Reptetition 4: Random Forest done
+2020-06-26 14:52:07 | Reptetition 10: Random Forest done
+2020-06-26 14:52:07 | Reptetition 1: Random Forest done
+2020-06-26 14:52:08 | Reptetition 5: Random Forest done
+2020-06-26 14:52:09 | Reptetition 7: Random Forest done
+2020-06-26 14:52:09 | Reptetition 3: MICE-TR done
+2020-06-26 14:52:10 | Reptetition 6: Random Forest done
+2020-06-26 14:52:10 | Reptetition 2: MICE-TR done
+2020-06-26 14:52:10 | Reptetition 8: MICE-TR done
+2020-06-26 14:52:12 | Reptetition 9: MICE-TR done
+2020-06-26 14:52:15 | Reptetition 4: MICE-TR done
+2020-06-26 14:52:15 | Reptetition 10: MICE-TR done
+2020-06-26 14:52:16 | Reptetition 1: MICE-TR done
+2020-06-26 14:52:17 | Reptetition 5: MICE-TR done
+2020-06-26 14:52:19 | Reptetition 7: MICE-TR done
+2020-06-26 14:52:19 | Reptetition 6: MICE-TR done
+
+------
+Ends at: 2020-06-26 14:52:36
+Run time: 0.021 h
+------
+

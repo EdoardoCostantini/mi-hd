@@ -67,7 +67,7 @@ supported, highdimensionality etc.)
 		* DVs: continuous.
 	* Limitations:
 		* cannot impute dichotomous or polytomous variables at the moment: needs a different algorithm 
-	* Packages: blasso package from Chris(?) Hans is availe at his personal website (archive version)
+	* Packages: blasso package from Chris Hans is available at his personal website (archive version)
 	* Problems:
 		* Multivariate implementation: gibbs sampler nesting. From the language of ZahoLong2016 (p. 2026-7), in univariate case
 		you need to a) formulate the Bayesian Linear Model for the variable with missing values; 2) simulate 
@@ -95,15 +95,29 @@ supported, highdimensionality etc.)
 			imputations are needed to have multiple imputed datasets. In reality, this is one way of doing it.
 			However, you can also derive your imputation from one single chain, using thinning to select some
 			imputations after convergence is reached. THis latter format is the one suggested by Zhao Long 2016.
-	* Notes: 
+	* Notes:
+		* Dichotomous data: I wrote code to perform it according to probit models. This required a few tweaks:
+		  1. original blasso requires sigma prior for p > n
+	          2. original blasso samples tau last, using an updated sigma
+        	  3. I modified blasso to sample sigma last. That way I can
+	             have 1 sample from blasso function where all values are
+        	     sampled with sigma value = 1. I then want to overwrite
+	             the sampled sigma with value 1 so that next iteration
+        	     will still use 1
+		  This has required a modification of the blasso package installed on your computer. If some results
+		  do not match anymore, try reinstalling the orignal version of blasso and check again. In the future
+		  I would ideally have a separate version of the blasso package with my tweaks.
 		* The lasso penalty is proportional to the log density of a laplacian distribution (or double exponential) (see 
 		Tibshirani1996 section 5) and this distribution has a shape with mass in the center and in the tails meaning
 		that when used as a prior for regression coefficeints, it will favor coefficients that are either 0 or large. 
 		Advantages of this procedure is that it provides directly a valid posterior distribution of the coefficients 
 		AND the posterior predictive distribution of the missing values.
 		* HTLR R package has a very nice implementation of the bayesian multinomial logistic regression with 
-		hyper-lasso prior for feature selection. Include it in the BLasso code for imputation and then you
-		are good to go w/ it.
+		hyper-lasso prior for feature selection. Think about how to include this in your imputation set up.
+		In genral you know from theory that FCS allows for different distirbutions of the imputed variables
+		so ideally the fact that the sampling of a regression coefficnet for a continuous variable x1, is coming 
+		from a different posterior than the one used to sample the regression coefficeints of a multinomial logistic
+		bayesian regression, should not be an issue.
 
 * **PCA based auxiliary variables inclusion (DONE)** following Howard et al 2015
 	

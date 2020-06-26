@@ -5,7 +5,7 @@
 impute_MICE_CART <- function(Z, parms){
   
   ## Input: 
-  # @Z: dataset w/ missing values, 
+  # Z = Xy_mis # dataset w/ missing values, 
   
   ## output: 
   # - a list of chains imputed datasets at iteration iters, 
@@ -17,8 +17,8 @@ impute_MICE_CART <- function(Z, parms){
     start.time <- Sys.time()
     
     imp_MI_CART_mids <- mice::mice(Z, 
-                                   m = parms$ndt, 
-                                   maxit = parms$iters,
+                                   m = parms$mice_ndt, 
+                                   maxit = parms$mice_iters,
                                    meth = 'cart', 
                                    minbucket = 5)
     

@@ -2,7 +2,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_MICE_TR <- function(Z, AS_size, parms = parms){
+impute_MICE_TR <- function(Z, cond, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values, 
@@ -10,6 +10,11 @@ impute_MICE_TR <- function(Z, AS_size, parms = parms){
   # @chains: number of imputation chains, 
   # @iters: itnerations and number
   # @parms: the initialization object parms
+  
+  ## Example inputs
+  # Z = Xy_mis
+  # cond = conds
+  # parms = parms
   
   ## output: 
   # - a list of chains imputed datasets at iteration iters
@@ -19,24 +24,29 @@ impute_MICE_TR <- function(Z, AS_size, parms = parms){
   ## body:
   if(parms$meth_sel$MI_T == TRUE){
     # Select true active set 
-    S <- parms$S_all[[ which(paste0("q", AS_size) == names(parms$S_all)) ]]
-    MI_ture_pred <- c((S), ncol(Z))
+    q = cond$q
+    S <- parms$S_all[[q]]
+    MI_ture_pred <- c(S)
     
     # Define predictor matrix for MI TRUE
     predMat <- matrix(rep(0, ncol(Z)^2), ncol = ncol(Z), 
                       dimnames = list(colnames(Z), colnames(Z)))
-    predMat[parms$z_m_id, MI_ture_pred] <- 1
-    # predMat[c("z1", "z2", "z3"), MI_ture_pred] <- 1
+    predMat[1:length(parms$z_m_id), MI_ture_pred] <- 1
+    
+    # Define methods
+    methods <- rep("norm", ncol(Z))
+    vartype <- sapply(Z, class)
+    methods[vartype != "numeric"] <- "pmm"
     
     # Impute
     start.time <- Sys.time()
     
     imp_MITR_mids <- mice::mice(Z, 
                                 predictorMatrix = predMat,
-                                m = parms$ndt,
-                                maxit = parms$iters,
+                                m = parms$mice_ndt,
+                                maxit = parms$mice_iters,
                                 ridge = 1e-5,
-                                method = "norm")
+                                method = methods)
     
     end.time <- Sys.time()
     

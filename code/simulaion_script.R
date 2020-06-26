@@ -28,7 +28,7 @@ sim_start <- Sys.time()
                   FUN      = doRep,
                   conds    = conds,
                   parms    = parms,
-                  mc.cores = ( 5 ) )
+                  mc.cores = ( 10 ) )
 
 sim_ends <- Sys.time()
 
@@ -41,9 +41,15 @@ cat(paste0("\n", "------", "\n",
     sep = "\n",
     append = TRUE)
 
+  # Attach parm object
+  out$parms <- parms
+
 # Save output -------------------------------------------------------------
 
 saveRDS(out,
         paste0(parms$outDir,
                parms$results_file_name)
 )
+
+
+length(out)

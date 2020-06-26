@@ -1,80 +1,7 @@
-### Title:    Imputing High Dimensional Data
+### Title:    helper functions
+### Porject:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
-
-# data generation ---------------------------------------------------------
-
-genData <- function(cnd, parms){
-  # For internals
-  # cnd <- conds[1,]
-  
-  p_Zm <- length(parms$z_m_id) # number of variables w/ missing values
-  p_Zf <- cnd["p"] - p_Zm      # number of fully observed variables
-  
-  # Gen Zf(ully observed)
-  Zf <- rmvnorm(n     = parms$n, 
-                mean  = rep(0, p_Zf), 
-                sigma = AR1(p_Zf, rho = cnd["rho"]) )
-
-  # Append empty Zm(issing values on p_Zm variables)
-  Zm <- matrix(rep(NA, p_Zm*parms$n),
-               ncol = p_Zm)
-  Z <- cbind(Zm, Zf)
-  
-  # Fill Zm with true values
-  AS_indx <- which(names(parms$S_all) == paste0("q", cnd["q"])) # active set (AS) indx
-  Zs <- Z[, parms$S_all[[AS_indx]]] # Active set
-  a <- rep(1, ncol(Zs)) * parms$stnr[AS_indx]
-  
-  Zm <- sapply(1:p_Zm, 
-               function(x) {
-                 rnorm(parms$n, 1 + Zs %*% a, sqrt(parms$z_m_var))
-               }
-  )
-  
-  # Replace in dataset Z the new true values
-  Z <- cbind(Zm, Zf)
-    colnames(Z) <- paste0("z", 1:ncol(Z))
-  
-  # Generate y
-  b0 <- parms$b
-  b <- rep(parms$b, parms$k)
-  y <- rnorm(parms$n, 
-             mean = b0 + Z[, 1:parms$k] %*% b,
-             sd = sqrt(parms$y_var))
-  
-  return( as.data.frame(cbind(Z, y)) )
-}
-
-# Example use
-# set.seed(1234)
-# Xy <- genData(conds[1, ], parms)
-# lm(y ~ z1 + z2 + z3 + z4 + z5, data = Xy) # true y model
-
-imposeMiss <- function(Xy, parms){
-  # Given a fully observed dataset and param object containing the regression
-  # coefficients of the model to impose missingness, it returns a version of
-  # the original data with imposed missingness on z1, and its missingness
-  # idicator (R)
-  
-  n <- nrow(Xy)
-  coefs <- parms$b_miss_model
-  Xy_miss <- as.matrix(Xy)
-  nR <- sapply(1:length(parms$z_m_id), function(d){
-    logit_miss <- cbind(1, Xy_miss[, parms$detlamod[[d]]]) %*% coefs
-    prb_miss <- exp(logit_miss)/(1+exp(logit_miss))
-    nR <- rbinom(n, 1, prb_miss) == 1
-    return(nR)
-  }
-  )
-  
-  for (i in 1:length(parms$z_m_id)) {
-    Xy_miss[nR[, i], parms$z_m_id[i]] <- NA
-  }
-  
-  return(list(Xy_miss = as.data.frame(Xy_miss),
-              nR = nR) )
-}
 
 # generic functions -------------------------------------------------------
 
@@ -213,7 +140,35 @@ init_dt_i <- function(Z0, missVarInfo){
 
 # Estimation --------------------------------------------------------------
 
-rr_est_lasso <- function(X, y, parms){
+rr_est_ridge <- function(X, y, parms, fam="gaussian"){
+  ## Description:
+  # Given any dv y (e.g. variable to be imputed), and its corresponding X 
+  # values (observed, or imputed), fits a lasso regression
+  ## For internals:
+  # data("Boston", package = "MASS")
+  # X <- model.matrix(medv~., Boston)
+  # y <- Boston$medv
+  # fam <- "gaussian"
+  ## Internals from simualtion
+  # X = X_obs_bs
+  # y = y_obs_bs
+  # parms = parms
+  # fam = glmfam
+  
+  cv_lasso <- cv.glmnet(X, y,
+                        family = fam,
+                        nfolds = 10,
+                        alpha = 0)
+  
+  regu.mod <- glmnet(X, y, 
+                     family = fam,
+                     alpha = 1, 
+                     lambda = cv_lasso$lambda.min)
+
+  return(regu.mod)
+}
+
+rr_est_lasso <- function(X, y, parms, fam="gaussian"){
   ## Description:
   # Given any dv y (e.g. variable to be imputed), and its corresponding X 
   # values (observed, or imputed), fits a lasso regression
@@ -221,56 +176,67 @@ rr_est_lasso <- function(X, y, parms){
     # data("Boston", package = "MASS")
     # X <- model.matrix(medv~., Boston)
     # y <- Boston$medv
+    # fam <- "gaussian"
   ## Internals from simualtion
-  # X = Wm_j_obs
-  # y = z_j_obs
+  # X = X_obs_bs
+  # y = y_obs_bs
   # parms = parms
+  # fam = glmfam
   
   cv_lasso <- cv.glmnet(X, y,
-                        family = "gaussian",
+                        family = fam,
                         nfolds = 10,
                         alpha = 1)
   
   regu.mod <- glmnet(X, y, 
-                     family = "gaussian",
+                     family = fam,
                      alpha = 1, 
                      lambda = cv_lasso$lambda.min)
   
   return(regu.mod)
 }
 
-rr_est_elanet <- function(X, y, parms){
+rr_est_elanet <- function(X, y, parms, fam = "gaussian"){
+  # Source for cross validation strategy:
+  # https://daviddalpiaz.github.io/r4sl/elastic-net.html
   ## Description:
   # Given any dv y (e.g. variable to be imputed), and its corresponding X 
   # values (observed, or imputed), fits a lasso regression
   ## For internals:
-  #   data("Boston", package = "MASS")
-  #   X <- model.matrix(medv~., Boston)
-  #   y <- Boston$medv
+  # data("Boston", package = "MASS")
+  # X <- model.matrix(medv~., Boston)
+  # y <- Boston$medv
+  # fam <- "gaussian"
+  
+  ## Internals from simualtion
+  # X = X_obs_bs
+  # y = y_obs_bs
+  # parms = parms
+  # fam = glmfam
+  
   # Set training control
   train_control <- trainControl(method = "cv",
-                                number = 10,
-                                # repeats = 5,
+                                number = 10, # 10-fold cross validation 
                                 selectionFunction = "best",
                                 verboseIter = FALSE)
   
   # CV
-  el_cv <- train(y ~., 
-                 data = cbind(y, X), 
+  el_cv <- train(y ~ .,
+                 data = data.frame(y, X), 
                  method = "glmnet",
-                 family = "gaussian", 
+                 family = fam, 
                  type.multinomial = "grouped",
                  trControl = train_control,
                  preProcess = c("center", "scale"),
-                 tuneLength = 25
+                 tuneLength = 10 # values tried for both alpha and lambda
   )
   
   # Train model
   regu.mod <- glmnet(X, y,
-                     family = "gaussian",
+                     family = fam,
                      type.multinomial = "grouped", # if glmfam is multinomial, otherwise does not apply
-                     alpha = el_cv$bestTune[1],
-                     lambda = el_cv$bestTune[2])
+                     alpha = el_cv$bestTune$alpha,
+                     lambda = el_cv$bestTune$lambda)
   
   return(regu.mod)
 }
@@ -283,6 +249,7 @@ imp_gaus_DURR <- function(model, X_tr, y_tr, X_te, parms){
   
   # Given a fitted imputation model it returns the imputations for
   # the missing values on a normally distributed imputation dv
+  # (based on DengEtAl 2016, appendix)
   
   ## For internals ##
   
@@ -314,7 +281,7 @@ imp_dich_DURR <- function(model, X_tr, y_tr, X_te, parms){
   ## Description ##
   
   # Given a fitted imputation model it returns the imputations for
-  # the missing values on dichotomous
+  # the missing values on dichotomous. (based on DengEtAl 2016, appendix)
   
   ## For internals ##
   
@@ -332,9 +299,15 @@ imp_dich_DURR <- function(model, X_tr, y_tr, X_te, parms){
   # model <- glmnet(X_tr, y_tr,
   #                 family = "binomial", alpha = 1, lambda = cv$lambda.min)
   
+  ## Internals from simulation
+  # model = regu.mod
+  # X_tr = X_obs_bs
+  # y_tr = y_obs_bs
+  # X_te = X_mis
+  
   ## Body ##
   
-  X_te <- model.matrix(rep(1, nrow(X_te)) ~ X_te)[, -1]
+  X_te <- model.matrix( ~ X_te)[, -1]
   py1  <- predict(model, X_te, type = "response") # probability y = 1
   y_prd <- rbinom(nrow(X_te), 1, py1)             # random draw
   
@@ -382,7 +355,7 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   
   # Given a regularized model it returns the imputations for
   # the missing values on a normally distributed imputation dv
-  # according to IURR method
+  # according to IURR method (based on DengEtAl 2016, appendix)
   
   ## For internals ##
 
@@ -399,12 +372,12 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   #   cv <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
   # model <- glmnet(X_tr, y_tr, alpha = 1, lambda = cv$lambda.min)
   
+  ## Inputs from simulation
   # model = regu.mod
-  # X_tr = Wm_j_obs
-  # y_tr = z_j_obs
-  # X_te = Wm_mj 
-  # y_te = zm_mj
-  # parms = parms
+  # X_tr = X_obs
+  # y_tr = y_obs
+  # X_te = X_mis
+  # y_te = y_mis
   
   ## Body ##
   
@@ -457,6 +430,75 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   return(y_imp)
 }
 
+imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
+  ## Description ##
+  
+  # Given a regularized model it returns the imputations for
+  # the missing values on bernulli distributed imputation dv
+  # according to IURR method (based on DengEtAl 2016, appendix)
+  
+  ## For internals ##
+  
+  # data("Boston", package = "MASS")
+  # train_ind <- Boston$medv %>%
+  #   caret::createDataPartition(p = 0.8, list = FALSE)
+  # train  <- Boston[train_ind, ]
+  # test <- Boston[-train_ind, ]
+  # 
+  # X_tr <- model.matrix(chas~., train)[,-1]
+  # X_te <- model.matrix(chas~., test)[,-1]
+  # y_tr <- train$chas
+  # y_te <- test$chas
+  #   cv <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
+  # model <- glmnet(X_tr, y_tr, alpha = 1, lambda = cv$lambda.min)
+  # fam <- "binomial"
+  
+  ## Inputs from simulation
+  # model = regu.mod
+  # X_tr = X_obs
+  # y_tr = y_obs
+  # X_te = X_mis
+  # y_te = y_mis
+  
+  ## Body ##
+  
+  # Select predictors based on rr
+  rr_coef <- as.matrix(coef(model)) # regularized regression coefs
+  rr_coef_no0 <- row.names(rr_coef)[rr_coef != 0]
+  AS <- rr_coef_no0[-1] # predictors active set
+  
+  # 1. Obtain estiamtes w/ standard inference procedure (IWLS or ML)
+  if(identical(rr_coef_no0, "(Intercept)")){
+    glm_fit <- glm(y_tr ~ 1, family = "binomial")
+  } else {
+    glm_fit <- glm(y_tr ~ X_tr[, AS], family = "binomial")
+  }
+
+  # 2. obtain estimates
+  theta <- coef(glm_fit)
+  Sigma <- vcov(glm_fit)
+  
+  # 3. Sample parameters for posterior predictive distribution
+  # (approximate distirbution of parameters)
+  pdraws_par <- MASS::mvrnorm(1,
+                              mu = theta, 
+                              Sigma = Sigma)
+  
+  # 4. Sample approxiamtion posterior predictive distribution
+  if(identical(rr_coef_no0, "(Intercept)")){
+    logit <- b_ppd <- pdraws_par # only intercept
+    prob <- exp(logit) / (1+exp(logit))
+    y_imp <- rbinom(nrow(X_te), 1, prob)
+  } else {
+    X_ppd <- model.matrix( ~ X_te[, AS]) # X for posterior pred dist
+    b_ppd <- pdraws_par # betas for posterior pred dist
+    logit <- X_ppd %*% b_ppd
+    prob <- exp(logit) / (1+exp(logit))
+    y_imp <- rbinom(nrow(X_te), 1, prob)
+  }
+  return(y_imp)
+}
+
 .lm_loss <-function(theta, y, X){
   n <- nrow(X)
   k <- ncol(X)
@@ -489,71 +531,170 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   return(fmi)
 }
 
-fit_models <- function(multi_dt, mod){
+# fit_models <- function(multi_dt, mod){
+#   # Given a list of complete datasets it fits a model described
+#   # in mod 
+#   models <- lapply(X = multi_dt,
+#                    FUN = function(x) lm(mod, data = x))
+#   return(models)
+# }
+
+fit_sat_model <- function(multi_dt){
   # Given a list of complete datasets it fits a model described
-  # in mod 
-  models <- lapply(X = multi_dt,
-                   FUN = function(x) lm(mod, data = x))
+  # in mod
+  ## Example input ##
+  # multi_dt <- list(imp_DURR_rd$dats,
+  #                  imp_DURR_la$dats,
+  #                  imp_DURR_el$dats,
+  #                  imp_IURR_la$dats,
+  #                  imp_IURR_el$dats,
+  #                  imp_blasso$dats,
+  #                  imp_PCA$dats,
+  #                  imp_CART$dats,
+  #                  imp_RANF$dats,
+  #                  imp_MICE_TR$dats)[[1]]
+  ## Body ##
+  if(!is.null(multi_dt)){
+    models <- lapply(X = multi_dt,
+                     FUN = function(x) {
+                       sem(parms$lav_model, 
+                           data = x, 
+                           likelihood = "wishart")
+                     })
+    
+  } else {models = NULL}
   return(models)
 }
 
+get_EST <- function(fits){
+  ## Description
+  # Given a list of fits for different single imputation apoprahces
+  # it returns the estiamtes of the parameters for each
+  ## For internals
+  # fits = list(fit_mf, fit_gs, fit_cc)
+  summa_models <- lapply(X = fits,
+                         FUN = function(x) parameterEstimates(x))
+  
+  coefs <- sapply(X = summa_models,
+                  FUN = function(x) x[, c("est")])
+  return(coefs)
+}
+
+get_CI <- function(fits){
+  ## Description
+  # Given a list of fits for different single imputation apoprahces
+  # it returns the CI of the estiamtes of the parameters for each
+  ## For internals
+  # fits = list(fit_mf, fit_gs, fit_cc)
+  CI_list <- lapply(X = fits,
+                    FUN = function(x) parameterEstimates(x)[, 
+                                                            c("ci.lower", 
+                                                              "ci.upper")]
+  )
+
+  CI_mtx <- sapply(CI_list, function(x){
+    c(x[,1], x[,2])
+  })
+
+  return(CI_mtx)
+}
+  
 get_pool_EST <- function(fits){
   ## Description
   # Given a list of imputed datasets under the same imputation model
   # it returns the pooled estiamtes of the regression coefs
   ## For internals
-  # fake_data <- nhanes
-  # colnames(fake_data) <- c("y", "z1", "z2", "z3")
-  # imp <- mice(fake_data, print = FALSE, m = 10, seed = 24415)
-  # imp_dats <- mice::complete(imp, "all")
-  # multi_dt = imp_dats
+  # fits = fits_md[[5]]
   summa_models <- lapply(X = fits,
-                         FUN = function(x) summary(x))
-  coefs <- t(sapply(X = summa_models,
-                    FUN = function(x) coef(x)[, "Estimate"]))
-  Q_bar <- colMeans(coefs)
+                         FUN = function(x) parameterEstimates(x))
+  
+  coefs <- sapply(X = summa_models,
+                    FUN = function(x) x[, c("est")])
+  Q_bar <- rowMeans(coefs)
+    # 1 column per imputed dataset
   return(Q_bar)
+  # mu <- coefs[1:parms$zm_n, ]
+  # va <- coefs[(parms$zm_n+1):(parms$zm_n*2), ]
+  # co <- coefs[(parms$zm_n*2+1):nrow(coefs), ]
 }
+
+# # For linear models
+# get_pool_EST <- function(fits){
+#   ## Description
+#   # Given a list of imputed datasets under the same imputation model
+#   # it returns the pooled estiamtes of the regression coefs
+#   ## For internals
+#   # fake_data <- nhanes
+#   # colnames(fake_data) <- c("y", "z1", "z2", "z3")
+#   # imp <- mice(fake_data, print = FALSE, m = 10, seed = 24415)
+#   # imp_dats <- mice::complete(imp, "all")
+#   # multi_dt = imp_dats
+#   summa_models <- lapply(X = fits,
+#                          FUN = function(x) summary(x))
+#   coefs <- t(sapply(X = summa_models,
+#                     FUN = function(x) coef(x)[, "Estimate"]))
+#   Q_bar <- colMeans(coefs)
+#   return(Q_bar)
+# }
 
 get_pool_CI <- function(fits){
   ## Description
   # Given a list of imputed datasets under the same imputation model
   # it returns the pooled CIs of the regression coefs
+  ## Note on storing convention: instead of storing low and up bound
+  # in different columns I stored in one single column. The first half
+  # is lwr bound, the bottom part is upper bound. This makes it easier
+  # to store. 
+  
   ## For internals
-  # fake_data <- nhanes
-  # colnames(fake_data) <- c("y", "z1", "z2", "z3")
-  # imp <- mice(fake_data, print = FALSE, m = 10, seed = 24415)
-  # imp_dats <- mice::complete(imp, "all")
-  # multi_dt = imp_dats
+  # fits = fits_md[[5]]
+  
+  
+  ## Body
   m <- length(fits)
-  
+  ## Coef estimates
   summa_models <- lapply(X = fits,
-                         FUN = function(x) summary(x))
-  ## Coef estimates ##
-  coefs <- t(sapply(X = summa_models,
-                    FUN = function(x) coef(x)[, "Estimate"]))
-  Q_bar <- colMeans(coefs)
+                         FUN = function(x) parameterEstimates(x))
+  coefs <- sapply(X = summa_models,
+                  FUN = function(x) x[, c("est")])
+  Q_bar <- rowMeans(coefs)
   
-  ## Variances
-  all_vcov <- lapply(X = summa_models,
+  ## Variances (squared standard error for each parameter)
+  all_vcov <- lapply(X = fits,
                      FUN = function(x) vcov(x))
   
   U_bar <- diag(Reduce('+', all_vcov) / m)
   
-  B <- diag(1 / (m-1) * (t(coefs) - Q_bar) %*% t(t(coefs) - Q_bar))
+  B <- diag(1 / (m-1) * (coefs - Q_bar) %*% t(coefs - Q_bar))
   
-  T <- U_bar + B + B/m
+  T_var <- U_bar + B + B/m
   
   ## Degrees of freedom
-  nu <- .miDf(length(fits), b = B, t = T, summa_models[[1]]$df[2])
+  nu_com <- parms$n - nrow(coefs) # n - k where k number of paramteres estimated
+  nu <- .miDf(length(fits), b = B, t = T_var, nu_com)
  
   ## CI computation
   t_nu <- qt(1 - (1-parms$alphaCI)/2, 
              df = nu)
   
-  CI <- data.frame(lwr = Q_bar - t_nu * sqrt(T), 
-                   upr = Q_bar + t_nu * sqrt(T))
+  CI <- c(lwr = Q_bar - t_nu * sqrt(T_var), 
+                   upr = Q_bar + t_nu * sqrt(T_var))
+  # Column wise storing
+  # CI <- data.frame(lwr = Q_bar - t_nu * sqrt(T_var), 
+  #                  upr = Q_bar + t_nu * sqrt(T_var))
+  
   return(CI = CI)
+}
+
+onetree <- function(xobs, xmis, yobs, s) {
+  ## Ripped off mice package mice.impute.rf. Fits one free for the 
+  ## random forest. Used in your own random forest version
+  fit <- randomForest::randomForest(x = xobs, y = yobs,
+                                    ntree = 1)
+  leafnr <- predict(object = fit, newdata = xobs, nodes = TRUE)
+  nodes <- predict(object = fit, newdata = xmis, nodes = TRUE)
+  donor <- lapply(nodes, function(s) yobs[leafnr == s])
+  return(donor)
 }
 
 bbootstrap <- function(x) { # Bayesian Bootstrap
@@ -632,4 +773,8 @@ extract_results <- function(cond_name, output, dt_rep){
   resu <- list(bias = bias, 
                CI = round(CI, 3))
   return(resu)
+}
+
+extract_bias <- function(){
+  
 }

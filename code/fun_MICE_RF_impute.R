@@ -16,8 +16,8 @@ impute_MICE_RF <- function(Z, parms){
   if(parms$meth_sel$MI_RF == TRUE){
     start.time <- Sys.time()
     imp_MI_RF_mids <- mice::mice(Z, 
-                                 m = parms$ndt,
-                                 maxit = parms$iters,
+                                 m = parms$mice_ndt,
+                                 maxit = parms$mice_iters,
                                  meth = "rf", 
                                  ntree = parms$rfntree)
     end.time <- Sys.time()

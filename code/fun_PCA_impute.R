@@ -54,7 +54,6 @@ impute_PCA <- function(Z, parms = parms){
                                   ordVars = ordeVars,
                                   nomVars = factVars,
                                   moderators = colnames(Z_aux) )
-
     } else {
       interact <- NULL
     }
@@ -71,7 +70,7 @@ impute_PCA <- function(Z, parms = parms){
     DA_list <- list(Z_aux, interact, polynom)
     Z_aux <- do.call(cbind, 
                      DA_list[lapply(DA_list, length) != 0])
-
+    
     # Extract PCs
     pcaOut <- prcomp(Z_aux, scale = TRUE, retx = TRUE)
     
@@ -82,17 +81,31 @@ impute_PCA <- function(Z, parms = parms){
     ## Extract the principal component scores:
     Z_pca   <- pcaOut$x[, rSquared < parms$PCA_pcthresh]
     
+    ## Define Imputation methods
+    Z_4imp <- cbind(Z_mod, Z_pca)
+      methods <- rep("norm", ncol(Z_4imp))
+      vartype <- sapply(Z_4imp, class)
+      methods[vartype != "numeric"] <- "pmm"
+    
+    ## Define Predictor matrix
+    predMat <- matrix(rep(0, ncol(Z_4imp)^2), ncol = ncol(Z_4imp), 
+                      dimnames = list(colnames(Z_4imp), colnames(Z_4imp)))
+    predMat[1:length(parms$z_m_id), ] <- 1
+    diag(predMat) <- 0
+      
     # Impute
-    imp_PCA_mids <- mice::mice(cbind(Z_mod, Z_pca),
-                               m = parms$ndt,
-                               maxit = parms$iters,
+    imp_PCA_mids <- mice::mice(Z_4imp,
+                               m = parms$mice_ndt,
+                               maxit = parms$mice_iters,
+                               predictorMatrix = predMat,
                                ridge = 1e-5,
-                               method = "norm")
+                               method = methods)
+    imp_PCA_mids$predictorMatrix
     end.time <- Sys.time()
     
     # Store results
     imp_PCA_dats <- mice::complete(imp_PCA_mids, "all")
-    imp_PCA_imps <- imp_PCA_mids$imp
+    imp_PCA_imps <- imp_PCA_mids$imp[1:parms$zm_n]
     imp_PCA_time <- difftime(end.time, start.time, units = "mins")
     
     return(list(dats = imp_PCA_dats,
