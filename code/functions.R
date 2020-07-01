@@ -104,39 +104,38 @@ init_dt_i <- function(Z0, missVarInfo){
   # the variable loop (for j in 1:l) and the current iteration data at the end
 }
 
-# process_4IURR <- function(Z, Zm, j_th, parms){
-#   ## Description:
-#   # Given a datset with missing values, an imputed version from a previous
-#   # iteration of imputation, and the index of the variable under imputation
-#   # it returns a dataset with observed values on the variable under imputation
-#   # and corresponding values on the other X variables either observed or 
-#   # previously imputed.
-#   ## For internals:
-#   # data(iris2) # example dataset from PcAux package
-#   # Z <- iris2[,-c(1,7)] # original data w/ missing values
-#   # Zm <- init_dt_i(Z, missing_type(Z)) # result of previous iteration
-#   # j_th <- 1
-#   
-#   ## Step 0. Prepare data for j-th variable imputation
-#   ry <- !is.na(Z[, j_th]) # indexing obserrved values on y
-#   Wm_j  <- Zm[,-j_th]     # predictors for imp model from inizialized dataset (m-1) [ALL CASES]  
-#   zm_j  <- Zm[,j_th]      # outcome for imp model from inizialized dataset (m-1)    [ALL CASES]
-#   Wm_mj <- Wm_j[!ry, ] # predictor rows for cases with missing z_j               [OBSERVED and IMPUTED]
-#   zm_mj <- zm_j[!ry]   # current (m) draw of z_j for cases with missing z_j      [IMPUTED/MISSING CASES]
-#   
-#   # Select cases for imputation model
-#   z_j_obs  <- Zm[, j_th][!is.na(Z[, j_th])]   # observed components of j-th variable [OBSERVED VALUES]
-#   Wm_j_obs <- Zm[, -j_th][!is.na(Z[, j_th]),] # current (m) components of the predictors cooresponding 
-#                                         # to observed cases on j-th variable [OBSERVED and IMPUTED VALUES]
-#   
-#   Zy <- (list(Wm_j_obs = as.matrix(Wm_j_obs),
-#               z_j_obs = as.vector(z_j_obs),
-#               Wm_mj = as.matrix(Wm_mj),
-#               zm_mj = as.vector(zm_mj))) 
-#   
-#   return(Zy)
-# }
+# Debugging function
+# For use see: https://stackoverflow.com/questions/40629715/how-to-show-error-location-in-trycatch/40674718
 
+withErrorTracing = function(expr, silentSuccess=FALSE) {
+  hasFailed = FALSE
+  messages = list()
+  warnings = list()
+  
+  errorTracer = function(obj) {
+    
+    # Storing the call stack 
+    calls = sys.calls()
+    calls = calls[1:length(calls)-1]
+    # Keeping the calls only
+    trace = limitedLabels(c(calls, attr(obj, "calls")))
+    
+    # Printing the 2nd and 3rd traces that contain the line where the error occured
+    # This is the part you might want to edit to suit your needs
+    print(paste0("Error occuring: ", trace[length(trace):1][2:3]))
+    
+    # Muffle any redundant output of the same message
+    optionalRestart = function(r) { res = findRestart(r); if (!is.null(res)) invokeRestart(res) }
+    optionalRestart("muffleMessage")
+    optionalRestart("muffleWarning")
+  }
+  
+  vexpr = withCallingHandlers(withVisible(expr),  error=errorTracer)
+  if (silentSuccess && !hasFailed) {
+    cat(paste(warnings, collapse=""))
+  }
+  if (vexpr$visible) vexpr$value else invisible(vexpr$value)
+}
 
 # Estimation --------------------------------------------------------------
 
@@ -543,24 +542,32 @@ fit_sat_model <- function(multi_dt){
   # Given a list of complete datasets it fits a model described
   # in mod
   ## Example input ##
-  # multi_dt <- list(imp_DURR_rd$dats,
-  #                  imp_DURR_la$dats,
-  #                  imp_DURR_el$dats,
-  #                  imp_IURR_la$dats,
-  #                  imp_IURR_el$dats,
-  #                  imp_blasso$dats,
-  #                  imp_PCA$dats,
-  #                  imp_CART$dats,
-  #                  imp_RANF$dats,
+  # multi_dt <- list(imp_PCA$dats,
   #                  imp_MICE_TR$dats)[[1]]
   ## Body ##
   if(!is.null(multi_dt)){
     models <- lapply(X = multi_dt,
                      FUN = function(x) {
-                       sem(parms$lav_model, 
-                           data = x, 
-                           likelihood = "wishart")
+                       tryCatch({
+                         # Obtain MLE estiamtes
+                         sem(parms$lav_model, 
+                                     data = x, 
+                                     likelihood = "wishart")},
+                         # If there is a fitting error, report it
+                                error = function(report) {
+                                  err <- paste0("Original Error: ", report)
+                                  return(err)
+                                },
+                         # if there is a warning error, report it
+                                warning = function(report) {
+                                  err <- paste0("Original Warning: ", report)
+                                  return(err)
+                                })
                      })
+    
+    # Keep only models that converged
+    fits_indx <- as.vector(which(!sapply(models, is.character)))
+    models <- models[fits_indx]
     
   } else {models = NULL}
   return(models)
@@ -604,7 +611,7 @@ get_pool_EST <- function(fits){
   # Given a list of imputed datasets under the same imputation model
   # it returns the pooled estiamtes of the regression coefs
   ## For internals
-  # fits = fits_md[[5]]
+  # fits = fits_md[[7]]
   summa_models <- lapply(X = fits,
                          FUN = function(x) parameterEstimates(x))
   
@@ -613,29 +620,7 @@ get_pool_EST <- function(fits){
   Q_bar <- rowMeans(coefs)
     # 1 column per imputed dataset
   return(Q_bar)
-  # mu <- coefs[1:parms$zm_n, ]
-  # va <- coefs[(parms$zm_n+1):(parms$zm_n*2), ]
-  # co <- coefs[(parms$zm_n*2+1):nrow(coefs), ]
 }
-
-# # For linear models
-# get_pool_EST <- function(fits){
-#   ## Description
-#   # Given a list of imputed datasets under the same imputation model
-#   # it returns the pooled estiamtes of the regression coefs
-#   ## For internals
-#   # fake_data <- nhanes
-#   # colnames(fake_data) <- c("y", "z1", "z2", "z3")
-#   # imp <- mice(fake_data, print = FALSE, m = 10, seed = 24415)
-#   # imp_dats <- mice::complete(imp, "all")
-#   # multi_dt = imp_dats
-#   summa_models <- lapply(X = fits,
-#                          FUN = function(x) summary(x))
-#   coefs <- t(sapply(X = summa_models,
-#                     FUN = function(x) coef(x)[, "Estimate"]))
-#   Q_bar <- colMeans(coefs)
-#   return(Q_bar)
-# }
 
 get_pool_CI <- function(fits){
   ## Description
@@ -649,10 +634,11 @@ get_pool_CI <- function(fits){
   ## For internals
   # fits = fits_md[[5]]
   
-  
   ## Body
-  m <- length(fits)
   ## Coef estimates
+  m <- length(fits)
+  # use only dataset for which model can be fit
+  
   summa_models <- lapply(X = fits,
                          FUN = function(x) parameterEstimates(x))
   coefs <- sapply(X = summa_models,
@@ -679,9 +665,6 @@ get_pool_CI <- function(fits){
   
   CI <- c(lwr = Q_bar - t_nu * sqrt(T_var), 
                    upr = Q_bar + t_nu * sqrt(T_var))
-  # Column wise storing
-  # CI <- data.frame(lwr = Q_bar - t_nu * sqrt(T_var), 
-  #                  upr = Q_bar + t_nu * sqrt(T_var))
   
   return(CI = CI)
 }

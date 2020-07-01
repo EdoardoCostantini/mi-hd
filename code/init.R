@@ -43,11 +43,10 @@
 
 # Itereations, repetitions, etc
   parms$dt_rep     <- 10  # replications for averaging results (200 goal)
-  # For DURR, IURR, Blasso style of imputation algorithm
   parms$chains     <- 1 # number of parallel chains for convergence check
-  parms$iters      <- 5 # 20
-  parms$burnin_imp <- 0 # 10 # how many imputation iterations should be discarded
-  parms$ndt        <- 5 # 10 # number of imputed datasets to pool esitmaes from (10)
+  parms$iters      <- 2 #50
+  parms$burnin_imp <- 0 # 20 # how many imputation iterations should be discarded
+  parms$ndt        <- 2 # 10 # number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
@@ -56,13 +55,11 @@
   parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
   parms$keep_dt <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # keep 1 dataset every thin
   
-  parms$iter_bl <- 1   # blasso samples (everything else is in burnin)
-  parms$burn_bl <- 1e3 * parms$iter_bl # blasso burnin
   parms$rfntree <- 10  # default value as no indication is given in paper
 
   # For mice-like algorithms
-  parms$mice_iters      <- 2 # 10
-  parms$mice_ndt        <- 2 # 10 # number of imputed datasets to pool esitmaes from (10)
+  parms$mice_iters <- 2 #  20
+  parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
   
 # Data gen ----------------------------------------------------------------
 
@@ -103,27 +100,37 @@
 
 # Response Model (rm)
   parms$rm_b <- c(-3, -3, 2, -1)
-  parms$rm_x <- t(sapply(parms$z_m_id, function(x)
-    c(base::sample((1:20)[-parms$z_m_id], 3),
-      base::sample(21:50, 1))
-  ))
 
+  # parms$rm_x <- t(sapply(parms$z_m_id, function(x)
+  #   c(base::sample(parms$blck1[which(parms$blck1 != x)], 3),
+  #     base::sample(parms$blck2[which(parms$blck2 != x)], 1))
+  # ))
+  parms$rm_x <- matrix(c(2, 3, 5, 10,
+                         5, 3, 1, 7,
+                         1, 2, 5, 6,
+                         3, 1, 2, 9,
+                         2, 5, 1, 10,
+                         5, 2, 1, 6), 
+                       ncol = 4, nrow = 6,
+                       byrow = TRUE)
+  
+  
 # Models ------------------------------------------------------------------
-  source("./gen_lavaan_model.R") # generate txt file for lavaan model
-  parms$lav_model <- read.table("../txt/lavaan_model_sat.txt",
-                          as.is = TRUE)$V1
-
+  # source("./gen_lavaan_model.R") # generate txt file for lavaan model
+  # # parms$lav_model <- read.table("../txt/lavaan_model_sat.txt",
+  # #                         as.is = TRUE)$V1
+  parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), collapse="\n")
+  
+  
 # Generic
-  parms$meth_sel <- data.frame(DURR_rd = FALSE,
-                               DURR_la = FALSE,
+  parms$meth_sel <- data.frame(DURR_la = TRUE,
                                DURR_el = FALSE,
-                               IURR_la = FALSE,
+                               IURR_la = TRUE,
                                IURR_el = FALSE,
-                               blasso  = FALSE,
+                               blasso  = TRUE,
                                MI_PCA  = TRUE,
-                               MI_CART = FALSE,
-                               MI_CTBB = FALSE,
-                               MI_RF   = FALSE,
+                               MI_CART = TRUE,
+                               MI_RF   = TRUE,
                                MI_T    = TRUE,
                                missFor = TRUE,
                                GS      = TRUE,
@@ -162,11 +169,11 @@
 
 # Conditions --------------------------------------------------------------
 
-  p   <- c(500) # number of variables
+  p   <- 50 # c(50, 500) # number of variables
   rho <- c(0.5) # autoregressive structure
   q   <- c(1) # c(4, 20)  # active set (num of variables are true predictors of y)
   latent <- c(FALSE, TRUE)[1]
-  pm <- c(.3)
+  pm <- c(.1, .3)
   
   conds <- expand.grid(p, rho, q, latent, pm)
     colnames(conds) <- c("p", "rho", "q", "latent", "pm")

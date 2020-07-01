@@ -14,9 +14,6 @@ var_names <- paste0("z", parms$z_m_id)
 
 # Text objects ------------------------------------------------------------
 
-# start model
-head_model_start <- "'\n"
-
 # Means
 head_means <- "# Intercepts\n"
 all_means <- paste0(var_names, " ~ ", "1")
@@ -33,14 +30,10 @@ all_covs <- combn(var_names, 2)
 all_covs <- apply(all_covs, 2, paste0, collapse = " ~~ ")
 all_covs <- paste(all_covs, collapse = "\n")
 
-# end model
-head_model_end <- "'"
-
 # Compile model file ------------------------------------------------------
 
 # Start and intercepts
-cat(paste(head_model_start, 
-          head_means,
+cat(paste(head_means,
           all_means),
     file = paste0(model_loc_path, model_name),
     sep = "\n")
@@ -53,8 +46,7 @@ cat(paste(head_vars, all_vars),
 
 # Add covariances and end
 cat(paste(head_covs, 
-          all_covs, 
-          head_model_end),
+          all_covs),
     file = paste0(model_loc_path, model_name),
     sep = "\n",
     append = TRUE)

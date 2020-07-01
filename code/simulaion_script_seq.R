@@ -12,10 +12,20 @@ set.seed(12345)
 
 out1 <- list()
 
-for(rp in 1 : 5){
+for(rp in 1 : 1){
   print(paste0("REPETITION:", rp))
   out1[[rp]] <- doRep(rp, conds = conds, parms = parms)
 }
+
+set.seed(12345)
+out2 <- list()
+
+for(rp in 1 : 1){
+  print(paste0("REPETITION:", rp))
+  out2[[rp]] <- doRep(rp, conds = conds, parms = parms)
+}
+
+all.equal(out1[[1]]$cond_50_0.1$all_EST, out2[[1]]$cond_50_0.1$all_EST)
 
 out1[[3]]$cond_500_0.3
 out <- out1

@@ -59,7 +59,7 @@ round(colMeans(res_time), 3)
   round(bias, 3)
   
   # Bias as percentage of true value
-  round(bias/psd_tr_vec*100, 3)
+  round(bias/psd_tr_vec*100, 1)
 
   # Multivariate distance
   # Euclidian distance
@@ -90,8 +90,8 @@ round(colMeans(res_time), 3)
   round(ecd_sts_list, 3)
 
   # Mahalanobis distance 
-  cov_mat <- var(rbind(bias_prct[[1]][,1], psd_tr_list[[1]]))
-  mahalanobis(avg_stats[[1]][,1], psd_tr_list[[1]], cov_mat)
+  cov_mat <- var(rbind(avg_sts_list[[1]][,1], psd_tr_list[[1]]))
+  mahalanobis(avg_sts_list[[1]][,1], psd_tr_list[[1]], cov_mat)
     # cannot be used because if methods go well, then the difference
     # between the two vectors is quite small, and the inverse of the
     # covariance matrix of highly correlated vectors is not duable

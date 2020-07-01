@@ -62,12 +62,6 @@ impute_DURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
           glmfam <- detect_family(Zm[, j])
           
           # 2. Fit regularized regression on bootstraped observed data
-          ## Ridge
-          if(reg_type == "ridge"){
-            regu.mod <- rr_est_ridge(X = X_obs_bs, y = y_obs_bs, 
-                                     parms = parms, fam = glmfam)
-          }
-          
           ## Lasso
           if(reg_type == "lasso"){
             regu.mod <- rr_est_lasso(X = X_obs_bs, y = y_obs_bs, 

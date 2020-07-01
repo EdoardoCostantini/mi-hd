@@ -2,15 +2,11 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-16
 
-# Packges to install:
-  install.packages(tidyverse)
-  install.packages(CVTuningCov) # for AR1 function
-  install.packages(mvtnorm)
-  install.packages(monomvn)
-  install.packages(glmnet)
-  install.packages(rlecuyer) # for seed in parallel
-  install.packages('./blasso/', 
-                   repos = NULL, 
-                   type = "source")
-
+  library(devtools)
   
+# Packges to install:
+  # 1. Install blasso package on a Windows computer:
+  # Use the gz.tar file in the package folder in the impute_HD folder
+  
+  # 2. Install PcAux
+  install_github("PcAux-Package/PcAux/source/PcAux")

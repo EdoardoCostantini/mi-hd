@@ -5,6 +5,12 @@
 rm(list=ls())
 source("./init.R")
 
+## Create a cluster object:
+clus <- makeCluster(10)
+
+## Two different ways to source a script on the worker nodes:
+clusterEvalQ(cl = clus, expr = source("./init.R"))
+
 ## Data directory for storage
 
 # Progress report file ----------------------------------------------------
@@ -24,12 +30,6 @@ cat(paste0("SIMULATION PROGRESS REPORT",
 
 sim_start <- Sys.time()
 
-## Create a cluster object:
-clus <- makeCluster(2)
-
-## Two different ways to source a script on the worker nodes:
-clusterEvalQ(cl = clus, expr = source("init.R"))
-
 ## Run the computations in parallel on the 'clus' object:
 out <- parLapply(cl = clus, 
                  X = 1 : parms$dt_rep,
@@ -44,12 +44,15 @@ sim_ends <- Sys.time()
 
 cat(paste0("\n", "------", "\n",
            "Ends at: ", Sys.time(), "\n",
-           "Run time: ", 
+           "Run time: ",
            round(difftime(sim_ends, sim_start, units = "hours"), 3), " h",
            "\n", "------", "\n"),
     file = paste0(parms$outDir, parms$report_file_name),
     sep = "\n",
     append = TRUE)
+
+# Attach parm object
+out$parms <- parms
 
 # Save output -------------------------------------------------------------
 

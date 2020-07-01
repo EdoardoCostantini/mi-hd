@@ -50,6 +50,3 @@ saveRDS(out,
         paste0(parms$outDir,
                parms$results_file_name)
 )
-
-
-length(out)

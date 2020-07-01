@@ -21,6 +21,7 @@ for (r in 1:reps) {
   pm_store[r, ] <- colMeans(is.na(dt_mis))
 }
 
+round(colMeans(pm_store), 3)
 round(colMeans(pm_store), 1) == cond$pm
 # All variables with missing values have on average
 # the correct proportion of missing cases.
@@ -74,15 +75,93 @@ summa_models <- lapply(X = fit_gs,
                        FUN = function(x) parameterEstimates(x))
 
 
+
+# Replicability -----------------------------------------------------------
+
+# Run cells with seeds
+
+rm(list=ls())
+source("./init.R")
+
+rp <- 1
+
+set.seed(1234)
+runCell_res1 <- runCell(cond = conds[1, ], 
+                        parms = parms,
+                        rep_status = rp)
+set.seed(1234)
+runCell_res2 <- runCell(cond = conds[1, ], 
+                        parms = parms,
+                        rep_status = rp)
+
+all.equal(runCell_res1, runCell_res2)
+
+# mcapply
+
+rm(list=ls())
+source("./init.R")
+
+out_1 <- mclapply(X        = 1 : parms$dt_rep,
+                  FUN      = doRep,
+                  conds    = conds[1,],
+                  parms    = parms,
+                  mc.cores = ( 10 ) )
+
+out_2 <- mclapply(X        = 1 : parms$dt_rep,
+                  FUN      = doRep,
+                  conds    = conds[1,],
+                  parms    = parms,
+                  mc.cores = ( 10 ) )
+
+all.equal(out_1[[1]]$cond_50_0.1$all_EST, out_2[[1]]$cond_50_0.1$all_EST)
+all.equal(out_1[[2]]$cond_50_0.1$all_CI, out_2[[2]]$cond_50_0.1$all_CI)
+all.equal(out_1[[2]]$cond_50_0.1$imp_values, out_2[[2]]$cond_50_0.1$imp_values)
+
+# parapply
+
+rm(list=ls())
+source("./init.R")
+
+clus <- makeCluster(10)
+clusterEvalQ(cl = clus, expr = source("./init.R"))
+
+parapply1 <- parLapply(cl = clus, 
+                 X = 1 : parms$dt_rep,
+                 fun = doRep, 
+                 conds = conds, 
+                 parms = parms)
+
+stopCluster(clus)
+
+clus <- makeCluster(10)
+clusterEvalQ(cl = clus, expr = source("./init.R"))
+
+parapply2 <- parLapply(cl = clus, 
+                       X = 1 : parms$dt_rep,
+                       fun = doRep, 
+                       conds = conds, 
+                       parms = parms)
+
+stopCluster(clus)
+
+all.equal(parapply1[[1]]$cond_50_0.1$all_EST, parapply2[[1]]$cond_50_0.1$all_EST)
+all.equal(parapply1[[2]]$cond_50_0.1$all_CI, parapply2[[2]]$cond_50_0.1$all_CI)
+all.equal(parapply1[[2]]$cond_50_0.1$imp_values, parapply2[[2]]$cond_50_0.1$imp_values)
+all.equal(parapply1[[5]]$cond_50_0.1$imp_values, parapply2[[5]]$cond_50_0.1$imp_values)
+all.equal(parapply1[[6]]$cond_50_0.1$imp_values, parapply2[[6]]$cond_50_0.1$imp_values)
+all.equal(parapply1[[8]]$cond_50_0.1$imp_values, parapply2[[8]]$cond_50_0.1$imp_values)
+
+parapply1[[8]]
+
 # Paramters of interest ---------------------------------------------------
 
 rm(list=ls())
 source("./init.R")
 set.seed(1234)
 
-cond <- conds[1,]
+cond <- conds[3,]
 
-reps <- 1e3
+reps <- 1e2
 full_store <- matrix(NA, nrow = reps, ncol = length(parms$z_m_id))
 miss_store <- matrix(NA, nrow = reps, ncol = length(parms$z_m_id))
 
@@ -93,6 +172,7 @@ full_cor_sum <- matrix(0, nrow = length(parms$z_m_id), ncol = length(parms$z_m_i
 miss_cor_sum <- matrix(0, nrow = length(parms$z_m_id), ncol = length(parms$z_m_id))
 
 for (r in 1:reps) {
+  print(r/reps*100)
   dt_full <- genDt_mvn(cond, parms)
   dt_mis  <- imposeMiss(dt_full, parms, cond)
   full_store[r, ] <- colMeans(dt_full)[parms$z_m_id]
@@ -106,32 +186,43 @@ for (r in 1:reps) {
 }
 
 # Effect of missingness on analysis
-round(
-  cbind(colMeans(full_store),
-        colMeans(miss_store)),
-  3)
 
-full_mv <- colMeans(full_store)
-miss_mv <- colMeans(miss_store)
+# Means
 
-# Bias in terms of percentage of true value
+  round(
+    cbind(colMeans(full_store),
+          colMeans(miss_store)),
+    3)
+  
+  full_mv <- colMeans(full_store)
+  miss_mv <- colMeans(miss_store)
+  
+  # Bias in terms of percentage of true value
   round((full_mv - miss_mv)/full_mv*100, 0)
 
-full_cov <- full_cov_sum/reps
-miss_cov <- miss_cov_sum/reps
-lapply(list(full_cov, miss_cov), round, 2)
+# COVARIANCE
+  
+  full_cov <- full_cov_sum/reps
+  miss_cov <- miss_cov_sum/reps
+  lapply(list(full_cov, miss_cov), round, 2)
+  # Bias percent points (percentage of true value)
+  bias_pg <- round((full_cov - miss_cov)/full_cov*100, 0)
+  bias_pg
+  pm_50 <- bias_pg[lower.tri(bias_pg)]
+  data.frame(pm_50 = pm_50, pm_500 = pm_500)
+  
+  mean(diag(bias_pg)) # mean variances bias %
+  mean(bias_pg[lower.tri(bias_pg)]) # mean covariances bias %
 
-# Bias percent points (percentage of true value)
-  round((full_cov - miss_cov)/full_cov*100, 0)
-  mean(unique(round((full_cov - miss_cov)/full_cov*100, 0)))
-
-full_cor <- full_cor_sum/reps
-miss_cor <- miss_cor_sum/reps
-lapply(list(full_cor, miss_cor), round, 2)
-# Bias in terms of percentage of true value
+# CORRELATION
+  
+  full_cor <- full_cor_sum/reps
+  miss_cor <- miss_cor_sum/reps
+  lapply(list(full_cor, miss_cor), round, 2)
+  # Bias in terms of percentage of true value
   round((full_cor - miss_cor)/full_cor*100, 0)
   mean(unique(round((full_cor - miss_cor)/full_cor*100, 0)))
-
+  
 # Best Crossvalidation for Elastic net ------------------------------------
 
 reps <- 25

@@ -52,16 +52,16 @@ genDt_mvn <- function(cond, parms){
 imposeMAR <- function(target_id, dt_in, parms, cond){
   # Right Tail Imposition of missingness
   # Inputs
-  # target_id <- parms$z_m_id[4]
-  # dt_in   <- genDt_mvn(conds[1, ], parms)
+  # target_id <- parms$z_m_id[1]
   # cond <- conds[1,]
+  # dt_in   <- genDt_mvn(cond, parms)
   
   # Body
   dt_out <- as.matrix(dt_in)
   rm_id <- which(parms$z_m_id %in% target_id)
-  
+
   # Perform
-  parms$rm_b <- c(-3, -3, 2, -1)
+  parms$rm_b <- c(-1, -1, .667, -.333)
   linPred <- dt_out[, parms$rm_x[rm_id, ]] %*% parms$rm_b
   missPropensity <- pnorm(linPred, mean(linPred), sd(linPred))
   nR <- missPropensity >= 1 - cond$pm

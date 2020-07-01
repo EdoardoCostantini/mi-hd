@@ -13,7 +13,7 @@ impute_MICE_TR <- function(Z, cond, parms = parms){
   
   ## Example inputs
   # Z = Xy_mis
-  # cond = conds
+  # cond = conds[1,]
   # parms = parms
   
   ## output: 

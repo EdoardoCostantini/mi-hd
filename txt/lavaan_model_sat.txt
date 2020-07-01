@@ -1,5 +1,4 @@
-'
- # Intercepts
+# Intercepts
  z1 ~ 1
 z2 ~ 1
 z3 ~ 1
@@ -28,4 +27,4 @@ z3 ~~ z7
 z3 ~~ z8
 z6 ~~ z7
 z6 ~~ z8
-z7 ~~ z8 '
+z7 ~~ z8
