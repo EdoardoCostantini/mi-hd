@@ -4,66 +4,67 @@
 
 rm(list = ls())
 
-source("./functions.R")
-source("./init.R")
+source("./init_general.R")
 
-# Current simulation results ----------------------------------------------
-# If you run the simulation script you can use this directly to quick check
-# Time
-res_time <- NULL
-for (i in 1:out[[1]]$cond_200_4$parms$dt_rep) {
-  res_time <- rbind(res_time, out[[i]]$cond_200_4$run_time_min)
-}
-round(colMeans(res_time), 3)
+# out <- readRDS("../output/sim_res_20200630_1954.rds")
+out <- readRDS("../output/sim_res_20200704_1612.rds")
 
-# Compute Bias in a condition ---------------------------------------------
+# Time Analyses -----------------------------------------------------------
 
-  select_cond <- names(out[[1]])[1] # available conditions
+  res_sem_time(out, 1)
 
-# Step 1. Obtain "true" comparison values
+  out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
+  colnames(out_time) <- names(out[[1]])
+  t(out_time)
 
-  full_dat_est <- NULL
+  select_cond <- names(out[[1]])[4] # available conditions
+
+  # Time
+  res_time <- NULL
   for (i in 1:out$parms$dt_rep) {
-    dat <- out[[i]][[select_cond]]$dat_full
-    fit <- sem(parms$lav_model, 
-               data = dat,
-               likelihood = "wishart")
-    full_dat_est <- rbind(full_dat_est, 
-                          parameterEstimates(fit)$est)
+    res_time <- rbind(res_time, out[[i]][[select_cond]]$run_time_min)
   }
-  
-  psd_tr_vec <- colMeans(full_dat_est) # pseudo true values
+  round(colMeans(res_time), 3)
 
-# Step 2. Compute averages of statistics
+# Univariate Analyses -----------------------------------------------------
+  
+## MLE estiamtes (saturated sem model) ##
+  
+  # Extract results per conditions
+  out_cond1 <- res_sem_sum(out, condition = 1)
+  out_cond2 <- res_sem_sum(out, condition = 2)
+  out_cond3 <- res_sem_sum(out, condition = 3)
+  out_cond4 <- res_sem_sum(out, condition = 4)
 
-  # Row index for type of paramter
-  avg_indx <- 1:out$parms$zm_n
-  var_indx <- (out$parms$zm_n+1):(out$parms$zm_n*2)
-  cov_indx <- (tail(var_indx, 1)+1):nrow(out[[i]][[select_cond]]$all_EST)
+  # Show results for a given condition
+  cnd <- 4
+  names(out[[1]])[cnd]
+  res_sem_sum(out, condition = cnd)$MCMC_est
+  res_sem_sum(out, condition = cnd)$bias_raw
+  res_sem_sum(out, condition = cnd)$bias_per
+  res_sem_sum(out, condition = cnd)$ci_cov
   
-  # Store objects
-  sum_stats <- matrix(0, 
-                      nrow = nrow(out[[i]][[select_cond]]$all_EST), 
-                      ncol = length(out$parms$methods))
+## Linear Model: Intercept and regression coefficients ##
+  cnd <- 4
+  names(out[[1]])[cnd]
+  lm_cond1 <- res_lm_sum(out, condition = 1)
+  lm_cond2 <- res_lm_sum(out, condition = 2)
+  lm_cond3 <- res_lm_sum(out, condition = 3)
+  lm_cond4 <- res_lm_sum(out, condition = 4)
   
-  # Compute averages of the statistics
-  for (i in 1:out$parms$dt_rep) {
-      sum_stats <- sum_stats + out[[i]][[select_cond]]$all_EST
-  }
+  lm_cond1$bias_per
+  lm_cond2$bias_per
+  lm_cond3$bias_per
+  lm_cond4$bias_per
   
-  avg_stats <- sum_stats / out$parms$dt_rep
+  lm_cond1$ci_cov
+  lm_cond2$ci_cov
+  lm_cond3$ci_cov
+  lm_cond4$ci_cov
+  
+# Multivariate Analyses ---------------------------------------------------
 
-# Step 3. Obtain Bias
-  # Raw bias
-  bias <- avg_stats - psd_tr_vec
-  round(bias, 3)
-  
-  # Bias as percentage of true value
-  round(bias/psd_tr_vec*100, 1)
-
-  # Multivariate distance
   # Euclidian distance
-  
   avg_sts_list <- list(mv = avg_stats[avg_indx, ],
                        va = avg_stats[var_indx, ],
                        cv = avg_stats[cov_indx, ])
@@ -97,64 +98,14 @@ round(colMeans(res_time), 3)
     # covariance matrix of highly correlated vectors is not duable
   solve(cov_mat)
 
-# Coverage ----------------------------------------------------------------
-  
-  # # Row index for type of paramter
-  # avg_indx <- 1:out$parms$zm_n
-  # var_indx <- (out$parms$zm_n+1):(out$parms$zm_n*2)
-  # cov_indx <- (tail(var_indx, 1)+1):nrow(out[[i]][[select_cond]]$all_EST)
-  # psd_tr_list <- list(mv = psd_tr_vec[avg_indx],
-  #                     va = psd_tr_vec[var_indx],
-  #                     cv = psd_tr_vec[cov_indx])
-  
-  # Store objects
-  str_thrs <- nrow(out[[1]][[select_cond]]$all_CI)/2 # storing threshold
-  sum_stats <- matrix(0, 
-                      nrow = nrow(out[[i]][[select_cond]]$all_EST), 
-                      ncol = length(out$parms$methods))
-  
-  # Compute averages of the statistics
-  for (i in 1:out$parms$dt_rep) {
-    cond_est <- out[[i]][[select_cond]]$all_EST
-    cond_CI <- out[[i]][[select_cond]]$all_CI
-      ci_low <- cond_CI[1:str_thrs, ]
-      ci_hig <- cond_CI[-(1:str_thrs), ]
-    
-    # General
-    sum_stats <- sum_stats + sapply(1:length(out$parms$methods), 
-                                    function(x){
-                                      ci_out <- ci_low[, x] < psd_tr_vec &
-                                        psd_tr_vec < ci_hig[, x]
-                                    }
-    )
-  }
-  
-  ci_coverage <- sum_stats / out$parms$dt_rep
 
-
-# Convergence -------------------------------------------------------------
-
-  # Mice TRUE
-  plot(out[[1]][[select_cond]]$imp_values$MICE_TR)
+# Save Results ------------------------------------------------------------
+  saveRDS(
+    list(cond1 = out_cond1,
+         cond2 = out_cond2,
+         cond3 = out_cond3,
+         cond4 = out_cond4,
+         parms = out$parms),
+   "../output/sum_exp1.rds" 
+  )
   
-  # Choose imputation methods
-  imp_meth <- out$parms$methods[1]
-  # Plot imputation from 1st chain
-  chain1 <- 1
-  par(mfrow = c(3, 3))
-  for (m in 1:length(imp_meth)) {
-    for (v in 1:length(parms$z_m_id)) {
-      imps_4plot <- out[[dt_rep]][[select_cond]]$imp_values[[imp_meth[m]]][[chain1]][[v]]
-      mean_imp <- rowMeans(imps_4plot)
-      plot(1:parms$iters, mean_imp, type = "l",
-           main = paste0(imp_meth[m], " Mean Imputations"),
-           ylim = c(mean(mean_imp)-4*sd(mean_imp), mean(mean_imp)+4*sd(mean_imp)),
-           ylab = paste0("z", v), xlab = "Iteration")
-  # And add imputations from other chains
-      for (i in 2:(parms$chains)) {
-        imps_4plot <- out[[dt_rep]][[select_cond]]$imp_values[[imp_meth[m]]][[i]][[v]]
-        mean_imp <- rowMeans(imps_4plot)
-        lines(1:parms$iters, mean_imp)
-      }
-    }
-  }

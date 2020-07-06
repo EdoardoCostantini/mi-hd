@@ -6,6 +6,10 @@
 
 ## Run one replication of the simulation:
 doRep <- function(rp, conds, parms, debug = FALSE) {
+  ## For internals
+  # rp = 1
+  # debug = FALSE
+  
   ## For 1 repetition, performs simulation across all conditions
   ## Setup the PRNG: (for setting seed with guaranteed independece)
   # form the rlecuyer package
@@ -71,9 +75,9 @@ runCell <- function(cond, parms, rep_status) {
   
   ## Data ------------------------------------------------------------------ ##
   # Gen 1 dataset w/ missing values; 1 fully-obs data for out-of-sample rmse
-  Xy <- genDt_mvn(cond, parms)
+  Xy <- simData_exp1(cond, parms)
   Xy_mis <- imposeMiss(Xy, parms, cond)
-  Xy_mis <- cbind(Xy_mis[parms$z_m_id], Xy_mis[-parms$z_m_id])
+  Xy_mis <- cbind(Xy_mis[, parms$z_m_id], Xy_mis[, -parms$z_m_id])
   
   O <- !is.na(Xy_mis) # matrix index of observed values
   miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
@@ -90,7 +94,9 @@ runCell <- function(cond, parms, rep_status) {
                              perform = parms$meth_sel$DURR_la,
                              parms = parms)
 
-  update_report("DURR lasso", rep_status, parms)
+  update_report("DURR lasso", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$DURR_la)
   
     # Elastic Net
   imp_DURR_el <- impute_DURR(Z = Xy_mis,
@@ -98,7 +104,9 @@ runCell <- function(cond, parms, rep_status) {
                              reg_type = "el",
                              perform = parms$meth_sel$DURR_el,
                              parms = parms)
-  update_report("DURR elastic net", rep_status, parms)
+  update_report("DURR elastic net", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$DURR_el)
 
   # Impute according to IURR method
     # Lasso
@@ -107,7 +115,9 @@ runCell <- function(cond, parms, rep_status) {
                                 reg_type = "lasso",
                                 perform = parms$meth_sel$IURR_la,
                                 parms = parms)
-  update_report("IURR lasso", rep_status, parms)
+  update_report("IURR lasso", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$IURR_la)
   
     # Elastic Net
   imp_IURR_el <- impute_IURR(Z = Xy_mis,
@@ -115,18 +125,33 @@ runCell <- function(cond, parms, rep_status) {
                              reg_type = "el",
                              perform = parms$meth_sel$IURR_el,
                              parms = parms)
-  update_report("IURR elastic net", rep_status, parms)
+  update_report("IURR elastic net", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$IURR_el)
 
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
                                  O = as.data.frame(O),
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
-  update_report("blasso", rep_status, parms)
+  update_report("blasso", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$blasso)
+  
+  # Impute according to van Buuren Ridge
+  imp_bridge <- impute_BRIDGE(Z = Xy_mis, 
+                              O = as.data.frame(O),
+                              parms = parms,
+                              perform = parms$meth_sel$bridge)
+  update_report("bridge", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$bridge)
 
   # Impute according to Howard Et Al 2015 PCA appraoch
   imp_PCA <- impute_PCA(Z = Xy_mis, parms = parms)
-  update_report("MICE-PCA", rep_status, parms)
+  update_report("MICE-PCA", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_PCA)
   
   # MICE-CART traditional
   imp_CART <- impute_CART(Z = Xy_mis,
@@ -134,7 +159,9 @@ runCell <- function(cond, parms, rep_status) {
                           perform = parms$meth_sel$MI_CART,
                           parms = parms)
   
-  update_report("MICE-CART", rep_status, parms)
+  update_report("MICE-CART", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_CART)
   
   # MICE-RF
   imp_RANF <- impute_RANF(Z = Xy_mis,
@@ -142,16 +169,23 @@ runCell <- function(cond, parms, rep_status) {
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
   
-  update_report("Random Forest", rep_status, parms)
+  update_report("Random Forest", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_RF)
   
   # MICE w/ true model
   imp_MICE_TR <- impute_MICE_TR(Z = Xy_mis,
                                 cond = cond,
+                                perform = parms$meth_sel$MI_OP,
                                 parms = parms)
-  update_report("MICE-TR", rep_status, parms)
+  update_report("MICE-TR", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_OP)
   
   # missForest
   imp_missFor <- impute_missFor(Z = Xy_mis, parms = parms)
+  missForest_out <- capture.output(impute_missFor(Z = Xy_mis, parms = parms))
+  missFprest_outdt <- capture.output(imp_missFor$dats)
   
   ## Convergence ----------------------------------------------------------- ##
   
@@ -159,88 +193,117 @@ runCell <- function(cond, parms, rep_status) {
                      DURR_el = imp_DURR_el$imps,
                      IURR_la = imp_IURR_la$imps,
                      IURR_el = imp_IURR_el$imps,
-                     blasso = imp_blasso$imps,
-                     MICE_PCA = imp_PCA$mids,
-                     MICE_CART = imp_CART$mids,
-                     MICE_RF = imp_RANF$imps,
-                     MICE_TR = imp_MICE_TR$mids) # I need this for convergence
+                     bridge  = imp_bridge$imps,
+                     blasso  = imp_blasso$imps,
+                     MI_PCA  = imp_PCA$mids,
+                     MI_CART = imp_CART$imps,
+                     MI_RF   = imp_RANF$imps,
+                     MI_OP   = imp_MICE_TR$mids) # I need this for convergence
   
   ## Analyse --------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
-  fits_md <- lapply(list(imp_DURR_la$dats,
-                         imp_DURR_el$dats,
-                         imp_IURR_la$dats,
-                         imp_IURR_el$dats,
-                         imp_blasso$dats,
-                         imp_PCA$dats,
-                         imp_CART$dats,
-                         imp_RANF$dats,
-                         imp_MICE_TR$dats), 
-                    fit_sat_model)
   
-  # missForest single imputation
-  fit_mf <- sem(parms$lav_model, 
-                data = imp_missFor$dats, 
-                likelihood = "wishart")
+  ## MLE estaimte of mean, variance, covariance
   
-  # Gold Standard
-  fit_gs <- sem(parms$lav_model, 
-                data = Xy, 
-                likelihood = "wishart")
+  # Multiple imputed dataset
   
-  # CC (complete case analysis)
-  fit_cc <- sem(parms$lav_model, 
-                data = Xy_mis[rowSums(!O) == 0, ], # select complete casese
-                likelihood = "wishart")
+  sem_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
+                          DURR_el = imp_DURR_el$dats,
+                          IURR_la = imp_IURR_la$dats,
+                          IURR_el = imp_IURR_el$dats,
+                          bridge  = imp_bridge$dats,
+                          blasso  = imp_blasso$dats,
+                          MI_PCA  = imp_PCA$dats,
+                          MI_CART = imp_CART$dats,
+                          MI_RF   = imp_RANF$dats,
+                          MI_OP   = imp_MICE_TR$dats), 
+                     fit_sat_model)
   
-  fits_successes <- c(sapply(fits_md, length), 
-                      inspect(fit_mf, what = "converged"),
-                      inspect(fit_gs, what = "converged"),
-                      inspect(fit_cc, what = "converged"))
+  # Single dataset
+  sem_sndt <- lapply(list(missFor = imp_missFor$dats,          
+                          GS      = Xy,                        
+                          CC      = Xy_mis[rowSums(!O) == 0, ]), 
+                     sem, model = parms$lav_model, likelihood = "wishart")
   
-  names(fits_successes) <- names(parms$meth_sel)
+  sem_sndt_output <- capture.output(sem_sndt)
+  
+  ## LM model
+  
+  # Multiple datasets
+  
+  lm_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
+                         DURR_el = imp_DURR_el$dats,
+                         IURR    = imp_IURR_la$dats,
+                         IURR_el = imp_IURR_el$dats,
+                         bridge  = imp_bridge$dats,
+                         blasso  = imp_blasso$dats,
+                         MI_PCA  = imp_PCA$dats,
+                         MI_CART = imp_CART$dats,
+                         MI_RF   = imp_RANF$dats,
+                         MI_OP   = imp_MICE_TR$dats), 
+                    fit_lm_models, vrbs = parms$lm_model)
+  
+  # Single dataset
+  
+  lm_sndt <- fit_lm_models(list(missFor = imp_missFor$dats, 
+                                GS      = Xy, 
+                                CC      = Xy_mis[rowSums(!O) == 0, ]),
+                           vrbs = parms$lm_model)
   
   ## Pooling --------------------------------------------------------------- ##
   # For each imp method, pool estimates across the m datasets
-  pool_EST <- sapply(fits_md[lapply(fits_md, length) != 0], 
-                     get_pool_EST)
-  pool_CI  <- sapply(fits_md[lapply(fits_md, length) != 0], 
-                     get_pool_CI)
+  
+  # MLE mean, var, cov
+  
+  sem_pool_EST <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
+                         sem_pool_EST_f)
+  sem_pool_CI  <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
+                         sem_pool_CI_f)
   
   # append single imputations, and GS and CC results
-  all_EST <- cbind(pool_EST,
-                   get_EST(list(fit_mf, fit_gs, fit_cc)))
-
-  all_CI <- cbind(pool_CI,
-                  get_CI(list(fit_mf, fit_gs, fit_cc)))
+  sem_pool_EST <- cbind(sem_pool_EST,
+                        sem_EST(sem_sndt))
   
-  # give meaningful names
-  # colnames(all_EST) <- parms$methods
-  # colnames(all_CI) <- parms$methods
-  # Note: For some reason, with parLapply this naming sends everything to shit-
-  #       Maybe good to keep as reminder of oredr of the methods in the results
-
-  # aggregate times
-  imp_time <- list(DURR_la   = imp_DURR_la$time,
-                   DURR_el   = imp_DURR_el$time,
-                   IURR      = imp_IURR_la$time,
-                   IURR_el   = imp_IURR_el$time,
-                   blasso    = imp_blasso$time,
-                   MICE_PCA  = imp_PCA$time,
-                   MICE_CART = imp_CART$time,
-                   MICE_RF   = imp_RANF$time,
-                   MICE_TR   = imp_MICE_TR$time)
+  sem_pool_CI <- cbind(sem_pool_CI,
+                       sem_CI(sem_sndt))
+  
+  # LM models
+  lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_EST_f)
+  lm_pool_CI <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_CI_f)
+  
+  # append single imputations, and GS and CC results
+  lm_pool_EST <- cbind(lm_pool_est,
+                       lm_EST(lm_sndt))
+  
+  lm_pool_CI <- cbind(lm_pool_CI,
+                      lm_CI(lm_sndt))
+  
+  
+  ## Times ----------------------------------------------------------------- ##
+  # aggregate imputation times
+  
+  imp_time <- list(DURR_la = imp_DURR_la$time,
+                   DURR_el = imp_DURR_el$time,
+                   IURR    = imp_IURR_la$time,
+                   IURR_el = imp_IURR_el$time,
+                   bridge  = imp_bridge$time,
+                   blasso  = imp_blasso$time,
+                   MI_PCA  = imp_PCA$time,
+                   MI_CART = imp_CART$time,
+                   MI_RF   = imp_RANF$time,
+                   MI_OP   = imp_MICE_TR$time)
   imp_time <- do.call(cbind, imp_time)[1,]
   
   ## Store output ---------------------------------------------------------- ##
   output <- list(cond = cond,
-                 dat_full = Xy,
-                 dat_miss = Xy_mis,
-                 all_EST = all_EST,
-                 all_CI = all_CI,
+                 dat_full     = Xy,
+                 dat_miss     = Xy_mis,
+                 sem_EST      = sem_pool_EST,
+                 sem_CI       = sem_pool_CI,
+                 lm_EST       = lm_pool_EST,
+                 lm_CI        = lm_pool_CI,
                  miss_descrps = miss_descrps,
                  run_time_min = imp_time,
-                 imp_values = imp_values,
-                 fit_succ = fits_successes)
+                 imp_values   = imp_values)
   return(output)
 }

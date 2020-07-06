@@ -2,7 +2,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_MICE_TR <- function(Z, cond, parms = parms){
+impute_MICE_TR <- function(Z, cond, perform = TRUE, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values, 
@@ -22,10 +22,9 @@ impute_MICE_TR <- function(Z, cond, parms = parms){
   # - imputation run time
   
   ## body:
-  if(parms$meth_sel$MI_T == TRUE){
+  if(perform == TRUE){
     # Select true active set 
-    q = cond$q
-    S <- parms$S_all[[q]]
+    S <- parms$S_all
     MI_ture_pred <- c(S)
     
     # Define predictor matrix for MI TRUE

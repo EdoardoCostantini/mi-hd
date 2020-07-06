@@ -1,17 +1,21 @@
-### Title:    Imputing High Dimensional Data
+### Title:    Convergence Checks: Initialization Script for Exp 1 
+### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
-### Created:  2020-05-19
+### Created:  2020-07-03
+### Notes:    Runs the simulation for convergence checks (few repetitions, 
+###           more chains)
+### IMPORTANT: Working directory: ~/imputeHD-comp/code
 
-rm(list=ls())
+rm(list = ls())
 source("./init_general.R")
-source("./init_exp1.R")
+source("../convergence/init_exp1_convCheck.R")
 
 ## Data directory for storage
 
 # Progress report file ----------------------------------------------------
 file.create(paste0(parms$outDir, parms$report_file_name))
 
-cat(paste0("SIMULATION PROGRESS REPORT",
+cat(paste0("CONVERGENCE CHECK PROGRESS REPORT",
            "\n",
            "Description: ", parms$description, "\n",
            "\n", "------", "\n",
@@ -25,12 +29,11 @@ cat(paste0("SIMULATION PROGRESS REPORT",
 
 sim_start <- Sys.time()
 
-  out <- mclapply(X        = 1 : parms$dt_rep,
-                  FUN      = doRep,
-                  conds    = conds,
-                  parms    = parms,
-                  debug    = FALSE,
-                  mc.cores = ( 10 ) )
+out <- mclapply(X        = 1 : parms$dt_rep,
+                FUN      = doRep,
+                conds    = conds,
+                parms    = parms,
+                mc.cores = ( 10 ) )
 
 sim_ends <- Sys.time()
 
@@ -43,10 +46,9 @@ cat(paste0("\n", "------", "\n",
     sep = "\n",
     append = TRUE)
 
-  # Attach parm object
-  out$parms <- parms
-  out[[1]]$cond_500_0.3$sem_EST[1:2, 1:2]
-  
+# Attach parm object
+out$parms <- parms
+
 # Save output -------------------------------------------------------------
 
 saveRDS(out,

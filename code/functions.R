@@ -5,12 +5,27 @@
 
 # generic functions -------------------------------------------------------
 
-update_report <- function(method_name = "Method #", rep_count = 1, parms){
+update_report <- function(method_name = "Method ...", 
+                          rep_count = 1, 
+                          parms, 
+                          cnd,
+                          perform = TRUE){
+  ## Exanple inputs
+  # method_name = "Method ..."
+  # rep_count = 1
+  # cnd = data.frame(p = 500, pm = .3)
+  # perform = TRUE
   # Updates the report .txt file with the count and name of accomplished task
-  cat(paste0(Sys.time(), " | Reptetition ", rep_count, ": ", method_name, " done",
-             "\n"),
-      file = paste0(parms$outDir, parms$report_file_name),
-      append = TRUE)  
+  if(perform == TRUE){
+    cat(paste0(Sys.time(), 
+               " | Rep = ", rep_count, 
+               ", ", paste0(names(cnd), " = ", cnd, collapse = ", "),
+               " | ", method_name, 
+               " done",
+               "\n"),
+        file = paste0(parms$outDir, parms$report_file_name),
+        append = TRUE)
+  }
 }
 
 detect_family <- function(x){
@@ -61,11 +76,14 @@ missing_type <- function(Z){
 init_dt_i <- function(Z0, missVarInfo){
   # Input: (1) a dataset with missing values; (2) and object produced by function missing_type
   #   examples:
-  #     @Z <- mice::boys
+  #     @Z0 <- mice::boys
   #     @missVarInfo <- missing_type(Z)
   # Output: a dataset with cotninuous variables imputed with mean value, and categorical with mode category
   # Used in: MICERandomForest
   # Notes: integer and numeric variables are considered (inaccurately) both as continuous
+  ## Input examples from simulation
+  # Z0 <- Z
+  # missVarInfo <- missing_type(Z)
   
   # Make oredered factors as numeric
   if( (length(missVarInfo$ordeVars))!=0 ){
@@ -530,13 +548,27 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
   return(fmi)
 }
 
-# fit_models <- function(multi_dt, mod){
-#   # Given a list of complete datasets it fits a model described
-#   # in mod 
-#   models <- lapply(X = multi_dt,
-#                    FUN = function(x) lm(mod, data = x))
-#   return(models)
-# }
+# Estimate regression coefficeints
+
+fit_lm_models <- function(multi_dt, vrbs){
+  ## Description:
+  # Given a list of complete datasets it fits a model described
+  # in mod
+  ## Example internals
+  # multi_dt <- imp_DURR_la$dats
+  # vrbs <- parms$lm_model
+  if(!is.null(multi_dt)){
+  mod <- paste0(vrbs[1], 
+            " ~ ", 
+            paste0(vrbs[-1], collapse = " + ")
+  )
+    models <- lapply(X = multi_dt,
+                     FUN = function(x) lm(mod, data = x))
+  } else {models = NULL}
+  return(models)
+}
+
+# MLE Estiamtes of means, variances, covariances
 
 fit_sat_model <- function(multi_dt){
   # Given a list of complete datasets it fits a model described
@@ -551,18 +583,18 @@ fit_sat_model <- function(multi_dt){
                        tryCatch({
                          # Obtain MLE estiamtes
                          sem(parms$lav_model, 
-                                     data = x, 
-                                     likelihood = "wishart")},
+                             data = x, 
+                             likelihood = "wishart")},
                          # If there is a fitting error, report it
-                                error = function(report) {
-                                  err <- paste0("Original Error: ", report)
-                                  return(err)
-                                },
+                         error = function(report) {
+                           err <- paste0("Original Error: ", report)
+                           return(err)
+                         },
                          # if there is a warning error, report it
-                                warning = function(report) {
-                                  err <- paste0("Original Warning: ", report)
-                                  return(err)
-                                })
+                         warning = function(report) {
+                           err <- paste0("Original Warning: ", report)
+                           return(err)
+                         })
                      })
     
     # Keep only models that converged
@@ -573,7 +605,7 @@ fit_sat_model <- function(multi_dt){
   return(models)
 }
 
-get_EST <- function(fits){
+sem_EST <- function(fits){
   ## Description
   # Given a list of fits for different single imputation apoprahces
   # it returns the estiamtes of the parameters for each
@@ -587,7 +619,7 @@ get_EST <- function(fits){
   return(coefs)
 }
 
-get_CI <- function(fits){
+sem_CI <- function(fits){
   ## Description
   # Given a list of fits for different single imputation apoprahces
   # it returns the CI of the estiamtes of the parameters for each
@@ -605,13 +637,41 @@ get_CI <- function(fits){
 
   return(CI_mtx)
 }
+
+lm_EST <- function(fits){
+  ## Description
+  # Given a list of fits for different single imputation apoprahces
+  # it returns the estiamtes of the parameters for each
+  ## For internals
+  # fits = lm_sndt
   
-get_pool_EST <- function(fits){
+  coefs <- sapply(X = fits,
+                         FUN = function(x) coef(x))
+  
+  return(coefs)
+}
+
+lm_CI <- function(fits){
+  ## Description
+  # Given a list of fits for different single imputation apoprahces
+  # it returns the CI of the estiamtes of the parameters for each
+  ## For internals
+  # fits = lm_sndt
+  CI_list <- lapply(X = fits, confint)
+                    
+  CI_mtx <- sapply(CI_list, function(x){
+    c(x[,1], x[,2])
+  })
+  
+  return(CI_mtx)
+}
+  
+sem_pool_EST_f <- function(fits){
   ## Description
   # Given a list of imputed datasets under the same imputation model
   # it returns the pooled estiamtes of the regression coefs
   ## For internals
-  # fits = fits_md[[7]]
+  # fits = fits_md[[4]]
   summa_models <- lapply(X = fits,
                          FUN = function(x) parameterEstimates(x))
   
@@ -622,7 +682,7 @@ get_pool_EST <- function(fits){
   return(Q_bar)
 }
 
-get_pool_CI <- function(fits){
+sem_pool_CI_f <- function(fits){
   ## Description
   # Given a list of imputed datasets under the same imputation model
   # it returns the pooled CIs of the regression coefs
@@ -632,7 +692,7 @@ get_pool_CI <- function(fits){
   # to store. 
   
   ## For internals
-  # fits = fits_md[[5]]
+  # fits = sem_fits[[5]]
   
   ## Body
   ## Coef estimates
@@ -665,6 +725,67 @@ get_pool_CI <- function(fits){
   
   CI <- c(lwr = Q_bar - t_nu * sqrt(T_var), 
                    upr = Q_bar + t_nu * sqrt(T_var))
+  
+  return(CI = CI)
+}
+
+## LM pooling
+
+lm_pool_EST_f <- function(fits){
+  ## Description
+  # Given a list of imputed datasets under the same imputation model
+  # it returns the pooled estiamtes of the regression coefs
+  ## For internals
+  # fits <- lm_fits[[2]]
+  
+  # Extract estiamtes from the fitted models
+  summa_models <- lapply(X = fits,
+                         FUN = function(x) summary(x))
+  coefs <- t(sapply(X = summa_models,
+                    FUN = function(x) coef(x)[, "Estimate"]))
+  
+  Q_bar <- colMeans(coefs)
+  
+  return(Q_bar)
+  
+}
+
+lm_pool_CI_f <- function(fits){
+  ## Description
+  # Given a list of imputed datasets under the same imputation model
+  # it returns the pooled CIs of the regression coefs
+  
+  ## Example internals
+  # fits <- lm_fits[[1]]
+  
+  # Do we have fits for a given imputation method?
+  m <- length(fits)
+  summa_models <- lapply(X = fits,
+                         FUN = function(x) summary(x))
+  ## Coef estimates ##
+  coefs <- t(sapply(X = summa_models,
+                    FUN = function(x) coef(x)[, "Estimate"]))
+  Q_bar <- colMeans(coefs)
+  
+  ## Variances
+  all_vcov <- lapply(X = summa_models,
+                     FUN = function(x) vcov(x))
+  
+  U_bar <- diag(Reduce('+', all_vcov) / m)
+  
+  B <- diag(1 / (m-1) * (t(coefs) - Q_bar) %*% t(t(coefs) - Q_bar))
+  
+  T <- U_bar + B + B/m
+  
+  ## Degrees of freedom
+  nu <- .miDf(length(fits), b = B, t = T, summa_models[[1]]$df[2])
+  
+  ## CI computation
+  t_nu <- qt(1 - (1-parms$alphaCI)/2, 
+             df = nu)
+  
+  CI <- c(lwr = Q_bar - t_nu * sqrt(T), 
+          upr = Q_bar + t_nu * sqrt(T))
   
   return(CI = CI)
 }
@@ -758,6 +879,234 @@ extract_results <- function(cond_name, output, dt_rep){
   return(resu)
 }
 
-extract_bias <- function(){
+mean_traceplot <- function(out, 
+                           dat = 1, # which data repetition should I show?
+                           method = "blasso", # same name as in parms
+                           y_range = c(-10, 20),
+                           iters = 1:5){
+  ## Description
+  # It prints the traceplots for the mean imputed values in each iteration
+  # in different chains, by variable, one dataset, one imputation method
   
+  # Display in same pane
+  par(mfrow = c(3, ceiling(out$parms$zm_n/3)))
+  class(out[[dat]][[1]]$imp_values$MI_TR)
+  # Plot
+  # Are imputations of mids class?
+  if(class(out[[dat]][[1]]$imp_values[[method]]) == "mids"){
+    plot(out[[dat]][[1]]$imp_values[[method]])
+  } else {
+    for (v in 1:length(out$parms$z_m_id)) {
+      # CHAIN 1
+      # Mean imputed value across individuals in each iteration
+      mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[1]][[v]][iters, ])
+      
+      # imps_4plot <- imp_blasso$imps[[1]][[v]]
+      # mean_imp <- rowMeans(imps_4plot)
+      plot(seq(out$parms$iters)[iters], mean_imp, type = "l",
+           main = method,
+           ylim = y_range,
+           ylab = paste0("z", v), xlab = "Iteration")
+      
+      # CHAIN 2 to m 
+      for (i in 2:(out$parms$chains)) {
+        mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[i]][[v]][iters, ])
+        lines(seq(out$parms$iters)[iters], mean_imp)
+      }
+    }
+  }
+}
+  
+res_sem_time <- function(out, condition = 1){
+  # Sem Model
+  select_cond <- names(out[[1]])[condition]
+  
+  # Time
+  res_time <- NULL
+  for (i in 1:out$parms$dt_rep) {
+    res_time <- rbind(res_time, out[[i]][[select_cond]]$run_time_min)
+  }
+  return(round(colMeans(res_time), 3) )
+}
+
+res_sem_sum <- function(out, condition = 1){
+  # Sem Model
+  select_cond <- names(out[[1]])[condition]
+  
+  ## 1. Obtain Pseudo True Values ##
+  
+  full_dat_est <- matrix(NA, 
+                         nrow = out$parms$dt_rep, 
+                         ncol = nrow(out[[1]][[select_cond]]$sem_EST))
+  for (i in 1:out$parms$dt_rep) {
+    full_dat_est[i, ] <- out[[i]][[select_cond]]$sem_EST[, which(out$parms$methods == "GS")]
+  }
+  
+  psd_tr_vec <- colMeans(full_dat_est) # pseudo true values
+  
+  ## Step 2. Compute averages of statistics (MCMC estiamtes) ##
+  
+  # Store Sums
+  sum_stats <- matrix(0, 
+                      nrow = nrow(out[[i]][[select_cond]]$sem_EST), 
+                      ncol = length(out$parms$methods))
+  
+  # Compute averages of the statistics
+  for (i in 1:out$parms$dt_rep) {
+    sum_stats <- sum_stats + out[[i]][[select_cond]]$sem_EST
+  }
+  
+  # Reference valuse vs Average estimtes
+  avg_stats <- sum_stats / out$parms$dt_rep
+  
+  # Give meaningful names
+  fit <- lavaan::sem(out$parms$lav_model,
+                     data = out[[1]][[select_cond]]$dat_full,
+                     likelihood = "wishart")
+  rownames(avg_stats) <- apply(parameterEstimates(fit)[,1:3], 
+                               1, 
+                               paste0, 
+                               collapse = "")
+  
+  colnames(avg_stats) <- out$parms$methods
+  
+  ## Step 3. Obtain Bias ##
+  
+  # Raw bias
+  bias <- avg_stats - psd_tr_vec
+  round(cbind(ref=psd_tr_vec, bias), 3)
+  
+  # Bias as percentage of true value
+  bias_per <- cbind(ref = round(psd_tr_vec, 3), 
+                    round(abs(bias)/psd_tr_vec*100, 0))
+  
+  ## Step 4: Obtain CI Coverages ##
+  # Store objects
+  str_thrs <- nrow(out[[1]][[select_cond]]$sem_CI)/2 # storing threshold
+  sum_stats <- matrix(0, 
+                      nrow = nrow(out[[i]][[select_cond]]$sem_EST), 
+                      ncol = length(out$parms$methods))
+  MLE_conv <- rep(0, length(out$parms$methods))
+  # Compute averages of the statistics
+  for (i in 1:out$parms$dt_rep) {
+    cond_est <- out[[i]][[select_cond]]$sem_EST
+    cond_CI  <- out[[i]][[select_cond]]$sem_CI
+    ci_low   <- cond_CI[1:str_thrs, ]
+    ci_hig   <- cond_CI[-(1:str_thrs), ]
+    
+    # General
+    for (m in 1:length(out$parms$methods)) {
+      if(!is.na( sum(ci_low[, m]) )){
+        sum_stats[, m] <- sum_stats[, m] + 
+          as.numeric(ci_low[, m] < psd_tr_vec & psd_tr_vec < ci_hig[, m])
+        MLE_conv[m] <- MLE_conv[m] + as.numeric(!is.na( sum(ci_low[, m]) ))
+      }
+    }
+  }
+  
+  ci_coverage <- sum_stats / MLE_conv
+  rownames(ci_coverage) <- rownames(avg_stats)
+  colnames(ci_coverage) <- colnames(avg_stats)
+  names(MLE_conv) <- colnames(avg_stats)
+  
+  # Output
+  results <- list(cond = select_cond,
+                  MCMC_est = round(cbind(ref=psd_tr_vec, avg_stats), 3),
+                  bias_raw = round(cbind(ref=psd_tr_vec, bias), 3),
+                  bias_per = bias_per,
+                  ci_cov = round(ci_coverage*100, 1),
+                  MLE_conv_rate = MLE_conv)
+  return(results)
+}
+
+res_lm_sum <- function(out, condition = 1){
+  # Sem Model
+  select_cond <- names(out[[1]])[condition]
+  
+  ## 1. Obtain Pseudo True Values ##
+  
+  full_dat_est <- matrix(NA, 
+                         nrow = out$parms$dt_rep, 
+                         ncol = nrow(out[[1]][[select_cond]]$lm_EST))
+  for (i in 1:out$parms$dt_rep) {
+    full_dat_est[i, ] <- out[[i]][[select_cond]]$lm_EST[, which(out$parms$methods == "GS")]
+  }
+  
+  psd_tr_vec <- colMeans(full_dat_est) # pseudo true values
+  
+  ## Step 2. Compute averages of statistics (MCMC estiamtes) ##
+  
+  # Store Sums
+  sum_stats <- matrix(0, 
+                      nrow = nrow(out[[i]][[select_cond]]$lm_EST), 
+                      ncol = length(out$parms$methods))
+  
+  # Compute averages of the statistics
+  for (i in 1:out$parms$dt_rep) {
+    sum_stats <- sum_stats + out[[i]][[select_cond]]$lm_EST
+  }
+  
+  # Reference valuse vs Average estimtes
+  avg_stats <- sum_stats / out$parms$dt_rep
+  MCMC_est  <- round(cbind( ref = psd_tr_vec, avg_stats), 3)
+  
+  # Give meaningful names
+  # fit <- lavaan::sem(out$parms$lav_model,
+  #                    data = out[[1]][[select_cond]]$dat_full,
+  #                    likelihood = "wishart")
+  # rownames(avg_stats) <- apply(parameterEstimates(fit)[,1:3], 
+  #                              1, 
+  #                              paste0, 
+  #                              collapse = "")
+  # 
+  # colnames(avg_stats) <- out$parms$methods
+  
+  ## Step 3. Obtain Bias ##
+  
+  # Raw bias
+  bias <- avg_stats - psd_tr_vec
+  bias_raw <- round(cbind(ref=psd_tr_vec, bias), 3)
+  
+  # Bias as percentage of true value
+  bias_per <- cbind(ref = round(psd_tr_vec, 3), 
+                    round(abs(bias)/psd_tr_vec*100, 0))
+  
+  ## Step 4: Obtain CI Coverages ##
+  # Store objects
+  str_thrs <- nrow(out[[1]][[select_cond]]$lm_CI)/2 # storing threshold
+  sum_stats <- matrix(0, 
+                      nrow = nrow(out[[i]][[select_cond]]$lm_EST), 
+                      ncol = length(out$parms$methods))
+  MLE_conv <- rep(0, length(out$parms$methods))
+  # Compute averages of the statistics
+  for (i in 1:out$parms$dt_rep) {
+    cond_est <- out[[i]][[select_cond]]$lm_EST
+    cond_CI  <- out[[i]][[select_cond]]$lm_CI
+    ci_low   <- cond_CI[1:str_thrs, ]
+    ci_hig   <- cond_CI[-(1:str_thrs), ]
+    
+    # General
+    for (m in 1:length(out$parms$methods)) {
+      if(!is.na( sum(ci_low[, m]) )){
+        sum_stats[, m] <- sum_stats[, m] + 
+          as.numeric(ci_low[, m] < psd_tr_vec & psd_tr_vec < ci_hig[, m])
+        MLE_conv[m] <- MLE_conv[m] + as.numeric(!is.na( sum(ci_low[, m]) ))
+      }
+    }
+  }
+  
+  ci_coverage <- sum_stats / MLE_conv
+    rownames(ci_coverage) <- rownames(avg_stats)
+    colnames(ci_coverage) <- colnames(avg_stats)
+  ci_coverage <- round(ci_coverage*100, 1)
+  names(MLE_conv) <- colnames(avg_stats)
+  
+  # Output
+  results <- list(cond = select_cond,
+                  MCMC_est = MCMC_est,
+                  bias_raw = bias_raw,
+                  bias_per = bias_per,
+                  ci_cov = ci_coverage,
+                  MLE_conv_rate = MLE_conv)
+  return(results)
 }

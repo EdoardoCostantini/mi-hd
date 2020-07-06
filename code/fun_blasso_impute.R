@@ -96,10 +96,9 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
                                      noisy = FALSE)
 
           # step 2: update imputed values (sample from predictive distribution)
-          pdraw_zj_imp <- rnorm(nrow(Z_mis), 
+          pdraw_zj_imp <- rnorm(nrow(Z_mis),
                                 mean = (Z_mis %*% as.vector(pdraw$beta)), 
                                 sd = sqrt(pdraw$sig2) )
-          
         }
         if(fam == "binomial"){
           N1  <- sum(zj_obs == 1)     # Number of successes

@@ -17,7 +17,7 @@ impute_missFor <- function(Z, parms){
     start.time <- Sys.time()
     
     imp_missForest <- missForest(Z,
-                                 maxiter = 10,
+                                 maxiter = 20,
                                  ntree = 100,
                                  parallelize = "no")
     

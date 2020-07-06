@@ -5,26 +5,67 @@
 
 # data generation ---------------------------------------------------------
 
-# multivairate 
-
-genDt_mvn <- function(cond, parms){
+# Experiment 1: Multivariate Data -----------------------------------------
+simData_exp1 <- function(cond, parms){
   # For internals
   # cond <- conds[1,]
   
+  # 1. Generate covariance matrix -----------------------------------------
+    Sigma <- diag(cond$p)
+  # Block 1: highly correlated variables
+    Sigma[parms$blck1, ] <- parms$blck1_r
+  # Block 2: not so highly correlated variables
+    Sigma[parms$blck2, ] <- parms$blck2_r
+  # Block 3: uncorrelated variables
+    block3_p <- cond$p - length(c(parms$blck1, parms$blck2))
+    Sigma[-c(parms$blck1, parms$blck2), ] <- .01
+  # Fix diagonal
+    diag(Sigma) <- 1
+  # Make symmetric
+    Sigma[upper.tri(Sigma)] <- t(Sigma)[upper.tri(Sigma)]
+  
+  # 2. Gen n x p data -----------------------------------------------------
+    # Sample
+    Z <- rmvnorm(n     = parms$n, 
+                 mean  = rep(0, cond$p), 
+                 sigma = Sigma )
+    # Give meaningful names
+    colnames(Z) <- paste0("z", 1:ncol(Z))
+  
+  # 3. Scale according to your evs examination
+    Z_sc <- Z * sqrt(parms$item_var) + parms$item_mean
+
+  return( as.data.frame( Z_sc ) )
+}
+
+# Use
+# Xy <- simData_exp1(conds[1, ], parms)
+# cor(Xy)[1:15, 1:15]
+# cov(Xy)[1:15, 1:15]
+
+# Experiment 2: Interactions ----------------------------------------------
+
+simData_exp2 <- function(parms, inter = TRUE){
+  # For internals
+  # cond <- conds[1,]
+  # inter = TRUE
+  
   # Generate covaraince matrix
   # For paramters decisions, look back at
-  Sigma <- diag(cond$p)
+  Sigma <- diag(parms$p - length(parms$blcky))
   
   # Block 1: highly correlated variables
-  Sigma[parms$blck1, ] <- parms$blck1_r
+  blck1_indx <- parms$blck1 - length(parms$blcky)
+  Sigma[blck1_indx, ] <- parms$blck1_r
   
   # Block 2: not so highly correlated variables
-  Sigma[parms$blck2, ] <- parms$blck2_r
+  blck2_indx <- parms$blck2-length(parms$blcky)
+  Sigma[blck2_indx, ] <- parms$blck2_r
   
   # Block 3: uncorrelated variables
-  block3_p <- cond$p - length(c(parms$blck1, parms$blck2))
-  Sigma[-c(parms$blck1, parms$blck2), ] <- .01 #runif(block3_p*cond$p, 0.01, .1)
-
+  blck3_indx <- (1:ncol(Sigma))[-c(blck1_indx, blck2_indx)]
+  Sigma[blck3_indx, ] <- .01
+  
   # Fix diagonal
   diag(Sigma) <- 1
   
@@ -33,274 +74,82 @@ genDt_mvn <- function(cond, parms){
   
   # Gen Axuliariy Variables
   Z <- rmvnorm(n     = parms$n, 
-               mean  = rep(0, cond$p), 
+               mean  = rep(0, ncol(Sigma)), 
                sigma = Sigma )
   colnames(Z) <- paste0("z", 1:ncol(Z))
-
-  # Scale according to your evs examination
-  Z_sc <- Z * sqrt(parms$item_mean) + parms$item_var
-  # values used based on study of democratic and morals items
   
-  return( Z_sc )
-}
-
-# Use
-# Xy <- genDt_mvn(conds[1, ], parms)
-# cor(Xy)[1:15, 1:15]
-# cov(Xy)[1:15, 1:15]
-
-imposeMAR <- function(target_id, dt_in, parms, cond){
-  # Right Tail Imposition of missingness
-  # Inputs
-  # target_id <- parms$z_m_id[1]
-  # cond <- conds[1,]
-  # dt_in   <- genDt_mvn(cond, parms)
+  # Gen y variables
+  # Main Effects
+  blcky_indx <- c(blck1_indx[1], blck2_indx[1], blck3_indx[1])
   
-  # Body
-  dt_out <- as.matrix(dt_in)
-  rm_id <- which(parms$z_m_id %in% target_id)
-
-  # Perform
-  parms$rm_b <- c(-1, -1, .667, -.333)
-  linPred <- dt_out[, parms$rm_x[rm_id, ]] %*% parms$rm_b
-  missPropensity <- pnorm(linPred, mean(linPred), sd(linPred))
-  nR <- missPropensity >= 1 - cond$pm
-  dt_out[nR, target_id] <- NA
+  # Interaction Effects
+  inter_indx <- c(blcky_indx[1], blcky_indx[3])
+  int_term <- apply(Z[, inter_indx], 1, prod)
   
-  # Result
-  return( dt_out[, target_id] )
-}
-
-imposeMiss <- function(dt_in, parms, cond){
-  # Given a fully observed dataset and param object containing the regression
-  # coefficients of the model to impose missingness, it returns a version of
-  # the original data with imposed missingness on z1, and its missingness
-  # idicator (R)
-  
-  ## Inputs ##
-  
-  # dt_in   <- genDt_mvn(conds[1, ], parms)
-  # cond <- conds
-  
-  ## Body ##
-  # n <- nrow(Xy)
-  dt_out <- as.matrix(dt_in)
-
-  for (i in parms$z_m_id) {
-    dt_out[, i] <- imposeMAR(target_id = i,
-                             dt_in = dt_in,
-                             parms = parms,
-                             cond = cond)
+  # Linear model predictors
+  if(inter == TRUE){
+    betas <- c(.333, -.333, -.1, .666)
+  } else {
+    betas <- c(.333+.222, -.333-.222, -.1-.222, 0)
   }
   
-  return( as.data.frame(dt_out) )
+  # Signal to noise ratio
+  Z_pred <- cbind(Z[, blcky_indx], int_term)
+  signal <- t(parms$beta) %*% cov(Z_pred) %*% parms$beta
+  sY     <- (signal / parms$r2) - signal
+  
+  omega2  <-  as.vector( parms$stnr * betas %*% cov(Z_pred) %*% betas )
+  eps     <-  rnorm(parms$n, mean = 0, sd = sqrt(sY))
+  
+  # Create y
+  y <- cbind(Z[, blcky_indx], int_term) %*% betas + eps
+  
+  # Combine data
+  yX <- data.frame(y = y, Z)
+  
+  # Scale according to your evs examination
+  yX_sc <- yX * sqrt(parms$item_var) + parms$item_mean
+
+  return(yX_sc)
 }
 
-# DengEtAl Style ----------------------------------------------------------
+# Xy <- genDt_exp2(parms, inter = TRUE)
+# lm_out <- lm(y ~ -1 + z1 + z11 + z21 + z1:z21, data = Xy)
+# summary(lm_out)
+# lm_out_sd <- lm(y ~ -1 + z1 + z11 + z21 + z1:z21, data = as.data.frame(scale(Xy)))
+# summary(lm_out_sd)
 # 
-# genData <- function(cnd, parms){
-#   # For internals
-#   # cnd <- conds[1,]
-#   
-#   p_Zm <- length(parms$z_m_id) # number of variables w/ missing values
-#   p_Zf <- cnd["p"] - p_Zm      # number of fully observed variables
-#   
-#   # Gen Zf(ully observed)
-#   Zf <- rmvnorm(n     = parms$n, 
-#                 mean  = rep(0, p_Zf), 
-#                 sigma = AR1(p_Zf, rho = cnd["rho"]) )
-#   
-#   # Append empty Zm(issing values on p_Zm variables)
-#   Zm <- matrix(rep(NA, p_Zm*parms$n),
-#                ncol = p_Zm)
-#   Z <- cbind(Zm, Zf)
-#   
-#   # Fill Zm with true values
-#   AS_indx <- which(names(parms$S_all) == paste0("q", cnd["q"])) # active set (AS) indx
-#   Zs <- Z[, parms$S_all[[AS_indx]]] # Active set
-#   a <- rep(1, ncol(Zs)) * parms$stnr[AS_indx]
-#   
-#   Zm <- sapply(1:p_Zm, 
-#                function(x) {
-#                  rnorm(parms$n, 1 + Zs %*% a, sqrt(parms$z_m_var))
-#                }
-#   )
-#   
-#   # Replace in dataset Z the new true values
-#   Z <- cbind(Zm, Zf)
-#   colnames(Z) <- paste0("z", 1:ncol(Z))
-#   
-#   # Generate y
-#   b0 <- parms$b
-#   b <- rep(parms$b, parms$k)
-#   y <- rnorm(parms$n, 
-#              mean = b0 + Z[, 1:parms$k] %*% b,
-#              sd = sqrt(parms$y_var))
-#   
-#   return( as.data.frame(cbind(Z, y)) )
-# }
-# 
-# # Example use
-# # set.seed(1234)
-# # Xy <- genData(conds[1, ], parms)
-# # lm(y ~ z1 + z2 + z3 + z4 + z5, data = Xy) # true y model
-# 
-# imposeMiss <- function(Xy, parms){
-#   # Given a fully observed dataset and param object containing the regression
-#   # coefficients of the model to impose missingness, it returns a version of
-#   # the original data with imposed missingness on z1, and its missingness
-#   # idicator (R)
-#   
-#   n <- nrow(Xy)
-#   coefs <- parms$b_miss_model
-#   Xy_miss <- as.matrix(Xy)
-#   nR <- sapply(1:length(parms$z_m_id), function(d){
-#     logit_miss <- cbind(1, Xy_miss[, parms$detlamod[[d]]]) %*% coefs
-#     prb_miss <- exp(logit_miss)/(1+exp(logit_miss))
-#     nR <- rbinom(n, 1, prb_miss) == 1
-#     return(nR)
-#   }
-#   )
-#   
-#   for (i in 1:length(parms$z_m_id)) {
-#     Xy_miss[nR[, i], parms$z_m_id[i]] <- NA
-#   }
-#   
-#   return(list(Xy_miss = as.data.frame(Xy_miss),
-#               nR = nR) )
-# }
-# 
-# genDataCat <- function(cnd, parms){
-#   # For internals
-#   # cnd <- conds[1,]
-#   
-#   p_Zm <- length(parms$z_m_id) # number of variables w/ missing values
-#   p_Zf <- cnd["p"] - p_Zm      # number of fully observed variables
-#   
-#   # Gen Zf(ully observed)
-#   Zf <- rmvnorm(n     = parms$n, 
-#                 mean  = rep(0, p_Zf), 
-#                 sigma = AR1(p_Zf, rho = cnd["rho"]) )
-#   
-#   # Append empty Zm(issing values on p_Zm variables)
-#   Zm <- matrix(rep(NA, p_Zm*parms$n),
-#                ncol = p_Zm)
-#   Z <- cbind(Zm, Zf)
-#   
-#   # Fill Zm with true values
-#   AS_indx <- which(names(parms$S_all) == paste0("q", cnd["q"])) # active set (AS) indx
-#   Zs <- Z[, parms$S_all[[AS_indx]]] # Active set
-#   a <- rep(1, ncol(Zs)) * parms$stnr[AS_indx]
-#   
-#   # Number of vairables of each type
-#   nvar_count <- 2
-#   nvar_dicho <- 1
-#   nvar_polyt <- 0
-#   
-#   Zm_count <- sapply(1:nvar_count, 
-#                      function(x) {
-#                        rnorm(parms$n, 1 + Zs %*% a, sqrt(parms$z_m_var))
-#                      }
-#   )
-#   
-#   Zm_dicho <- data.frame(
-#     lapply(1:nvar_dicho, # lapply keeps them as factors
-#            function(x) {
-#              logit <- 1 + Zs %*% a
-#              prob <- exp(logit)/(1+exp(logit))
-#              y <- factor(rbinom(parms$n, 1, prob))
-#            }
-#     )
-#   )
-#   
-#   # Zm_polyt <- data.frame(
-#   #   lapply(1:nvar_polyt, # lapply keeps them as factors
-#   #          function(x) {genMultiCat(K = 3, X = Zs)$y})
-#   # )
-#   
-#   Zm <- data.frame(Zm_count, Zm_dicho) #, Zm_polyt)
-#   
-#   # Replace in dataset Z the new true values
-#   Z <- cbind(Zm, Zf)
-#   colnames(Z) <- paste0("z", 1:ncol(Z)) # fix names
-#   
-#   # Generate y
-#   X <- as.matrix(cbind(Z[, 1:2],
-#                        model.matrix( ~ Z[,3])[, -1],
-#                        # model.matrix( ~ Z[,3])[, -1],
-#                        Z[, -c(1:3)]))
-#   
-#   b0 <- parms$b
-#   b <- rep(parms$b, parms$k)
-#   y <- rnorm(parms$n, 
-#              mean = b0 + X[, 1:parms$k] %*% b,
-#              sd = sqrt(parms$y_var))
-#   
-#   return( as.data.frame(cbind(Z, y)) )
-# }
-# 
-# # Example use
-# # set.seed(1234)
-# # Xy <- genDataCat(conds[1, ], parms)
-# # lm(y ~ z1 + z2 + z3 + z4 + z5, data = Xy) # true y model
-# 
-# imposeMissCat <- function(Xy, parms){
-#   # Given a fully observed dataset and param object containing the regression
-#   # coefficients of the model to impose missingness, it returns a version of
-#   # the original data with imposed missingness on z1, and its missingness
-#   # idicator (R)
-#   
-#   n <- nrow(Xy)
-#   coefs <- parms$b_miss_model
-#   nR <- sapply(1:length(parms$z_m_id), function(d){
-#     logit_miss <- as.matrix(cbind(1, Xy[, parms$detlamod[[d]]])) %*% coefs
-#     prb_miss <- exp(logit_miss)/(1+exp(logit_miss))
-#     nR <- rbinom(n, 1, prb_miss) == 1
-#     return(nR)
-#   }
-#   )
-#   
-#   for (i in 1:length(parms$z_m_id)) {
-#     Xy[nR[, i], parms$z_m_id[i]] <- NA
-#   }
-#   
-#   return(list(Xy_miss = Xy,
-#               nR = nR) )
-# }
-# 
-# genMultiCat <- function(K = 3, X) {
-#   # Data gen from multinomial logit model
-#   # Notes: Randomly generated parameters, in the future I will choose them
-#   # Example inputs
-#   # K = 3 # number of categories for outcome vairable
-#   # X = matrix(rnorm(1e3), ncol = 4) # some dataset
-#   
-#   # Body
-#   a <- runif(K-1, 0, 5) # intercept terms
-#   B <- matrix(runif((K-1)*ncol(X), 0, 5),
-#               ncol = ncol(X)) # logit reg coefs
-#   
-#   # Denominator
-#   denom_pt1 <- sapply(1:(K-1), 
-#                       function(k) exp(a[k] + X %*% B[k, ]) )
-#   denom <- 1 + rowSums(denom_pt1)
-#   
-#   # Calculating the matrix of probabilities for each category of the DV
-#   vProb = cbind( 1/denom,             # baseline category
-#                  sapply(1:(K-1), 
-#                         function(k) exp(a[k] + X %*% B[k, ])/denom))
-#   # each row has the probabilities for that specific individual of falling
-#   # in each category of Y (i.e. each row sums to 1)
-#   # rowSums(vProb)
-#   
-#   # Sample category for each individual
-#   location = t(apply(vProb, 1, rmultinom, n = 1, size = 1)) 
-#   
-#   # Store result
-#   y <- apply(location, 1, function(x) which(x==1))
-#   y <- factor(y, labels = sample(words, K)) 
-#   
-#   return(list(y = y,
-#               true_par = cbind(a, B))
-#   )
-# }
+# Xy <- genDt_exp2(parms, inter = FALSE)
+# lm(y ~ -1 + z1 + z11 + z21, data = Xy)
+# lm(y ~ -1 + z1 + z11 + z21, data = as.data.frame(scale(Xy)))
+
+
+# Missingness -------------------------------------------------------------
+
+imposeMiss <- function(dat_in, parms, cond){
+  ## Description
+  # Given a fully observed dataset and a param object containing the regression
+  # coefficients of the model to impose missingness, it returns a version of
+  # the original data with imposed missingness on all the variables indicated
+  # as target int parms$z_m_id
+  ## Example Inputs
+  # cond <- conds[1,]
+  # dat_in   <- simData_exp1(cond, parms)
+  
+  # Body
+  # Define non-response vector
+  dat_out <- dat_in
+  for (i in 1:parms$zm_n) {
+    nR <- simMissingness(pm    = cond$pm,
+                         data  = dat_in,
+                         preds = parms$rm_x[i, ],
+                         type  = parms$missType,
+                         beta  = parms$auxWts)
+    
+    # Fill in NAs
+    dat_out[nR, parms$z_m_id[i]] <- NA
+  }
+  
+  # Result
+  return( dat_out )
+}

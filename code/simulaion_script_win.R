@@ -3,13 +3,15 @@
 ### Created:  2020-05-19
 
 rm(list=ls())
-source("./init.R")
+source("./init_general.R")
+source("./init_exp1.R")
 
 ## Create a cluster object:
 clus <- makeCluster(10)
 
 ## Two different ways to source a script on the worker nodes:
-clusterEvalQ(cl = clus, expr = source("./init.R"))
+clusterEvalQ(cl = clus, expr = source("./init_general.R"))
+clusterEvalQ(cl = clus, expr = source("./init_exp1.R"))
 
 ## Data directory for storage
 

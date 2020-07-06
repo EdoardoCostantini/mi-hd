@@ -9,14 +9,15 @@ source("./functions.R")
 # Does the proportion of missing data imposed work?
 
 rm(list=ls())
-source("./init.R")
+source("./init_general.R")
+source("./init_exp1.R")
 
 reps <- 1e3
 cond <- conds[1,]
 pm_store <- matrix(NA, nrow = reps, ncol = cond$p)
 
 for (r in 1:reps) {
-  dt_full <- genDt_mvn(cond, parms)
+  dt_full <- simData_exp1(cond, parms)
   dt_mis  <- imposeMiss(dt_full, parms, cond)
   pm_store[r, ] <- colMeans(is.na(dt_mis))
 }
@@ -25,7 +26,6 @@ round(colMeans(pm_store), 3)
 round(colMeans(pm_store), 1) == cond$pm
 # All variables with missing values have on average
 # the correct proportion of missing cases.
-
 
 # -------------------------------------------------------------------------
 

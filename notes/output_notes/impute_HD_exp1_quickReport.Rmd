@@ -1,0 +1,82 @@
+---
+title: "impute_HD_exp1_quickReport"
+author: "Edoardo Costantini"
+date: "7/6/2020"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+  library(kableExtra)
+# Load Exp1 summari results
+  out <- readRDS("../../output/sum_exp1.rds")
+  # out_cnv <- readRDS("../../output/cnv_check_20200704_1613.rds")
+
+# Row index for type of paramter
+  avg_indx <- 1:out$parms$zm_n
+  var_indx <- (out$parms$zm_n+1):(out$parms$zm_n*2)
+  cov_indx <- (tail(var_indx, 1)+1):nrow(out$cond1$MCMC_est)
+```
+
+## Condition 1
+
+First, look at the MCMC raw esitmates of the parameters of itnerest
+
+```{r, echo=FALSE}
+kable(out$cond1$MCMC_est, caption = "MCMC estimates") %>%
+  kable_styling("striped", full_width = F) %>%
+  pack_rows("Means", 
+            start_row = avg_indx[1],
+            end_row  = tail(avg_indx, 1)) %>%
+  pack_rows("Variances", 
+            start_row = var_indx[1],
+            end_row  = tail(var_indx, 1)) %>%
+  pack_rows("Covariances", 
+            start_row = cov_indx[1],
+            end_row  = tail(cov_indx, 1))
+
+kable(out$cond1$bias_raw, caption = "Bias (raw)") %>%
+  kable_styling("striped", full_width = F) %>%
+  pack_rows("Means", 
+            start_row = avg_indx[1],
+            end_row  = tail(avg_indx, 1)) %>%
+  pack_rows("Variances", 
+            start_row = var_indx[1],
+            end_row  = tail(var_indx, 1)) %>%
+  pack_rows("Covariances", 
+            start_row = cov_indx[1],
+            end_row  = tail(cov_indx, 1))
+
+kable(out$cond1$bias_per, caption = "Bias (as percentage of reference value)") %>%
+  kable_styling("striped", full_width = F) %>%
+  pack_rows("Means", 
+            start_row = avg_indx[1],
+            end_row  = tail(avg_indx, 1)) %>%
+  pack_rows("Variances", 
+            start_row = var_indx[1],
+            end_row  = tail(var_indx, 1)) %>%
+  pack_rows("Covariances", 
+            start_row = cov_indx[1],
+            end_row  = tail(cov_indx, 1))
+
+kable(out$cond1$ci_cov, caption = "Confidence Intervals Coverage") %>%
+  kable_styling("striped", full_width = F) %>%
+  pack_rows("Means", 
+            start_row = avg_indx[1],
+            end_row  = tail(avg_indx, 1)) %>%
+  pack_rows("Variances", 
+            start_row = var_indx[1],
+            end_row  = tail(var_indx, 1)) %>%
+  pack_rows("Covariances", 
+            start_row = cov_indx[1],
+            end_row  = tail(cov_indx, 1))
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
