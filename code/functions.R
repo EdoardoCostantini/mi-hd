@@ -552,18 +552,22 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
 
 fit_lm_models <- function(multi_dt, vrbs){
   ## Description:
-  # Given a list of complete datasets it fits a model described
-  # in mod
+  # Given a list of complete datasets it fits a linear model
+  # to obtain standardized regression coefficients (all vairables 
+  # are centered and standardized)
   ## Example internals
   # multi_dt <- imp_DURR_la$dats
   # vrbs <- parms$lm_model
   if(!is.null(multi_dt)){
   mod <- paste0(vrbs[1], 
-            " ~ ", 
+            " ~ - 1 + ", 
             paste0(vrbs[-1], collapse = " + ")
   )
     models <- lapply(X = multi_dt,
-                     FUN = function(x) lm(mod, data = x))
+                     FUN = function(x) lm(mod, 
+                                          data = as.data.frame( scale(x) )
+                                          )
+                     )
   } else {models = NULL}
   return(models)
 }
@@ -933,7 +937,7 @@ res_sem_sum <- function(out, condition = 1){
   # Sem Model
   select_cond <- names(out[[1]])[condition]
   
-  ## 1. Obtain Pseudo True Values ##
+  ## Step 1. Obtain Pseudo True Values ##
   
   full_dat_est <- matrix(NA, 
                          nrow = out$parms$dt_rep, 
@@ -974,13 +978,13 @@ res_sem_sum <- function(out, condition = 1){
   
   # Raw bias
   bias <- avg_stats - psd_tr_vec
-  round(cbind(ref=psd_tr_vec, bias), 3)
   
   # Bias as percentage of true value
   bias_per <- cbind(ref = round(psd_tr_vec, 3), 
                     round(abs(bias)/psd_tr_vec*100, 0))
   
   ## Step 4: Obtain CI Coverages ##
+  
   # Store objects
   str_thrs <- nrow(out[[1]][[select_cond]]$sem_CI)/2 # storing threshold
   sum_stats <- matrix(0, 
@@ -1050,17 +1054,6 @@ res_lm_sum <- function(out, condition = 1){
   avg_stats <- sum_stats / out$parms$dt_rep
   MCMC_est  <- round(cbind( ref = psd_tr_vec, avg_stats), 3)
   
-  # Give meaningful names
-  # fit <- lavaan::sem(out$parms$lav_model,
-  #                    data = out[[1]][[select_cond]]$dat_full,
-  #                    likelihood = "wishart")
-  # rownames(avg_stats) <- apply(parameterEstimates(fit)[,1:3], 
-  #                              1, 
-  #                              paste0, 
-  #                              collapse = "")
-  # 
-  # colnames(avg_stats) <- out$parms$methods
-  
   ## Step 3. Obtain Bias ##
   
   # Raw bias
@@ -1109,4 +1102,56 @@ res_lm_sum <- function(out, condition = 1){
                   ci_cov = ci_coverage,
                   MLE_conv_rate = MLE_conv)
   return(results)
+}
+
+res_ed_est <- function(results, measure = "all"){
+  # Internals
+  # results <- list(out_cond1, lm_cond1)[[2]]
+  # measure <- c("all", "mean", "var", "cov")[2]
+  
+  # Which elements should be included in the distance computation
+  if(measure == "all")  measure_id <- 1:nrow(results$MCMC_est)
+  if(measure == "mean") measure_id <- 1:6
+  if(measure == "var")  measure_id <- 7:12
+  if(measure == "cov")  measure_id <- 13:nrow(results$MCMC_est)
+  if(measure == "rc")   measure_id <- 2:nrow(results$MCMC_est)
+  
+  # Prepare objects for distance computation
+  method_id <- which(colnames(results$MCMC_est) %in% c("ref", "GS"))
+  ref <- results$MCMC_est[measure_id, "ref"]
+  MCMC_est <- results$MCMC_est[measure_id, -method_id]
+  
+  # Compute Euclidean distance
+  out_dist <- sapply(as.data.frame(MCMC_est), 
+                     function(x) dist(rbind(ref, x))
+  )
+  
+  # Prepare and return output
+  return(out_dist)
+}
+
+res_ed_ci <- function(results, measure = "all"){
+  # Internals
+  # results <- list(out_cond1, lm_cond1)[[1]]
+  # measure <- c("all", "mean", "var", "cov")[2]
+  
+  # Which elements should be included in the distance computation
+  if(measure == "all")  measure_id <- 1:nrow(results$ci_cov)
+  if(measure == "mean") measure_id <- 1:6
+  if(measure == "var")  measure_id <- 7:12
+  if(measure == "cov")  measure_id <- 13:nrow(results$ci_cov)
+  if(measure == "rc")   measure_id <- 2:nrow(results$ci_cov)
+  
+  # Prepare objects for distance computation
+  method_id <- which(colnames(results$ci_cov) %in% c("ref", "GS"))
+  ref <- rep(95, length(measure_id))
+  MCMC_ci <- results$ci_cov[measure_id, -method_id]
+  
+  # Compute Euclidean distance
+  out_dist <- sapply(as.data.frame(MCMC_ci), 
+                     function(x) dist(rbind(ref, x))
+  )
+  
+  # Prepare and return output
+  return(out_dist)
 }

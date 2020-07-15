@@ -70,10 +70,16 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
         zj_obs <- Zm[O[, j], j]
         zj_mis <- Zm[!O[, j], j]
         Z_obs <- as.matrix(Zm[O[, j], -j])
-          Z_obs <- apply(Z_obs, 2, as.numeric) # makes dicho numbers
         Z_mis <- as.matrix(Zm[!O[, j], -j])
-          Z_mis <- apply(Z_mis, 2, as.numeric) # makes dicho numbers
-          
+        
+        # Scaled versions
+        s_zj_obs <- scale(zj_obs)
+        s_Z_obs  <- scale(Zm[O[, j], -j])
+        s_Z_mis  <- scale(Zm[!O[, j], -j], 
+                          center = colMeans(Z_obs), 
+                          scale = apply(Z_obs, 2, sd))
+        
+        # Storing draws  
         beta_m  <- Beta.out[[j]][m-1,] #rep(0, ncol(Z_obs)) # starting vbalues for gibbs sampler
         sigma_m <- sqrt(Sig.out[[j]][m-1])
         tam_m   <- Tau.out[[j]][m-1]
@@ -84,7 +90,7 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
         
         if(fam == "gaussian"){
           # step 1: update j-th imputation model parameters
-          pdraw <- blasso::blasso.vs(Y = zj_obs, X = Z_obs,
+          pdraw <- blasso::blasso.vs(Y = s_zj_obs, X = s_Z_obs,
                                      iters =1,
                                      burn = 0,
                                      beta = beta_m, 
@@ -95,10 +101,12 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
                                      fixsig = FALSE, fixtau = FALSE, fixphi = FALSE,
                                      noisy = FALSE)
 
-          # step 2: update imputed values (sample from predictive distribution)
-          pdraw_zj_imp <- rnorm(nrow(Z_mis),
-                                mean = (Z_mis %*% as.vector(pdraw$beta)), 
-                                sd = sqrt(pdraw$sig2) )
+          # step 2: sample from predictive distribution (predict on beta draws scale)
+          s_pdraw_zj_imp <- rnorm(nrow(s_Z_mis),
+                                  mean = (s_Z_mis %*% as.vector(pdraw$beta)), 
+                                  sd = sqrt(pdraw$sig2) )
+          # and rescale
+          pdraw_zj_imp <- s_pdraw_zj_imp * sd(zj_obs) + mean(zj_obs)
         }
         if(fam == "binomial"){
           N1  <- sum(zj_obs == 1)     # Number of successes
@@ -155,7 +163,9 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
         # Store results
         Beta.out[[j]][m, ] <- as.vector(pdraw$beta)
         Sig.out[[j]][m]    <- pdraw$sig2
-        Tau.out[[j]][m]    <- pdraw$tau
+        Tau.out[[j]][m]    <- ifelse(pdraw$tau > 0, pdraw$tau, Tau.out[[j]][m-1])
+          # In unlikly scenario wehre Tau is smaller than 0, keep previous draw
+          # not solid
         Phi.out[[j]][m]    <- pdraw$phi
         Imp.out[[j]][m, ]  <- pdraw_zj_imp
         

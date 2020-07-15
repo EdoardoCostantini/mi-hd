@@ -45,7 +45,6 @@ cat(paste0("\n", "------", "\n",
 
   # Attach parm object
   out$parms <- parms
-  out[[1]]$cond_500_0.3$sem_EST[1:2, 1:2]
   
 # Save output -------------------------------------------------------------
 

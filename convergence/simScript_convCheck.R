@@ -29,7 +29,7 @@ cat(paste0("CONVERGENCE CHECK PROGRESS REPORT",
 
 sim_start <- Sys.time()
 
-out <- mclapply(X        = 1 : parms$dt_rep,
+out_cnv <- mclapply(X        = 1 : parms$dt_rep,
                 FUN      = doRep,
                 conds    = conds,
                 parms    = parms,
@@ -47,11 +47,11 @@ cat(paste0("\n", "------", "\n",
     append = TRUE)
 
 # Attach parm object
-out$parms <- parms
+out_cnv$parms <- parms
 
 # Save output -------------------------------------------------------------
 
-saveRDS(out,
+saveRDS(out_cnv,
         paste0(parms$outDir,
                parms$results_file_name)
 )

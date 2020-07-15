@@ -1,4 +1,52 @@
 \maketitle
 \section{Introduction}
 
-This is an amazing introduction. But keep reading for the methods
+Today’s social and behavioral scientists are blessed with a wealth of large, high-quality and publicly available social scientific datasets such as the Longitudinal Internet Studies for the Social Sciences (LISS) Panel and the European Values Study (EVS), with initiatives being undertaken to link and extend these datasets into a full system of linked open data (LOD). Making use of the full potential of these data sets requires dealing with the crucial problem of missing data. 
+
+The tools researchers working with these data sets need to correct for the bias introduced by nonresponses 
+require special attention. The large number of items recorded, coupled with the longitudinal nature of surveys and the necessity
+of preserving complex interactions and nonlinear relations, easily produces high-dimensional ($p>n$) imputation 
+problems that impair a straightforward application of imputation algorithms such as MICE \citep{vanBuuren:2012}.
+
+Furthermore, when employing Multiple Imputation to deal with missing values, data handlers tend to prefer including more
+predictors in the imputation models as to reduce chances of uncongenial imputation and analysis models \citep{meng:1994}.
+High-dimensional data imputation settings represent both an obstacle and an opportunity in this sense: an 
+obstacle, as in the presence of high-dimensional data it is simply not possible to include all variables in standard parametric
+imputation models; an opportunity, because the large amount of features available has the potential to reduces the chances of 
+leaving out of the imputation models important predictors of missignenss.
+
+Many solutions have been proposed to deal with missing values in high dimensional contexts, but most of them
+have focused on single imputations in an effort to improve the accuracy of individual imputations \citep{kimEtAl:2005, 
+stekhovenBuhlmann:2011, d'ambrosioEtAl:2012}.
+The main task of social scientists is to make inference about a general population based on a sample of observed 
+data, and single imputation is simply an inadequate missing data handling technique for such purpose: it 
+does not guarantee to find estimates that are unbiased and confidence valid \citep{rubin:1996}.
+
+Recent years have seen a plethora of studies proposing new Multiple Imputation methods for high dimensional
+missing data, which can be grouped as follows: 
+\begin{itemize}
+\item MI through frequentist use of regularized regression - Using regularized regression to
+	deal with the high-dimensionality of imputation models has been proposed and tested by
+	\citet{zhaoLong:2016} and \citet{dengEtAl:2016}. Their methods are referred to here 
+	as Direct and Indirect Use of Regularized Regression (DURR, and IURR, as abbreviated in their papers);
+\item MI through Bayesian regularized regression - In the R package 'mice', the implementation of 
+	Bayesian MI under the normal linear model allows to use a ridge penalty to estimate the imputation 
+	model regression coefficients in the presence of high collinearity and more features than observations
+	\citep[p. 68, algotithm 3.1]{vanBuuren:2012}. In the present work, we refer to such approach as 'bridge'. 
+	\citet{zhaoLong:2016} have also proposed using \citet{hans:2009}'s Bayesian Lasso regression to implement an 
+	alternative fully Bayesian high-dimensional imputation approach (blasso).
+\item non-parametric MI through regression trees - To this category belong the methods of 
+	\citet{burgetteReiter:2010, shahEtAl:2014} who proposed, respectively, an integration of regression trees 
+	and random forest within the Multiple Imputation by Chained Equations algorithm. In this paper they are 
+	referred to as MI-CART and MI-RANF.
+\item MI through dimensionality reduction - \citet{howardEtAl:2015} proposed using PCA to extract a few components
+	from a set of auxiliary variables to be used as predictors in regular runs of a MICE algorithm bringing the 
+	imputation problem back to a low dimensional one. Such method is referred to here as MI-PCA.
+\end{itemize}
+Despite being so prolific, the field is in need of comprehensive studies that compare the performances
+of such state-of-the-art methods on fair ground for specific scientific endeavours.
+
+With this study we set out to present a thorough review and comparison of MI approaches for high-dimensional 
+datasets. The goal was assessing how they meet the requirements of statistical validity of the analysis 
+performed on the treated data.
+

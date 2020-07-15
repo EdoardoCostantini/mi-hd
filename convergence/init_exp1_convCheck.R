@@ -9,15 +9,15 @@
 source("./init_exp1.R")
 
 # Decide which methods you car about for the convergence check
-parms$meth_sel <- data.frame(DURR_la = TRUE,
+parms$meth_sel <- data.frame(DURR_la = FALSE,
                              DURR_el = FALSE,
-                             IURR_la = TRUE,
+                             IURR_la = FALSE,
                              IURR_el = FALSE,
                              blasso  = TRUE,
-                             bridge  = TRUE,
-                             MI_PCA  = TRUE,
-                             MI_CART = TRUE,
-                             MI_RF   = TRUE,
+                             bridge  = FALSE,
+                             MI_PCA  = FALSE,
+                             MI_CART = FALSE,
+                             MI_RF   = FALSE,
                              MI_OP   = TRUE,
                              missFor = TRUE,
                              GS      = TRUE,
@@ -26,8 +26,8 @@ parms$meth_sel <- data.frame(DURR_la = TRUE,
 
 # Decide which paramters suit best the convergence check
 parms$dt_rep     <- 10 # replications for averaging results (200 goal)
-parms$chains     <- 5  # number of parallel chains for convergence check
-parms$iters      <- 200 
+parms$chains     <- 2  # number of parallel chains for convergence check
+parms$iters      <- 50 
 parms$burnin_imp <- 0  # no need, I want to see the first part as well
 parms$ndt        <- parms$chains # same chians as dataset in mice like imp
 parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt

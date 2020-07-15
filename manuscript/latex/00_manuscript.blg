@@ -1,0 +1,54 @@
+This is BibTeX, Version 0.99d (TeX Live 2019)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: 00_manuscript.aux
+The style file: apalike.bst
+I couldn't open database file .bib
+---line 36 of file 00_manuscript.aux
+ : \bibdata{../../../stats-refs/raw/missingData/bibtex/papers,../../../stats-refs/raw/missingData/bibtex/books,../../../stats-refs/raw/bayesStats/bibtex/papers,
+ :                                                                                                                                                              }
+I'm skipping whatever remains of this command
+Database file #1: ../../../stats-refs/raw/missingData/bibtex/papers.bib
+Database file #2: ../../../stats-refs/raw/missingData/bibtex/books.bib
+Database file #3: ../../../stats-refs/raw/bayesStats/bibtex/papers.bib
+You've used 13 entries,
+            1935 wiz_defined-function locations,
+            576 strings with 6121 characters,
+and the built_in function-call counts, 5216 in all, are:
+= -- 524
+> -- 179
+< -- 10
++ -- 58
+- -- 58
+* -- 455
+:= -- 897
+add.period$ -- 39
+call.type$ -- 13
+change.case$ -- 92
+chr.to.int$ -- 13
+cite$ -- 13
+duplicate$ -- 191
+empty$ -- 383
+format.name$ -- 77
+if$ -- 1018
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 15
+newline$ -- 68
+num.names$ -- 39
+pop$ -- 69
+preamble$ -- 1
+purify$ -- 94
+quote$ -- 0
+skip$ -- 150
+stack$ -- 0
+substring$ -- 440
+swap$ -- 23
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 74
+warning$ -- 0
+while$ -- 48
+width$ -- 0
+write$ -- 172
+(There was 1 error message)

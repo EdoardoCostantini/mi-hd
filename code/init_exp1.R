@@ -48,37 +48,36 @@
   parms$z_m_id  <- c((parms$blck1[1]):3, 
                      (parms$blck2[1]):8)
   parms$zm_n <- length(parms$z_m_id)
-  # parms$z_m_var <- 4 # error variance for z_m generation
   parms$S_all   <- list(q1 = (c(parms$blck1, parms$blck2)), # variables in block 1 and 2
                         q2 = (c(4:13, 50:59)))[[1]]
-  # parms$stnr    <- c(1, sqrt(.2)) # signal to noise ratio for alpha coefs
 
 # y gen / imporntant predictors
   parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
-  # In the current set up there is no y, no formula, there are only
-  # vairbales with missing values that are correlated with each
-  # other. SO I use this object to identify the variables that
-  # are to be imputed
-  # parms$formula <- c("y ~ z1 + z2 + z3 + z4 + z5")
-  # parms$k       <- 5 # number of predictors for analysis model
+  # variables that are to be imputed
   parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
 
 # Response Model (rm)
-  parms$auxWts   <- c(.3, .3, .3, .1) # weighting the importance of predictors in imposition
   parms$missType <- c("high", "low")[2]
-  # parms$rm_x <- t(sapply(parms$z_m_id, function(x)
-  #   c(base::sample(parms$blck1[which(parms$blck1 != x)], 3),
-  #     base::sample(parms$blck2[which(parms$blck2 != x)], 1))
-  # ))
-  parms$rm_x <- matrix(c(2, 3, 5, 10,
-                         5, 3, 1, 7,
-                         1, 2, 5, 6,
-                         3, 1, 2, 9,
-                         2, 5, 1, 10,
-                         5, 2, 1, 6), 
+  parms$auxWts   <- c(1, 1, 1, 1) # weighting the importance of predictors: all the same
+  parms$rm_x <- matrix(c(3, 4, 8, 9, # in terms of first data generation order
+                         3, 4, 8, 9, # for all vairables:
+                         2, 4, 8, 9, # - 1 w/ NA high cor
+                         3, 4, 8, 9, # - 1 w/out NA high cor
+                         3, 4, 8, 9, # - 1 w/ NA mid cor
+                         3, 4, 7, 9),# - 1 w/out NA mid cor
                        ncol = 4, nrow = 6,
                        byrow = TRUE)
   
+  # Old set up
+  # parms$auxWts   <- c(.3, .3, .3, .1)
+  # parms$rm_x <- matrix(c(2, 3, 5, 10,
+  #                        5, 3, 1, 7,
+  #                        1, 2, 5, 6,
+  #                        3, 1, 2, 9,
+  #                        2, 5, 1, 10,
+  #                        5, 2, 1, 6),
+  #                      ncol = 4, nrow = 6,
+  #                      byrow = TRUE)
   
 # Models ------------------------------------------------------------------
   # source("./gen_lavaan_model.R") # generate txt file for lavaan model
@@ -142,8 +141,6 @@
 # Conditions --------------------------------------------------------------
 
   p   <- c(50, 500) # c(50, 500) # number of variables
-  # rho <- c(0.5) # autoregressive structure
-  # q   <- c(1) # c(4, 20)  # active set (num of variables are true predictors of y)
   latent <- c(FALSE, TRUE)[1]
   pm <- c(.1, .3)
   

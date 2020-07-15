@@ -249,7 +249,7 @@ runCell <- function(cond, parms, rep_status) {
                                 GS      = Xy, 
                                 CC      = Xy_mis[rowSums(!O) == 0, ]),
                            vrbs = parms$lm_model)
-  
+  cov
   ## Pooling --------------------------------------------------------------- ##
   # For each imp method, pool estimates across the m datasets
   

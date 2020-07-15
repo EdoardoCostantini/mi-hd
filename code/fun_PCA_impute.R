@@ -37,7 +37,7 @@ impute_PCA <- function(Z, parms = parms){
       factVars <- names(vartypes)[vartypes == "factor"]
       ordeVars <- names(vartypes)[vartypes == "ordered factor"]
     
-    # 1. Single Imputation of auxiliary vairbales if missing 
+    # 1. Single Imputation of auxiliary variables if missing 
     # (doesn't do anything if Z_aux is fully observed)
     if(sum(is.na(Z_aux)) != 0){
       predMatrix <- quickpred(Z_aux, mincor = parms$PCA_mincor)

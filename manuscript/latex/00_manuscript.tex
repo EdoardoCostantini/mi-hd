@@ -3,20 +3,39 @@
 
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath} 		% for matrixes
-\usepackage[flushleft]{threeparttable} % for table notes
+\usepackage{amsmath} 			% for matrixes
+\usepackage{bm} 			% for bold math
+\usepackage[flushleft]{threeparttable} 	% for table notes
+\usepackage{pdflscape} 			% for tables in landscape mode
+\usepackage{graphicx} 			% to resize tables
+\usepackage[round]{natbib} % for better apalike citation style
 
 \title{Imputation for High Dimensional Data\\ \Large A comprehensive review}
-\author{Edoardo Costantini}
+\author{Edoardo Costantini \& Kyle M. Lang}
 \date{July 2020}
 
 \begin{document}
 
 \input{01_intro.tex}
 \input{02_methods.tex}
+\input{03_results.tex}
+\input{04_conclusions.tex}
 
 % Bibliography
-\bibliographystyle{IEEEannot}
-\bibliography{../bibtex/references}
+\bibliographystyle{apalike}
+
+\bibliography{
+	../../../stats-refs/raw/missingData/bibtex/papers,
+	../../../stats-refs/raw/missingData/bibtex/books,
+	../../../stats-refs/raw/bayesStats/bibtex/papers,	
+	}
+
+% terminal compile strategy:
+% 0. Go to folder containing 00_manuscript.tex
+% 1. pdflatex 00_manuscript.tex
+% 2. bibtex 00_manuscript
+% 3. pdflatex 00_manuscript.tex
+% 4. pdflatex 00_manuscript.tex
+% Source: https://www.latex-tutorial.com/tutorials/bibtex/
 
 \end{document}

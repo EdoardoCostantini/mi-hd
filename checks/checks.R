@@ -5,31 +5,8 @@
 source("./init.R")
 source("./functions.R")
 
-# Missing data pm ---------------------------------------------------------
-# Does the proportion of missing data imposed work?
+# SEM Model convergence ---------------------------------------------------
 
-rm(list=ls())
-source("./init_general.R")
-source("./init_exp1.R")
-
-reps <- 1e3
-cond <- conds[1,]
-pm_store <- matrix(NA, nrow = reps, ncol = cond$p)
-
-for (r in 1:reps) {
-  dt_full <- simData_exp1(cond, parms)
-  dt_mis  <- imposeMiss(dt_full, parms, cond)
-  pm_store[r, ] <- colMeans(is.na(dt_mis))
-}
-
-round(colMeans(pm_store), 3)
-round(colMeans(pm_store), 1) == cond$pm
-# All variables with missing values have on average
-# the correct proportion of missing cases.
-
-# -------------------------------------------------------------------------
-
-# SEM Model non convergence when few iterations
 cond <- data.frame(p = 500, pm = .3)
 # fit_gs <- list()
 # fit_cc <- list()
@@ -75,6 +52,26 @@ summa_models <- lapply(X = fit_gs,
                        FUN = function(x) parameterEstimates(x))
 
 
+
+# Linear Model Estiamtes --------------------------------------------------
+
+rm(list=ls())
+source("./init_general.R")
+source("./init_exp1.R")
+
+reps <- 250
+cond <- conds[1,]
+pm_store <- matrix(NA, nrow = reps, ncol = (length(parms$lm_model)-1))
+
+
+for (r in 1:reps) {
+  dt_full <- simData_exp1(cond, parms)
+  lm <- lm(z1 ~ -1 + z2 + z3 + z4 + z7 + z8, as.data.frame(scale(dt_full)))
+  pm_store[r,] <- lm$coefficients
+  print(paste0(round(r/reps*100, 1), "% done"))
+}
+
+round(colMeans(pm_store), 3)
 
 # Replicability -----------------------------------------------------------
 

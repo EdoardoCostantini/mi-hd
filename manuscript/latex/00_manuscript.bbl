@@ -1,0 +1,76 @@
+\begin{thebibliography}{}
+
+\bibitem[Burgette and Reiter, 2010]{burgetteReiter:2010}
+Burgette, L.~F. and Reiter, J.~P. (2010).
+\newblock Multiple imputation for missing data via sequential regression trees.
+\newblock {\em American Journal of Epidemiology}, 172(9):1070--1076.
+
+\bibitem[D'Ambrosio et~al., 2012]{d'ambrosioEtAl:2012}
+D'Ambrosio, A., Aria, M., and Siciliano, R. (2012).
+\newblock Accurate tree-based missing data imputation and data fusion within
+  the statistical learning paradigm.
+\newblock {\em Journal of Classification}, 29(2):227--258.
+
+\bibitem[Deng et~al., 2016]{dengEtAl:2016}
+Deng, Y., Chang, C., Ido, M.~S., and Long, Q. (2016).
+\newblock Multiple imputation for general missing data patterns in the presence
+  of high-dimensional data.
+\newblock {\em Scientific reports}, 6:21689.
+
+\bibitem[Hans, 2009]{hans:2009}
+Hans, C. (2009).
+\newblock Bayesian lasso regression.
+\newblock {\em Biometrika}, 96(4):835--845.
+
+\bibitem[Howard et~al., 2015]{howardEtAl:2015}
+Howard, W.~J., Rhemtulla, M., and Little, T.~D. (2015).
+\newblock Using principal components as auxiliary variables in missing data
+  estimation.
+\newblock {\em Multivariate Behavioral Research}, 50(3):285--299.
+
+\bibitem[Kim et~al., 2005]{kimEtAl:2005}
+Kim, H., Golub, G.~H., and Park, H. (2005).
+\newblock Missing value estimation for {DNA} microarray gene expression data:
+  local least squares imputation.
+\newblock {\em Bioinformatics}, 21(2):187--198.
+
+\bibitem[Meng, 1994]{meng:1994}
+Meng, X.-L. (1994).
+\newblock Multiple-imputation inferences with uncongenial sources of input.
+\newblock {\em Statistical Science}, pages 538--558.
+
+\bibitem[Rubin, 1987]{rubin:1987}
+Rubin, D.~B. (1987).
+\newblock {\em Multiple imputation for nonresponse in surveys}, volume 519.
+\newblock John Wiley \& Sons, New York, NY.
+
+\bibitem[Rubin, 1996]{rubin:1996}
+Rubin, D.~B. (1996).
+\newblock Multiple imputation after 18+ years.
+\newblock {\em Journal of the American Statistical Association},
+  91(434):473--489.
+
+\bibitem[Shah et~al., 2014]{shahEtAl:2014}
+Shah, A.~D., Bartlett, J.~W., Carpenter, J., Nicholas, O., and Hemingway, H.
+  (2014).
+\newblock Comparison of random forest and parametric imputation models for
+  imputing missing data using mice: a caliber study.
+\newblock {\em American journal of epidemiology}, 179(6):764--774.
+
+\bibitem[Stekhoven and B{\"u}hlmann, 2011]{stekhovenBuhlmann:2011}
+Stekhoven, D.~J. and B{\"u}hlmann, P. (2011).
+\newblock Missforest—non-parametric missing value imputation for mixed-type
+  data.
+\newblock {\em Bioinformatics}, 28(1):112--118.
+
+\bibitem[van Buuren, 2012]{vanBuuren:2012}
+van Buuren, S. (2012).
+\newblock {\em Flexible Imputation of Missing Data}.
+\newblock {CRC} Press, Boca Raton, FL.
+
+\bibitem[Zhao and Long, 2016]{zhaoLong:2016}
+Zhao, Y. and Long, Q. (2016).
+\newblock Multiple imputation in the presence of high-dimensional data.
+\newblock {\em Statistical Methods in Medical Research}, 25(5):2021--2035.
+
+\end{thebibliography}
