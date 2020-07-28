@@ -2,8 +2,10 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-source("./init.R")
-source("./functions.R")
+rm(list=ls())
+source("./init_general.R")
+source("./init_exp1.R")
+source("./init_exp3.R")
 
 # SEM Model convergence ---------------------------------------------------
 
@@ -220,6 +222,155 @@ for (r in 1:reps) {
   round((full_cor - miss_cor)/full_cor*100, 0)
   mean(unique(round((full_cor - miss_cor)/full_cor*100, 0)))
   
+
+# Ridge Penalty choice ----------------------------------------------------
+
+  rm(list=ls())
+  source("./init_general.R")
+  source("./init_exp1.R")
+  
+  # Save a condition of low and high dimensionality from experiment 1
+  cond_ld <- conds[1, ]
+  cond_hd <- conds[4, ]
+  
+  # 1. Generate the data
+  Xy_ld <- simData_exp1(cond_ld, parms)
+  Xy_hd <- simData_exp1(cond_hd, parms)
+  
+  # 2. Impose miss
+  Xy_mis_ld <- imposeMiss(Xy_ld, parms, cond_ld)
+  Xy_mis_ld <- cbind(Xy_mis_ld[, parms$z_m_id], Xy_mis_ld[, -parms$z_m_id])
+  
+  Xy_mis_hd <- imposeMiss(Xy_hd, parms, cond_hd)
+  Xy_mis_hd <- cbind(Xy_mis_hd[, parms$z_m_id], Xy_mis_hd[, -parms$z_m_id])
+  
+  # 4. Perform imputation w/ w/o ridge penalty based on chunk of impude_BRIDGE
+  Zm_ld <- init_dt_i(Xy_mis_ld, missing_type(Xy_mis_ld)) # initialize data for each chain
+  Zm_hd <- init_dt_i(Xy_mis_hd, missing_type(Xy_mis_hd))
+  
+  # Obtain posterior draws for all paramters of interest
+  ridge_trial <- 1e-5
+  j <- 1
+  
+  pdraw_ld <- .norm.draw(y       = Zm_ld[, j],
+                         ry      = as.data.frame(!is.na(Xy_mis_ld))[, j], 
+                         x       = as.matrix(Zm_ld[, -j]),
+                         ls.meth = "ridge", ridge = ridge_trial)
+  pdraw_hd <- .norm.draw(y       = Zm_hd[, j],
+                         ry      = as.data.frame(!is.na(Xy_mis_hd))[, j], 
+                         x       = as.matrix(Zm_hd[, -j]),
+                         ls.meth = "ridge", ridge = ridge_trial)
+  
+  # Inside of .norm.draw w/ ls.meth = "ridge", this is what happens:
+  # arguments
+  x     = as.matrix(Zm_hd[, -j])
+  ridge = ridge_trial
+  
+  # procedure
+  xtx <- crossprod(x)
+  pen <- ridge * diag(xtx)
+  # if (length(pen) == 1) 
+  #   pen <- matrix(pen)
+  v <- solve(xtx + diag(pen))
+  c <- t(y) %*% x %*% v
+  r <- y - x %*% t(c)
+
+  # Inspect posterior draws
+  pdraw_ld$beta[1:49,]
+  pdraw_ld$sigma
+  
+  pdraw_hd$beta[1:49,]
+  pdraw_hd$sigma
+  
+
+# Data Generation Latent Structure ----------------------------------------
+
+  rm(list=ls())
+  source("./init_general.R")
+  source("./init_exp3.R")
+  
+## Works for all conditions ##
+  
+  all_conds_data <- lapply(1:nrow(conds), function(x){
+    X <- simData_exp3(parms, conds[x,])
+    Xy_mis <- imposeMiss_lv(X, parms, conds[x, ])
+    return(Xy_mis)
+  })
+  length(all_conds_data)
+  
+## On average, items have mean 0, variance 1 ##
+  
+  set.seed(20200727)
+  store <- matrix(0, nrow = parms$n_it*conds[1,]$lv, ncol = 2)
+  for (i in 1:5e3) {
+    X <- simData_exp3(parms, conds[1,])
+    store <- store + data.frame(mu = colMeans(X$dat), 
+                                var = apply(X$dat, 2, var))
+  }
+  round(store/5e3, 3)
+  
+## check estimates on raw original data ##
+  
+  # Deifne some CFA mode to test
+  CFA_model <- '
+    # Measurement Model
+    lv1 =~ z1 + z2 + z3 + z4 + z5
+    lv2 =~ z6 + z7 + z8 + z9 + z10
+  '
+  
+  set.seed(20200727)
+  X <- simData_exp3(parms, conds[1,])
+  
+  # Scaled data
+  Xs <- X$dat * sqrt(5) + 5
+
+  Xs <- sapply(X$dat, function(x){
+    x * sqrt(5)/sd(x) + 5
+  })
+  colMeans(X$dat)
+  apply(X$dat, 2, var)
+  colMeans(Xs)
+  apply(Xs, 2, var)
+  
+  # Fit models
+  fit   <- cfa(CFA_model, data = X$dat, std.lv = TRUE)
+  fit_v <- cfa(CFA_model, data = X$dat)
+  fit_s <- cfa(CFA_model, data = Xs, std.lv = TRUE)
+  fit_s <- cfa(CFA_model, data = scale(Xs), std.lv = TRUE)
+  
+  # Measured
+  round(X$Lambda, 3)  # factor loadings
+  diag(X$Theta)[1:10] # items error variances
+  
+  # Setting latent variables variances to 1 standardizes factor scores already
+  parameterEstimates(fit, 
+                     se = F, zstat = F, pvalue = F, ci = F,
+                     standardized = TRUE)
+  parameterEstimates(fit_v, 
+                     se = F, zstat = F, pvalue = F, ci = F,
+                     standardized = TRUE)
+  parameterEstimates(fit_s,
+                     se = F, zstat = F, pvalue = F, ci = F,
+                     standardized = TRUE)
+  
+  # Compare
+  round(X$Lambda, 3)[1,1] / round(X$Lambda, 3)[2,1]
+  parameterEstimates(fit)$est[1] /parameterEstimates(fit)$est[2]
+  parameterEstimates(fit_s, standardized = TRUE)$est[1] / parameterEstimates(fit_s, standardized = TRUE)$est[2]
+
+## Low / high factor loadings
+  set.seed(20200727)
+  X_high <- simData_exp3(parms, conds[1,])
+  set.seed(20200727)
+  X_low  <- simData_exp3(parms, conds[5,])
+  
+  fits <- lapply(list(X_high$dat, X_low$dat), 
+                 cfa, model = CFA_model, std.lv = TRUE)
+  lapply(fits, parameterEstimates, standardized = TRUE,
+         se = F, zstat = F, pvalue = F, ci = F)
+  round(X_high$Lambda, 3)
+  round(X_low$Lambda, 3)
+
 # Best Crossvalidation for Elastic net ------------------------------------
 
 reps <- 25
@@ -284,7 +435,7 @@ for (i in 1:reps) {
   )
   lambda_val[i, 3] <- as.numeric(el_cv$bestTune["lambda"])
   alpha_val[i, 3] <- as.numeric(el_cv$bestTune["alpha"])
-  
+ 
 }
 
 apply(lambda_val, 2, var)

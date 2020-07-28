@@ -1,13 +1,14 @@
-### Title:    Imputing High Dimensional Data
+### Title:    Imputation according to optimal oracle imputation model
+### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_MICE_TR <- function(Z, cond, perform = TRUE, parms = parms){
+impute_MICE_OP <- function(Z, cond, perform = TRUE, parms = parms){
   
   ## Input: 
-  # @Z: dataset w/ missing values, 
+  # @Z: dataset w/ missing values
   # @AS_size a number indicating the size of the Active Set
-  # @chains: number of imputation chains, 
+  # @chains: number of imputation chains
   # @iters: itnerations and number
   # @parms: the initialization object parms
   
@@ -23,14 +24,10 @@ impute_MICE_TR <- function(Z, cond, perform = TRUE, parms = parms){
   
   ## body:
   if(perform == TRUE){
-    # Select true active set 
-    S <- parms$S_all
-    MI_ture_pred <- c(S)
-    
-    # Define predictor matrix for MI TRUE
+    # Define predictor matrix for MI TRUE with best active set
     predMat <- matrix(rep(0, ncol(Z)^2), ncol = ncol(Z), 
                       dimnames = list(colnames(Z), colnames(Z)))
-    predMat[1:length(parms$z_m_id), MI_ture_pred] <- 1
+    predMat[1:length(parms$z_m_id), parms$S_all] <- 1
     
     # Define methods
     methods <- rep("norm", ncol(Z))

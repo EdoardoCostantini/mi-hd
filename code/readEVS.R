@@ -2,6 +2,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-06-22
 
+rm(list=ls())
 library(foreign) # to import .dta data
 library(labelled) # to extract valriables labels
 
@@ -233,6 +234,47 @@ library(labelled) # to extract valriables labels
     cor(likert10, use = "pairwise.complete.obs")
   ), round, 3)
   
+# Study CFA models --------------------------------------------------------
+
+  FV <- c("v82", "v83", "v84")
+  GR <- c("v72_DE", "v73_DE", "v74_DE", "v75_DE", 
+          "v76_DE", "v77_DE", "v78_DE", "v79_DE")
+  
+  model <- '
+    # Measurement Model
+    GR =~ v72_DE + v73_DE + v74_DE + v75_DE + 
+          v76_DE + v77_DE + v78_DE + v79_DE
+    FV =~ v82 + v83 + v84
+    
+    # Latent relationships
+    GR ~~ FV
+  '
+  
+  fit <- cfa(model, data = EVS2017_GE, 
+             std.lv = TRUE,
+             missing = "fiml")
+  
+  # Check model fit
+  summary(fit, fit.measures = TRUE, standardized = TRUE)
+  parameterEstimates(fit, standardized = TRUE)
   
 
+# Study Missingness of values scales --------------------------------------
+  N <- nrow(EVS2017_GE)
+  missPat <- mice::md.pattern(EVS2017_GE[, c(FV, GR)], plot = FALSE)
+  
+  missPat[nrow(missPat), ]
+  missPat[95:nrow(missPat), -ncol(missPat)]
+  
+  pm  <- 1-round(missPat[nrow(missPat), -ncol(missPat)]/N, 3)
+  var_ll <- cbind(sapply(EVS2017_GE[, names(pm)], var_label))
+  
+  data.frame(
+    percent_m = pm,
+    label = var_ll
+  )
+  
+  
+  
+  
   

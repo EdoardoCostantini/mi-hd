@@ -696,7 +696,7 @@ sem_pool_CI_f <- function(fits){
   # to store. 
   
   ## For internals
-  # fits = sem_fits[[5]]
+  # fits = sem_fits[[1]]
   
   ## Body
   ## Coef estimates
