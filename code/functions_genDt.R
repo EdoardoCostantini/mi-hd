@@ -184,7 +184,7 @@ imposeMiss_lv <- function(dat_in, parms, cond){
 
 # Data w/ Latent Structure ------------------------------------------------
 
-simData_exp3 <- function(parms, cond){
+simData_lv <- function(parms, cond){
   # cond <-  conds[1,]
   n_it_tot <- parms$n_it * cond$lv
   
@@ -257,4 +257,4 @@ simData_exp3 <- function(parms, cond){
 }
 
 # Use function
-# simData_exp3()
+# simData_lv()

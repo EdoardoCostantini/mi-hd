@@ -4,7 +4,7 @@
 
 rm(list=ls())
 source("./init_general.R")
-source("./init_exp3.R")
+source("./init_exp2.R")
 
 ## Data directory for storage
 

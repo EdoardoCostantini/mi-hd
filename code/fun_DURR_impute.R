@@ -5,7 +5,7 @@
 ###           reference papers Zhao Long 2016 (for univariate miss) and 
 ###           Deng et al 2016 (for multivariate miss)
 
-impute_DURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
+impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
   ## Description
   # Z = Xy_mis
   # O <- as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
@@ -67,7 +67,7 @@ impute_DURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
             regu.mod <- rr_est_lasso(X = X_obs_bs, y = y_obs_bs, 
                                      parms = parms, fam = glmfam)
           }
-          
+
           ## Elastic net
           if(reg_type == "el"){
             regu.mod <- rr_est_elanet(X = X_obs_bs, y = y_obs_bs, 

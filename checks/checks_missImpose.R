@@ -259,6 +259,11 @@ round(colMeans(pm_store), 1) == cond$pm
   rm(list=ls())
   source("./init_general.R")
   source("./init_exp1.R")
+      
+  parms$auxWts <- rep(1, 4)
+  parms$auxWts <- rep(4, 4) 
+    # as long as they are equal among themselves,
+    # it does not matter which number you are using.
 
 # Loop data generation
   set.seed(1234)

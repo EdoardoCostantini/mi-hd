@@ -59,30 +59,30 @@
 # Response Model (rm)
   parms$missType <- c("high", "low")[2]
   parms$auxWts   <- c(1, 1, 1, 1) # weighting the importance of predictors: all the same
-  parms$rm_x <- matrix(c(3, 4, 8, 9, # in terms of first data generation order
-                         3, 4, 8, 9, # for all vairables:
-                         2, 4, 8, 9, # - 1 w/ NA high cor
-                         3, 4, 8, 9, # - 1 w/out NA high cor
-                         3, 4, 8, 9, # - 1 w/ NA mid cor
-                         3, 4, 7, 9),# - 1 w/out NA mid cor
+  parms$rm_x <- matrix(c(4, 5, 9, 10,
+                         4, 5, 9, 10,
+                         4, 5, 9, 10,
+                         4, 5, 9, 10,
+                         4, 5, 9, 10,
+                         4, 5, 9, 10),
                        ncol = 4, nrow = 6,
                        byrow = TRUE)
   
-  # Old set up
-  # parms$auxWts   <- c(.3, .3, .3, .1)
-  # parms$rm_x <- matrix(c(2, 3, 5, 10,
-  #                        5, 3, 1, 7,
-  #                        1, 2, 5, 6,
-  #                        3, 1, 2, 9,
-  #                        2, 5, 1, 10,
-  #                        5, 2, 1, 6),
-  #                      ncol = 4, nrow = 6,
+  # parms$missType <- c("high", "low")[2]
+  # parms$auxWts   <- c(1, 1) # weighting the importance of predictors: all the same
+  # parms$rm_x <- matrix(c(4, 9,
+  #                        4, 9, 
+  #                        4, 9, 
+  #                        4, 9,
+  #                        4, 9,
+  #                        4, 9),
+  #                      ncol = 2, nrow = 6,
   #                      byrow = TRUE)
   
 # Models ------------------------------------------------------------------
   # source("./gen_lavaan_model.R") # generate txt file for lavaan model
-  # # parms$lav_model <- read.table("../txt/lavaan_model_sat.txt",
-  # #                         as.is = TRUE)$V1
+  ## NOTE: this is not to be kept running in the windows simulation because if so
+  ##       it creates problems. Run it just once to have it in the correct folder.
   parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), collapse="\n")
   
   

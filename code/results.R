@@ -6,16 +6,25 @@
   library(xtable)
   source("./init_general.R")
   
-  # out <- readRDS("../output/sim_res_20200707_0942.rds")
-  # out <- readRDS("../output/sim_res_20200708_0931.rds")
-  out <- readRDS("../output/sim_res_20200710_1019.rds")
+  # Checks
+  # filename <- "sim_res_20200801_1620" # the 750 data reps and 100 iters run
+  # 20200715 Correct
+  # filename <- "sim_res_20200710_1019" # first submision
+  # Current Correct
+  # filename <- "sim_res_20200731_1735"
+  
+  # Read R object
+  out <- readRDS(paste0("../output/", filename, ".rds"))
 
+  out$parms$dt_rep
+  out$parms$iters
+  
 # Time Analyses -----------------------------------------------------------
 
   out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
   colnames(out_time) <- names(out[[1]])
   t(out_time)
-
+  
 # Univariate Analyses -----------------------------------------------------
   
 ## MLE estiamtes (saturated sem model) ##
@@ -25,9 +34,9 @@
   out_cond2 <- res_sem_sum(out, condition = 2)
   out_cond3 <- res_sem_sum(out, condition = 3)
   out_cond4 <- res_sem_sum(out, condition = 4)
-
+  
   # Show results for a given condition
-  cnd <- 4
+  cnd <- 1
   names(out[[1]])[cnd]
   res_sem_sum(out, condition = cnd)$MCMC_est
   res_sem_sum(out, condition = cnd)$bias_raw
@@ -59,8 +68,6 @@
   
 # Multivariate Analyses ---------------------------------------------------
   
-  
-  
   print(xtable(sem_ed_out_est,
                caption = "Experiment 1 conditions ($n = 200$)",
                align = c("l", rep("c", ncol(sem_ed_out_est))) ))
@@ -90,7 +97,7 @@
          cond3 = out_cond3,
          cond4 = out_cond4,
          parms = out$parms),
-   "../output/sum_exp1_sem.rds" 
+    paste0("../output/", filename, "sum_exp1_sem.rds") 
   )
   
   saveRDS(
@@ -99,5 +106,5 @@
          cond3 = lm_cond3,
          cond4 = lm_cond4,
          parms = out$parms),
-    "../output/sum_exp1_lm.rds" 
+    paste0("../output/", filename, "sum_exp1_lm.rds") 
   )

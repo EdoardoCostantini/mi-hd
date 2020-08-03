@@ -371,6 +371,20 @@ for (r in 1:reps) {
   round(X_high$Lambda, 3)
   round(X_low$Lambda, 3)
 
+
+# Interaction terms and number of predictors ------------------------------
+
+  # Generaete some X predictors
+  p <- 30 # number of variables
+  X <- MASS::mvrnorm(1e2, rep(0, p), diag(p))
+  
+  # How many possible two-way interactions between these variables?
+  n <- ncol(X)
+  k <- 2 # two-way interactions 
+  
+  # Combination
+  factorial(n) / (factorial(k)*factorial(n-k))
+  
 # Best Crossvalidation for Elastic net ------------------------------------
 
 reps <- 25

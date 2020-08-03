@@ -5,23 +5,29 @@
 ### Notes:    The goal is to find out how many iterations should be used
 ###           in the full study for each method.
 
+rm(list = ls())
+source("./init_general.R")
 
 # Read Simulation Results -------------------------------------------------
 # Special Run with multiple chains. This output does not contain results
 # of the simualtion study. It contains an imputation run with many iterations,
 # many chians, for the most difficult condition of experiment 1.
-# out_cnv <- readRDS("../output/cnv_check_20200706_2236.rds")
+
+# 20200715 Correct
 out_cnv <- readRDS("../output/cnv_check_20200710_1020.rds")
 
+# 20200803 Correct
+out_cnv <- readRDS("../output/cnv_check_20200731_1652.rds")
+
 # What to show
-exp_dat <- 9 # which data replication (10 possibilities)
+exp_dat <- 10 # which data replication (10 possibilities)
 iters_range <- 1:250 # which set of iterations
+y_range <- c(3, 6)
 
 # Run description
 data.frame( Chians = c(all = out_cnv$parms$chains, MICE = out_cnv$parms$mice_ndt),
             Iters = c(all = out_cnv$parms$iters, MICE = out_cnv$parms$mice_iters)
 )
-y_range <- c(3, 6)
 
 # DURR_la
 mean_traceplot(out_cnv, 

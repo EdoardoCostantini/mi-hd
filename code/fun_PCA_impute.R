@@ -27,7 +27,7 @@ impute_PCA <- function(Z, parms = parms){
     p <- ncol(Z) # number of variables [INDEX with j]
     n <- nrow(Z) # number of observations
     
-    # Separate analysis model vairables from auxiliary variables 
+    # Separate analysis model variables from auxiliary variables 
     Z_aux <- Z[, -which(sapply(names(Z), grepl, x = parms$formula))]
     Z_mod <- Z[, which(sapply(names(Z), grepl, x = parms$formula))]
     

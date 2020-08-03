@@ -11,8 +11,16 @@
   source("./init_general.R")
 
 # Read results from a run of simulation study
-  sum_exp1_sem <- readRDS("../output/sum_exp1_sem.rds" )
-  sum_exp1_lm <- readRDS("../output/sum_exp1_lm.rds" )
+  # Checks
+  sum_exp1_sem <- readRDS("../output/sim_res_20200801_1620sum_exp1_sem.rds")
+  sum_exp1_lm  <- readRDS("../output/sim_res_20200801_1620sum_exp1_lm.rds")
+  # 20200715 Correct
+  # sum_exp1_sem <- readRDS("../output/sim_res_20200710_1019sum_exp1_sem.rds" )
+  # sum_exp1_lm <- readRDS("../output/sim_res_20200710_1019sum_exp1_lm.rds" )
+  # Current Correct
+  sum_exp1_sem <- readRDS("../output/sim_res_20200731_1735sum_exp1_sem.rds")
+  sum_exp1_lm  <- readRDS("../output/sim_res_20200731_1735sum_exp1_lm.rds")
+  
   
 # Bias --------------------------------------------------------------------
   sum_exp1_sem$cond1$cond
@@ -148,6 +156,12 @@
   indx <- rownames(sum_exp1_sem$cond4$bias_raw)[c(1, 4, 
                                                   7, 10, 
                                                   13, 15, 25)]
+  sum_exp1_sem$cond4$cond
+  sum_exp1_sem$cond4$ci_cov[indx, ]
+  
+  sum_exp1_sem$cond4$cond
+  sum_exp1_sem$cond4$bias_per[indx, ]
+  
   genTableEAM <- function(x){
     # Generates section of the table for EAM turn in paper
     store <- NULL
@@ -158,12 +172,6 @@
     }
     return(store)
   }
-  sum_exp1_sem$cond1$cond
-  sum_exp1_sem$cond2$cond
-  sum_exp1_sem$cond3$cond
-  sum_exp1_sem$cond4$cond
-  
-  genTableEAM()
   
   list_tables <- lapply(list(cond1=1,
                              cond2=2,

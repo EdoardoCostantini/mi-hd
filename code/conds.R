@@ -116,7 +116,7 @@ POL_varmis <- c(TRUE, FALSE)
   INT_prbmis <- c(TRUE, FALSE) 
   POL_prbmis <- c(TRUE, FALSE)
   # C) general complexity of missingness (following Collins et al 2001)
-  MAR <- c("LINEAR", "CONVEX") # type of true relatioship
+  MAR <- c("LINEAR", "INTER") # type of true relatioship
   
 # Whether or not data should be augmented w/ interactions and polyterms
 # before imputation
@@ -155,11 +155,10 @@ POL_varmis <- c(TRUE, FALSE)
 #             and proportion of missings increase?
   
   expand.grid(n = n, 
-              latent = latent[2],
-              MAR = MAR[1],
-              MCAR = plannedMCAR[1],
+              latent = latent[1],
+              MAR = MAR,
               p = p,
-              pm = pm)
+              pm = .2)
   
 # Experiment 2 ------------------------------------------------------------
 # Name:     Recovering Interaction relationshps: 
