@@ -22,6 +22,16 @@
   parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
   parms$keep_dt <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # keep 1 dataset every thin
 
+  # For blasso
+  parms$chains_bl     <- 1 # number of parallel chains for convergence check
+  parms$iters_bl      <- 50
+  parms$burnin_imp_bl <- 20 # how many imputation iterations should be discarded
+  parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
+  parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
+  parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
+                                             length(parms$pos_dt_bl), 
+                                             parms$thin_bl)]
+  
   # For mice-like algorithms
   parms$mice_iters <- 20 #  20
   parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)

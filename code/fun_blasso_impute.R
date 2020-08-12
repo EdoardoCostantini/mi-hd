@@ -15,18 +15,18 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
   nr  <- colSums(!O[1:p_imp]) # variable-wise count of observed values
   
   # To store imputed values and check convergence
-  imp_blasso_val <- vector("list", parms$chains)
-    names(imp_blasso_val) <- seq(1:parms$chains)
+  imp_blasso_val <- vector("list", parms$chains_bl)
+    names(imp_blasso_val) <- seq(1:parms$chains_bl)
 
   # Time performance
   start.time <- Sys.time()
   
   # For one chain of imputatuions
-  for (cc in 1:parms$chains) {
+  for (cc in 1:parms$chains_bl) {
     
     # To store multiply imputed datasets (in from the last chain)
-    imp_blasso_dat <- vector("list", parms$iters)
-      names(imp_blasso_dat) <- seq(1:parms$iters)
+    imp_blasso_dat <- vector("list", parms$iters_bl)
+      names(imp_blasso_dat) <- seq(1:parms$iters_bl)
     
     Zm <- init_dt_i(Z, missing_type(Z)) # initialize data for each chain
       imp_blasso_dat$`1` <- Zm
@@ -34,37 +34,37 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
     # For each, I need one slot per imputaiton model
       
     # regression coefficients
-    Beta.out <- lapply(1:p_imp, matrix, data= NA, nrow=parms$iters, ncol=ncol(Z)-1)
+    Beta.out <- lapply(1:p_imp, matrix, data= NA, nrow=parms$iters_bl, ncol=ncol(Z)-1)
     for (i in 1:p_imp) Beta.out[[i]][1, ] <- rep(0, ncol(Z)-1)
     
     # Error variance
-    Sig.out <- lapply(1:p_imp, matrix, data = NA, nrow = parms$iters, ncol = 1)
+    Sig.out <- lapply(1:p_imp, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
     for (i in 1:p_imp) Sig.out[[i]][1, ] <- 1
     
     # tau parameter in Hans 2009 and 10 blasso model
-    Tau.out <-  lapply(1:p_imp, matrix, data = NA, nrow = parms$iters, ncol = 1)
+    Tau.out <-  lapply(1:p_imp, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
     for (i in 1:p_imp) Tau.out[[i]][1, ] <- 1
     
     # phi parameter in Hans 2010 blasso model
-    Phi.out <-  lapply(1:p_imp, matrix, data = NA, nrow = parms$iters, ncol = 1)
+    Phi.out <-  lapply(1:p_imp, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
     for (i in 1:p_imp) Phi.out[[i]][1, ] <- .5
     
     # Imputed scores
     Imp.out <- lapply(1:p_imp, function(x) {
-      matrix(data = NA, nrow = parms$iters, ncol = nr[x],
+      matrix(data = NA, nrow = parms$iters_bl, ncol = nr[x],
              dimnames = list(NULL, rownames(Zm[!O[, x],]) ))
     })
     for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, i], i]
     
     # Latent variable for probit models
     lv.out <- lapply(1:p_imp, function(x) {
-      matrix(NA, ncol = r[x], nrow = parms$iters)
+      matrix(NA, ncol = r[x], nrow = parms$iters_bl)
     })
     for (i in 1:p_imp) lv.out[[i]][1, ] <- 0
     
     # Loop across Iteration
-    for (m in 2:parms$iters) {
-      print(paste0("BLASSO - Chain: ", cc, "/", parms$chains, "; Iter: ", m, "/", parms$iters))
+    for (m in 2:parms$iters_bl) {
+      print(paste0("BLASSO - Chain: ", cc, "/", parms$chains_bl, "; Iter: ", m, "/", parms$iters_bl))
       # Loop across variables (cycle)
       for (j in 1:p_imp) {
         zj_obs <- Zm[O[, j], j]
@@ -180,7 +180,7 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
 
   end.time <- Sys.time()
   
-  return(list(dats = imp_blasso_dat[parms$keep_dt],
+  return(list(dats = imp_blasso_dat[parms$keep_dt_bl],
               imps = imp_blasso_val,
               time = difftime(end.time, 
                               start.time, 

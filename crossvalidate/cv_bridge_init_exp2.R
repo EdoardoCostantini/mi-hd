@@ -5,8 +5,16 @@
 
 # Modify parms ------------------------------------------------------------
 # Itereations, repetitions, etc
-parms$dt_rep     <- 10  # reduced number of data repretions just to make sure 
-# that ridge penalty decision is not done on 1 dataset
+parms$dt_rep     <- 10
+parms$chains     <- 1 
+parms$iters      <- 75
+parms$burnin_imp <- 50
+parms$ndt        <- 10
+parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
+parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
+parms$keep_dt <- parms$pos_dt[seq(1, 
+                                  length(parms$pos_dt), 
+                                  parms$thin)] # keep 1 dataset every thin
 
 parms$meth_sel <- data.frame(DURR_la = FALSE,
                              DURR_el = FALSE,
@@ -40,7 +48,8 @@ parms$description <- c("In each repetition, 1 dataset is created for each condit
 
 # Conditions --------------------------------------------------------------
 # Modify condtions for crossvalidation
-ridge <- c(1e-2, 1e-3, 1e-4, 1e-5, 1e-6)
+
+ridge <- 10^seq(from = -1, to = -8, by = -1)
 lv    <- c(10, 100)       # number of latent variables
 pm    <- c(.1, .3)        # proportion of missings level
 fl    <- c("high", "low") # factor loadings level

@@ -26,7 +26,7 @@ data.frame(
 # What to show
 exp_dat <- 3 # which data replication (10 possibilities)
 iters_range <- 1:250 # which set of iterations
-y_range <- c(-.85, .2)
+y_range <- c(-.3, .2)
 
 
 # DURR_la (50-100 good for all)

@@ -11,17 +11,29 @@
 # Itereations, repetitions, etc
   parms$dt_rep     <- 10  # replications for averaging results (200 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
-  parms$iters      <- 50
-  parms$burnin_imp <- 20 # how many imputation iterations should be discarded
-  parms$ndt        <- 10 # number of imputed datasets to pool esitmaes from (10)
+  parms$iters      <- 5
+  parms$burnin_imp <- 0 # how many imputation iterations should be discarded
+  parms$ndt        <- 5 # number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
     # then, I keep 1 set of imputations every "thin"
     # number of iterations for the MI procedure (20)
   parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
-  parms$keep_dt <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # keep 1 dataset every thin
+  parms$keep_dt <- parms$pos_dt[seq(1, 
+                                    length(parms$pos_dt), 
+                                    parms$thin)] # keep 1 dataset every thin
 
+  # For blasso
+  parms$chains_bl     <- 1 # number of parallel chains for convergence check
+  parms$iters_bl      <- 5
+  parms$burnin_imp_bl <- 0 # how many imputation iterations should be discarded
+  parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
+  parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
+  parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
+                                             length(parms$pos_dt_bl), 
+                                             parms$thin_bl)]
+  
   # For mice-like algorithms
   parms$mice_iters <- 5 #  20
   parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
@@ -75,8 +87,8 @@
   # source("./gen_lavaan_model.R") # generate txt file for lavaan model
   # # parms$lav_model <- read.table("../txt/lavaan_model_sat.txt",
   # #                         as.is = TRUE)$V1
-  parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), 
-                           collapse="\n")
+  parms$lav_model <- NULL #paste(readLines("../txt/lavaan_model_sat.txt"), 
+                          #collapse="\n")
   parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic

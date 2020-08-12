@@ -115,20 +115,13 @@ runCell <- function(cond, parms, rep_status) {
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
   # impose missing values;
-  if(parms$exp == 1){
-    Xy <- simData_exp1(cond, parms)
-    Xy_mis <- imposeMiss(Xy, parms, cond)
-    Xy_mis <- cbind(Xy_mis[, parms$z_m_id], Xy_mis[, -parms$z_m_id])
-  }
   
-  if(parms$exp == 2){
-    simData_list <- simData_lv(parms, cond)
-      Xy <- simData_list$dat
-    Xy_mis <- imposeMiss_lv(simData_list, parms, cond)
-  }
+  Xy <- simData_exp1(cond, parms)
+  Xy_mis <- imposeMiss(Xy, parms, cond)
+  Xy_mis <- cbind(Xy_mis[, parms$z_m_id], Xy_mis[, -parms$z_m_id])
   
-    O <- !is.na(Xy_mis) # matrix index of observed values
-    miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
+  O <- !is.na(Xy_mis) # matrix index of observed values
+  miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
     
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
@@ -159,10 +152,10 @@ runCell <- function(cond, parms, rep_status) {
   # Impute according to IURR method
     # Lasso
   imp_IURR_la <- impute_IURR(Z = Xy_mis,
-                                O = as.data.frame(O),
-                                reg_type = "lasso",
-                                perform = parms$meth_sel$IURR_la,
-                                parms = parms)
+                             O = as.data.frame(O),
+                             reg_type = "lasso",
+                             perform = parms$meth_sel$IURR_la,
+                             parms = parms)
   update_report("IURR lasso", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$IURR_la)
