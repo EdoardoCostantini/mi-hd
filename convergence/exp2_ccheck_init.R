@@ -6,7 +6,7 @@
 ###           in the full study for each method.
 
 # Get uninteresting parameters from the init_exp1.R script
-source("./init_exp2.R")
+source("./exp2_init.R")
 
 # Decide which methods you car about for the convergence check
 parms$meth_sel <- data.frame(DURR_la = TRUE,
@@ -54,16 +54,19 @@ parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes
 # Output and Progres report related
 parms$outDir <- "../output/"
 parms$start_time <- format(Sys.time(), "%Y%m%d_%H%M")
-parms$report_file_name <- paste0("ccheck_", 
-                                 "exp", parms$exp, "_",
-                                 parms$start_time,
+
+parms$report_file_name <- paste0("exp",
+                                 parms$exp, "_",
+                                 "conv_",
+                                 parms$start_time, 
                                  ".txt")
-parms$results_file_name <- paste0("ccheck_", 
-                                  "exp", parms$exp, "_",
+parms$results_file_name <- paste0("exp",
+                                  parms$exp, "_",
+                                  "conv_",
                                   parms$start_time,
                                   ".rds")
 parms$description <- c("For the most challanging condition, data generation is repeated 
-                        a few times, imputation models are used. Imputations are can 
+                        a few times, imputation models are used. Obtained imputations can 
                         then be used to check convergence")
 
 # Fix condition to desired one for convergence check

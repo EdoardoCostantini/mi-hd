@@ -1,31 +1,33 @@
-### Title:    Initialization scirpt parameter
+### Title:    Initialization scirpt parameter for experiment 3 (simple latent)
 ### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
-### Created:  2020-05-19
+### Created:  2020-07-22
 
 # Fixed Parameters --------------------------------------------------------
 
   parms <- list()
-  parms$exp <- 1 # which experiment is been run
+  parms$exp <- 2 # second experiment - latent structure
 
 # Itereations, repetitions, etc
-  parms$dt_rep     <- 500  # replications for averaging results (200 goal)
+  parms$dt_rep     <- 10  # replications for averaging results (200 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
-  parms$iters      <- 50
-  parms$burnin_imp <- 20 # how many imputation iterations should be discarded
-  parms$ndt        <- 10 # number of imputed datasets to pool esitmaes from (10)
+  parms$iters      <- 5
+  parms$burnin_imp <- 0 # how many imputation iterations should be discarded
+  parms$ndt        <- 5 # number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
     # then, I keep 1 set of imputations every "thin"
     # number of iterations for the MI procedure (20)
   parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
-  parms$keep_dt <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # keep 1 dataset every thin
+  parms$keep_dt <- parms$pos_dt[seq(1, 
+                                    length(parms$pos_dt), 
+                                    parms$thin)] # keep 1 dataset every thin
 
   # For blasso
   parms$chains_bl     <- 1 # number of parallel chains for convergence check
-  parms$iters_bl      <- 50
-  parms$burnin_imp_bl <- 20 # how many imputation iterations should be discarded
+  parms$iters_bl      <- 5
+  parms$burnin_imp_bl <- 0 # how many imputation iterations should be discarded
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
@@ -33,79 +35,72 @@
                                              parms$thin_bl)]
   
   # For mice-like algorithms
-  parms$mice_iters <- 20 #  20
+  parms$mice_iters <- 5 #  20
   parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
   
 # Data gen ----------------------------------------------------------------
-
-  parms$n       <- 200 # number of cases for data generationz
-
+  parms$n_obs <- 200 # number of cases for data generation
+  parms$n <- 200 # number of cases for data generation
+  
 # "True" values
   parms$item_mean <- 5
   parms$item_var  <- 5
   
-# Variable blocks
-  parms$blck1 <- 1:5 # higly correlated
-  parms$blck2 <- (tail(parms$blck1,1)+1):10 # correlated
+# Latent Structure
+  # parms$n_lv    <- 3              # number of latent variables (defined by condition)
+  parms$n_it    <- 5 # number of measured items
+  # parms$AR_rho  <- .5             # autoregressive correlation (for now)
+  
+# Latent Variable blocks
+  parms$blck1 <- 1:4 # highly correlated latent variables
+  parms$blck2 <- (tail(parms$blck1, 1)+1):8 # mid correlated latent variables
 
   parms$blck1_r <- .6 # correlation for highly correlated variables
   parms$blck2_r <- .3 # correlation for correlated variables
 
 # Z gen (fully observed covariates)
-  parms$Z_o_mu  <- 0 # mean for gen of fully observed variables
 
-# z_m gen (covariates that will have missingness)
-  parms$z_m_id  <- c((parms$blck1[1]):3, 
-                     (parms$blck2[1]):8)
+# z_m gen (measured items that will have missingness)
+  parms$z_m_id  <- 1:10
   parms$zm_n <- length(parms$z_m_id)
-  parms$S_all   <- list(q1 = (c(parms$blck1, parms$blck2)), # variables in block 1 and 2
-                        q2 = (c(4:13, 50:59)))[[1]]
-
+  parms$S_all   <- 1:(5*4) 
+    # all measured items (5) for the first 4 lv. These include:
+    # - latent variables of items with missing values (1 and 2)
+    # - latent variables involved in response model (3 and 4)
+    # - all of their items
+  
 # y gen / imporntant predictors
   parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
   # variables that are to be imputed
   parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
 
-# Response Model (rm)
+# Response Model
   parms$missType <- c("high", "low")[2]
-  parms$auxWts   <- c(1, 1, 1, 1) # weighting the importance of predictors: all the same
-  parms$rm_x <- matrix(c(4, 5, 9, 10,
-                         4, 5, 9, 10,
-                         4, 5, 9, 10,
-                         4, 5, 9, 10,
-                         4, 5, 9, 10,
-                         4, 5, 9, 10),
-                       ncol = 4, nrow = 6,
-                       byrow = TRUE)
   
-  # parms$missType <- c("high", "low")[2]
-  # parms$auxWts   <- c(1, 1) # weighting the importance of predictors: all the same
-  # parms$rm_x <- matrix(c(4, 9,
-  #                        4, 9, 
-  #                        4, 9, 
-  #                        4, 9,
-  #                        4, 9,
-  #                        4, 9),
-  #                      ncol = 2, nrow = 6,
-  #                      byrow = TRUE)
+  # Latent variables 3 and 4 influence missingness
+  parms$rm_x <- c(3, 4)
+  
+  # weighting the importance of predictors: all the same
+  parms$auxWts <- c(1, 1)
   
 # Models ------------------------------------------------------------------
   # source("./gen_lavaan_model.R") # generate txt file for lavaan model
-  ## NOTE: this is not to be kept running in the windows simulation because if so
-  ##       it creates problems. Run it just once to have it in the correct folder.
-  parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), collapse="\n")
-  
+  # # parms$lav_model <- read.table("../txt/lavaan_model_sat.txt",
+  # #                         as.is = TRUE)$V1
+  parms$lav_model <- NULL #paste(readLines("../txt/lavaan_model_sat.txt"), 
+                          #collapse="\n")
+  parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic
   parms$meth_sel <- data.frame(DURR_la = TRUE,
                                DURR_el = FALSE,
-                               IURR_la = TRUE,
+                               IURR_la = FALSE,
                                IURR_el = FALSE,
-                               bridge  = TRUE,
+                               bridge  = FALSE,
                                blasso  = TRUE,
-                               MI_PCA  = TRUE,
-                               MI_CART = TRUE,
-                               MI_RF   = TRUE,
+                               MI_PCA  = FALSE,
+                               MI_CART = FALSE,
+                               MI_RF   = FALSE,
                                MI_OP   = TRUE,
                                missFor = TRUE,
                                GS      = TRUE,
@@ -138,10 +133,14 @@
 # Output and Progres report related
   parms$outDir <- "../output/"
   parms$start_time <- format(Sys.time(), "%Y%m%d_%H%M")
-  parms$report_file_name <- paste0("sim_res_", 
+  parms$report_file_name <- paste0("exp",
+                                   parms$exp, "_",
+                                   "simOut_",
                                    parms$start_time, 
                                    ".txt")
-  parms$results_file_name <- paste0("sim_res_", 
+  parms$results_file_name <- paste0("exp",
+                                    parms$exp, "_",
+                                    "simOut_", 
                                     parms$start_time,
                                     ".rds")
   parms$description <- c("In each repetition, 1 dataset is created for each condition.
@@ -150,9 +149,14 @@
 
 # Conditions --------------------------------------------------------------
 
-  p   <- c(50, 500) # c(50, 500) # number of variables
-  latent <- c(FALSE, TRUE)[1]
-  pm <- c(.1, .3)
+  lv    <- c(10, 100)       # number of latent variables
+  pm    <- c(.1, .3)        # proportion of missings level
+  fl    <- c("high", "low") # factor loadings level
+  ridge <- c(1e-5) # 1 valude found w/ corssvalidation
   
-  conds <- expand.grid(p, latent, pm)
-    colnames(conds) <- c("p", "latent", "pm")
+  conds <- expand.grid(lv, pm, fl, 
+                       ridge, # fixed vactor
+                       stringsAsFactors = FALSE)
+    colnames(conds) <- c("lv", "pm", "fl", "ridge")
+    
+    

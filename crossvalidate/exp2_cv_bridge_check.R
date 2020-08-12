@@ -7,8 +7,8 @@
 
 rm(list = ls())
 source("./init_general.R")
-source("./init_exp2.R")
-source("../crossvalidate/cv_bridge_init_exp2.R")
+source("./exp2_init.R.R")
+source("../crossvalidate/exp2_cv_bridge_init.R")
 
 sim_start <- Sys.time()
 

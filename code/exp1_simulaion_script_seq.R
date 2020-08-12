@@ -5,7 +5,7 @@
 library(parallel) # detectCores(); makeCluster()
 rm(list=ls())
 source("./init_general.R")
-source("./init_exp1.R")
+source("./exp1_init.R")
 
 rp <- 1
 i <- 1

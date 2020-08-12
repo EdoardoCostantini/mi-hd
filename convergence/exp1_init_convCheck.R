@@ -6,7 +6,7 @@
 ###           in the full study for each method.
 
 # Get uninteresting parameters from the init_exp1.R script
-source("./init_exp1.R")
+source("./exp1_init.R")
 
 # Decide which methods you car about for the convergence check
 parms$meth_sel <- data.frame(DURR_la = TRUE,

@@ -1,10 +1,17 @@
 ### Title:    Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
-### Created:  2020-07-22
+### Created:  2020-05-19
 
 rm(list=ls())
 source("./init_general.R")
-source("./init_exp2.R")
+source("./exp1_init.R")
+
+## Create a cluster object:
+clus <- makeCluster(10)
+
+## Two different ways to source a script on the worker nodes:
+clusterEvalQ(cl = clus, expr = source("./init_general.R"))
+clusterEvalQ(cl = clus, expr = source("./init_exp1.R"))
 
 ## Data directory for storage
 
@@ -25,27 +32,30 @@ cat(paste0("SIMULATION PROGRESS REPORT",
 
 sim_start <- Sys.time()
 
-  out <- mclapply(X        = 1 : parms$dt_rep,
-                  FUN      = doRep,
-                  conds    = conds,
-                  parms    = parms,
-                  debug    = FALSE,
-                  mc.cores = ( 10 ) )
+## Run the computations in parallel on the 'clus' object:
+out <- parLapply(cl = clus, 
+                 X = 1 : parms$dt_rep,
+                 fun = doRep, 
+                 conds = conds, 
+                 parms = parms)
+
+## Kill the cluster:
+stopCluster(clus)
 
 sim_ends <- Sys.time()
 
 cat(paste0("\n", "------", "\n",
            "Ends at: ", Sys.time(), "\n",
-           "Run time: ", 
+           "Run time: ",
            round(difftime(sim_ends, sim_start, units = "hours"), 3), " h",
            "\n", "------", "\n"),
     file = paste0(parms$outDir, parms$report_file_name),
     sep = "\n",
     append = TRUE)
 
-  # Attach parm object
-  out$parms <- parms
-  
+# Attach parm object
+out$parms <- parms
+
 # Save output -------------------------------------------------------------
 
 saveRDS(out,

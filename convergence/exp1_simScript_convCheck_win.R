@@ -1,17 +1,28 @@
-### Title:    Imputing High Dimensional Data
+### Title:    Convergence Checks: Initialization Script for Exp 1 (windows)
+### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
-### Created:  2020-05-19
+### Created:  2020-07-03
+### Notes:    Runs the simulation for convergence checks (few repetitions, 
+###           more chains)
+### IMPORTANT: Working directory: ~/imputeHD-comp/code
 
-rm(list=ls())
+rm(list = ls())
 source("./init_general.R")
-source("./init_exp1.R")
+source("../convergence/exp1_init_convCheck.R")
+
+## Create a cluster object:
+clus <- makeCluster(parms$dt_rep)
+
+## Two different ways to source a script on the worker nodes:
+clusterEvalQ(cl = clus, expr = source("./init_general.R"))
+clusterEvalQ(cl = clus, expr = source("../convergence/init_exp1_convCheck.R"))
 
 ## Data directory for storage
 
 # Progress report file ----------------------------------------------------
 file.create(paste0(parms$outDir, parms$report_file_name))
 
-cat(paste0("SIMULATION PROGRESS REPORT",
+cat(paste0("CONVERGENCE CHECK PROGRESS REPORT",
            "\n",
            "Description: ", parms$description, "\n",
            "\n", "------", "\n",
@@ -25,27 +36,30 @@ cat(paste0("SIMULATION PROGRESS REPORT",
 
 sim_start <- Sys.time()
 
-  out <- mclapply(X        = 1 : parms$dt_rep,
-                  FUN      = doRep,
-                  conds    = conds,
-                  parms    = parms,
-                  debug    = FALSE,
-                  mc.cores = ( 10 ) )
+## Run the computations in parallel on the 'clus' object:
+out <- parLapply(cl = clus, 
+                 X = 1 : parms$dt_rep,
+                 fun = doRep, 
+                 conds = conds, 
+                 parms = parms)
+
+## Kill the cluster:
+stopCluster(clus)
 
 sim_ends <- Sys.time()
 
 cat(paste0("\n", "------", "\n",
            "Ends at: ", Sys.time(), "\n",
-           "Run time: ", 
+           "Run time: ",
            round(difftime(sim_ends, sim_start, units = "hours"), 3), " h",
            "\n", "------", "\n"),
     file = paste0(parms$outDir, parms$report_file_name),
     sep = "\n",
     append = TRUE)
 
-  # Attach parm object
-  out$parms <- parms
-  
+# Attach parm object
+out$parms <- parms
+
 # Save output -------------------------------------------------------------
 
 saveRDS(out,

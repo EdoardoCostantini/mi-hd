@@ -1,4 +1,4 @@
-### Title:    Convergence Checks: Initialization Script for Exp 1 (windows)
+### Title:    Convergence Checks: Initialization Script for Exp 1 
 ### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
 ### Created:  2020-07-03
@@ -8,14 +8,7 @@
 
 rm(list = ls())
 source("./init_general.R")
-source("../convergence/init_exp1_convCheck.R")
-
-## Create a cluster object:
-clus <- makeCluster(parms$dt_rep)
-
-## Two different ways to source a script on the worker nodes:
-clusterEvalQ(cl = clus, expr = source("./init_general.R"))
-clusterEvalQ(cl = clus, expr = source("../convergence/init_exp1_convCheck.R"))
+source("../convergence/exp1_init_convCheck.R")
 
 ## Data directory for storage
 
@@ -36,21 +29,17 @@ cat(paste0("CONVERGENCE CHECK PROGRESS REPORT",
 
 sim_start <- Sys.time()
 
-## Run the computations in parallel on the 'clus' object:
-out <- parLapply(cl = clus, 
-                 X = 1 : parms$dt_rep,
-                 fun = doRep, 
-                 conds = conds, 
-                 parms = parms)
-
-## Kill the cluster:
-stopCluster(clus)
+out_cnv <- mclapply(X        = 1 : parms$dt_rep,
+                FUN      = doRep,
+                conds    = conds,
+                parms    = parms,
+                mc.cores = ( 10 ) )
 
 sim_ends <- Sys.time()
 
 cat(paste0("\n", "------", "\n",
            "Ends at: ", Sys.time(), "\n",
-           "Run time: ",
+           "Run time: ", 
            round(difftime(sim_ends, sim_start, units = "hours"), 3), " h",
            "\n", "------", "\n"),
     file = paste0(parms$outDir, parms$report_file_name),
@@ -58,11 +47,11 @@ cat(paste0("\n", "------", "\n",
     append = TRUE)
 
 # Attach parm object
-out$parms <- parms
+out_cnv$parms <- parms
 
 # Save output -------------------------------------------------------------
 
-saveRDS(out,
+saveRDS(out_cnv,
         paste0(parms$outDir,
                parms$results_file_name)
 )
