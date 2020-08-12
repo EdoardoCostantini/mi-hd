@@ -15,7 +15,7 @@ clus <- makeCluster(parms$dt_rep)
 
 ## Two different ways to source a script on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
-clusterEvalQ(cl = clus, expr = source("../convergence/init_exp1_convCheck.R"))
+clusterEvalQ(cl = clus, expr = source("../convergence/exp1_init_convCheck.R"))
 
 ## Data directory for storage
 

@@ -11,13 +11,13 @@ source("./exp2_init.R")
 # Decide which methods you car about for the convergence check
 parms$meth_sel <- data.frame(DURR_la = TRUE,
                              DURR_el = FALSE,
-                             IURR_la = FALSE,
+                             IURR_la = TRUE,
                              IURR_el = FALSE,
                              blasso  = TRUE,
-                             bridge  = FALSE,
-                             MI_PCA  = FALSE,
-                             MI_CART = FALSE,
-                             MI_RF   = FALSE,
+                             bridge  = TRUE,
+                             MI_PCA  = TRUE,
+                             MI_CART = TRUE,
+                             MI_RF   = TRUE,
                              MI_OP   = TRUE,
                              missFor = TRUE,
                              GS      = TRUE,
@@ -37,7 +37,7 @@ parms$keep_dt    <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # kee
 
 # For blasso
 parms$chains_bl     <- 5 # number of parallel chains for convergence check
-parms$iters_bl      <- 1e3
+parms$iters_bl      <- 2e3
 parms$burnin_imp_bl <- 0 # how many imputation iterations should be discarded
 parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
 parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets

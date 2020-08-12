@@ -514,9 +514,9 @@ runCell_lv <- function(cond, parms, rep_status) {
   # For each imp method, analyse all datasets based on model defined in init.R
   
   ## Create Scored data (needed to define analysis model)
-  SC_dt_sn <- lapply(list(GS = Xy,
-                          CC = Xy[rowSums(!O) == 0, ],
-                          missFor = imp_missFor$dats),
+  SC_dt_sn <- lapply(list(missFor = imp_missFor$dats,
+                          GS = Xy,
+                          CC = Xy[rowSums(!O) == 0, ]),
                      scorify, cond = cond, parms = parms)
   
   SC_dt_mi <-  lapply(list(DURR_la = imp_DURR_la$dats,

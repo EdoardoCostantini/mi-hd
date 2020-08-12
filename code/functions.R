@@ -1088,6 +1088,10 @@ mean_traceplot <- function(out,
                            method = "blasso", # same name as in parms
                            y_range = c(-10, 20),
                            iters = 1:5){
+  ## Internals
+  # out <- out_cnv
+  # iters = 200:300
+
   ## Description
   # It prints the traceplots for the mean imputed values in each iteration
   # in different chains, by variable, one dataset, one imputation method
@@ -1104,17 +1108,19 @@ mean_traceplot <- function(out,
       # Mean imputed value across individuals in each iteration
       mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[1]][[v]][iters, ])
       
-      # imps_4plot <- imp_blasso$imps[[1]][[v]]
-      # mean_imp <- rowMeans(imps_4plot)
-      plot(seq(out$parms$iters)[iters], mean_imp, type = "l",
-           main = method,
-           ylim = y_range,
-           ylab = paste0("z", v), xlab = "Iteration")
+      plot(iters, mean_imp, type = "l",
+         main = method,
+         ylim = y_range,
+         ylab = paste0("z", v), xlab = "Iteration")
+      # plot(seq(out$parms$iters)[iters], mean_imp, type = "l",
+      #      main = method,
+      #      ylim = y_range,
+      #      ylab = paste0("z", v), xlab = "Iteration")
       
       # CHAIN 2 to m 
       for (i in 2:(out$parms$chains)) {
         mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[i]][[v]][iters, ])
-        lines(seq(out$parms$iters)[iters], mean_imp)
+        lines(iters, mean_imp)
       }
     }
   }
@@ -1130,6 +1136,91 @@ res_sem_time <- function(out, condition = 1){
     res_time <- rbind(res_time, out[[i]][[select_cond]]$run_time_min)
   }
   return(round(colMeans(res_time), 3) )
+}
+
+res_sum <- function(out, model, condition = 1){
+  # model = "semR" # the first part of the name of a result object stored
+                   # in out 
+  # model = "lm"
+  # condition = 1
+  
+  ## Prep ##
+  est <- paste0(model, "_EST")
+  ci <- paste0(model, "_CI")
+  select_cond <- names(out[[1]])[condition]
+  
+  
+  ## Step 1. Obtain Pseudo True Values ##
+  full_dat_est <- matrix(NA, 
+                         # Data repetitions
+                         nrow = out$parms$dt_rep, 
+                         # Parameters estiamtes
+                         ncol = nrow(out[[1]][[select_cond]][[est]]))
+  
+  for (i in 1:out$parms$dt_rep) {
+    full_dat_est[i, ] <- out[[i]][[select_cond]][[est]][, which(out$parms$methods == "GS")]
+  }
+  
+  psd_tr_vec <- colMeans(full_dat_est) # pseudo true values
+  
+  ## Step 2. Bias ##
+  avg <- sapply(out$parms$methods, function(m){
+    store <- NULL
+    for (i in 1:out$parms$dt_rep) {
+      succ_method <- colnames(out[[i]][[select_cond]][[est]])
+      store <- cbind(store, 
+                     out[[i]][[select_cond]][[est]][, 
+                                                     succ_method %in% m])
+    }
+    c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
+  })
+  
+  # Store Objects
+  validReps <- avg["rep", ] # number of successes
+  avg <- avg[-which(rownames(avg) == "rep"), ]
+  
+  # Raw bias
+  bias <- avg - psd_tr_vec
+  
+  # Bias as percentage of true value
+  bias_per <- cbind(ref = round(psd_tr_vec, 3),
+                    round(
+                      abs(bias)/psd_tr_vec*100, 
+                      0)
+  )
+  
+  ## Step 3. CI Coverange ##
+  # storing threshold
+  str_thrs <- nrow(out[[1]][[select_cond]][[ci]])/2
+  
+  # Confidence Interval Coverage
+  CIC <- sapply(out$parms$methods, function(m){
+    store <- NULL
+    for (i in 1:out$parms$dt_rep) {
+      succ_method <- colnames(out[[i]][[select_cond]][[est]])
+      col_indx <- succ_method %in% m
+      cond_est <- out[[i]][[select_cond]][[est]]
+      cond_CI  <- out[[i]][[select_cond]][[ci]]
+      ci_low   <- cond_CI[1:str_thrs, ]
+      ci_hig   <- cond_CI[-(1:str_thrs), ]
+      
+      store <- cbind(store, 
+                     ci_low[, col_indx] < psd_tr_vec &
+                       psd_tr_vec < ci_hig[, col_indx]
+      )
+    }
+    rowMeans(store, na.rm = TRUE) # MCMC statistics 
+  })
+  rownames(CIC) <- rownames(bias)
+  
+  # Output
+  results <- list(cond = select_cond,
+                  MCMC_est = round(cbind(ref=psd_tr_vec, avg), 3),
+                  bias_raw = round(cbind(ref=psd_tr_vec, bias), 3),
+                  bias_per = bias_per,
+                  ci_cov   = round(CIC*100, 1),
+                  validReps = validReps)
+  return(results)
 }
 
 res_sem_sum <- function(out, condition = 1){
@@ -1215,99 +1306,6 @@ res_sem_sum <- function(out, condition = 1){
                   ci_cov   = round(CIC*100, 1),
                   validReps = validReps)
   return(results)
-
-  ###
-  # OLD VERSION
-  # # Sem Model
-  # select_cond <- names(out[[1]])[condition]
-  # 
-  # ## Step 1. Obtain Pseudo True Values ##
-  # 
-  # full_dat_est <- matrix(NA, 
-  #                        # Data repetitions
-  #                        nrow = out$parms$dt_rep, 
-  #                        # Parameters estiamtes
-  #                        ncol = nrow(out[[1]][[select_cond]]$sem_EST))
-  # for (i in 1:out$parms$dt_rep) {
-  #   full_dat_est[i, ] <- out[[i]][[select_cond]]$sem_EST[, which(out$parms$methods == "GS")]
-  # }
-  # 
-  # psd_tr_vec <- colMeans(full_dat_est) # pseudo true values
-  # 
-  # ## Step 2. Compute averages of statistics (MCMC estiamtes) ##
-  # 
-  # 
-  # # Store Sums
-  # sum_stats <- matrix(0, 
-  #                     nrow = nrow(out[[i]][[select_cond]]$sem_EST), 
-  #                     ncol = length(out$parms$methods))
-  # 
-  # # Compute averages of the statistics
-  # for (i in 1:out$parms$dt_rep) {
-  #   sum_stats <- sum_stats + out[[i]][[select_cond]]$sem_EST
-  # }
-  # 
-  # # Reference valuse vs Average estimtes
-  # avg_stats <- sum_stats / out$parms$dt_rep
-  # 
-  # # Give meaningful names
-  # fit <- lavaan::sem(out$parms$lav_model,
-  #                    data = out[[1]][[select_cond]]$dat_full,
-  #                    likelihood = "wishart")
-  # rownames(avg_stats) <- apply(parameterEstimates(fit)[,1:3], 
-  #                              1, 
-  #                              paste0, 
-  #                              collapse = "")
-  # 
-  # colnames(avg_stats) <- out$parms$methods
-  # 
-  # ## Step 3. Obtain Bias ##
-  # 
-  # # Raw bias
-  # bias <- avg_stats - psd_tr_vec
-  # 
-  # # Bias as percentage of true value
-  # bias_per <- cbind(ref = round(psd_tr_vec, 3), 
-  #                   round(abs(bias)/psd_tr_vec*100, 0))
-  # 
-  # ## Step 4: Obtain CI Coverages ##
-  # 
-  # # Store objects
-  # str_thrs <- nrow(out[[1]][[select_cond]]$sem_CI)/2 # storing threshold
-  # sum_stats <- matrix(0, 
-  #                     nrow = nrow(out[[i]][[select_cond]]$sem_EST), 
-  #                     ncol = length(out$parms$methods))
-  # MLE_conv <- rep(0, length(out$parms$methods))
-  # # Compute averages of the statistics
-  # for (i in 1:out$parms$dt_rep) {
-  #   cond_est <- out[[i]][[select_cond]]$sem_EST
-  #   cond_CI  <- out[[i]][[select_cond]]$sem_CI
-  #   ci_low   <- cond_CI[1:str_thrs, ]
-  #   ci_hig   <- cond_CI[-(1:str_thrs), ]
-  #   
-  #   # General
-  #   for (m in 1:length(out$parms$methods)) {
-  #     if(!is.na( sum(ci_low[, m]) )){
-  #       sum_stats[, m] <- sum_stats[, m] + 
-  #         as.numeric(ci_low[, m] < psd_tr_vec & psd_tr_vec < ci_hig[, m])
-  #       MLE_conv[m] <- MLE_conv[m] + as.numeric(!is.na( sum(ci_low[, m]) ))
-  #     }
-  #   }
-  # }
-  # 
-  # ci_coverage <- sum_stats / MLE_conv
-  # rownames(ci_coverage) <- rownames(avg_stats)
-  # colnames(ci_coverage) <- colnames(avg_stats)
-  # names(MLE_conv) <- colnames(avg_stats)
-  # 
-  # # Output
-  # results <- list(cond = select_cond,
-  #                 MCMC_est = round(cbind(ref=psd_tr_vec, avg_stats), 3),
-  #                 bias_raw = round(cbind(ref=psd_tr_vec, bias), 3),
-  #                 bias_per = bias_per,
-  #                 ci_cov = round(ci_coverage*100, 1),
-  #                 MLE_conv_rate = MLE_conv)
-  # return(results)
 }
 
 res_lm_sum <- function(out, condition = 1){

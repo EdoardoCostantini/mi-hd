@@ -7,7 +7,7 @@
 
 rm(list=ls())
 source("./init_general.R")
-source("./init_exp1.R")
+source("./exp2_init.R")
 
 reps <- 1e3
 cond <- conds[1,]
@@ -31,7 +31,7 @@ round(colMeans(pm_store), 1) == cond$pm
 
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp1.R")
+  source("./exp2_init.R")
   
   ## gen data according to condition ##
   cond <- conds[1, ]
@@ -261,7 +261,7 @@ round(colMeans(pm_store), 1) == cond$pm
       
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp1.R")
+  source("./exp2_init.R")
       
   parms$n <- 5e4 # increased to make patterns clearer
   
@@ -309,7 +309,7 @@ round(colMeans(pm_store), 1) == cond$pm
 
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp1.R")
+  source("./exp2_init.R")
       
   parms$auxWts <- rep(1, 4)
   parms$auxWts <- rep(4, 4) 

@@ -152,11 +152,11 @@
   lv    <- c(10, 100)       # number of latent variables
   pm    <- c(.1, .3)        # proportion of missings level
   fl    <- c("high", "low") # factor loadings level
-  ridge <- c(1e-5) # 1 valude found w/ corssvalidation
+  ridge <- rep(c(1e-1, 1e-7), 4) # 1 valude found w/ corssvalidation
   
-  conds <- expand.grid(lv, pm, fl, 
-                       ridge, # fixed vactor
+  conds <- expand.grid(lv, pm, fl,
                        stringsAsFactors = FALSE)
+  conds <- cbind(conds, ridge)
     colnames(conds) <- c("lv", "pm", "fl", "ridge")
     
     

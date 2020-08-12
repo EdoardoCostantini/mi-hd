@@ -33,12 +33,14 @@ parms$meth_sel <- data.frame(DURR_la = FALSE,
 parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
 
 # Report names
-parms$report_file_name <- paste0("cv_bridge_",
-                                 "exp", parms$exp, "_",
-                                 parms$start_time, 
+parms$report_file_name <- paste0("exp",
+                                 parms$exp, "_",
+                                 "cv_bridge_",
+                                 parms$start_time,
                                  ".txt")
-parms$results_file_name <- paste0("cv_bridge_",
-                                  "exp", parms$exp, "_",
+parms$results_file_name <- paste0("exp",
+                                  parms$exp, "_",
+                                  "cv_bridge_",
                                   parms$start_time,
                                   ".rds")
 parms$description <- c("In each repetition, 1 dataset is created for each condition.

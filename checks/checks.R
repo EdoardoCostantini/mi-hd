@@ -4,7 +4,7 @@
 
 rm(list=ls())
 source("./init_general.R")
-source("./init_exp1.R")
+source("./exp2_init.R")
 source("./init_exp3.R")
 
 # SEM Model convergence ---------------------------------------------------
@@ -59,7 +59,7 @@ summa_models <- lapply(X = fit_gs,
 
 rm(list=ls())
 source("./init_general.R")
-source("./init_exp1.R")
+source("./exp2_init.R")
 
 reps <- 250
 cond <- conds[1,]
@@ -158,7 +158,7 @@ parapply1[[8]]
 
 rm(list=ls())
 source("./init_general.R")
-source("./init_exp1.R")
+source("./exp2_init.R")
 set.seed(1234)
 
 cond <- conds[3,]
@@ -221,7 +221,7 @@ for (r in 1:reps) {
 
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp1.R")
+  source("./exp2_init.R")
   parms$n <- 1e3
   
   # Gen Data
@@ -257,7 +257,7 @@ for (r in 1:reps) {
 
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp1.R")
+  source("./exp2_init.R")
   
   # Save a condition of low and high dimensionality from experiment 1
   cond_ld <- conds[1, ]

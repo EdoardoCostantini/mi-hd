@@ -7,7 +7,7 @@
 
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp2.R")
+  source("./exp2_init.R")
 
 # > works for all conditions ----------------------------------------------
 
@@ -58,7 +58,7 @@
   
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp2.R")
+  source("./exp2_init.R")
   cond <- conds[1, ]
   
   # Mods to make things clearer
@@ -99,7 +99,7 @@
 
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp2.R")
+  source("./exp2_init.R")
   
   # Gen data
   set.seed(20200805)
@@ -194,7 +194,7 @@
   
   rm(list=ls())
   source("./init_general.R")
-  source("./init_exp2.R")
+  source("./exp2_init.R")
   
   # Twick paramters
   cond <- data.frame(lv = 10, pm = .1, fl = "high")
