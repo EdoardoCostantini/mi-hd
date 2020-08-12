@@ -43,12 +43,12 @@ round(colMeans(pm_store), 1) == cond$pm
 # > Internals ####
   # Internals
   # Type of missingnes (where in the target variable distribution)
-    type = "high"
+    type = "center"
     
   # Eta: Standardized linear predictors
     set.seed(1234)
-    preds = c(2, 3, 4, 5)
-    beta = rep(1, length(preds)) 
+    preds = c(2)
+    beta = rep(3, length(preds)) 
       # as long as they are the same value, eta will be exactly the same
       # these values define the relative importance of each predictor
     data = Xy
@@ -177,8 +177,6 @@ round(colMeans(pm_store), 1) == cond$pm
   # }
 
 # > Visualize ####
-
-  # Visualize variable x distributed according to standard logistic PDF and CDF
     set.seed(20200708)
     x <- sort(rlogis(1e5,
                      location = 0, # standard logistic
@@ -187,6 +185,8 @@ round(colMeans(pm_store), 1) == cond$pm
       # some observation in my dataset that is in the low part of the data
     id <- order(eta)[195]
       # some observation in my dataset that is in the high part of the data
+    
+  # Density of fully observed vs var with missings
     
   # Probabilities of missings for a given id, w/ and w/out offset
     sort(
@@ -250,8 +250,59 @@ round(colMeans(pm_store), 1) == cond$pm
       text(-7.5, probs+.025, 
            labels = paste0("p(NA) = ", round(probs, 2)), 
            col = "red", cex = .75)
-  
+      
 
+# Density Comparison ------------------------------------------------------
+# Compare fully observed variable and different versions of one with 
+# missing values imposed with offsetting. In this run, you can see
+# how for different type of imposition (low, high, center, tails)
+# the density of the observed part of variable is different from the
+# fully observed one.
+      
+  rm(list=ls())
+  source("./init_general.R")
+  source("./init_exp1.R")
+      
+  parms$n <- 5e4 # increased to make patterns clearer
+  
+  # Gen data
+  set.seed(20200805)
+  cond <- conds[1, ] # actual pm is defined below
+  Xy <- simData_exp1(cond, parms)
+  Xy_mis <- Xy
+  
+  # Plot density of fully observed variable (black solid)
+  plot(density(Xy[, 1]),
+       main = "Effects of offsetting missImpose",
+       ylim = c(0, max(density(Xy[, 1])$y) + sd(density(Xy[, 1])$y)),
+       lwd = 3
+  )
+  
+  # Chose which methods to plot
+  range <- 1:4
+  types <- c("low", "high", "center", "tails")[range]
+  color <- c("red", "blue", "darkorange", "darkgray")[range]
+  
+  # Plot density of observed part under the different methods
+  lapply(range, function(x){
+    for (i in 1:50) {
+      nR <- simMissingness(data  = Xy, 
+                           preds = c(2,3,4,5), # more predictors accentuate effect
+                           #beta  = 1, # any number gives same result
+                                       # if all predictors have same importance
+                           pm    = .8, # larger makes pattern clearer
+                           type  = types[x])
+      lines(density(Xy_mis[!nR, 1], na.rm = TRUE), 
+            col = color[x], lty = 2, lwd = .5)
+    }
+  })
+  legend(-2, .25,
+         legend = types,
+         col    = color, 
+         lwd = c(2, 2, 2, 2),
+         lty = c(2, 2, 2, 2), 
+         cex = 1)
+      
 # Effect of missingness on analysis ---------------------------------------
 
 # > Set up ####

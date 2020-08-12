@@ -11,13 +11,10 @@
   # 20200715 Correct
   # filename <- "sim_res_20200710_1019" # first submision
   # Current Correct
-  # filename <- "sim_res_20200731_1735"
+  filename <- "sim_res_20200731_1735"
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))
-
-  out$parms$dt_rep
-  out$parms$iters
   
 # Time Analyses -----------------------------------------------------------
 

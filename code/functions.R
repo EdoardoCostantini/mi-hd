@@ -258,6 +258,83 @@ rr_est_elanet <- function(X, y, parms, fam = "gaussian"){
   return(regu.mod)
 }
 
+CFA_mod_wirte <- function(dat, lv_number, parms){
+  # Define CFA model
+  # lv_number = 2
+  item_names <- colnames(dat)[1:(lv_number*parms$n_it)]
+  lv_names <- paste0("lv", 1:lv_number)
+  
+  lv_models <- sapply(1:lv_number, function(i){
+    paste0(lv_names[i], 
+           " =~ ",
+           paste0(item_names[((0:lv_number)[i]*parms$n_it+1):
+                          ((0:lv_number)[i+1]*parms$n_it)], 
+                  collapse = " + ")
+    )
+    
+  })
+  
+  CFA_model <- paste(lv_models, collapse = "\n")
+  
+  return(CFA_model)
+}
+
+# SAT_mod_write <- function(parms){
+#   var_names <- paste0("z", parms$z_m_id)
+#   # Means
+#   head_means <- "# Intercepts\n"
+#   all_means <- paste0(var_names, " ~ ", "1")
+#   all_means <- paste(all_means, collapse = "\n")
+#   
+#   # Variances
+#   head_vars <- "# Variances \n"
+#   all_vars <- paste0(var_names, " ~~ ", var_names)
+#   all_vars <- paste(all_vars, collapse = "\n")
+#   
+#   # Coivariances
+#   head_covs <- "# Covariances \n"
+#   all_covs <- combn(var_names, 2)
+#   all_covs <- apply(all_covs, 2, paste0, collapse = " ~~ ")
+#   all_covs <- paste(all_covs, collapse = "\n")
+#   
+#   # Put together
+#   SAT_mod <- paste(head_means,all_means,
+#                    head_vars, all_vars,
+#                    head_covs, all_covs
+#   )
+#   
+#   return(SAT_mod)
+# }
+
+SAT_mod_write <- function(var_id){
+  # var_id <- paste0("z", 1:10)
+  # var_id <- colnames(SC_dt_sn$GS)[1:parms$sc_n]
+  
+  # Means
+  head_means <- "# Means\n"
+  all_means <- paste0(var_id, " ~ ", "1")
+  all_means <- paste(all_means, collapse = "\n")
+  
+  # Variances
+  head_vars <- "# Variances \n"
+  all_vars <- paste0(var_id, " ~~ ", var_id)
+  all_vars <- paste(all_vars, collapse = "\n")
+  
+  # Coivariances
+  head_covs <- "# Covariances \n"
+  all_covs <- combn(var_id, 2)
+  all_covs <- apply(all_covs, 2, paste0, collapse = " ~~ ")
+  all_covs <- paste(all_covs, collapse = "\n")
+  
+  # Put together
+  SAT_mod <- paste(head_means,all_means,
+                   head_vars, all_vars,
+                   head_covs, all_covs
+  )
+  
+  return(SAT_mod)
+}
+
 
 # Imputation --------------------------------------------------------------
 
@@ -548,6 +625,37 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
   return(fmi)
 }
 
+.fmi_compute <- function(fits){
+  ## Description
+  # Given a list of fits on multiply imputed datasets
+  # it returns the fmi for each estiamted paramter
+  
+  ## For internals
+  # fits = semR_fit_mi[["bridge"]]
+  
+  ## Body
+  ## Coef estimates
+  m <- length(fits)
+
+  coefs <- sapply(X = fits,
+                  FUN = function(x) coef(x))
+  Q_bar <- rowMeans(coefs)
+  
+  ## Variances (squared standard error for each parameter)
+  all_vcov <- lapply(X = fits,
+                     FUN = function(x) vcov(x))
+  U_bar <- diag(Reduce('+', all_vcov) / m)
+  
+  B <- diag(1 / (m-1) * (coefs - Q_bar) %*% t(coefs - Q_bar))
+  
+  T_var <- U_bar + B + B/m
+  
+  # FMI vector
+  FMI <- round(.fmi(m = m, b = B, t = T_var), 3)
+  
+  return(FMI)
+}
+
 # Estimate regression coefficeints
 
 fit_lm_models <- function(multi_dt, vrbs){
@@ -615,11 +723,13 @@ sem_EST <- function(fits){
   # it returns the estiamtes of the parameters for each
   ## For internals
   # fits = list(fit_mf, fit_gs, fit_cc)
-  summa_models <- lapply(X = fits,
-                         FUN = function(x) parameterEstimates(x))
-  
-  coefs <- sapply(X = summa_models,
-                  FUN = function(x) x[, c("est")])
+  # summa_models <- lapply(X = fits,
+  #                        FUN = function(x) parameterEstimates(x))
+  # 
+  # coefs <- sapply(X = summa_models,
+  #                 FUN = function(x) x[, c("est")])
+  coefs <- sapply(X = fits,
+                  FUN = function(x) coef(x))
   return(coefs)
 }
 
@@ -629,12 +739,20 @@ sem_CI <- function(fits){
   # it returns the CI of the estiamtes of the parameters for each
   ## For internals
   # fits = list(fit_mf, fit_gs, fit_cc)
+  
+  row_indx <- !is.na(parameterEstimates(fits[[1]])[, "z"])
+    # In the CFA model, either the variances of lv or factor loadings
+    # are fixed to some value. Hence, they would not be paramters.
+    # However, while the vcov function keeps this into account, the
+    # computation of Q_bar that starts from the output of paramterEstimates
+    # does not. So I need an index that identifies what rows of
+    # paramterEstimates output are actual paramters.
   CI_list <- lapply(X = fits,
-                    FUN = function(x) parameterEstimates(x)[, 
+                    FUN = function(x) parameterEstimates(x)[row_indx, 
                                                             c("ci.lower", 
                                                               "ci.upper")]
   )
-
+  
   CI_mtx <- sapply(CI_list, function(x){
     c(x[,1], x[,2])
   })
@@ -672,15 +790,14 @@ lm_CI <- function(fits){
   
 sem_pool_EST_f <- function(fits){
   ## Description
-  # Given a list of imputed datasets under the same imputation model
-  # it returns the pooled estiamtes of the regression coefs
+  # Given a list of fits from different imputed datasets under the
+  # same imputation model it returns the pooled estiamtes of the
+  # parameters of interest.
   ## For internals
-  # fits = fits_md[[4]]
-  summa_models <- lapply(X = fits,
-                         FUN = function(x) parameterEstimates(x))
-  
-  coefs <- sapply(X = summa_models,
-                    FUN = function(x) x[, c("est")])
+  # fits = SAT_fit_sc_mi[[1]] # fits_md[[4]]
+  ## Pool coefs
+  coefs <- sapply(X = fits,
+                  FUN = function(x) coef(x))
   Q_bar <- rowMeans(coefs)
     # 1 column per imputed dataset
   return(Q_bar)
@@ -696,27 +813,36 @@ sem_pool_CI_f <- function(fits){
   # to store. 
   
   ## For internals
-  # fits = sem_fits[[1]]
+  # fits = SAT_fit_raw_mi[[1]]
+  # fits = sem_fits[lapply(sem_fits, length) != 0][[1]]
   
   ## Body
   ## Coef estimates
   m <- length(fits)
   # use only dataset for which model can be fit
+  row_indx <- !is.na(parameterEstimates(fits[[1]])[, "z"])
+    # In the CFA model, either the variances of lv or factor loadings
+    # are fixed to some value. Hence, they would not be paramters.
+    # However, while the vcov function keeps this into account, the
+    # computation of Q_bar that starts from the output of paramterEstimates
+    # does not. So I need an index that identifies what rows of 
+    # paramterEstimates output are actual paramters.
   
-  summa_models <- lapply(X = fits,
-                         FUN = function(x) parameterEstimates(x))
-  coefs <- sapply(X = summa_models,
-                  FUN = function(x) x[, c("est")])
+  # summa_models <- lapply(X = fits,
+  #                        FUN = function(x) parameterEstimates(x)[row_indx,])
+  # coefs <- sapply(X = summa_models,
+  #                 FUN = function(x) x[, c("est")])
+  coefs <- sapply(X = fits,
+                  FUN = function(x) coef(x))
   Q_bar <- rowMeans(coefs)
   
   ## Variances (squared standard error for each parameter)
   all_vcov <- lapply(X = fits,
                      FUN = function(x) vcov(x))
-  
   U_bar <- diag(Reduce('+', all_vcov) / m)
   
   B <- diag(1 / (m-1) * (coefs - Q_bar) %*% t(coefs - Q_bar))
-  
+
   T_var <- U_bar + B + B/m
   
   ## Degrees of freedom
@@ -831,6 +957,80 @@ bbootstrap <- function(x) { # Bayesian Bootstrap
                      replace = TRUE, 
                      prob = g)
   return(bbsample)
+}
+
+## NEW VERSIONS 
+fit_sem <- function(multi_dt, model, std.lv=FALSE){
+  # Given a list of complete datasets it fits a model described
+  # in mod
+  ## Example input ##
+  # multi_dt <- imp_DURR_la$dats
+  # multi_dt <- SC_dt_sn
+  # model <- SAT_mod_write(colnames(SC_dt_sn$GS)[1:parms$sc_n],
+  #                        parms, score = TRUE)
+  ## Body ##
+  if(!is.null(multi_dt)){
+    fits <- lapply(X = multi_dt,
+                     FUN = function(x) {
+                       tryCatch({
+                         # Fit SEM model
+                         sem(model = model, 
+                             data = x, 
+                             likelihood = "wishart",
+                             std.lv = std.lv)},
+                         # If there is a fitting error, report it
+                         error = function(report) {
+                           err <- paste0("Original Error: ", report)
+                           return(err)
+                         },
+                         # if there is a warning error, report it
+                         warning = function(report) {
+                           err <- paste0("Original Warning: ", report)
+                           return(err)
+                         })
+                     })
+    # Keep only models that converged (no fitting errors)
+    fits_indx <- as.vector(which(!sapply(fits, is.character)))
+    fits <- fits[fits_indx]
+    
+  } else {fits = NULL}
+  return(fits)
+}
+
+fit_lm <- function(multi_dt, model){
+  ## Description:
+  # Given a list of complete datasets it fits a linear model
+  # to obtain standardized regression coefficients (all vairables 
+  # are centered and standardized)
+  ## Example internals
+  # multi_dt = SC_dt_mi$DURR_la
+  # model = LM_formula
+  if(!is.null(multi_dt)){
+    fits <- lapply(X = multi_dt,
+                     FUN = function(x) lm(model, 
+                                          data = x)
+    )
+  } else {fits = NULL}
+  return(fits)
+}
+
+# Create Scores for MI datasets
+scorify <- function(dat_in, cond, parms){
+  ## Makes raw data into univariate scores corresponding to theoretical 
+  ## constructs.
+  # Example inputs
+  # dat_in <- Xy # single dataset
+  
+  dat_out <- data.frame(matrix(nrow = nrow(dat_in), ncol = cond$lv))
+    colnames(dat_out) <- paste0("sc", 1:cond$lv)
+  
+  for (i in 1:cond$lv) {
+    item_idx <- c((0:cond$lv)[i]*parms$n_it+1):((0:cond$lv)[i+1]*parms$n_it)
+    dat_out[,i] <- rowMeans(dat_in[, item_idx])
+  }
+  
+  return(dat_out)
+    
 }
 
 # Results -----------------------------------------------------------------

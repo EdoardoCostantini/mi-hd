@@ -162,7 +162,7 @@ imposeMiss_lv <- function(dat_in, parms, cond){
   # indicated as target int parms$z_m_id
   ## Example Inputs
   # cond <- conds[1,]
-  # dat_in   <- simData_exp3(parms, cond)
+  # dat_in   <- simData_lv(parms, cond)
   
   # Body
   # Define non-response vector
@@ -170,7 +170,7 @@ imposeMiss_lv <- function(dat_in, parms, cond){
   for (i in 1:parms$zm_n) {
     nR <- simMissingness(pm    = cond$pm,
                          data  = dat_in$scores_lv,
-                         preds = parms$rm_x[i, ],
+                         preds = parms$rm_x,
                          type  = parms$missType,
                          beta  = parms$auxWts)
     
@@ -211,10 +211,14 @@ simData_lv <- function(parms, cond){
   
   # Factor loadings (random factor)
 # (3) Sample from unif .7 .8, all different
-  if(cond$fl == "high"){
-    lambda <- runif(n_it_tot, .9, .97)
+  if(cond$fl == "none"){
+    lambda <- rep(0, n_it_tot)
   } else {
-    lambda <- runif(n_it_tot, .5, .6)
+    if(cond$fl == "high"){
+      lambda <- runif(n_it_tot, .9, .97)
+    } else {
+      lambda <- runif(n_it_tot, .5, .6)
+    }
   }
 
   for (i in 1:length(lambda)) {
@@ -241,13 +245,12 @@ simData_lv <- function(parms, cond){
     colnames(scs_delta) <- paste0("d_z", 1:ncol(scs_delta))
   
   # Compute Observed Scores
-# (6) items with interecepts or not?
+# (6) items
   x <- matrix(nrow = parms$n, ncol = n_it_tot)
   for(i in 1:parms$n){
     x[i, ] <- t(Lambda %*% scs_lv[i, ] + scs_delta[i, ])
   }
   colnames(x) <- paste0("z", seq(1:n_it_tot))
-  
   # Function output
   return( list(dat    = as.data.frame(x),
                Phi    = Phi,

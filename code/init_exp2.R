@@ -11,9 +11,9 @@
 # Itereations, repetitions, etc
   parms$dt_rep     <- 10  # replications for averaging results (200 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
-  parms$iters      <- 10
-  parms$burnin_imp <- 5 # how many imputation iterations should be discarded
-  parms$ndt        <- 5 # number of imputed datasets to pool esitmaes from (10)
+  parms$iters      <- 50
+  parms$burnin_imp <- 20 # how many imputation iterations should be discarded
+  parms$ndt        <- 10 # number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
@@ -23,7 +23,7 @@
   parms$keep_dt <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # keep 1 dataset every thin
 
   # For mice-like algorithms
-  parms$mice_iters <- 10 #  20
+  parms$mice_iters <- 5 #  20
   parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
   
 # Data gen ----------------------------------------------------------------
@@ -40,8 +40,8 @@
   # parms$AR_rho  <- .5             # autoregressive correlation (for now)
   
 # Latent Variable blocks
-  parms$blck1 <- 1:2 # highly correlated latent variables
-  parms$blck2 <- (tail(parms$blck1, 1)+1):4 # mid correlated latent variables
+  parms$blck1 <- 1:4 # highly correlated latent variables
+  parms$blck2 <- (tail(parms$blck1, 1)+1):8 # mid correlated latent variables
 
   parms$blck1_r <- .6 # correlation for highly correlated variables
   parms$blck2_r <- .3 # correlation for correlated variables
@@ -65,17 +65,8 @@
 # Response Model
   parms$missType <- c("high", "low")[2]
   
-  # which latent variables influences the missingness on which item
-  parms$rm_x     <- do.call(
-    rbind,
-    lapply(list(c(3, 4), c(3, 4)),
-           function(x) matrix(x, byrow = TRUE,
-                              nrow = parms$zm_n/2,
-                              # becuase 2 latent variables
-                              # have items with missing values
-                              ncol = 2)
-    )
-  )
+  # Latent variables 3 and 4 influence missingness
+  parms$rm_x <- c(3, 4)
   
   # weighting the importance of predictors: all the same
   parms$auxWts <- c(1, 1)
@@ -84,19 +75,20 @@
   # source("./gen_lavaan_model.R") # generate txt file for lavaan model
   # # parms$lav_model <- read.table("../txt/lavaan_model_sat.txt",
   # #                         as.is = TRUE)$V1
-  parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), collapse="\n")
-  
+  parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), 
+                           collapse="\n")
+  parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic
   parms$meth_sel <- data.frame(DURR_la = TRUE,
                                DURR_el = FALSE,
-                               IURR_la = TRUE,
+                               IURR_la = FALSE,
                                IURR_el = FALSE,
-                               bridge  = TRUE,
+                               bridge  = FALSE,
                                blasso  = TRUE,
-                               MI_PCA  = TRUE,
-                               MI_CART = TRUE,
-                               MI_RF   = TRUE,
+                               MI_PCA  = FALSE,
+                               MI_CART = FALSE,
+                               MI_RF   = FALSE,
                                MI_OP   = TRUE,
                                missFor = TRUE,
                                GS      = TRUE,
@@ -141,11 +133,14 @@
 
 # Conditions --------------------------------------------------------------
 
-  lv <- c(10, 100) # c(50, 500) # number of variables
-  pm <- c(.1, .3)
-  fl <- c("high", "low")
+  lv    <- c(10, 100)       # number of latent variables
+  pm    <- c(.1, .3)        # proportion of missings level
+  fl    <- c("high", "low") # factor loadings level
+  ridge <- c(1e-5) # 1 valude found w/ corssvalidation
   
-  conds <- expand.grid(lv, pm, fl, stringsAsFactors = FALSE)
-    colnames(conds) <- c("lv", "pm", "fl")
+  conds <- expand.grid(lv, pm, fl, 
+                       ridge, # fixed vactor
+                       stringsAsFactors = FALSE)
+    colnames(conds) <- c("lv", "pm", "fl", "ridge")
     
     

@@ -39,3 +39,6 @@ source("./fun_missFor_impute.R")
 source("./functions_genDt.R")
 source("./subroutines.R")
 source("./simMissingness.R")
+
+# Experiment Specific -----------------------------------------------------
+# source("./gen_lavaan_model.R") # generate txt file for lavaan model

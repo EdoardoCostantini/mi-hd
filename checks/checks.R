@@ -152,77 +152,107 @@ all.equal(parapply1[[8]]$cond_50_0.1$imp_values, parapply2[[8]]$cond_50_0.1$imp_
 
 parapply1[[8]]
 
-# Paramters of interest ---------------------------------------------------
+# Effects of missingness --------------------------------------------------
+# Satuerated Model Estimation of Means, Variances and Covariances
+# together with the CC (listwise deletion) analysis
 
 rm(list=ls())
-source("./init.R")
+source("./init_general.R")
+source("./init_exp1.R")
 set.seed(1234)
 
 cond <- conds[3,]
 
-reps <- 1e2
-full_store <- matrix(NA, nrow = reps, ncol = length(parms$z_m_id))
-miss_store <- matrix(NA, nrow = reps, ncol = length(parms$z_m_id))
-
-full_cov_sum <- matrix(0, nrow = length(parms$z_m_id), ncol = length(parms$z_m_id))
-miss_cov_sum <- matrix(0, nrow = length(parms$z_m_id), ncol = length(parms$z_m_id))
-
-full_cor_sum <- matrix(0, nrow = length(parms$z_m_id), ncol = length(parms$z_m_id))
-miss_cor_sum <- matrix(0, nrow = length(parms$z_m_id), ncol = length(parms$z_m_id))
+# Repeat data generation and estimations
+reps <- 1e3
+mu_fl <- mu_ms <- var_fl <- var_ms <- 
+  matrix(NA, nrow = reps, ncol = length(parms$z_m_id))
+cov_fl <- cov_ms <- 
+  matrix(NA, nrow = reps, ncol = ncol(combn(parms$z_m_id, 2)))
 
 for (r in 1:reps) {
   print(r/reps*100)
-  dt_full <- genDt_mvn(cond, parms)
-  dt_mis  <- imposeMiss(dt_full, parms, cond)
-  full_store[r, ] <- colMeans(dt_full)[parms$z_m_id]
-  miss_store[r, ] <- colMeans(dt_mis, na.rm = TRUE)[parms$z_m_id]
   
-  full_cov_sum <- full_cov_sum + cov(dt_full[, parms$z_m_id])
-  miss_cov_sum <- miss_cov_sum + cov(dt_mis[, parms$z_m_id], use = "pairwise.complete.obs")
+  Xy <- simData_exp1(cond, parms)
+  Xy_mis  <- imposeMiss(Xy, parms, cond)
+  O <- !is.na(Xy_mis) # matrix index of observed values
   
-  full_cor_sum <- full_cor_sum + cor(dt_full[, parms$z_m_id])
-  miss_cor_sum <- miss_cor_sum + cor(dt_mis[, parms$z_m_id], use = "pairwise.complete.obs")
+  sem_sndt <- lapply(list(GS      = Xy,
+                          CC      = Xy_mis), # default is listwise deletion
+                     sem, model = parms$lav_model, likelihood = "wishart")
+  sem_par <- sem_EST(sem_sndt)
+  
+  # Means
+  mu_fl[r, ] <- sem_par[1:parms$zm_n, "GS"]
+  mu_ms[r, ] <- sem_par[1:parms$zm_n, "CC"]
+  
+  # Variances
+  var_fl[r, ] <- sem_par[(parms$zm_n+1):(parms$zm_n*2), "GS"]
+  var_ms[r, ] <- sem_par[(parms$zm_n+1):(parms$zm_n*2), "CC"]
+  
+  # Covariances
+  cov_fl[r, ] <- sem_par[-(1:(parms$zm_n*2)), "GS"]
+  cov_ms[r, ] <- sem_par[-(1:(parms$zm_n*2)), "CC"]
 }
 
 # Effect of missingness on analysis
 
-# Means
+# MCMC Estimates
+  out_mu <- data.frame(full = round( colMeans(mu_fl), 3),
+                       miss = round( colMeans(mu_ms), 3))
+  out_va <- data.frame(full = round( colMeans(var_fl), 3),
+                       miss = round( colMeans(var_ms), 3))
+  out_cv <- data.frame(full = round( colMeans(cov_fl), 3),
+                       miss = round( colMeans(cov_ms), 3))
 
-  round(
-    cbind(colMeans(full_store),
-          colMeans(miss_store)),
-    3)
+# Bias (in terms of percentage of true value)
+  BPR_mu <- round(abs(out_mu$full - out_mu$miss)/out_mu$full*100, 0)
+  BPR_va <- round(abs(out_va$full - out_va$miss)/out_va$full*100, 0)
+  BPR_cv <- round(abs(out_cv$full - out_cv$miss)/out_cv$full*100, 0)
   
-  full_mv <- colMeans(full_store)
-  miss_mv <- colMeans(miss_store)
+# Obtain names to show things better
+  fit <- sem(Xy, model = parms$lav_model, likelihood = "wishart")
+  nm_par <- apply(parameterestimates(fit)[,1:3], 1, paste0, collapse = "")
+  results <- data.frame(BPR=c(BPR_mu,BPR_va,BPR_cv))
+  rownames(results) <- nm_par
+  results
   
-  # Bias in terms of percentage of true value
-  round((full_mv - miss_mv)/full_mv*100, 0)
+# Effects of missingness --------------------------------------------------
 
-# COVARIANCE
+  rm(list=ls())
+  source("./init_general.R")
+  source("./init_exp1.R")
+  parms$n <- 1e3
   
-  full_cov <- full_cov_sum/reps
-  miss_cov <- miss_cov_sum/reps
-  lapply(list(full_cov, miss_cov), round, 2)
-  # Bias percent points (percentage of true value)
-  bias_pg <- round((full_cov - miss_cov)/full_cov*100, 0)
-  bias_pg
-  pm_50 <- bias_pg[lower.tri(bias_pg)]
-  data.frame(pm_50 = pm_50, pm_500 = pm_500)
+  # Gen Data
+  set.seed(20200805)
+  cond <- conds[3, ]
+  Xy <- simData_exp1(cond, parms)
+  Xy_mis <- imposeMiss(Xy, parms, cond)
+  Xy_mis <- cbind(Xy_mis[, parms$z_m_id], Xy_mis[, -parms$z_m_id])
   
-  mean(diag(bias_pg)) # mean variances bias %
-  mean(bias_pg[lower.tri(bias_pg)]) # mean covariances bias %
-
-# CORRELATION
+  # Visualize
+  MI <- mice(data = Xy_mis[, 1:20], m = 50, maxit = 10,
+             method = "norm")
+  MI_dt <- complete(MI, "all")
+  # Plots
+  data.frame(i = colnames(Xy)[1:20], 
+             j = colnames(Xy_mis)[1:20],
+             imp = colnames(MI_dt$`1`))
   
-  full_cor <- full_cor_sum/reps
-  miss_cor <- miss_cor_sum/reps
-  lapply(list(full_cor, miss_cor), round, 2)
-  # Bias in terms of percentage of true value
-  round((full_cor - miss_cor)/full_cor*100, 0)
-  mean(unique(round((full_cor - miss_cor)/full_cor*100, 0)))
+  i <- 1; j <- 1
   
-
+  plot(density(Xy[, i]), col = "black",
+       main = "Density",
+       xlab = "Z1", ylab = "",
+       xlim = c(0, 10), ylim = c(0, .25), lwd = 3)
+  # MAR: MI fixes the missingness
+  lines(density(Xy_mis[, j], na.rm = TRUE), col = "darkorange", lwd = 3)
+  lapply(MI_dt, function(x) lines(density(x[, j]), 
+                                  lty = 2,
+                                  col = "darkorange")
+  )
+  
 # Ridge Penalty choice ----------------------------------------------------
 
   rm(list=ls())
@@ -283,93 +313,7 @@ for (r in 1:reps) {
   pdraw_hd$sigma
   
 
-# Data Generation Latent Structure ----------------------------------------
 
-  rm(list=ls())
-  source("./init_general.R")
-  source("./init_exp3.R")
-  
-## Works for all conditions ##
-  
-  all_conds_data <- lapply(1:nrow(conds), function(x){
-    X <- simData_exp3(parms, conds[x,])
-    Xy_mis <- imposeMiss_lv(X, parms, conds[x, ])
-    return(Xy_mis)
-  })
-  length(all_conds_data)
-  
-## On average, items have mean 0, variance 1 ##
-  
-  set.seed(20200727)
-  store <- matrix(0, nrow = parms$n_it*conds[1,]$lv, ncol = 2)
-  for (i in 1:5e3) {
-    X <- simData_exp3(parms, conds[1,])
-    store <- store + data.frame(mu = colMeans(X$dat), 
-                                var = apply(X$dat, 2, var))
-  }
-  round(store/5e3, 3)
-  
-## check estimates on raw original data ##
-  
-  # Deifne some CFA mode to test
-  CFA_model <- '
-    # Measurement Model
-    lv1 =~ z1 + z2 + z3 + z4 + z5
-    lv2 =~ z6 + z7 + z8 + z9 + z10
-  '
-  
-  set.seed(20200727)
-  X <- simData_exp3(parms, conds[1,])
-  
-  # Scaled data
-  Xs <- X$dat * sqrt(5) + 5
-
-  Xs <- sapply(X$dat, function(x){
-    x * sqrt(5)/sd(x) + 5
-  })
-  colMeans(X$dat)
-  apply(X$dat, 2, var)
-  colMeans(Xs)
-  apply(Xs, 2, var)
-  
-  # Fit models
-  fit   <- cfa(CFA_model, data = X$dat, std.lv = TRUE)
-  fit_v <- cfa(CFA_model, data = X$dat)
-  fit_s <- cfa(CFA_model, data = Xs, std.lv = TRUE)
-  fit_s <- cfa(CFA_model, data = scale(Xs), std.lv = TRUE)
-  
-  # Measured
-  round(X$Lambda, 3)  # factor loadings
-  diag(X$Theta)[1:10] # items error variances
-  
-  # Setting latent variables variances to 1 standardizes factor scores already
-  parameterEstimates(fit, 
-                     se = F, zstat = F, pvalue = F, ci = F,
-                     standardized = TRUE)
-  parameterEstimates(fit_v, 
-                     se = F, zstat = F, pvalue = F, ci = F,
-                     standardized = TRUE)
-  parameterEstimates(fit_s,
-                     se = F, zstat = F, pvalue = F, ci = F,
-                     standardized = TRUE)
-  
-  # Compare
-  round(X$Lambda, 3)[1,1] / round(X$Lambda, 3)[2,1]
-  parameterEstimates(fit)$est[1] /parameterEstimates(fit)$est[2]
-  parameterEstimates(fit_s, standardized = TRUE)$est[1] / parameterEstimates(fit_s, standardized = TRUE)$est[2]
-
-## Low / high factor loadings
-  set.seed(20200727)
-  X_high <- simData_exp3(parms, conds[1,])
-  set.seed(20200727)
-  X_low  <- simData_exp3(parms, conds[5,])
-  
-  fits <- lapply(list(X_high$dat, X_low$dat), 
-                 cfa, model = CFA_model, std.lv = TRUE)
-  lapply(fits, parameterEstimates, standardized = TRUE,
-         se = F, zstat = F, pvalue = F, ci = F)
-  round(X_high$Lambda, 3)
-  round(X_low$Lambda, 3)
 
 
 # Interaction terms and number of predictors ------------------------------

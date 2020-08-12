@@ -104,7 +104,12 @@ impute_PCA <- function(Z, parms = parms){
     end.time <- Sys.time()
     
     # Store results
-    imp_PCA_dats <- mice::complete(imp_PCA_mids, "all")
+    imp_PCA_PC_dats <- mice::complete(imp_PCA_mids, "all")
+    miss_id <- paste0("z", parms$z_m_id)
+    imp_PCA_dats <- lapply(imp_PCA_PC_dats, function(x){
+      cbind(x[, miss_id], Z[,-which(colnames(Z) %in% miss_id)])
+    })
+    
     imp_PCA_imps <- imp_PCA_mids$imp[1:parms$zm_n]
     imp_PCA_time <- difftime(end.time, start.time, units = "mins")
     

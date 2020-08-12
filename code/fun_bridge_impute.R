@@ -3,7 +3,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_BRIDGE <- function(Z, O, parms, perform = TRUE){
+impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
   
   # Prep data ---------------------------------------------------------------
   # Z = Xy_mis
@@ -58,7 +58,7 @@ impute_BRIDGE <- function(Z, O, parms, perform = TRUE){
             pdraw <- .norm.draw(y       = Zm[, j], 
                                 ry      = O[, j], 
                                 x       = as.matrix(Zm[, -j]), 
-                                ls.meth = "ridge", ridge = parms$ridge)
+                                ls.meth = "ridge", ridge = ridge_p)
             
             # Obtain posterior predictive draws
             pdraw_zj_imp <- Z_mis %*% pdraw$beta + rnorm(sum(!O[, j])) * pdraw$sigma

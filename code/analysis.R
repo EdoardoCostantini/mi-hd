@@ -20,8 +20,7 @@
   # Current Correct
   sum_exp1_sem <- readRDS("../output/sim_res_20200731_1735sum_exp1_sem.rds")
   sum_exp1_lm  <- readRDS("../output/sim_res_20200731_1735sum_exp1_lm.rds")
-  
-  
+
 # Bias --------------------------------------------------------------------
   sum_exp1_sem$cond1$cond
   sum_exp1_sem$cond1$bias_per
