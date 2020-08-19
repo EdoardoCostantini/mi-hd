@@ -15,9 +15,9 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
   if(perform == TRUE){
     p  <- ncol(Z) # number of variables [indexed with j]
     
-    p_imp <- length(parms$z_m_id) # variables with missing values
-    r     <- colSums(O[1:p_imp]) # variable-wise count of observed values
-    nr    <- colSums(!O[1:p_imp]) # variable-wise count of observed values
+    p_imp    <- sum(colMeans(O) < 1)
+    p_imp_id <- names(which(colMeans(O) < 1))
+    nr       <- colSums(!O[, colMeans(O) < 1])
     
     # To store imputed values and check convergence
     imp_IURR_val <- vector("list", parms$chains)
@@ -35,28 +35,30 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
         names(imp_IURR_dat) <- seq(1:parms$iters)
         
       # Storing imputate values for each iteration (per chain)
-      imps <- lapply(1:p_imp, function(x) {
+      imps <- lapply(p_imp_id, function(x) {
         matrix(data = NA, nrow = parms$iters, ncol = nr[x],
                dimnames = list(NULL, rownames(Z[!O[, x],]) ))
       })
       
       Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
         imp_IURR_dat$`1` <- Zm
-        for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, i], i]
+        for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                                p_imp_id[i]]
       
       for (m in 2:parms$iters) {
         print(paste0("IURR - Chain: ", cc, "/", parms$chains, 
                      "; Iter: ", m, "/", parms$iters))
         for (j in 1:p_imp) {
+          J <- which(colnames(Zm) %in% p_imp_id[j])
           # Select data
-          y_obs <- z_j_obs  <- Zm[O[, j] == TRUE, j]
-          y_mis <- zm_mj    <- Zm[O[, j] == FALSE, j] # useless
-          X_obs <- Wm_j_obs <- as.matrix(Zm[O[, j] == TRUE, -j])
+          y_obs <- z_j_obs  <- Zm[O[, J] == TRUE, J]
+          y_mis <- zm_mj    <- Zm[O[, J] == FALSE, J] # useless
+          X_obs <- Wm_j_obs <- as.matrix(Zm[O[, J] == TRUE, -J])
             X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
-          X_mis <- Wm_mj    <- as.matrix(Zm[O[, j] == FALSE, -j])
+          X_mis <- Wm_mj    <- as.matrix(Zm[O[, J] == FALSE, -J])
             X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
           
-          glmfam <- detect_family(Zm[, j])
+          glmfam <- detect_family(Zm[, J])
             
           # Fit regularized regression
           # Requirement for procedure is that selected n > p as the ML apporaches
@@ -99,7 +101,7 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
           }
           
           # Append imputation
-          Zm[!O[, j], j] <- zm_j # update data
+          Zm[!O[, J], J] <- zm_j # update data
           imps[[j]][m, ] <- zm_j # save iteration imputation
         }
       imp_IURR_dat[[m]] <- Zm

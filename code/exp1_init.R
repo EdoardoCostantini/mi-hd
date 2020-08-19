@@ -11,9 +11,9 @@
 # Itereations, repetitions, etc
   parms$dt_rep     <- 500  # replications for averaging results (200 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
-  parms$iters      <- 50
-  parms$burnin_imp <- 20 # how many imputation iterations should be discarded
-  parms$ndt        <- 10 # number of imputed datasets to pool esitmaes from (10)
+  parms$iters      <- 50 # 50
+  parms$burnin_imp <- 20 # 20 how many imputation iterations should be discarded
+  parms$ndt        <- 10 # 10 number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
@@ -24,8 +24,8 @@
 
   # For blasso
   parms$chains_bl     <- 1 # number of parallel chains for convergence check
-  parms$iters_bl      <- 50
-  parms$burnin_imp_bl <- 20 # how many imputation iterations should be discarded
+  parms$iters_bl      <- 50 # 50
+  parms$burnin_imp_bl <- 20 # 20 how many imputation iterations should be discarded
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
@@ -33,7 +33,7 @@
                                              parms$thin_bl)]
   
   # For mice-like algorithms
-  parms$mice_iters <- 20 #  20
+  parms$mice_iters <- 20 # 20
   parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
   
 # Data gen ----------------------------------------------------------------
@@ -55,16 +55,20 @@
   parms$Z_o_mu  <- 0 # mean for gen of fully observed variables
 
 # z_m gen (covariates that will have missingness)
-  parms$z_m_id  <- c((parms$blck1[1]):3, 
-                     (parms$blck2[1]):8)
+  # parms$z_m_id  <- c((parms$blck1[1]):3, 
+  #                    (parms$blck2[1]):8)
+  parms$z_m_id  <- paste0("z", c((parms$blck1[1]):3, 
+                                 (parms$blck2[1]):8))
   parms$zm_n <- length(parms$z_m_id)
   parms$S_all   <- list(q1 = (c(parms$blck1, parms$blck2)), # variables in block 1 and 2
                         q2 = (c(4:13, 50:59)))[[1]]
 
 # y gen / imporntant predictors
-  parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
+  # parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
+  parms$formula <- paste0(parms$z_m_id, collapse = ", ")
   # variables that are to be imputed
-  parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
+  # parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
+  parms$lm_model <- parms$z_m_id
 
 # Response Model (rm)
   parms$missType <- c("high", "low")[2]

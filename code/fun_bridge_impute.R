@@ -8,14 +8,15 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
   # Prep data ---------------------------------------------------------------
   # Z = Xy_mis
   # O = as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
+  # ridge_p = 1e-5
   if(perform == TRUE){
     
     tryCatch({
-      p  <- ncol(Z) # number of variables [indexed with j]
+      p  <- ncol(Z) # number of variables [indexed with J]
       
-      p_imp <- length(parms$z_m_id) # variables with missing values
-      r  <- colSums(O[1:p_imp]) # variable-wise count of observed values
-      nr  <- colSums(!O[1:p_imp]) # variable-wise count of observed values
+      p_imp    <- sum(colMeans(O) < 1)
+      p_imp_id <- names(which(colMeans(O) < 1))
+      nr       <- colSums(!O[, colMeans(O) < 1])
       
       # To store imputed values and check convergence
       imp_bridge_val <- vector("list", parms$chains)
@@ -36,35 +37,37 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
         # Empty storing objects for MCMC samples
         
         # Imputed scores
-        Imp.out <- lapply(1:p_imp, function(x) {
-          matrix(data = NA, nrow = parms$iters, ncol = nr[x],
+        Imp.out <- lapply(p_imp_id, function(x) {
+          matrix(data = NA, nrow = parms$iters_bl, ncol = nr[x],
                  dimnames = list(NULL, rownames(Zm[!O[, x],]) ))
         })
-        for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, i], i]
+        for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                                   p_imp_id[i]]
         
         # Loop across Iteration
         for (m in 2:parms$iters) {
           print(paste0("bridge - Chain: ", cc, "/", parms$chains, "; Iter: ", m, "/", parms$iters))
           # Loop across variables (cycle)
           for (j in 1:p_imp) {
-            zj_obs <- Zm[O[, j], j]
-            zj_mis <- Zm[!O[, j], j]
-            Z_obs <- as.matrix(Zm[O[, j], -j])
+            J <- which(colnames(Zm) %in% p_imp_id[j])
+            zj_obs <- Zm[O[, J], J]
+            zj_mis <- Zm[!O[, J], J]
+            Z_obs <- as.matrix(Zm[O[, J], -J])
             Z_obs <- apply(Z_obs, 2, as.numeric) # makes dicho numbers
-            Z_mis <- as.matrix(Zm[!O[, j], -j])
+            Z_mis <- as.matrix(Zm[!O[, J], -J])
             Z_mis <- apply(Z_mis, 2, as.numeric) # makes dicho numbers
             
             # Obtain posterior draws for all paramters of interest
-            pdraw <- .norm.draw(y       = Zm[, j], 
-                                ry      = O[, j], 
-                                x       = as.matrix(Zm[, -j]), 
+            pdraw <- .norm.draw(y       = Zm[, J], 
+                                ry      = O[, J], 
+                                x       = as.matrix(Zm[, -J]), 
                                 ls.meth = "ridge", ridge = ridge_p)
             
             # Obtain posterior predictive draws
-            pdraw_zj_imp <- Z_mis %*% pdraw$beta + rnorm(sum(!O[, j])) * pdraw$sigma
+            pdraw_zj_imp <- Z_mis %*% pdraw$beta + rnorm(sum(!O[, J])) * pdraw$sigma
             
             # Append imputation (for next iteration)
-            Zm[!O[, j], j] <- pdraw_zj_imp
+            Zm[!O[, J], J] <- pdraw_zj_imp
             
             # Store imputations
             Imp.out[[j]][m, ]  <- pdraw_zj_imp

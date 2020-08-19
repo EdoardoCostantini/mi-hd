@@ -2,7 +2,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_PCA <- function(Z, parms = parms){
+impute_PCA <- function(Z, O, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values, 
@@ -18,6 +18,7 @@ impute_PCA <- function(Z, parms = parms){
   
   # For internals
   # Z = Xy_mis
+  # O = as.data.frame(!is.na(Xy_mis)) # matrix index of observed values
   
   ## body:
   if(parms$meth_sel$MI_PCA == TRUE){
@@ -26,6 +27,7 @@ impute_PCA <- function(Z, parms = parms){
     # Data
     p <- ncol(Z) # number of variables [INDEX with j]
     n <- nrow(Z) # number of observations
+    p_imp_id <- names(which(colMeans(O) < 1))
     
     # Separate analysis model variables from auxiliary variables 
     Z_aux <- Z[, -which(sapply(names(Z), grepl, x = parms$formula))]
@@ -39,7 +41,7 @@ impute_PCA <- function(Z, parms = parms){
     
     # 1. Single Imputation of auxiliary variables if missing 
     # (doesn't do anything if Z_aux is fully observed)
-    if(sum(is.na(Z_aux)) != 0){
+    if(sum(is.na(Z_aux)) > 0){
       predMatrix <- quickpred(Z_aux, mincor = parms$PCA_mincor)
       Z_aux_mids <- mice(Z_aux, m = 1, maxit = 1, 
                          predictorMatrix = predMatrix,
@@ -88,26 +90,25 @@ impute_PCA <- function(Z, parms = parms){
       methods[vartype != "numeric"] <- "pmm"
     
     ## Define Predictor matrix
-    predMat <- matrix(rep(0, ncol(Z_4imp)^2), ncol = ncol(Z_4imp), 
-                      dimnames = list(colnames(Z_4imp), colnames(Z_4imp)))
-    predMat[1:length(parms$z_m_id), ] <- 1
-    diag(predMat) <- 0
+    # predMat <- matrix(rep(0, ncol(Z_4imp)^2), ncol = ncol(Z_4imp), 
+    #                   dimnames = list(colnames(Z_4imp), colnames(Z_4imp)))
+    # predMat[1:length(parms$z_m_id), ] <- 1
+    # diag(predMat) <- 0
       
     # Impute
     imp_PCA_mids <- mice::mice(Z_4imp,
                                m = parms$mice_ndt,
                                maxit = parms$mice_iters,
-                               predictorMatrix = predMat,
+                               # predictorMatrix = predMat,
                                ridge = 1e-5,
                                method = methods)
-    imp_PCA_mids$predictorMatrix
     end.time <- Sys.time()
     
     # Store results
     imp_PCA_PC_dats <- mice::complete(imp_PCA_mids, "all")
-    miss_id <- paste0("z", parms$z_m_id)
+    
     imp_PCA_dats <- lapply(imp_PCA_PC_dats, function(x){
-      cbind(x[, miss_id], Z[,-which(colnames(Z) %in% miss_id)])
+      cbind(x[, p_imp_id], Z[, -which(colnames(Z) %in% p_imp_id)])
     })
     
     imp_PCA_imps <- imp_PCA_mids$imp[1:parms$zm_n]

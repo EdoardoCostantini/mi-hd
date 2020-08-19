@@ -85,10 +85,11 @@
                                IURR_la = TRUE,
                                IURR_el = FALSE,
                                blasso  = TRUE,
+                               bridge  = TRUE,
                                MI_PCA  = TRUE,
                                MI_CART = TRUE,
                                MI_RF   = TRUE,
-                               MI_T    = TRUE,
+                               MI_OP    = TRUE,
                                missFor = TRUE,
                                GS      = TRUE,
                                CC      = TRUE
@@ -122,7 +123,11 @@
   parms$PCA_mincor   <- .3 # mincor for qucikpred for single imputation auxiliary vars
   parms$PCA_maxpw    <- 2L # polynomials order
   parms$PCA_pcthresh <- .5 # proportion of vairance for selection of PCs
-
+  parms$formula <- paste0("y", sep = ", ",
+                          paste0("z", parms$yMod_cov, collapse = ", "), sep = ", ",
+                          paste0(paste0("z", parms$yMod_int), collapse = ""))
+  
+  
   # Random Forest
   parms$rfntree <- 10
   

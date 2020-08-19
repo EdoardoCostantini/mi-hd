@@ -118,10 +118,11 @@ runCell <- function(cond, parms, rep_status) {
   
   Xy <- simData_exp1(cond, parms)
   Xy_mis <- imposeMiss(Xy, parms, cond)
-  Xy_mis <- cbind(Xy_mis[, parms$z_m_id], Xy_mis[, -parms$z_m_id])
+  Xy_mis <- cbind(Xy_mis[, parms$z_m_id], 
+                  Xy_mis[, -which(colnames(Xy_mis) %in% parms$z_m_id)])
   
   O <- !is.na(Xy_mis) # matrix index of observed values
-  miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
+  miss_descrps <- colMeans(!O[, parms$z_m_id]) 
     
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
@@ -190,7 +191,7 @@ runCell <- function(cond, parms, rep_status) {
                 perform = parms$meth_sel$bridge)
 
   # Impute according to Howard Et Al 2015 PCA appraoch
-  imp_PCA <- impute_PCA(Z = Xy_mis, parms = parms)
+  imp_PCA <- impute_PCA(Z = Xy_mis, O = O, parms = parms)
   update_report("MICE-PCA", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$MI_PCA)
@@ -217,6 +218,7 @@ runCell <- function(cond, parms, rep_status) {
   
   # MICE w/ true model
   imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
+                                O = O,
                                 cond = cond,
                                 perform = parms$meth_sel$MI_OP,
                                 parms = parms)
@@ -446,7 +448,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   
   ## ----------------------------------------------------------------------- ##
   # Impute according to Howard Et Al 2015 PCA appraoch
-  imp_PCA <- impute_PCA(Z = Xy_mis, parms = parms)
+  imp_PCA <- impute_PCA(Z = Xy_mis, O = O, parms = parms)
   update_report("MICE-PCA", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$MI_PCA)
@@ -476,6 +478,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   ## ----------------------------------------------------------------------- ##
   # MICE w/ true model
   imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
+                                O = O,
                                 cond = cond,
                                 perform = parms$meth_sel$MI_OP,
                                 parms = parms)
@@ -535,7 +538,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   )
   
   ## Define Analysis models
-  SAT_mod_raw <- SAT_mod_write(colnames(Xy)[parms$z_m_id]) # raw data
+  SAT_mod_raw <- SAT_mod_write(parms$z_m_id) # raw data
   CFA_mod_raw <- CFA_mod_wirte(Xy, 2, parms) # raw data
   SAT_mod_sco <- SAT_mod_write(colnames(SC_dt_sn$GS)[1:parms$sc_n]) # score data
   lm_formula <- "sc1 ~ -1 + sc2 + sc3"
@@ -733,7 +736,7 @@ runCell_int <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./init.R")
-  # cond <- conds[1, ]
+  # cond <- conds[2, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
@@ -761,13 +764,31 @@ runCell_int <- function(cond, parms, rep_status) {
   if(cond$int_sub == TRUE){
     col_int <- paste0("z", parms$yMod_int)
     
+    # Fully obsrved
+    int_term <- apply(scale(Xy[, col_int], 
+                            scale = FALSE, center = TRUE), 
+                      1, 
+                      prod)
+    Xy <- cbind(Xy, int_term)
+    colnames(Xy)[colnames(Xy) == "int_term"] <- paste0(col_int, 
+                                                       collapse = "")
+    
+    # W/ missings
     int_term <- apply(scale(Xy_mis[, col_int], 
                             scale = FALSE, center = TRUE), 
                       1, 
                       prod)
     Xy_mis <- cbind(Xy_mis, int_term)
-    colnames(Xy_mis)[colnames(Xy_mis) == "int_term"] <- paste0(col_int, collapse = "")
+    colnames(Xy_mis)[colnames(Xy_mis) == "int_term"] <- paste0(col_int, 
+                                                               collapse = "")
+    
+    # Give names
+    lapply(list(Xy, Xy_mis), function(x){
+      colnames(x)[colnames(x) == "int_term"] <- paste0(col_int, collapse = "")
+      return(x)
+    })
   }
+  
   # Missing data 
   O <- !is.na(Xy_mis) # matrix index of observed values
   miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
@@ -831,15 +852,16 @@ runCell_int <- function(cond, parms, rep_status) {
   # Impute according to van Buuren Ridge
   imp_bridge <- impute_BRIDGE(Z = Xy_mis, 
                               O = as.data.frame(O),
-                              ridge_p = parms$ridge,
+                              ridge_p = cond$ridge,
                               parms = parms,
                               perform = parms$meth_sel$bridge)
+  
   update_report("bridge", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$bridge)
   
   # Impute according to Howard Et Al 2015 PCA appraoch
-  imp_PCA <- impute_PCA(Z = Xy_mis, parms = parms)
+  imp_PCA <- impute_PCA(Z = Xy_mis, O = O, parms = parms)
   update_report("MICE-PCA", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$MI_PCA)
@@ -866,6 +888,7 @@ runCell_int <- function(cond, parms, rep_status) {
   
   # MICE w/ true model
   imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
+                                O = O,
                                 cond = cond,
                                 perform = parms$meth_sel$MI_OP,
                                 parms = parms)
@@ -875,9 +898,7 @@ runCell_int <- function(cond, parms, rep_status) {
   
   # missForest
   imp_missFor <- impute_missFor(Z = Xy_mis, parms = parms)
-  # missForest_out <- capture.output(impute_missFor(Z = Xy_mis, parms = parms))
-  # missFprest_outdt <- capture.output(imp_missFor$dats)
-  
+
   ## Convergence ----------------------------------------------------------- ##
   
   imp_values <- list(DURR_la = imp_DURR_la$imps,
@@ -893,33 +914,17 @@ runCell_int <- function(cond, parms, rep_status) {
   
   ## Analyse --------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
-  
-  ## MLE estaimte of mean, variance, covariance
-  
-  # Multiple imputed dataset
-  
-  sem_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
-                          DURR_el = imp_DURR_el$dats,
-                          IURR_la = imp_IURR_la$dats,
-                          IURR_el = imp_IURR_el$dats,
-                          bridge  = imp_bridge$dats,
-                          blasso  = imp_blasso$dats,
-                          MI_PCA  = imp_PCA$dats,
-                          MI_CART = imp_CART$dats,
-                          MI_RF   = imp_RANF$dats,
-                          MI_OP   = imp_MICE_OP$dats), 
-                     fit_sat_model)
-  
-  # Single dataset
-  sem_sndt <- lapply(list(missFor = imp_missFor$dats,          
-                          GS      = Xy,                        
-                          CC      = Xy_mis[rowSums(!O) == 0, ]), 
-                     sem, model = parms$lav_model, likelihood = "wishart")
-  
-  ## LM model
-  
+
   # Multiple datasets
-  
+  if(cond$int_sub == FALSE){
+    lm_vrbs <- c("y", 
+                 paste0("z", parms$yMod_cov))
+  } else {
+    lm_vrbs <- c("y", 
+                 paste0("z", parms$yMod_cov), 
+                 paste0("z", parms$yMod_int, collapse = ""))
+  }
+
   lm_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
                          DURR_el = imp_DURR_el$dats,
                          IURR_la = imp_IURR_la$dats,
@@ -930,31 +935,17 @@ runCell_int <- function(cond, parms, rep_status) {
                          MI_CART = imp_CART$dats,
                          MI_RF   = imp_RANF$dats,
                          MI_OP   = imp_MICE_OP$dats), 
-                    fit_lm_models, vrbs = parms$lm_model)
+                    fit_lm_models, vrbs = lm_vrbs)
   
   # Single dataset
   
   lm_sndt <- fit_lm_models(list(missFor = imp_missFor$dats, 
                                 GS      = Xy, 
                                 CC      = Xy_mis[rowSums(!O) == 0, ]),
-                           vrbs = parms$lm_model)
+                           vrbs = lm_vrbs)
   
   ## Pooling --------------------------------------------------------------- ##
   # For each imp method, pool estimates across the m datasets
-  
-  # MLE mean, var, cov
-  
-  sem_pool_MI_EST <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
-                            sem_pool_EST_f)
-  sem_pool_MI_CI  <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
-                            sem_pool_CI_f)
-  
-  # append single imputations, and GS and CC results
-  sem_gather_EST <- cbind(sem_pool_MI_EST,
-                          sem_EST(sem_sndt))
-  
-  sem_gather_CI <- cbind(sem_pool_MI_CI,
-                         sem_CI(sem_sndt))
   
   # LM models
   lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_EST_f)
@@ -966,7 +957,6 @@ runCell_int <- function(cond, parms, rep_status) {
   
   lm_pool_CI <- cbind(lm_pool_CI,
                       lm_CI(lm_sndt))
-  
   
   ## Times ----------------------------------------------------------------- ##
   # aggregate imputation times

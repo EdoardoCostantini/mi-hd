@@ -59,7 +59,8 @@
 # Z gen (fully observed covariates)
 
 # z_m gen (measured items that will have missingness)
-  parms$z_m_id  <- 1:10
+  # parms$z_m_id  <- 1:10
+  parms$z_m_id <- paste0("z", 1:10)
   parms$zm_n <- length(parms$z_m_id)
   parms$S_all   <- 1:(5*4)
     # all measured items (5) for the first 4 lv. These include:
@@ -68,10 +69,12 @@
     # - all of their items
   
 # y gen / imporntant predictors
-  parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
+  # parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
+  parms$formula <- paste0(parms$z_m_id, collapse = ", ")
   # variables that are to be imputed
-  parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
-
+  # parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
+  parms$lm_model <- parms$z_m_id
+  
 # Response Model
   parms$missType <- c("high", "low")[2]
   
@@ -89,13 +92,13 @@
 # Generic
   parms$meth_sel <- data.frame(DURR_la = TRUE,
                                DURR_el = FALSE,
-                               IURR_la = FALSE,
+                               IURR_la = TRUE,
                                IURR_el = FALSE,
-                               bridge  = FALSE,
+                               bridge  = TRUE,
                                blasso  = TRUE,
-                               MI_PCA  = FALSE,
-                               MI_CART = FALSE,
-                               MI_RF   = FALSE,
+                               MI_PCA  = TRUE,
+                               MI_CART = TRUE,
+                               MI_RF   = TRUE,
                                MI_OP   = TRUE,
                                missFor = TRUE,
                                GS      = TRUE,

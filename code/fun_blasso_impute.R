@@ -10,9 +10,10 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
   if(perform == TRUE){
   p  <- ncol(Z) # number of variables [indexed with j]
 
-  p_imp <- length(parms$z_m_id) # variables with missing values
-  r  <- colSums(O[1:p_imp]) # variable-wise count of observed values
-  nr  <- colSums(!O[1:p_imp]) # variable-wise count of observed values
+  p_imp    <- sum(colMeans(O) < 1)
+  p_imp_id <- names(which(colMeans(O) < 1))
+  r        <- colSums(O[, colMeans(O) < 1])
+  nr       <- colSums(!O[, colMeans(O) < 1])
   
   # To store imputed values and check convergence
   imp_blasso_val <- vector("list", parms$chains_bl)
@@ -23,7 +24,7 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
   
   # For one chain of imputatuions
   for (cc in 1:parms$chains_bl) {
-    
+  
     # To store multiply imputed datasets (in from the last chain)
     imp_blasso_dat <- vector("list", parms$iters_bl)
       names(imp_blasso_dat) <- seq(1:parms$iters_bl)
@@ -50,11 +51,12 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
     for (i in 1:p_imp) Phi.out[[i]][1, ] <- .5
     
     # Imputed scores
-    Imp.out <- lapply(1:p_imp, function(x) {
+    Imp.out <- lapply(p_imp_id, function(x) {
       matrix(data = NA, nrow = parms$iters_bl, ncol = nr[x],
              dimnames = list(NULL, rownames(Zm[!O[, x],]) ))
     })
-    for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, i], i]
+    for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                               p_imp_id[i]]
     
     # Latent variable for probit models
     lv.out <- lapply(1:p_imp, function(x) {
@@ -67,15 +69,16 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
       print(paste0("BLASSO - Chain: ", cc, "/", parms$chains_bl, "; Iter: ", m, "/", parms$iters_bl))
       # Loop across variables (cycle)
       for (j in 1:p_imp) {
-        zj_obs <- Zm[O[, j], j]
-        zj_mis <- Zm[!O[, j], j]
-        Z_obs <- as.matrix(Zm[O[, j], -j])
-        Z_mis <- as.matrix(Zm[!O[, j], -j])
+        J <- which(colnames(Zm) %in% p_imp_id[j])
+        zj_obs <- Zm[O[, J], J]
+        zj_mis <- Zm[!O[, J], J]
+        Z_obs <- as.matrix(Zm[O[, J], -J])
+        Z_mis <- as.matrix(Zm[!O[, J], -J])
         
         # Scaled versions
         s_zj_obs <- scale(zj_obs)
-        s_Z_obs  <- scale(Zm[O[, j], -j])
-        s_Z_mis  <- scale(Zm[!O[, j], -j], 
+        s_Z_obs  <- scale(Zm[O[, J], -J])
+        s_Z_mis  <- scale(Zm[!O[, J], -J], 
                           center = colMeans(Z_obs), 
                           scale = apply(Z_obs, 2, sd))
         
@@ -170,7 +173,7 @@ impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
         Imp.out[[j]][m, ]  <- pdraw_zj_imp
         
         # Append imputation (for next iteration)
-        Zm[!O[, j], j] <- pdraw_zj_imp
+        Zm[!O[, J], J] <- pdraw_zj_imp
       }
       # only data from last chain will actaully be saved
       imp_blasso_dat[[m]] <- Zm 

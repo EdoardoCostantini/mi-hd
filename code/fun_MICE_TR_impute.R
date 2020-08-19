@@ -3,7 +3,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_MICE_OP <- function(Z, cond, perform = TRUE, parms = parms){
+impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values
@@ -16,6 +16,7 @@ impute_MICE_OP <- function(Z, cond, perform = TRUE, parms = parms){
   # Z = Xy_mis
   # cond = conds[2,]
   # parms = parms
+  # O <- as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
   
   ## output: 
   # - a list of chains imputed datasets at iteration iters
@@ -25,9 +26,10 @@ impute_MICE_OP <- function(Z, cond, perform = TRUE, parms = parms){
   ## body:
   if(perform == TRUE){
     # Define predictor matrix for MI TRUE with best active set
+    p_imp_id <- names(which(colMeans(O) < 1))
     predMat <- matrix(rep(0, ncol(Z)^2), ncol = ncol(Z), 
                       dimnames = list(colnames(Z), colnames(Z)))
-    predMat[1:length(parms$z_m_id), parms$S_all] <- 1
+    predMat[p_imp_id, parms$S_all] <- 1
     
     # Define methods
     methods <- rep("norm", ncol(Z))
