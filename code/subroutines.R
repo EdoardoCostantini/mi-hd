@@ -766,7 +766,7 @@ runCell_int <- function(cond, parms, rep_status) {
                       1, 
                       prod)
     Xy_mis <- cbind(Xy_mis, int_term)
-    colnames(Xy_mis)[colnames(Xy_mis) == "int_term"] <- paste0(col_int, collapse = ":")
+    colnames(Xy_mis)[colnames(Xy_mis) == "int_term"] <- paste0(col_int, collapse = "")
   }
   # Missing data 
   O <- !is.na(Xy_mis) # matrix index of observed values
