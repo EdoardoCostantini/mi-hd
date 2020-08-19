@@ -14,7 +14,7 @@ impute_MICE_OP <- function(Z, cond, perform = TRUE, parms = parms){
   
   ## Example inputs
   # Z = Xy_mis
-  # cond = conds[1,]
+  # cond = conds[2,]
   # parms = parms
   
   ## output: 

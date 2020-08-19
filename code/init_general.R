@@ -3,8 +3,6 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-07-01
 
-rm(list=ls())
-
 # Packages ----------------------------------------------------------------
 
 library(tidyverse)

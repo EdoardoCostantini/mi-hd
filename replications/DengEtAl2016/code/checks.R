@@ -94,6 +94,46 @@ source("./functions.R")
     CC = round(t(sapply(1:10, function(x) apply(store_coef_cc[[x]], 2, sd) )), 3)
   )
 
+  reps <- 500
+  
+  # LM related
+  b_fl <- b_ms <- 
+    matrix(NA, nrow = reps, ncol = 6)
+  R2 <- matrix(NA, nrow = reps, ncol = 2)
+  
+  # set.seed(20200814)
+  # Perform analysis
+  for (r in 1:reps) {
+    Xy <- genData(conds[1, ], parms)
+    # Xy_mis <- imposeMiss(Xy, parms)$Xy_miss
+    Xy_mis <- imposeMiss_int(Xy, parms, conds[1,])
+    
+    O <- !is.na(Xy_mis) # matrix index of observed values
+    
+    # LM
+    lm_GS <- lm(parms$formula, data = Xy)
+    # lm_CC <- lm(parms$formula, data = Xy_mis, na.action = na.omit)
+    lm_CC <- lm(parms$formula, data = Xy_mis)
+    lm_sndt <- list(GS = lm_GS, CC = lm_CC)
+    
+    lm_par <- as.data.frame(lapply(lm_sndt, coef))
+    
+    R2[r, ] <- sapply(lm_sndt, function(x) summary(x)$r.squared)
+    
+    b_fl[r, ] <- lm_par[, "GS"]
+    b_ms[r, ] <- lm_par[, "CC"]
+  }
+  
+  # Effect of missingness on analysis
+  # MCMC Estimates
+  out_lm <- data.frame(full = round( colMeans(b_fl), 3),
+                       miss = round( colMeans(b_ms, na.rm = TRUE), 3))
+  out_lm
+  
+  # Bias (in terms of percentage of true value)
+  BPR_lm <- round(abs(out_lm$full - out_lm$miss)/out_lm$full*100, 3)
+  BPR_lm
+  
 # IURR Error --------------------------------------------------------------
 # Run IURR many times to see if an error occurs due to varibale selection
   set.seed(1234)

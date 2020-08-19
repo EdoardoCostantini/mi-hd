@@ -11,14 +11,6 @@
   source("./init_general.R")
 
 # Read results from a run of simulation study
-  # Checks
-  sum_exp1_sem <- readRDS("../output/sim_res_20200801_1620sum_exp1_sem.rds")
-  sum_exp1_lm  <- readRDS("../output/sim_res_20200801_1620sum_exp1_lm.rds")
-  # 20200715 Correct
-  # sum_exp1_sem <- readRDS("../output/sim_res_20200710_1019sum_exp1_sem.rds" )
-  # sum_exp1_lm <- readRDS("../output/sim_res_20200710_1019sum_exp1_lm.rds" )
-  # Current Correct
-  sum_exp1_lm  <- readRDS("../output/sim_res_20200731_1735sum_exp1_lm.rds")
   exp2_res <- readRDS("../output/exp2_simOut_20200812_1449_res.rds")
 
 # Bias --------------------------------------------------------------------

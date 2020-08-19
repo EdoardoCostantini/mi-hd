@@ -13,7 +13,8 @@ source("./init_general.R")
 # of the simualtion study. It contains an imputation run with many iterations,
 # many chians, for the most difficult condition of experiment 1.
 
-out_cnv <- readRDS("../output/ccheck_exp2_20200812_1115.rds")
+out_cnv <- readRDS("../output/exp2_conv_20200812_1717.rds")
+out_cnv <- readRDS("../output/ccheck_exp2_20200811_1626.rds")
 
 # Run description
 
@@ -45,17 +46,17 @@ mean_traceplot(out_cnv,
                dat = exp_dat, 
                y_range = y_range, iters = 1:1e3)
 # blasso (try 1000 iterations)
-exp_dat <- 3
+exp_dat <- 5
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[3], 
                dat = exp_dat, 
-               y_range = y_range, iters = iters_range)
+               y_range = y_range, iters = 1500:2000)
 # Good after 500 for most. Some get better closer to 1e3
+# exp_dat <- 3 - z3, z5 is dificult but seems to go well after 1250 iterations
+# exp_dat <- 8 struggles with z3
+# exp_dat <- 1 z5 is a bit erratic
 # exp_data <- 5 shows very bad z7 and z10, but seem to be 
-# exceptions.
-# Current proposal: is to perform 1e3 iterations with 950 
-# burn in, save 10 data in last 50- exp_dat <- 3 shows why
-# we need to get to 1e3 iteartions with variable z5
+# DECISION: 2e3 iterations with 1950 burn in
 
 # bridge (50-100 good for all)
 exp_dat <- 3

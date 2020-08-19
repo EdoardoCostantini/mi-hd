@@ -1,0 +1,105 @@
+CONVERGENCE CHECK PROGRESS REPORT
+Description: For the most challanging condition, data generation is repeated 
+                        a few times, imputation models are used. Obtained imputations can 
+                        then be used to check convergence
+
+------
+Starts at: 2020-08-12 17:17:54
+------
+
+2020-08-12 17:17:54 - Starts Repetition: 1
+2020-08-12 17:17:54 - Starts Repetition: 3
+2020-08-12 17:17:54 - Starts Repetition: 4
+2020-08-12 17:17:54 - Starts Repetition: 5
+2020-08-12 17:17:54 - Starts Repetition: 9
+2020-08-12 17:17:54 - Starts Repetition: 6
+2020-08-12 17:17:54 - Starts Repetition: 10
+2020-08-12 17:17:54 - Starts Repetition: 2
+2020-08-12 17:17:54 - Starts Repetition: 8
+2020-08-12 17:17:54 - Starts Repetition: 7
+2020-08-12 18:47:20 | Rep = 6, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 18:48:40 | Rep = 5, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 18:49:48 | Rep = 1, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 18:54:25 | Rep = 2, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 18:56:08 | Rep = 7, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 18:56:57 | Rep = 8, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 18:57:15 | Rep = 4, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 18:58:46 | Rep = 10, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 18:59:04 | Rep = 9, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 19:01:26 | Rep = 3, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | DURR lasso done
+2020-08-12 20:06:45 | Rep = 6, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:12:31 | Rep = 5, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:20:49 | Rep = 1, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:23:39 | Rep = 4, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:24:01 | Rep = 3, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:24:13 | Rep = 9, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:33:29 | Rep = 10, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:35:32 | Rep = 2, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:39:12 | Rep = 8, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 20:46:32 | Rep = 7, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | IURR lasso done
+2020-08-12 22:50:19 | Rep = 6, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 22:55:20 | Rep = 5, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 22:57:10 | Rep = 4, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 22:57:14 | Rep = 3, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 22:59:11 | Rep = 9, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 23:02:18 | Rep = 1, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 23:07:27 | Rep = 10, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 23:10:35 | Rep = 8, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 23:16:59 | Rep = 2, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 23:29:21 | Rep = 7, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | blasso done
+2020-08-12 23:29:58 | Rep = 6, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:31:28 | Rep = 6, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-12 23:34:38 | Rep = 3, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:34:41 | Rep = 4, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:34:45 | Rep = 5, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:35:57 | Rep = 3, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-12 23:36:00 | Rep = 4, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-12 23:36:10 | Rep = 5, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-12 23:36:40 | Rep = 9, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:37:59 | Rep = 9, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-12 23:41:36 | Rep = 1, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:42:59 | Rep = 1, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-12 23:44:55 | Rep = 10, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:46:14 | Rep = 10, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-12 23:47:51 | Rep = 8, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:49:09 | Rep = 8, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-12 23:55:57 | Rep = 2, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-12 23:57:18 | Rep = 2, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-13 00:08:18 | Rep = 7, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | bridge done
+2020-08-13 00:08:38 | Rep = 6, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:09:45 | Rep = 7, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-PCA done
+2020-08-13 00:11:15 | Rep = 4, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:11:20 | Rep = 3, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:13:04 | Rep = 5, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:13:36 | Rep = 9, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:19:40 | Rep = 1, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:21:33 | Rep = 10, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:23:54 | Rep = 8, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:34:12 | Rep = 2, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:35:02 | Rep = 6, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 00:36:10 | Rep = 3, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 00:36:10 | Rep = 4, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 00:37:21 | Rep = 6, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 00:38:17 | Rep = 3, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 00:38:18 | Rep = 4, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 00:38:49 | Rep = 9, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 00:39:02 | Rep = 5, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 00:40:54 | Rep = 9, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 00:41:15 | Rep = 5, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 00:45:33 | Rep = 1, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 00:46:09 | Rep = 10, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 00:46:34 | Rep = 7, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-CART done
+2020-08-13 00:47:46 | Rep = 1, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 00:48:12 | Rep = 8, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 00:48:14 | Rep = 10, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 00:50:14 | Rep = 8, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 00:59:09 | Rep = 2, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 01:01:20 | Rep = 2, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+2020-08-13 01:10:48 | Rep = 7, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | Random Forest done
+2020-08-13 01:12:53 | Rep = 7, lv = 100, pm = 0.3, fl = high, ridge = 1e-07 | MICE-TR done
+
+------
+Ends at: 2020-08-13 01:13:13
+Run time: 7.922 h
+------
+

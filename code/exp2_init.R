@@ -9,11 +9,11 @@
   parms$exp <- 2 # second experiment - latent structure
 
 # Itereations, repetitions, etc
-  parms$dt_rep     <- 10  # replications for averaging results (200 goal)
-  parms$chains     <- 1 # number of parallel chains for convergence check
-  parms$iters      <- 5
-  parms$burnin_imp <- 0 # how many imputation iterations should be discarded
-  parms$ndt        <- 5 # number of imputed datasets to pool esitmaes from (10)
+  parms$dt_rep     <- 10# 500 replications for averaging results (200 goal)
+  parms$chains     <- 1 # 1   number of parallel chains for convergence check
+  parms$iters      <- 5 # 75
+  parms$burnin_imp <- 0 # 50  how many imputation iterations should be discarded
+  parms$ndt        <- 5 # 10  number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
@@ -25,9 +25,9 @@
                                     parms$thin)] # keep 1 dataset every thin
 
   # For blasso
-  parms$chains_bl     <- 1 # number of parallel chains for convergence check
-  parms$iters_bl      <- 5
-  parms$burnin_imp_bl <- 0 # how many imputation iterations should be discarded
+  parms$chains_bl     <- 1 # 1 number of parallel chains for convergence check
+  parms$iters_bl      <- 5 # 2e3
+  parms$burnin_imp_bl <- 0 # 1950 how many imputation iterations should be discarded
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
@@ -47,9 +47,7 @@
   parms$item_var  <- 5
   
 # Latent Structure
-  # parms$n_lv    <- 3              # number of latent variables (defined by condition)
   parms$n_it    <- 5 # number of measured items
-  # parms$AR_rho  <- .5             # autoregressive correlation (for now)
   
 # Latent Variable blocks
   parms$blck1 <- 1:4 # highly correlated latent variables
@@ -63,7 +61,7 @@
 # z_m gen (measured items that will have missingness)
   parms$z_m_id  <- 1:10
   parms$zm_n <- length(parms$z_m_id)
-  parms$S_all   <- 1:(5*4) 
+  parms$S_all   <- 1:(5*4)
     # all measured items (5) for the first 4 lv. These include:
     # - latent variables of items with missing values (1 and 2)
     # - latent variables involved in response model (3 and 4)
@@ -84,9 +82,6 @@
   parms$auxWts <- c(1, 1)
   
 # Models ------------------------------------------------------------------
-  # source("./gen_lavaan_model.R") # generate txt file for lavaan model
-  # # parms$lav_model <- read.table("../txt/lavaan_model_sat.txt",
-  # #                         as.is = TRUE)$V1
   parms$lav_model <- NULL #paste(readLines("../txt/lavaan_model_sat.txt"), 
                           #collapse="\n")
   parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
@@ -147,6 +142,25 @@
         Imputation methods are used on that condition-specific dataset.
         Results are therefore given per dataset in condition")
 
+
+# Storing prefrences ------------------------------------------------------
+  # Needs to match the location and name of the output list
+  parms$store <- c(cond     = TRUE,
+                   dat_full = FALSE,
+                   dat_miss = FALSE,
+                   sem_EST  = TRUE,
+                   sem_CI   = TRUE,
+                   CFA_EST  = TRUE,
+                   CFA_CI   = TRUE,
+                   semS_EST = TRUE,
+                   semS_CI  = TRUE,
+                   lm_EST   = TRUE,
+                   lm_CI    = TRUE,
+                   fmi      = TRUE,
+                   miss_des = FALSE,
+                   time     = TRUE,
+                   imps     = FALSE)
+  
 # Conditions --------------------------------------------------------------
 
   lv    <- c(10, 100)       # number of latent variables
@@ -158,5 +172,3 @@
                        stringsAsFactors = FALSE)
   conds <- cbind(conds, ridge)
     colnames(conds) <- c("lv", "pm", "fl", "ridge")
-    
-    

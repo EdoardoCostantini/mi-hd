@@ -719,8 +719,279 @@ runCell_lv <- function(cond, parms, rep_status) {
                                      lm   = lm_fmi),
                  miss_descrps = miss_descrps,
                  run_time_min = imp_time,
-                 imp_values   = imp_values)
+                 imp_values   = imp_values)[parms$store]
   
   return(output)
   
+}
+
+# Experiment 3 ------------------------------------------------------------
+
+runCell_int <- function(cond, parms, rep_status) {
+  ## Description
+  # Given 1 condition, Generates 1 dataset and performs imutations according to
+  # selected methods
+  ## For internals
+  # source("./init.R")
+  # cond <- conds[1, ]
+  
+  ## Data ------------------------------------------------------------------ ##
+  # According to experiment set up, gen 1 fully-obs data dataset and
+  # impose missing values;
+  
+  Xy <- simData_int(parms, cond)
+  Xy_mis <- imposeMiss_int(Xy, parms, cond)
+  
+  # DA: Append Axuliary Interaction terms
+  if(cond$int_da == TRUE){
+    col_exc <- which(colnames(Xy) %in% parms$z_m_id)
+    interact <- computeInteract(Xy_mis[, -col_exc],
+                                idVars = colnames(Xy_mis[, -col_exc]),
+                                ordVars = NULL,
+                                nomVars = NULL,
+                                moderators = colnames(Xy_mis[, -col_exc]) )
+    dim(Xy_mis)
+    dim(interact)
+    dim(combn(25, 2))
+    O <- !is.na(interact) # matrix index of observed values
+    sum(colMeans(O) != 1)
+    miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
+  }
+  # JAV (Transform, then impute)
+  if(cond$int_sub == TRUE){
+    col_int <- paste0("z", parms$yMod_int)
+    
+    int_term <- apply(scale(Xy_mis[, col_int], 
+                            scale = FALSE, center = TRUE), 
+                      1, 
+                      prod)
+    Xy_mis <- cbind(Xy_mis, int_term)
+    colnames(Xy_mis)[colnames(Xy_mis) == "int_term"] <- paste0(col_int, collapse = ":")
+  }
+  # Missing data 
+  O <- !is.na(Xy_mis) # matrix index of observed values
+  miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
+  
+  ## Imputation ------------------------------------------------------------ ##
+  # Impute m times the data w/ missing values w/ different methods
+  
+  # Impute according to DURR method
+  
+  # Lasso
+  imp_DURR_la <- impute_DURR(Z = Xy_mis,
+                             O = as.data.frame(O),
+                             reg_type = "lasso",
+                             perform = parms$meth_sel$DURR_la,
+                             parms = parms)
+  
+  update_report("DURR lasso", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$DURR_la)
+  
+  # Elastic Net
+  imp_DURR_el <- impute_DURR(Z = Xy_mis,
+                             O = as.data.frame(O),
+                             reg_type = "el",
+                             perform = parms$meth_sel$DURR_el,
+                             parms = parms)
+  update_report("DURR elastic net", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$DURR_el)
+  
+  # Impute according to IURR method
+  # Lasso
+  imp_IURR_la <- impute_IURR(Z = Xy_mis,
+                             O = as.data.frame(O),
+                             reg_type = "lasso",
+                             perform = parms$meth_sel$IURR_la,
+                             parms = parms)
+  update_report("IURR lasso", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$IURR_la)
+  
+  # Elastic Net
+  imp_IURR_el <- impute_IURR(Z = Xy_mis,
+                             O = as.data.frame(O),
+                             reg_type = "el",
+                             perform = parms$meth_sel$IURR_el,
+                             parms = parms)
+  update_report("IURR elastic net", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$IURR_el)
+  
+  # Impute according to Hans Blasso method
+  imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
+                                 O = as.data.frame(O),
+                                 parms = parms,
+                                 perform = parms$meth_sel$blasso)
+  update_report("blasso", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$blasso)
+  
+  # Impute according to van Buuren Ridge
+  imp_bridge <- impute_BRIDGE(Z = Xy_mis, 
+                              O = as.data.frame(O),
+                              ridge_p = parms$ridge,
+                              parms = parms,
+                              perform = parms$meth_sel$bridge)
+  update_report("bridge", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$bridge)
+  
+  # Impute according to Howard Et Al 2015 PCA appraoch
+  imp_PCA <- impute_PCA(Z = Xy_mis, parms = parms)
+  update_report("MICE-PCA", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_PCA)
+  
+  # MICE-CART traditional
+  imp_CART <- impute_CART(Z = Xy_mis,
+                          O = as.data.frame(O),
+                          perform = parms$meth_sel$MI_CART,
+                          parms = parms)
+  
+  update_report("MICE-CART", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_CART)
+  
+  # MICE-RF
+  imp_RANF <- impute_RANF(Z = Xy_mis,
+                          O = as.data.frame(O),
+                          perform = parms$meth_sel$MI_RF,
+                          parms = parms)
+  
+  update_report("Random Forest", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_RF)
+  
+  # MICE w/ true model
+  imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
+                                cond = cond,
+                                perform = parms$meth_sel$MI_OP,
+                                parms = parms)
+  update_report("MICE-TR", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_OP)
+  
+  # missForest
+  imp_missFor <- impute_missFor(Z = Xy_mis, parms = parms)
+  # missForest_out <- capture.output(impute_missFor(Z = Xy_mis, parms = parms))
+  # missFprest_outdt <- capture.output(imp_missFor$dats)
+  
+  ## Convergence ----------------------------------------------------------- ##
+  
+  imp_values <- list(DURR_la = imp_DURR_la$imps,
+                     DURR_el = imp_DURR_el$imps,
+                     IURR_la = imp_IURR_la$imps,
+                     IURR_el = imp_IURR_el$imps,
+                     bridge  = imp_bridge$imps,
+                     blasso  = imp_blasso$imps,
+                     MI_PCA  = imp_PCA$mids,
+                     MI_CART = imp_CART$imps,
+                     MI_RF   = imp_RANF$imps,
+                     MI_OP   = imp_MICE_OP$mids) # I need this for convergence
+  
+  ## Analyse --------------------------------------------------------------- ##
+  # For each imp method, analyse all datasets based on model defined in init.R
+  
+  ## MLE estaimte of mean, variance, covariance
+  
+  # Multiple imputed dataset
+  
+  sem_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
+                          DURR_el = imp_DURR_el$dats,
+                          IURR_la = imp_IURR_la$dats,
+                          IURR_el = imp_IURR_el$dats,
+                          bridge  = imp_bridge$dats,
+                          blasso  = imp_blasso$dats,
+                          MI_PCA  = imp_PCA$dats,
+                          MI_CART = imp_CART$dats,
+                          MI_RF   = imp_RANF$dats,
+                          MI_OP   = imp_MICE_OP$dats), 
+                     fit_sat_model)
+  
+  # Single dataset
+  sem_sndt <- lapply(list(missFor = imp_missFor$dats,          
+                          GS      = Xy,                        
+                          CC      = Xy_mis[rowSums(!O) == 0, ]), 
+                     sem, model = parms$lav_model, likelihood = "wishart")
+  
+  ## LM model
+  
+  # Multiple datasets
+  
+  lm_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
+                         DURR_el = imp_DURR_el$dats,
+                         IURR_la = imp_IURR_la$dats,
+                         IURR_el = imp_IURR_el$dats,
+                         bridge  = imp_bridge$dats,
+                         blasso  = imp_blasso$dats,
+                         MI_PCA  = imp_PCA$dats,
+                         MI_CART = imp_CART$dats,
+                         MI_RF   = imp_RANF$dats,
+                         MI_OP   = imp_MICE_OP$dats), 
+                    fit_lm_models, vrbs = parms$lm_model)
+  
+  # Single dataset
+  
+  lm_sndt <- fit_lm_models(list(missFor = imp_missFor$dats, 
+                                GS      = Xy, 
+                                CC      = Xy_mis[rowSums(!O) == 0, ]),
+                           vrbs = parms$lm_model)
+  
+  ## Pooling --------------------------------------------------------------- ##
+  # For each imp method, pool estimates across the m datasets
+  
+  # MLE mean, var, cov
+  
+  sem_pool_MI_EST <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
+                            sem_pool_EST_f)
+  sem_pool_MI_CI  <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
+                            sem_pool_CI_f)
+  
+  # append single imputations, and GS and CC results
+  sem_gather_EST <- cbind(sem_pool_MI_EST,
+                          sem_EST(sem_sndt))
+  
+  sem_gather_CI <- cbind(sem_pool_MI_CI,
+                         sem_CI(sem_sndt))
+  
+  # LM models
+  lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_EST_f)
+  lm_pool_CI <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_CI_f)
+  
+  # append single imputations, and GS and CC results
+  lm_pool_EST <- cbind(lm_pool_est,
+                       lm_EST(lm_sndt))
+  
+  lm_pool_CI <- cbind(lm_pool_CI,
+                      lm_CI(lm_sndt))
+  
+  
+  ## Times ----------------------------------------------------------------- ##
+  # aggregate imputation times
+  
+  imp_time <- list(DURR_la = imp_DURR_la$time,
+                   DURR_el = imp_DURR_el$time,
+                   IURR_la = imp_IURR_la$time,
+                   IURR_el = imp_IURR_el$time,
+                   bridge  = imp_bridge$time,
+                   blasso  = imp_blasso$time,
+                   MI_PCA  = imp_PCA$time,
+                   MI_CART = imp_CART$time,
+                   MI_RF   = imp_RANF$time,
+                   MI_OP   = imp_MICE_OP$time)
+  imp_time <- do.call(cbind, imp_time)[1,]
+  
+  ## Store output ---------------------------------------------------------- ##
+  output <- list(cond         = cond,
+                 dat_full     = Xy,
+                 dat_miss     = Xy_mis,
+                 lm_EST       = lm_pool_EST,
+                 lm_CI        = lm_pool_CI,
+                 miss_descrps = miss_descrps,
+                 run_time_min = imp_time,
+                 imp_values   = imp_values)[parms$store]
+  
+  return(output)
 }
