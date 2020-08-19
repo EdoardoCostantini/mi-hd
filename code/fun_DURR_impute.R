@@ -15,14 +15,14 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
   if(perform == TRUE){
     p  <- ncol(Z) # number of variables [indexed with j]
     
-    p_imp <- length(parms$z_m_id) # variables with missing values
-    r     <- colSums(O[1:p_imp]) # variable-wise count of observed values
-    nr    <- colSums(!O[1:p_imp]) # variable-wise count of observed values
+    p_imp    <- sum(colMeans(O) < 1)
+    p_imp_id <- names(which(colMeans(O) < 1))
+    nr       <- colSums(!O[, colMeans(O) < 1])
     
     # To store imputed values and check convergence
     imp_DURR_val <- vector("list", parms$chains)
-     names(imp_DURR_val) <- seq(1:parms$chains)
-      
+      names(imp_DURR_val) <- seq(1:parms$chains)
+    
     # Time performance
     start.time <- Sys.time()
     
@@ -31,35 +31,36 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
       # To store multiply imputed datasets (per chain)
       imp_DURR_dat <- vector("list", parms$iters)
         names(imp_DURR_dat) <- seq(1:parms$iters)
-        
-      # Storing imputated values for each iteration (per chain)
-      imps <- lapply(1:p_imp, function(x) {
+      
+      imps <- lapply(p_imp_id, function(x) {
         matrix(data = NA, nrow = parms$iters, ncol = nr[x],
                dimnames = list(NULL, rownames(Z[!O[, x],]) ))
       })
       
       Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
         imp_DURR_dat$`1` <- Zm
-        for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, i], i]
+        for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                                p_imp_id[i]]
         
       for (m in 2:parms$iters) {
         print(paste0("DURR - Chain: ", cc, "/", parms$chains, 
                      "; Iter: ", m, "/", parms$iters))
         for (j in 1:p_imp) {
+          J <- which(colnames(Zm) %in% p_imp_id[j])
           # 1. Generate bootstrap data set (for each j!)
           # Generate bootstrap sample
           idx_bs   <- sample(1:nrow(Zm), nrow(Zm), replace = TRUE)
           Zm_bs <- Zm[idx_bs, ]
           
           # Select data
-          y_obs_bs <- Zm_bs[O[idx_bs, j], j]  # z_j_obs
-          y_mis_bs <- Zm_bs[!O[idx_bs, j], j] # zm_mj [useless]
-          X_obs_bs <- as.matrix(Zm_bs[O[idx_bs, j], -j]) # Wm_j_obs
+          y_obs_bs <- Zm_bs[O[idx_bs, J], J]  # z_j_obs
+          y_mis_bs <- Zm_bs[!O[idx_bs, J], J] # zm_mj [useless]
+          X_obs_bs <- as.matrix(Zm_bs[O[idx_bs, J], -J]) # Wm_j_obs
             X_obs_bs <- apply(X_obs_bs, 2, as.numeric) # makes dicho numbers
-          X_mis <- Wm_mj    <- as.matrix(Zm[!O[, j], -j]) # Wm_mj
+          X_mis <- Wm_mj    <- as.matrix(Zm[!O[, J], -J]) # Wm_mj
             X_mis <- apply(X_mis, 2, as.numeric)
           
-          glmfam <- detect_family(Zm[, j])
+          glmfam <- detect_family(Zm[, J])
           
           # 2. Fit regularized regression on bootstraped observed data
           ## Lasso
@@ -87,7 +88,7 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
           }
           
           # Append imputation
-          Zm[is.na(Z[, j]), j] <- zm_j
+          Zm[is.na(Z[, J]), J] <- zm_j
           imps[[j]][m, ] <- zm_j # save iteration imputation thing
           
         }
