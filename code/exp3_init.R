@@ -89,7 +89,7 @@
                                MI_PCA  = TRUE,
                                MI_CART = TRUE,
                                MI_RF   = TRUE,
-                               MI_OP    = TRUE,
+                               MI_OP   = TRUE,
                                missFor = TRUE,
                                GS      = TRUE,
                                CC      = TRUE

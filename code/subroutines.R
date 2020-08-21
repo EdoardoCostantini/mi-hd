@@ -96,6 +96,35 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
         }
       }
     }
+    if(parms$exp == 3){
+      for(i in 1 : nrow(conds)) {
+        
+        if(debug == TRUE){
+          rp_out[[i]] <- capture.output(tryCatch({
+            withErrorTracing({runCell_int(cond = conds[i, ],
+                                          parms = parms,
+                                          rep_status = rp)})
+          }, error = function(e){
+            e <<- e
+            cat("ERROR: ", e$message, "\nin ")
+            print(e$call)
+          }))
+        } else {
+          rp_out[[i]] <- tryCatch(
+            {
+              # Try running simulation for condition i, repetition rp
+              runCell_int(cond = conds[i, ],
+                         parms = parms,
+                         rep_status = rp)
+            },
+            error = function(report) {
+              err <- paste0("Original Error: ", report)
+              return(err)
+            }
+          )
+        }
+      }
+    }
   ## Return Function output  
   return(rp_out)
 }

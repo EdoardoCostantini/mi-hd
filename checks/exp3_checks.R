@@ -178,5 +178,86 @@
                   parms    = parms,
                   mc.cores = ( 4 ) )
 
+
+# mcapply run -------------------------------------------------------------
+
+  rm(list=ls())
+  source("./init_general.R")
+  source("./exp3_init.R")
+  
+  # Fix parameters to manageble task
+  parms$dt_rep     <- 5# 500 replications for averaging results
+  parms$chains     <- 1 # 1   number of parallel chains for convergence check
+  parms$iters      <- 5 # 75  total iterations
+  parms$burnin_imp <- 0 # 50  how many imputation iterations discarded
+  parms$ndt        <- 5 # 10  number of imputed datasets to pool esitmaes from
+  parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
+  parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidates
+  parms$keep_dt <- parms$pos_dt[seq(1, 
+                                    length(parms$pos_dt), 
+                                    parms$thin)] # keep 1 dataset every thin
+  parms$chains_bl     <- 1 # 1 
+  parms$iters_bl      <- 5 # 2e3  total iterations
+  parms$burnin_imp_bl <- 0 # 1950 discarded iterations
+  parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
+  parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate
+  parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
+                                             length(parms$pos_dt_bl), 
+                                             parms$thin_bl)]
+  parms$mice_iters <- 5 #  20
+  parms$mice_ndt   <- parms$ndt
+  
+  parms$store <- c(cond         = TRUE,
+                   dat_full     = FALSE,
+                   dat_miss     = FALSE,
+                   sem_EST      = TRUE,
+                   sem_CI       = TRUE,
+                   lm_EST       = TRUE,
+                   lm_CI        = TRUE,
+                   miss_descrps = TRUE,
+                   run_time_min = TRUE,
+                   imp_values   = FALSE)
+  
+  # Run mcapply
+  
+  out <- mclapply(X        = 1 : parms$dt_rep,
+                  FUN      = doRep,
+                  conds    = conds,
+                  parms    = parms,
+                  debug    = FALSE,
+                  mc.cores = ( parms$dt_rep ) )
+  out$parms <- parms
+  
+  # Apply some rsults functions
+  
+  condition <- 1
+  select_cond <- names(out[[1]])[condition]
+  
+  # Time
+  out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
+  colnames(out_time) <- names(out[[1]])
+  t(out_time)
+  
+  # Estaimtes Analysis ------------------------------------------------------
+  out[[1]]$`cond_0.3_1e-05_0.65_FALSE_FALSE_FALSE_25`$sem_EST
+  out[[1]]$`cond_0.3_1e-05_0.65_FALSE_FALSE_FALSE_25`$lm_EST
+  ## SEM estiamtes raw data (saturated model) ##
+  # Extract results per conditions
+  sem_res <- lapply(1:length(out[[1]]),
+                     function(x) res_sum(out, 
+                                         model = "sem", 
+                                         condition = x))
+  
+  lm_res <- lapply(1:length(out[[1]]),
+                    function(x) res_sum(out, 
+                                        model = "lm", 
+                                        condition = x))
+  
+  # Show results all conditions for a given data rep
+  lapply(1:length(out[[1]]),
+         function(x) sem_res[[x]]$bias_per)
+  
+  lapply(1:length(out[[1]]),
+         function(x) lm_res[[x]]$bias_per)
   
   

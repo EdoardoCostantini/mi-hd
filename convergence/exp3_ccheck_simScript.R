@@ -8,14 +8,14 @@
 
 rm(list = ls())
 source("./init_general.R")
-source("../convergence/exp2_ccheck_init.R")
+source("../convergence/exp3_ccheck_init.R")
 
 ## Create a cluster object:
 clus <- makeCluster(parms$dt_rep)
 
 ## Two different ways to source a script on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
-clusterEvalQ(cl = clus, expr = source("../convergence/exp2_ccheck_init.R"))
+clusterEvalQ(cl = clus, expr = source("../convergence/exp3_ccheck_init.R"))
 
 ## Data directory for storage
 
@@ -41,6 +41,7 @@ out <- parLapply(cl = clus,
                  X = 1 : parms$dt_rep,
                  fun = doRep, 
                  conds = conds, 
+                 debug = FALSE,
                  parms = parms)
 
 ## Kill the cluster:
@@ -59,6 +60,7 @@ cat(paste0("\n", "------", "\n",
 
 # Attach parm object
 out$parms <- parms
+out_cnv <- out
 
 # Save output -------------------------------------------------------------
 

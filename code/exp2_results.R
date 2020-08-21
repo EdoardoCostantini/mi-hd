@@ -31,9 +31,9 @@
                                          model = "semR", 
                                          condition = x))
   
-  # Show results for a given condition
+  # Show results all conditions for a given data rep
   lapply(1:length(out[[1]]),
-         function(x) print(semR_res[[x]]$bias_per))
+         function(x) semR_res[[x]]$bias_per)
   
 ## CFA model results
   # Extract results per conditions
@@ -44,7 +44,7 @@
   
   # Results?
   lapply(1:length(out[[1]]),
-         function(x) print(CFA_res[[x]]$bias_per[1:10, ]))
+         function(x) CFA_res[[x]]$bias_per[1:10, ])
   
 ## SEM estaimted Scored data
   # Extract results per conditions
@@ -55,7 +55,7 @@
   
   # Show results for a given condition
   lapply(1:length(out[[1]]),
-         function(x) print(semS_res[[x]]$bias_per))
+         function(x) semS_res[[x]]$bias_per)
 
 ## Linear Model: Intercept and regression coefficients ##
   lm_res <- lapply(1:length(out[[1]]),
@@ -65,7 +65,7 @@
   
   # Show results for a given condition
   lapply(1:length(out[[1]]),
-         function(x) print(lm_res[[x]]$bias_per))
+         function(x) lm_res[[x]]$bias_per)
 
 # Save Results ------------------------------------------------------------
   output <- lapply(list(semR = semR_res,
