@@ -8,7 +8,7 @@
   source("./init_general.R")
   
   # Result selection
-  filename <- "exp2_simOut_20200812_1449"
+  filename <- "exp2_simOut_20200812_1449" # last good
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))

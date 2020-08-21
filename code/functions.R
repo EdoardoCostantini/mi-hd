@@ -658,7 +658,29 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
 
 # Estimate regression coefficeints
 
-fit_lm_models <- function(multi_dt, vrbs){
+# fit_lm_models <- function(multi_dt, vrbs){
+#   ## Description:
+#   # Given a list of complete datasets it fits a linear model
+#   # to obtain standardized regression coefficients (all vairables 
+#   # are centered and standardized)
+#   ## Example internals
+#   # multi_dt <- imp_DURR_la$dats
+#   # vrbs <- parms$lm_model
+#   if(!is.null(multi_dt)){
+#   mod <- paste0(vrbs[1], 
+#             " ~ - 1 + ", 
+#             paste0(vrbs[-1], collapse = " + ")
+#   )
+#     models <- lapply(X = multi_dt,
+#                      FUN = function(x) lm(mod, 
+#                                           data = as.data.frame( scale(x) )
+#                                           )
+#                      )
+#   } else {models = NULL}
+#   return(models)
+# }
+
+fit_lm_models <- function(multi_dt, mod){
   ## Description:
   # Given a list of complete datasets it fits a linear model
   # to obtain standardized regression coefficients (all vairables 
@@ -667,15 +689,11 @@ fit_lm_models <- function(multi_dt, vrbs){
   # multi_dt <- imp_DURR_la$dats
   # vrbs <- parms$lm_model
   if(!is.null(multi_dt)){
-  mod <- paste0(vrbs[1], 
-            " ~ - 1 + ", 
-            paste0(vrbs[-1], collapse = " + ")
-  )
-    models <- lapply(X = multi_dt,
-                     FUN = function(x) lm(mod, 
-                                          data = as.data.frame( scale(x) )
-                                          )
+    models <- lapply(multi_dt,
+                     function(x) lm(mod, 
+                                    data = as.data.frame( x )
                      )
+    )
   } else {models = NULL}
   return(models)
 }

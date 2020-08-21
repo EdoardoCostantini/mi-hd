@@ -283,14 +283,14 @@ runCell <- function(cond, parms, rep_status) {
                          MI_CART = imp_CART$dats,
                          MI_RF   = imp_RANF$dats,
                          MI_OP   = imp_MICE_OP$dats), 
-                    fit_lm_models, vrbs = parms$lm_model)
+                    fit_lm_models, mod = parms$lm_model)
   
   # Single dataset
   
   lm_sndt <- fit_lm_models(list(missFor = imp_missFor$dats, 
                                 GS      = Xy, 
                                 CC      = Xy_mis[rowSums(!O) == 0, ]),
-                           vrbs = parms$lm_model)
+                           mod = parms$lm_model)
   
   ## Pooling --------------------------------------------------------------- ##
   # For each imp method, pool estimates across the m datasets
@@ -736,7 +736,7 @@ runCell_int <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./init.R")
-  # cond <- conds[2, ]
+  # cond <- conds[1, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
@@ -744,22 +744,7 @@ runCell_int <- function(cond, parms, rep_status) {
   
   Xy <- simData_int(parms, cond)
   Xy_mis <- imposeMiss_int(Xy, parms, cond)
-  
-  # DA: Append Axuliary Interaction terms
-  if(cond$int_da == TRUE){
-    col_exc <- which(colnames(Xy) %in% parms$z_m_id)
-    interact <- computeInteract(Xy_mis[, -col_exc],
-                                idVars = colnames(Xy_mis[, -col_exc]),
-                                ordVars = NULL,
-                                nomVars = NULL,
-                                moderators = colnames(Xy_mis[, -col_exc]) )
-    dim(Xy_mis)
-    dim(interact)
-    dim(combn(25, 2))
-    O <- !is.na(interact) # matrix index of observed values
-    sum(colMeans(O) != 1)
-    miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
-  }
+
   # JAV (Transform, then impute)
   if(cond$int_sub == TRUE){
     col_int <- paste0("z", parms$yMod_int)
@@ -775,23 +760,34 @@ runCell_int <- function(cond, parms, rep_status) {
     
     # W/ missings
     int_term <- apply(scale(Xy_mis[, col_int], 
-                            scale = FALSE, center = TRUE), 
-                      1, 
-                      prod)
+                            center = TRUE,
+                            scale = FALSE), 
+                      1, prod)
     Xy_mis <- cbind(Xy_mis, int_term)
     colnames(Xy_mis)[colnames(Xy_mis) == "int_term"] <- paste0(col_int, 
                                                                collapse = "")
+  }
+  # DA: Append Axuliary Interaction terms
+  if(cond$int_da == TRUE){
+    # col_exc <- which(colnames(Xy) %in% parms$z_m_id)
+    # interact <- computeInteract(Xy_mis[, -col_exc],
+    #                             idVars = colnames(Xy_mis[, -col_exc]),
+    #                             ordVars = NULL,
+    #                             nomVars = NULL,
+    #                             moderators = colnames(Xy_mis[, -col_exc]) )
     
-    # Give names
-    lapply(list(Xy, Xy_mis), function(x){
-      colnames(x)[colnames(x) == "int_term"] <- paste0(col_int, collapse = "")
-      return(x)
-    })
+    col_inc <- names(which( !is.na(colMeans(Xy_mis)) ))
+    interact <- computeInteract(Xy_mis[, col_inc],
+                                idVars = col_inc,
+                                ordVars = NULL,
+                                nomVars = NULL,
+                                moderators = col_inc)
+    Xy_mis <- cbind(Xy_mis, interact)
   }
   
   # Missing data 
   O <- !is.na(Xy_mis) # matrix index of observed values
-  miss_descrps <- colMeans(!O[, 1:parms$zm_n]) 
+  miss_descrps <- colMeans(!O[, parms$z_m_id]) 
   
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
@@ -804,7 +800,7 @@ runCell_int <- function(cond, parms, rep_status) {
                              reg_type = "lasso",
                              perform = parms$meth_sel$DURR_la,
                              parms = parms)
-  
+
   update_report("DURR lasso", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$DURR_la)
@@ -815,6 +811,7 @@ runCell_int <- function(cond, parms, rep_status) {
                              reg_type = "el",
                              perform = parms$meth_sel$DURR_el,
                              parms = parms)
+  
   update_report("DURR elastic net", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$DURR_el)
@@ -826,6 +823,7 @@ runCell_int <- function(cond, parms, rep_status) {
                              reg_type = "lasso",
                              perform = parms$meth_sel$IURR_la,
                              parms = parms)
+  
   update_report("IURR lasso", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$IURR_la)
@@ -845,6 +843,7 @@ runCell_int <- function(cond, parms, rep_status) {
                                  O = as.data.frame(O),
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
+  
   update_report("blasso", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$blasso)
@@ -862,6 +861,7 @@ runCell_int <- function(cond, parms, rep_status) {
   
   # Impute according to Howard Et Al 2015 PCA appraoch
   imp_PCA <- impute_PCA(Z = Xy_mis, O = O, parms = parms)
+  
   update_report("MICE-PCA", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$MI_PCA)
@@ -915,16 +915,35 @@ runCell_int <- function(cond, parms, rep_status) {
   ## Analyse --------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
 
-  # Multiple datasets
+  # Analysis model
+  SAT_mod <- SAT_mod_write(c("y", parms$z_m_id))
   if(cond$int_sub == FALSE){
-    lm_vrbs <- c("y", 
-                 paste0("z", parms$yMod_cov))
+    mod <- parms$frm
   } else {
-    lm_vrbs <- c("y", 
-                 paste0("z", parms$yMod_cov), 
-                 paste0("z", parms$yMod_int, collapse = ""))
+    mod <- paste0("y ~ -1 + ",
+                  paste0("z", parms$yMod_cov, collapse = " + "),
+                  " + ",
+                  paste0("z", parms$yMod_int, collapse = ""))
   }
 
+  # Sem model
+  sem_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
+                          DURR_el = imp_DURR_el$dats,
+                          IURR_la = imp_IURR_la$dats,
+                          IURR_el = imp_IURR_el$dats,
+                          bridge  = imp_bridge$dats,
+                          blasso  = imp_blasso$dats,
+                          MI_PCA  = imp_PCA$dats,
+                          MI_CART = imp_CART$dats,
+                          MI_RF   = imp_RANF$dats,
+                          MI_OP   = imp_MICE_OP$dats),
+                     fit_sem, model = SAT_mod)
+  sem_sndt <- fit_sem(list(missFor = imp_missFor$dats, 
+                           GS      = Xy, 
+                           CC      = Xy_mis[rowSums(!O) == 0, ]),
+                      model = SAT_mod)
+  
+  # Linear Model
   lm_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
                          DURR_el = imp_DURR_el$dats,
                          IURR_la = imp_IURR_la$dats,
@@ -935,17 +954,36 @@ runCell_int <- function(cond, parms, rep_status) {
                          MI_CART = imp_CART$dats,
                          MI_RF   = imp_RANF$dats,
                          MI_OP   = imp_MICE_OP$dats), 
-                    fit_lm_models, vrbs = lm_vrbs)
+                    fit_lm_models, mod = mod)
   
   # Single dataset
-  
   lm_sndt <- fit_lm_models(list(missFor = imp_missFor$dats, 
                                 GS      = Xy, 
                                 CC      = Xy_mis[rowSums(!O) == 0, ]),
-                           vrbs = lm_vrbs)
+                           mod = mod)
   
   ## Pooling --------------------------------------------------------------- ##
   # For each imp method, pool estimates across the m datasets
+  
+  # SEM
+  sem_pool_MI_EST <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
+                            sem_pool_EST_f)
+  sem_pool_MI_CI  <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
+                            sem_pool_CI_f)
+  
+  # append single imputations, and GS and CC results
+  indx_EST <- unique(c(sapply(parms$z_m_id, 
+                              grep, 
+                              x = rownames(sem_pool_MI_EST) ) ) )
+  index_CI <- unique(c(sapply(parms$z_m_id, 
+                              grep, 
+                              x = rownames(sem_pool_MI_CI) ) ) )
+  
+  sem_gather_EST <- cbind(sem_pool_MI_EST,
+                          sem_EST(sem_sndt))[sort(indx_EST), ]
+  
+  sem_gather_CI <- cbind(sem_pool_MI_CI,
+                         sem_CI(sem_sndt))[sort(index_CI), ]
   
   # LM models
   lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_EST_f)
@@ -977,6 +1015,8 @@ runCell_int <- function(cond, parms, rep_status) {
   output <- list(cond         = cond,
                  dat_full     = Xy,
                  dat_miss     = Xy_mis,
+                 sem_EST      = sem_gather_EST,
+                 sem_CI       = sem_gather_CI,
                  lm_EST       = lm_pool_EST,
                  lm_CI        = lm_pool_CI,
                  miss_descrps = miss_descrps,

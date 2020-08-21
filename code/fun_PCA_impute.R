@@ -18,7 +18,7 @@ impute_PCA <- function(Z, O, parms = parms){
   
   # For internals
   # Z = Xy_mis
-  # O = as.data.frame(!is.na(Xy_mis)) # matrix index of observed values
+  # O = as.data.frame(!is.na(Z)) # matrix index of observed values
   
   ## body:
   if(parms$meth_sel$MI_PCA == TRUE){
@@ -88,18 +88,11 @@ impute_PCA <- function(Z, O, parms = parms){
       methods <- rep("norm", ncol(Z_4imp))
       vartype <- sapply(Z_4imp, class)
       methods[vartype != "numeric"] <- "pmm"
-    
-    ## Define Predictor matrix
-    # predMat <- matrix(rep(0, ncol(Z_4imp)^2), ncol = ncol(Z_4imp), 
-    #                   dimnames = list(colnames(Z_4imp), colnames(Z_4imp)))
-    # predMat[1:length(parms$z_m_id), ] <- 1
-    # diag(predMat) <- 0
       
-    # Impute
+    ## Impute
     imp_PCA_mids <- mice::mice(Z_4imp,
                                m = parms$mice_ndt,
                                maxit = parms$mice_iters,
-                               # predictorMatrix = predMat,
                                ridge = 1e-5,
                                method = methods)
     end.time <- Sys.time()

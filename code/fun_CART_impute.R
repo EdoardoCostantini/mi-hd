@@ -9,7 +9,7 @@
 impute_CART <- function(Z, O, cond, parms, perform = TRUE){
   ## For internals: run subroutines.R until impute_CART, then
   # Z = Xy_mis
-  # O <- as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
+  # O <- as.data.frame(!is.na(Z))
   
   ## Body
   if(perform == TRUE){
@@ -55,7 +55,7 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
             X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
           X_mis <- Wm_mj    <- as.matrix(Zm[O[, J] == FALSE, -J])
             X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
-            
+          
           # Fit tree
           fit <- rpart::rpart(y_obs ~ ., 
                               data = as.data.frame(cbind(y_obs, X_obs)), 

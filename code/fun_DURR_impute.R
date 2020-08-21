@@ -8,7 +8,7 @@
 impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
   ## Description
   # Z = Xy_mis
-  # O <- as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
+  # O <- as.data.frame(!is.na(Z))            # matrix index of observed values
   # reg_type = c("el", "lasso")[2] # imputation model penality type
   
   ## Body
@@ -57,7 +57,7 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
           y_mis_bs <- Zm_bs[!O[idx_bs, J], J] # zm_mj [useless]
           X_obs_bs <- as.matrix(Zm_bs[O[idx_bs, J], -J]) # Wm_j_obs
             X_obs_bs <- apply(X_obs_bs, 2, as.numeric) # makes dicho numbers
-          X_mis <- Wm_mj    <- as.matrix(Zm[!O[, J], -J]) # Wm_mj
+          X_mis <- as.matrix(Zm[!O[, J], -J]) # Wm_mj
             X_mis <- apply(X_mis, 2, as.numeric)
           
           glmfam <- detect_family(Zm[, J])
@@ -90,7 +90,6 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
           # Append imputation
           Zm[is.na(Z[, J]), J] <- zm_j
           imps[[j]][m, ] <- zm_j # save iteration imputation thing
-          
         }
         imp_DURR_dat[[m]] <- Zm
       }  

@@ -16,7 +16,7 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
   # Z = Xy_mis
   # cond = conds[2,]
   # parms = parms
-  # O <- as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
+  # O <- as.data.frame(!is.na(Z))            # matrix index of observed values
   
   ## output: 
   # - a list of chains imputed datasets at iteration iters
@@ -25,11 +25,14 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
   
   ## body:
   if(perform == TRUE){
+    start.time <- Sys.time()
+    
     # Define predictor matrix for MI TRUE with best active set
     p_imp_id <- names(which(colMeans(O) < 1))
     predMat <- matrix(rep(0, ncol(Z)^2), ncol = ncol(Z), 
                       dimnames = list(colnames(Z), colnames(Z)))
-    predMat[p_imp_id, parms$S_all] <- 1
+    col_index <- colnames(predMat) %in% parms$S_all # flexibility interaction!
+    predMat[p_imp_id, col_index] <- 1
     
     # Define methods
     methods <- rep("norm", ncol(Z))
@@ -37,7 +40,6 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
     methods[vartype != "numeric"] <- "pmm"
     
     # Impute
-    start.time <- Sys.time()
     
     imp_MITR_mids <- mice::mice(Z, 
                                 predictorMatrix = predMat,

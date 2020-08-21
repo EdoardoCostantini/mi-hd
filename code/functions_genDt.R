@@ -225,7 +225,10 @@ simData_int <- function(parms, cond){
     y      <- Z_pred %*% parms$b_main + eps
   }
   if(cond$int_sub == TRUE){
-    int_term <- apply(Z[, parms$yMod_int], 1, prod)
+    # int_term <- apply(Z[, parms$yMod_int], 1, prod)
+    int_term <- apply(scale(Z[, parms$yMod_int],
+                            center = TRUE,
+                            scale = FALSE), 1, prod)
     Z_pred   <- cbind(Z[, parms$yMod_cov], int_term)
     beta     <- c(parms$b_main, parms$b_int)
     signal   <- t(beta) %*% cov(Z_pred) %*% beta
@@ -275,7 +278,10 @@ imposeMiss_int <- function(dat_in, parms, cond){
   }
   
   if(cond$int_rm == TRUE){
-    int_term <- apply(dat_in[, parms$rm_x[-which(parms$rm_x == "y")]], 
+    int_term <- apply(scale(dat_in[, 
+                                   parms$rm_x[-which(parms$rm_x == "y")]],
+                            center = TRUE,
+                            scale = FALSE),
                       1, 
                       prod)
     Z_pred   <- cbind(dat_in, int_term)

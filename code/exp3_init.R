@@ -132,8 +132,10 @@
   parms$rfntree <- 10
   
   # MICE true
-  parms$S_all <- c("y", paste0("z", parms$blck1))
-
+  parms$S_all <- c("y", 
+                   paste0("z", parms$blck1),
+                   paste0("z", parms$blck2),
+                   paste0(paste0("z", parms$yMod_int), collapse = ""))
 
 # Simulation desing -------------------------------------------------------
   # Replicability
@@ -163,11 +165,13 @@
   parms$store <- c(cond         = TRUE,
                    dat_full     = FALSE,
                    dat_miss     = FALSE,
+                   sem_EST      = TRUE,
+                   sem_CI       = TRUE,
                    lm_EST       = TRUE,
                    lm_CI        = TRUE,
                    miss_descrps = TRUE,
                    run_time_min = TRUE,
-                   imp_values   = TRUE)
+                   imp_values   = FALSE)
   
 # Conditions --------------------------------------------------------------
 
