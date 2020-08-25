@@ -114,8 +114,8 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
             {
               # Try running simulation for condition i, repetition rp
               runCell_int(cond = conds[i, ],
-                         parms = parms,
-                         rep_status = rp)
+                          parms = parms,
+                          rep_status = rp)
             },
             error = function(report) {
               err <- paste0("Original Error: ", report)
@@ -330,6 +330,8 @@ runCell <- function(cond, parms, rep_status) {
                             sem_pool_EST_f)
   sem_pool_MI_CI  <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
                             sem_pool_CI_f)
+  sem_fmi <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
+                    .fmi_compute)
   
   # append single imputations, and GS and CC results
   sem_gather_EST <- cbind(sem_pool_MI_EST,
@@ -341,6 +343,8 @@ runCell <- function(cond, parms, rep_status) {
   # LM models
   lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_EST_f)
   lm_pool_CI <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_CI_f)
+  lm_fmi <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
+                    .fmi_compute)
   
   # append single imputations, and GS and CC results
   lm_pool_EST <- cbind(lm_pool_est,
@@ -373,9 +377,11 @@ runCell <- function(cond, parms, rep_status) {
                  sem_CI       = sem_gather_CI,
                  lm_EST       = lm_pool_EST,
                  lm_CI        = lm_pool_CI,
+                 fmi          = list(sems = sem_fmi,
+                                     lm   = lm_fmi),
                  miss_descrps = miss_descrps,
                  run_time_min = imp_time,
-                 imp_values   = imp_values)
+                 imp_values   = imp_values)[parms$store]
   return(output)
 }
 
@@ -798,13 +804,6 @@ runCell_int <- function(cond, parms, rep_status) {
   }
   # DA: Append Axuliary Interaction terms
   if(cond$int_da == TRUE){
-    # col_exc <- which(colnames(Xy) %in% parms$z_m_id)
-    # interact <- computeInteract(Xy_mis[, -col_exc],
-    #                             idVars = colnames(Xy_mis[, -col_exc]),
-    #                             ordVars = NULL,
-    #                             nomVars = NULL,
-    #                             moderators = colnames(Xy_mis[, -col_exc]) )
-    
     col_inc <- names(which( !is.na(colMeans(Xy_mis)) ))
     interact <- computeInteract(Xy_mis[, col_inc],
                                 idVars = col_inc,
@@ -972,6 +971,7 @@ runCell_int <- function(cond, parms, rep_status) {
                            CC      = Xy_mis[rowSums(!O) == 0, ]),
                       model = SAT_mod)
   
+  
   # Linear Model
   lm_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
                          DURR_el = imp_DURR_el$dats,
@@ -999,6 +999,8 @@ runCell_int <- function(cond, parms, rep_status) {
                             sem_pool_EST_f)
   sem_pool_MI_CI  <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
                             sem_pool_CI_f)
+  sem_fmi <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
+                    .fmi_compute)
   
   # append single imputations, and GS and CC results
   indx_EST <- unique(c(sapply(parms$z_m_id, 
@@ -1015,9 +1017,12 @@ runCell_int <- function(cond, parms, rep_status) {
                          sem_CI(sem_sndt))[sort(index_CI), ]
   
   # LM models
-  lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_EST_f)
-  lm_pool_CI <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_CI_f)
-  
+  lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
+                        lm_pool_EST_f)
+  lm_pool_CI  <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
+                        lm_pool_CI_f)
+  lm_fmi      <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
+                        .fmi_compute)
   # append single imputations, and GS and CC results
   lm_pool_EST <- cbind(lm_pool_est,
                        lm_EST(lm_sndt))
@@ -1042,15 +1047,20 @@ runCell_int <- function(cond, parms, rep_status) {
   
   ## Store output ---------------------------------------------------------- ##
   output <- list(cond         = cond,
+                 # Datasets
                  dat_full     = Xy,
                  dat_miss     = Xy_mis,
+                 # MLE estiamtes
                  sem_EST      = sem_gather_EST,
                  sem_CI       = sem_gather_CI,
+                 # Linear mode
                  lm_EST       = lm_pool_EST,
                  lm_CI        = lm_pool_CI,
+                 # Other
+                 fmi          = list(sem = sem_fmi,
+                                     lm  = lm_fmi),
                  miss_descrps = miss_descrps,
                  run_time_min = imp_time,
                  imp_values   = imp_values)[parms$store]
-  
   return(output)
 }

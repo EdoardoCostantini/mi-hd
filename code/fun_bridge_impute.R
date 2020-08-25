@@ -8,7 +8,7 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
   # Prep data ---------------------------------------------------------------
   # Z = Xy_mis
   # O = as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
-  # ridge_p = 1e-5
+  # ridge_p = cond$ridge
   if(perform == TRUE){
     
     tryCatch({
@@ -38,7 +38,7 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
         
         # Imputed scores
         Imp.out <- lapply(p_imp_id, function(x) {
-          matrix(data = NA, nrow = parms$iters_bl, ncol = nr[x],
+          matrix(data = NA, nrow = parms$iters, ncol = nr[x],
                  dimnames = list(NULL, rownames(Zm[!O[, x],]) ))
         })
         for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 

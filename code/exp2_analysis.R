@@ -11,7 +11,8 @@
   source("./init_general.R")
 
 # Read results from a run of simulation study
-  exp2_res <- readRDS("../output/exp2_simOut_20200812_1449_res.rds")
+  exp2_res <- readRDS("../output/exp2_simOut_20200812_1449_res.rds") # way out
+  exp2_res <- readRDS("../output/exp2_simOut_20200819_1743_res.rds") # not yet there
 
 # Bias --------------------------------------------------------------------
   # SEM raw data

@@ -12,24 +12,11 @@
 
 # Read results from a run of simulation study
   # Checks
-  sum_exp1_sem <- readRDS("../output/sim_res_20200801_1620sum_exp1_sem.rds")
-  sum_exp1_lm  <- readRDS("../output/sim_res_20200801_1620sum_exp1_lm.rds")
-  # 20200715 Correct
-  # sum_exp1_sem <- readRDS("../output/sim_res_20200710_1019sum_exp1_sem.rds" )
-  # sum_exp1_lm <- readRDS("../output/sim_res_20200710_1019sum_exp1_lm.rds" )
-  # Current Correct
-  sum_exp1_sem <- readRDS("../output/sim_res_20200731_1735sum_exp1_sem.rds")
-  sum_exp1_lm  <- readRDS("../output/sim_res_20200731_1735sum_exp1_lm.rds")
+  exp1_res <- readRDS("../output/exp1_simOut_20200731_1735_res.rds")
+  sum_exp1_sem <- exp1_res$sem
+  sum_exp1_lm  <- exp1_res$lm
 
 # Bias --------------------------------------------------------------------
-  sum_exp1_sem$cond1$cond
-  sum_exp1_sem$cond1$bias_per
-  sum_exp1_sem$cond3$cond
-  sum_exp1_sem$cond3$bias_per
-  sum_exp1_sem$cond2$cond
-  sum_exp1_sem$cond2$bias_per
-  sum_exp1_sem$cond4$cond
-  sum_exp1_sem$cond4$bias_per
 
   # Result 1 - Easy round, all good except CART and RF
   sum_exp1_sem$cond1$cond
@@ -44,16 +31,8 @@
   sum_exp1_sem$cond4$bias_per[c(1,7,13), ]
 
 # CI ----------------------------------------------------------------------
-  sum_exp1_sem$cond1$cond
-  sum_exp1_sem$cond1$ci_cov
-  sum_exp1_sem$cond3$cond
-  sum_exp1_sem$cond3$ci_cov
-  sum_exp1_sem$cond2$cond
-  sum_exp1_sem$cond2$ci_cov
-  sum_exp1_sem$cond4$cond
-  sum_exp1_sem$cond4$ci_cov
   
-  # Result 1 - Coverage is a function of pm, not p (report mean CI coverage)
+  # Result 2 - Coverage is a function of pm, not p (report mean CI coverage)
   # pm .1
   t(round(sapply(list(p50 = sum_exp1_sem$cond1$ci_cov,  # p 50 
                       p500= sum_exp1_sem$cond2$ci_cov), # p 500
@@ -196,8 +175,7 @@
   sum_exp1_lm$cond4$cond
   sum_exp1_lm$cond4$bias_per
   
-  # CI 
-  
+  # CI
   sum_exp1_lm$cond1$cond
   sum_exp1_lm$cond1$ci_cov
   sum_exp1_lm$cond3$cond

@@ -13,11 +13,8 @@ source("./init_general.R")
 # of the simualtion study. It contains an imputation run with many iterations,
 # many chians, for the most difficult condition of experiment 1.
 
-# 20200715 Correct
-out_cnv <- readRDS("../output/cnv_check_20200710_1020.rds")
-
 # 20200803 Correct
-out_cnv <- readRDS("../output/cnv_check_20200731_1652.rds")
+out_cnv <- readRDS("../output/exp1_conv_20200731_1652.rds")
 
 # What to show
 exp_dat <- 10 # which data replication (10 possibilities)

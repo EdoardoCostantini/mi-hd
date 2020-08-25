@@ -11,10 +11,9 @@ source("./init_general.R")
 # Read Simulation Results -------------------------------------------------
 # Special Run with multiple chains. This output does not contain results
 # of the simualtion study. It contains an imputation run with many iterations,
-# many chians, for the most difficult condition of experiment 1.
+# many chians, for the most difficult condition of experiment 3.
 
-out_cnv <- readRDS("../output/exp2_conv_20200812_1717.rds")
-out_cnv <- readRDS("../output/ccheck_exp2_20200811_1626.rds")
+out_cnv <- readRDS("../output/exp3_conv_20200824_1643.rds")
 
 # Run description
 
@@ -29,24 +28,24 @@ data.frame(
 )
 
 # What to show
-iters_range <- 1:5 # which set of iterations
+iters_range <- 1:250 # which set of iterations
 y_range <- c(-.5, .5)
 
 # DURR_la (50-100 good for all)
-exp_dat <- 2
+exp_dat <- 8
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[1], 
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
 # IURR_la (50-100 good for all)
-exp_dat <- 2
+exp_dat <- 8
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[2], 
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
-# blasso (try 1000 iterations)
-exp_dat <- 2
-iters_range_bl <- 1:5
+# blasso (200-300 is a good range to chose from)
+exp_dat <- 9
+iters_range_bl <- 1:500
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[3], 
                dat = exp_dat, 
@@ -71,7 +70,7 @@ mean_traceplot(out_cnv,
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
 # MI_RF
-exp_dat <- 2
+exp_dat <- 6
 mean_traceplot(out_cnv,
                method = out_cnv$parms$method[7],
                dat = exp_dat, 

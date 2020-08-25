@@ -130,6 +130,21 @@
   parms$seed     <- 20200512 #20200309
   parms$nStreams <- 1000
 
+# Storing prefrences ------------------------------------------------------
+  # Needs to match the location and name of the output list
+ 
+  parms$store <-  c(cond         = TRUE,
+                    dat_full     = FALSE,
+                    dat_miss     = FALSE,
+                    sem_EST      = TRUE,
+                    sem_CI       = TRUE,
+                    lm_EST       = TRUE,
+                    lm_CI        = TRUE,
+                    fmi          = FALSE,
+                    miss_descrps = FALSE,
+                    run_time_min = TRUE,
+                    imp_values   = FALSE)
+  
 # Output and Progres report related
   parms$outDir <- "../output/"
   parms$start_time <- format(Sys.time(), "%Y%m%d_%H%M")

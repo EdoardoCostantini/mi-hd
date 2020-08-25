@@ -1,0 +1,105 @@
+CONVERGENCE CHECK PROGRESS REPORT
+Description: For the most challanging condition, data generation is repeated 
+                        a few times, imputation models are used. Obtained imputations can 
+                        then be used to check convergence
+
+------
+Starts at: 2020-08-24 16:44:03
+------
+
+2020-08-24 16:44:03 - Starts Repetition: 2
+2020-08-24 16:44:03 - Starts Repetition: 1
+2020-08-24 16:44:03 - Starts Repetition: 4
+2020-08-24 16:44:03 - Starts Repetition: 10
+2020-08-24 16:44:03 - Starts Repetition: 9
+2020-08-24 16:44:03 - Starts Repetition: 7
+2020-08-24 16:44:03 - Starts Repetition: 3
+2020-08-24 16:44:03 - Starts Repetition: 5
+2020-08-24 16:44:03 - Starts Repetition: 6
+2020-08-24 16:44:03 - Starts Repetition: 8
+2020-08-24 17:25:15 | Rep = 7, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:25:19 | Rep = 9, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:25:20 | Rep = 6, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:25:37 | Rep = 5, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:25:41 | Rep = 8, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:26:41 | Rep = 1, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:27:01 | Rep = 2, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:27:24 | Rep = 4, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:28:12 | Rep = 10, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:28:23 | Rep = 3, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | DURR lasso done
+2020-08-24 17:57:11 | Rep = 8, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 17:58:15 | Rep = 1, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:00:08 | Rep = 7, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:01:00 | Rep = 3, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:01:33 | Rep = 5, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:02:17 | Rep = 9, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:03:06 | Rep = 10, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:04:11 | Rep = 6, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:04:23 | Rep = 4, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:24:43 | Rep = 2, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | IURR lasso done
+2020-08-24 18:58:49 | Rep = 8, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:01:32 | Rep = 7, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:02:09 | Rep = 1, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:03:54 | Rep = 5, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:04:15 | Rep = 9, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:06:26 | Rep = 3, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:06:58 | Rep = 6, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:08:26 | Rep = 10, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:08:44 | Rep = 4, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:14:51 | Rep = 8, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:15:41 | Rep = 8, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:17:09 | Rep = 7, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:18:00 | Rep = 7, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:18:01 | Rep = 1, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:18:53 | Rep = 1, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:19:15 | Rep = 5, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:19:29 | Rep = 9, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:20:05 | Rep = 5, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:20:20 | Rep = 9, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:21:37 | Rep = 3, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:21:54 | Rep = 6, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:22:29 | Rep = 3, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:22:44 | Rep = 6, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:23:05 | Rep = 10, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:23:19 | Rep = 4, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:23:56 | Rep = 10, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:24:09 | Rep = 4, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:25:27 | Rep = 2, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | blasso done
+2020-08-24 19:28:50 | Rep = 8, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:31:01 | Rep = 7, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:32:21 | Rep = 1, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:33:16 | Rep = 5, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:33:31 | Rep = 9, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:36:13 | Rep = 3, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:36:20 | Rep = 6, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:37:41 | Rep = 10, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:37:47 | Rep = 4, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 19:39:01 | Rep = 8, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:40:05 | Rep = 2, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | bridge done
+2020-08-24 19:40:43 | Rep = 8, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:40:56 | Rep = 7, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:40:59 | Rep = 2, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-PCA done
+2020-08-24 19:42:24 | Rep = 1, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:42:34 | Rep = 7, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:43:23 | Rep = 5, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:43:48 | Rep = 9, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:44:08 | Rep = 1, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:45:03 | Rep = 5, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:45:31 | Rep = 9, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:46:07 | Rep = 6, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:46:26 | Rep = 3, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:47:25 | Rep = 4, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:47:41 | Rep = 10, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 19:47:47 | Rep = 6, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:48:07 | Rep = 3, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:49:08 | Rep = 4, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:49:25 | Rep = 10, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+2020-08-24 19:54:28 | Rep = 2, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-CART done
+2020-08-24 20:04:44 | Rep = 2, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | Random Forest done
+2020-08-24 20:06:28 | Rep = 2, pm = 0.3, ridge = 1e-07, r2 = 0.65, int_sub = TRUE, int_rm = TRUE, int_da = FALSE, p = 500 | MICE-TR done
+
+------
+Ends at: 2020-08-24 20:06:36
+Run time: 3.376 h
+------
+

@@ -197,7 +197,7 @@ simData_int <- function(parms, cond){
   Sigma[blck1_indx, ] <- parms$blck1_r
   
   # Block 2: not so highly correlated variables
-  blck2_indx <- parms$blck2-length(parms$blcky)
+  blck2_indx <- parms$blck2 - length(parms$blcky)
   Sigma[blck2_indx, ] <- parms$blck2_r
   
   # Block 3: uncorrelated variables
@@ -225,7 +225,6 @@ simData_int <- function(parms, cond){
     y      <- Z_pred %*% parms$b_main + eps
   }
   if(cond$int_sub == TRUE){
-    # int_term <- apply(Z[, parms$yMod_int], 1, prod)
     int_term <- apply(scale(Z[, parms$yMod_int],
                             center = TRUE,
                             scale = FALSE), 1, prod)

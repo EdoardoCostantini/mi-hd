@@ -1044,7 +1044,7 @@ scorify <- function(dat_in, cond, parms){
   
   for (i in 1:cond$lv) {
     item_idx <- c((0:cond$lv)[i]*parms$n_it+1):((0:cond$lv)[i+1]*parms$n_it)
-    dat_out[,i] <- rowMeans(dat_in[, item_idx])
+    dat_out[, i] <- rowMeans(dat_in[, item_idx])
   }
   
   return(dat_out)
@@ -1157,7 +1157,7 @@ res_sem_time <- function(out, condition = 1){
 }
 
 res_sum <- function(out, model, condition = 1){
-  # model = "semR" # the first part of the name of a result object stored
+  # model = "sem" # the first part of the name of a result object stored
                    # in out 
   # model = "lm"
   # condition = 1
@@ -1176,7 +1176,8 @@ res_sum <- function(out, model, condition = 1){
                          ncol = nrow(out[[1]][[select_cond]][[est]]))
   
   for (i in 1:out$parms$dt_rep) {
-    full_dat_est[i, ] <- out[[i]][[select_cond]][[est]][, which(out$parms$methods == "GS")]
+    full_dat_est[i, ] <- 
+      out[[i]][[select_cond]][[est]][, which(out$parms$methods == "GS")]
   }
   
   psd_tr_vec <- colMeans(full_dat_est) # pseudo true values
@@ -1192,10 +1193,22 @@ res_sum <- function(out, model, condition = 1){
     }
     c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
   })
-  
   # Store Objects
   validReps <- avg["rep", ] # number of successes
   avg <- avg[-which(rownames(avg) == "rep"), ]
+  
+  if(out$parms$exp == 1 & nchar(rownames(avg)[1])<1){
+    # Fixes a problem of old results from privous runs of eperiment 1
+    # in the future I will delte these part as exp 1 results wiil be
+    # uniform with rest
+    fit <- lavaan::sem(out$parms$lav_model,
+                       data = out[[1]][[select_cond]]$dat_full,
+                       likelihood = "wishart")
+    rownames(avg) <- apply(parameterEstimates(fit)[,1:3], 
+                           1, 
+                           paste0, 
+                           collapse = "")
+  }
   
   # Raw bias
   bias <- avg - psd_tr_vec
@@ -1207,6 +1220,13 @@ res_sum <- function(out, model, condition = 1){
                       0)
   )
   
+  meths <- out$parms$methods[-which(out$parms$methods == "GS")]
+  # # Bias Standardized
+  # if(out$parms$exp != 1 & model != "lm"){
+  #   bias_sd <- (avg[1:out$parms$zm_n, meths]-psd_tr_vec[1:out$parms$zm_n])/
+  #     psd_tr_vec[(out$parms$zm_n+1):(out$parms$zm_n+out$parms$zm_n)]
+  # }
+  # round(bias_sd, 3)
   ## Step 3. CI Coverange ##
   # storing threshold
   str_thrs <- nrow(out[[1]][[select_cond]][[ci]])/2
@@ -1401,86 +1421,6 @@ res_lm_sum <- function(out, condition = 1){
                   ci_cov = CIC*100,
                   validReps = validReps)
   return(results)
-  
-  ## OLD VERSION ##
-  # # Sem Model
-  # select_cond <- names(out[[1]])[condition]
-  # 
-  # ## 1. Obtain Pseudo True Values ##
-  # 
-  # full_dat_est <- matrix(NA, 
-  #                        nrow = out$parms$dt_rep, 
-  #                        ncol = nrow(out[[1]][[select_cond]]$lm_EST))
-  # for (i in 1:out$parms$dt_rep) {
-  #   full_dat_est[i, ] <- out[[i]][[select_cond]]$lm_EST[, which(out$parms$methods == "GS")]
-  # }
-  # 
-  # psd_tr_vec <- colMeans(full_dat_est) # pseudo true values
-  # 
-  # ## Step 2. Compute averages of statistics (MCMC estiamtes) ##
-  # 
-  # # Store Sums
-  # sum_stats <- matrix(0, 
-  #                     nrow = nrow(out[[i]][[select_cond]]$lm_EST), 
-  #                     ncol = length(out$parms$methods))
-  # 
-  # # Compute averages of the statistics
-  # for (i in 1:out$parms$dt_rep) {
-  #   sum_stats <- sum_stats + out[[i]][[select_cond]]$lm_EST
-  # }
-  # 
-  # # Reference valuse vs Average estimtes
-  # avg_stats <- sum_stats / out$parms$dt_rep
-  # MCMC_est  <- round(cbind( ref = psd_tr_vec, avg_stats), 3)
-  # 
-  # ## Step 3. Obtain Bias ##
-  # 
-  # # Raw bias
-  # bias <- avg_stats - psd_tr_vec
-  # bias_raw <- round(cbind(ref=psd_tr_vec, bias), 3)
-  # 
-  # # Bias as percentage of true value
-  # bias_per <- cbind(ref = round(psd_tr_vec, 3), 
-  #                   round(abs(bias)/psd_tr_vec*100, 0))
-  # 
-  # ## Step 4: Obtain CI Coverages ##
-  # # Store objects
-  # str_thrs <- nrow(out[[1]][[select_cond]]$lm_CI)/2 # storing threshold
-  # sum_stats <- matrix(0, 
-  #                     nrow = nrow(out[[i]][[select_cond]]$lm_EST), 
-  #                     ncol = length(out$parms$methods))
-  # MLE_conv <- rep(0, length(out$parms$methods))
-  # # Compute averages of the statistics
-  # for (i in 1:out$parms$dt_rep) {
-  #   cond_est <- out[[i]][[select_cond]]$lm_EST
-  #   cond_CI  <- out[[i]][[select_cond]]$lm_CI
-  #   ci_low   <- cond_CI[1:str_thrs, ]
-  #   ci_hig   <- cond_CI[-(1:str_thrs), ]
-  #   
-  #   # General
-  #   for (m in 1:length(out$parms$methods)) {
-  #     if(!is.na( sum(ci_low[, m]) )){
-  #       sum_stats[, m] <- sum_stats[, m] + 
-  #         as.numeric(ci_low[, m] < psd_tr_vec & psd_tr_vec < ci_hig[, m])
-  #       MLE_conv[m] <- MLE_conv[m] + as.numeric(!is.na( sum(ci_low[, m]) ))
-  #     }
-  #   }
-  # }
-  # 
-  # ci_coverage <- sum_stats / MLE_conv
-  #   rownames(ci_coverage) <- rownames(avg_stats)
-  #   colnames(ci_coverage) <- colnames(avg_stats)
-  # ci_coverage <- round(ci_coverage*100, 1)
-  # names(MLE_conv) <- colnames(avg_stats)
-  # 
-  # # Output
-  # results <- list(cond = select_cond,
-  #                 MCMC_est = MCMC_est,
-  #                 bias_raw = bias_raw,
-  #                 bias_per = bias_per,
-  #                 ci_cov = ci_coverage,
-  #                 MLE_conv_rate = MLE_conv)
-  # return(results)
 }
 
 res_ed_est <- function(results, measure = "all"){
@@ -1533,4 +1473,43 @@ res_ed_ci <- function(results, measure = "all"){
   
   # Prepare and return output
   return(out_dist)
+}
+
+bridge_cv <- function(out, mods = NULL){
+  # Returns a df with ridge penality selected for each condition
+  # Compute Average FMI across all parameter estiamtes per ridge value
+  
+  # Arguments check
+  if(is.null(mods)) mods = names(out[[1]][[1]]$fmi)
+  
+  # Body
+  store_0 <- list()
+  for (i in 1:nrow(out$conds)) {
+    store_1 <- NULL
+    for (dt in 1:out$parms$dt_rep) {
+      store_1 <- cbind(store_1, unlist(out[[dt]][[i]]$fmi[mods]))
+    }
+    # store_0 <- cbind(store_0, rowMeans(store_1))
+    store_0[[i]] <- rowMeans(store_1)
+  }
+  ridge_range <- length(unique(out$conds$ridge))
+  names(store_0) <- rep(unique(out$conds$ridge), nrow(out$conds)/ridge_range)
+  
+  avg_fmi <- round(sapply(store_0, mean), 3)
+  
+  # Select ridge value with lowest average FMI
+  i <- 1; j <- i+ridge_range-1
+  ridge_s <- NULL
+  for (r in 1:(length(avg_fmi)/ridge_range)) {
+    ridge_s[r] <- as.numeric(names(which.min(avg_fmi[i:j])))
+    i <- j+1
+    j <- i+ridge_range-1
+  }
+  
+  # Attach ridge value to specific condition
+  col_indx <- colnames(out$conds) != "ridge" # exclude ridge column
+  output <- data.frame(out$conds[!duplicated(out$conds[, col_indx]), 
+                                 col_indx],
+                       ridge = ridge_s)
+  return(output)
 }

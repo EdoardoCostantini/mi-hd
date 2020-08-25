@@ -84,6 +84,3 @@ parms$description <- c("For the most challanging condition, data generation is r
 # Fix condition to desired one for convergence check
 conds <- conds[c(12), ]
   # condition 12 is the complex: interactions everywhere and larger dataset to "scan"
-
-
-conds[1,]

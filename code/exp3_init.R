@@ -22,8 +22,8 @@
   
   # For blasso
   parms$chains_bl     <- 1 # 1 
-  parms$iters_bl      <- 5 # 2e3  total iterations
-  parms$burnin_imp_bl <- 0 # 1950 discarded iterations
+  parms$iters_bl      <- 5 # 300  total iterations
+  parms$burnin_imp_bl <- 0 # 250 discarded iterations
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
@@ -63,8 +63,6 @@
   # y gen / imporntant predictors
   parms$yMod_cov <- parms$blck1[1:3]
   parms$yMod_int <- parms$yMod_cov[1:2]
-  # parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
-  # parms$formula <- c("y ~ z1 + z2 + z3 + z4 + z5")
   parms$b_main <- rep(1, length(parms$yMod_cov))
   parms$b_int <- 1
   
@@ -101,8 +99,6 @@
   parms$missType <- c("high", "low", "tails")[3]
   
   # Response Model (rm)
-  # parms$rm_x <- parms$blck1[!parms$blck1 %in% parms$yMod_cov][1:2]
-  
   parms$rm_x <- c("y", 
                   paste0("z", 
                          (tail(parms$yMod_cov, 1)+1):
@@ -169,6 +165,7 @@
                    sem_CI       = TRUE,
                    lm_EST       = TRUE,
                    lm_CI        = TRUE,
+                   fmi          = FALSE,
                    miss_descrps = TRUE,
                    run_time_min = TRUE,
                    imp_values   = FALSE)
@@ -182,14 +179,26 @@
   
   # Specifications
   pm    <- c(.3)
-  p     <- c(25, 500) # c(50, 500) # number of variables
+  p     <- c(50, 500) # c(50, 500) # number of variables
   r2    <- c(.65)
   
   # Condition dependent Imputation model parameters
-  ridge <- 1e-5 # for bridge (needs crossvalidation)
+  ridge <- c(1e-08, # values from the exp3_cv_bridge_results.R script
+             1e-01, 
+             1e-04, 
+             1e-01,
+             1e-08, 
+             1e-08, 
+             1e-07, 
+             1e-07, 
+             1e-07, 
+             1e-07, 
+             1e-07, 
+             1e-07)
   
   # Dataframe of conditions  
-  conds <- expand.grid(pm, ridge, r2, int_sub, int_rm, int_da, p)
+  conds <- expand.grid(pm, ridge=NA, r2, int_sub, int_rm, int_da, p)
   
     colnames(conds) <- c("pm", "ridge", "r2", "int_sub", "int_rm", "int_da", "p")
   conds <- conds[!(conds$p == p[2] & conds$int_da == TRUE), ]
+  conds$ridge <- ridge
