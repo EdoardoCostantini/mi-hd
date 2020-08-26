@@ -392,7 +392,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   # Given 1 condition, Generates 1 dataset and performs imutations according to
   # selected methods
   ## For internals
-  # cond <- conds[1, ]
+  # cond <- conds[2, ]
   
   ## ----------------------------------------------------------------------- ##
   

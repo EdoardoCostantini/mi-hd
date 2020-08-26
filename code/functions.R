@@ -1153,11 +1153,11 @@ res_sem_time <- function(out, condition = 1){
   for (i in 1:out$parms$dt_rep) {
     res_time <- rbind(res_time, out[[i]][[select_cond]]$run_time_min)
   }
-  return(round(colMeans(res_time), 3) )
+  return( round(colMeans(res_time), 3) )
 }
 
-res_sum <- function(out, model, condition = 1){
-  # model = "sem" # the first part of the name of a result object stored
+res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
+  # model = "semS" # the first part of the name of a result object stored
                    # in out 
   # model = "lm"
   # condition = 1
@@ -1166,21 +1166,6 @@ res_sum <- function(out, model, condition = 1){
   est <- paste0(model, "_EST")
   ci <- paste0(model, "_CI")
   select_cond <- names(out[[1]])[condition]
-  
-  
-  ## Step 1. Obtain Pseudo True Values ##
-  full_dat_est <- matrix(NA, 
-                         # Data repetitions
-                         nrow = out$parms$dt_rep, 
-                         # Parameters estiamtes
-                         ncol = nrow(out[[1]][[select_cond]][[est]]))
-  
-  for (i in 1:out$parms$dt_rep) {
-    full_dat_est[i, ] <- 
-      out[[i]][[select_cond]][[est]][, which(out$parms$methods == "GS")]
-  }
-  
-  psd_tr_vec <- colMeans(full_dat_est) # pseudo true values
   
   ## Step 2. Bias ##
   avg <- sapply(out$parms$methods, function(m){
@@ -1194,8 +1179,9 @@ res_sum <- function(out, model, condition = 1){
     c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
   })
   # Store Objects
-  validReps <- avg["rep", ] # number of successes
-  avg <- avg[-which(rownames(avg) == "rep"), ]
+  validReps  <- avg["rep", ] # number of successes
+  avg        <- avg[-which(rownames(avg) == "rep"), ]
+  psd_tr_vec <- avg[, "GS"] # pseudo true values
   
   if(out$parms$exp == 1 & nchar(rownames(avg)[1])<1){
     # Fixes a problem of old results from privous runs of eperiment 1
@@ -1221,12 +1207,18 @@ res_sum <- function(out, model, condition = 1){
   )
   
   meths <- out$parms$methods[-which(out$parms$methods == "GS")]
-  # # Bias Standardized
-  # if(out$parms$exp != 1 & model != "lm"){
-  #   bias_sd <- (avg[1:out$parms$zm_n, meths]-psd_tr_vec[1:out$parms$zm_n])/
-  #     psd_tr_vec[(out$parms$zm_n+1):(out$parms$zm_n+out$parms$zm_n)]
-  # }
-  # round(bias_sd, 3)
+  # Bias Mean Standardized
+  if(bias_sd == TRUE){
+    means_indx <- grep("~1", rownames(avg))
+    vars_indx <- means_indx + length(means_indx)
+    bias_sd <- round(
+      (avg[means_indx, ] - psd_tr_vec[means_indx])/
+        sqrt(psd_tr_vec[vars_indx]),
+      3)
+  } else {
+    bias_sd <- NULL
+  }
+  
   ## Step 3. CI Coverange ##
   # storing threshold
   str_thrs <- nrow(out[[1]][[select_cond]][[ci]])/2
@@ -1252,11 +1244,12 @@ res_sum <- function(out, model, condition = 1){
   rownames(CIC) <- rownames(bias)
   
   # Output
-  results <- list(cond = select_cond,
-                  MCMC_est = round(cbind(ref=psd_tr_vec, avg), 3),
-                  bias_raw = round(cbind(ref=psd_tr_vec, bias), 3),
-                  bias_per = bias_per,
-                  ci_cov   = round(CIC*100, 1),
+  results <- list(cond      = select_cond,
+                  MCMC_est  = round(cbind(ref=psd_tr_vec, avg), 3),
+                  bias_raw  = round(cbind(ref=psd_tr_vec, bias), 3),
+                  bias_per  = bias_per,
+                  bias_sd   = bias_sd,
+                  ci_cov    = round(CIC*100, 1),
                   validReps = validReps)
   return(results)
 }
@@ -1423,56 +1416,41 @@ res_lm_sum <- function(out, condition = 1){
   return(results)
 }
 
-res_ed_est <- function(results, measure = "all"){
+res_ed_est <- function(results, index = 1:2){
   # Internals
-  # results <- list(out_cond1, lm_cond1)[[2]]
-  # measure <- c("all", "mean", "var", "cov")[2]
-  
-  # Which elements should be included in the distance computation
-  if(measure == "all")  measure_id <- 1:nrow(results$MCMC_est)
-  if(measure == "mean") measure_id <- 1:6
-  if(measure == "var")  measure_id <- 7:12
-  if(measure == "cov")  measure_id <- 13:nrow(results$MCMC_est)
-  if(measure == "rc")   measure_id <- 2:nrow(results$MCMC_est)
+  # results = exp2_res$semR$cond1
+  # index   = 1:2
   
   # Prepare objects for distance computation
-  method_id <- which(colnames(results$MCMC_est) %in% c("ref", "GS"))
-  ref <- results$MCMC_est[measure_id, "ref"]
-  MCMC_est <- results$MCMC_est[measure_id, -method_id]
+  method_id <- colnames(results$MCMC_est) != "ref"
+  ref <- results$MCMC_est[index, "ref"]
+  MCMC_est <- results$MCMC_est[index, method_id]
   
   # Compute Euclidean distance
   out_dist <- sapply(as.data.frame(MCMC_est), 
-                     function(x) dist(rbind(ref, x))
+                     function(x) dist(rbind(x, ref),
+                                      method = "euclidean")
   )
   
   # Prepare and return output
-  return(out_dist)
+  return( round(out_dist, 3) )
 }
 
-res_ed_ci <- function(results, measure = "all"){
+res_ed_ci <- function(results){
   # Internals
-  # results <- list(out_cond1, lm_cond1)[[1]]
-  # measure <- c("all", "mean", "var", "cov")[2]
-  
-  # Which elements should be included in the distance computation
-  if(measure == "all")  measure_id <- 1:nrow(results$ci_cov)
-  if(measure == "mean") measure_id <- 1:6
-  if(measure == "var")  measure_id <- 7:12
-  if(measure == "cov")  measure_id <- 13:nrow(results$ci_cov)
-  if(measure == "rc")   measure_id <- 2:nrow(results$ci_cov)
+  # results <- semR_res[[1]]
   
   # Prepare objects for distance computation
-  method_id <- which(colnames(results$ci_cov) %in% c("ref", "GS"))
-  ref <- rep(95, length(measure_id))
-  MCMC_ci <- results$ci_cov[measure_id, -method_id]
+  ref <- rep(95, nrow(results$ci_cov))
   
   # Compute Euclidean distance
-  out_dist <- sapply(as.data.frame(MCMC_ci), 
-                     function(x) dist(rbind(ref, x))
+  out_dist <- sapply(as.data.frame(results$ci_cov), 
+                     function(x) dist(rbind(x, ref),
+                                      method = "euclidean")
   )
   
   # Prepare and return output
-  return(out_dist)
+  return( round(out_dist, 1) )
 }
 
 bridge_cv <- function(out, mods = NULL){

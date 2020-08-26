@@ -62,7 +62,7 @@
   # parms$z_m_id  <- 1:10
   parms$z_m_id <- paste0("z", 1:10)
   parms$zm_n <- length(parms$z_m_id)
-  parms$S_all   <- 1:(5*4)
+  parms$S_all   <- paste0("z", ( 1:(parms$n_it * tail(parms$blck1, 1)) ))
     # all measured items (5) for the first 4 lv. These include:
     # - latent variables of items with missing values (1 and 2)
     # - latent variables involved in response model (3 and 4)

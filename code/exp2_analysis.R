@@ -11,194 +11,129 @@
   source("./init_general.R")
 
 # Read results from a run of simulation study
-  exp2_res <- readRDS("../output/exp2_simOut_20200812_1449_res.rds") # way out
-  exp2_res <- readRDS("../output/exp2_simOut_20200819_1743_res.rds") # not yet there
+  # exp2_res <- readRDS("../output/exp2_simOut_20200812_1449_res.rds") # way out
+  filename <- "exp2_simOut_20200819_1743_res"
+  exp2_res <- readRDS(paste0("../output/", filename, ".rds"))
 
 # Bias --------------------------------------------------------------------
-  # SEM raw data
-  exp2_res$semR$cond1$cond
-  exp2_res$semR$cond1$bias_per
-  exp2_res$semR$cond2$cond
-  exp2_res$semR$cond2$bias_per
-  exp2_res$semR$cond3$cond
-  exp2_res$semR$cond3$bias_per
-  exp2_res$semR$cond4$cond
-  exp2_res$semR$cond4$bias_per
+  exp2_res$conds
   
-  # CFA raw data
-  exp2_res$CFA$cond1$cond
-  exp2_res$CFA$cond1$bias_per
-  exp2_res$CFA$cond2$cond
-  exp2_res$CFA$cond2$bias_per
-  exp2_res$CFA$cond3$cond
-  exp2_res$CFA$cond3$bias_per
-  exp2_res$CFA$cond4$cond
-  exp2_res$CFA$cond4$bias_per
+  # Condition indexes
+  cindex_lh <- c(1:4)
+    runif(n_it_tot, .9, .97) #lh
+    runif(n_it_tot, .5, .6)  #ll
+  cindex_hd <- c(2, 4)
+  cindex_hp <- c(3, 4)
   
-  # SEM scored data
-  exp2_res$semS$cond1$cond
-  exp2_res$semS$cond1$bias_per
-  exp2_res$semS$cond2$cond
-  exp2_res$semS$cond2$bias_per
-  exp2_res$semS$cond3$cond
-  exp2_res$semS$cond3$bias_per
-  exp2_res$semS$cond4$cond
-  exp2_res$semS$cond4$bias_per
-  
-  # SEM scored data
-  exp2_res$lm$cond1$cond
-  exp2_res$lm$cond1$bias_per
-  exp2_res$lm$cond2$cond
-  exp2_res$lm$cond2$bias_per
-  exp2_res$lm$cond3$cond
-  exp2_res$lm$cond3$bias_per
-  exp2_res$lm$cond4$cond
-  exp2_res$lm$cond4$bias_per
-
-  # Result 1 - Easy round, all good except CART and RF
-  
-  
-  # Result 2 - Covariance trouble for Blasso and DURR w/ p 50 pm .3
-  
-  
-  # Result 3 - Variance and covariance trouble for MI-PCA and IURR, respectively
-  
-
-# CI ----------------------------------------------------------------------
-  # SEM raw data
-  exp2_res$semR$cond1$cond
-  exp2_res$semR$cond1$ci
-  exp2_res$semR$cond2$cond
-  exp2_res$semR$cond2$ci
-  exp2_res$semR$cond3$cond
-  exp2_res$semR$cond3$ci
-  exp2_res$semR$cond4$cond
-  exp2_res$semR$cond4$ci
-  
-  # CFA raw data
-  exp2_res$CFA$cond1$cond
-  exp2_res$CFA$cond1$ci
-  exp2_res$CFA$cond2$cond
-  exp2_res$CFA$cond2$ci
-  exp2_res$CFA$cond3$cond
-  exp2_res$CFA$cond3$ci
-  exp2_res$CFA$cond4$cond
-  exp2_res$CFA$cond4$ci
-  
-  # SEM scored data
-  exp2_res$semS$cond1$cond
-  exp2_res$semS$cond1$ci
-  exp2_res$semS$cond2$cond
-  exp2_res$semS$cond2$ci
-  exp2_res$semS$cond3$cond
-  exp2_res$semS$cond3$ci
-  exp2_res$semS$cond4$cond
-  exp2_res$semS$cond4$ci
-  
-  # SEM scored data
-  exp2_res$lm$cond1$cond
-  exp2_res$lm$cond1$ci
-  exp2_res$lm$cond2$cond
-  exp2_res$lm$cond2$ci
-  exp2_res$lm$cond3$cond
-  exp2_res$lm$cond3$ci
-  exp2_res$lm$cond4$cond
-  exp2_res$lm$cond4$ci
-  
-  # Result 1 - Coverage is a function of pm, not p (report mean CI coverage)
-  # pm .1
-  
-  # p 50
-  
-  # p 500
-  
-# Multivairate Distance Analysis ------------------------------------------
-
-  # Sem model estimates 
-  # All parameters
-  sem_ed_all <- round(t(sapply(list(p50pm.1  = sum_exp1_sem$cond1, 
-                                    p500pm.1 = sum_exp1_sem$cond2, 
-                                    p50pm.3  = sum_exp1_sem$cond3, 
-                                    p500pm.3 = sum_exp1_sem$cond4), 
-                               res_ed_est, 
-                               measure = "all"
-  )), 3)
+#> SEM raw data ####
+  t(sapply(exp2_res$semR,
+           function(x) x$validReps))
+  exp2_res$semR[[4]]$MCMC_est
   
   # Means
-  sem_ed_mu <- round(t(sapply(list(p50pm.1  = sum_exp1_sem$cond1, 
-                                   p500pm.1 = sum_exp1_sem$cond2, 
-                                   p50pm.3  = sum_exp1_sem$cond3, 
-                                   p500pm.3 = sum_exp1_sem$cond4), 
-                              res_ed_est, 
-                              measure = "mean"
-  )), 3)
+  lapply(exp2_res$semR,
+         function(x) x$bias_raw[1:10,]
+  )[cindex_lh]
+  
+  lapply(exp2_res$semR,
+         function(x) x$bias_raw[1:10,]
+         )[cindex_lh]
+    # Bias in percent makes no sense for means = 0
+  
+  lapply(exp2_res$semR,
+         function(x) x$bias_sd)[cindex_lh]
+    # High factor loadings: PCA and IURR are impressivly good
+  
+  lapply(exp2_res$semR,
+         function(x) x$bias_sd)[-cindex_lh]
+    # Low factor loadings: same pattern
+  
+  # Euclidean distance measure
+  exp2_res$semR[[3]]$MCMC_est[1:10, ] # rows of interest
+  t(sapply(exp2_res$semR,
+           res_ed_est, index = 1:10))[cindex_lh, ]
+  t(sapply(exp2_res$semR,
+           res_ed_est, index = 1:10))[-cindex_lh, ]
   
   # Variances
-  sem_ed_var <- round(t(sapply(list(p50pm.1  = sum_exp1_sem$cond1, 
-                                    p500pm.1 = sum_exp1_sem$cond2, 
-                                    p50pm.3  = sum_exp1_sem$cond3, 
-                                    p500pm.3 = sum_exp1_sem$cond4), 
-                               res_ed_est, 
-                               measure = "var"
-  )), 3)
+  lapply(exp2_res$semR,
+         function(x) x$bias_per[-c(1:10),])[cindex_lh]
+  lapply(exp2_res$semR,
+         function(x) x$bias_per[-c(1:10),])[-cindex_lh]
+    # Last condition is the interesting one: PCA and IURR perform well in all
+    # other conditions but when factor loadings are smaller then PCA starts to
+    # show its biased variances problem, and IURR its biased covariances problem
   
-  # Covariances
-  sem_ed_cov <- round(t(sapply(list(p50pm.1  = sum_exp1_sem$cond1, 
-                                    p500pm.1 = sum_exp1_sem$cond2, 
-                                    p50pm.3  = sum_exp1_sem$cond3, 
-                                    p500pm.3 = sum_exp1_sem$cond4), 
-                               res_ed_est, 
-                               measure = "cov"
-  )), 3)
-  round(rbind(sem_ed_all, 
-              sem_ed_mu, 
-              sem_ed_var, 
-              sem_ed_cov), 2)
+  # Confidence Intervals
+  lapply(exp2_res$semR,
+         function(x) x$ci_cov)[cindex_lh]
   
-  round(sem_ed_mu, 2)
-  round(sem_ed_var, 2)
-  round(sem_ed_cov, 2)
+  t(sapply(exp2_res$semR,
+           res_ed_ci))[cindex_lh, ]
+  t(sapply(exp2_res$semR,
+           res_ed_ci))[-cindex_lh, ]
+    # CI are great for PCA
   
-  # Make latex tables
-  latex_tab_input <- rbind(sem_ed_all, rep(NA, ncol(sem_ed_all)),
-                           sem_ed_mu, rep(NA, ncol(sem_ed_all)),
-                           sem_ed_var, rep(NA, ncol(sem_ed_all)),
-                           sem_ed_cov)
-  latex_tab_input <- do.call(rbind,
-                             lapply(list(sem_ed_all, 
-                                         sem_ed_mu, 
-                                         sem_ed_var, 
-                                         sem_ed_cov), 
-                                    function(x){
-                                      rownames(x) <- c("p = 50, pm = .1",
-                                                       "p = 50, pm = .3",
-                                                       "p = 500, pm = .1",
-                                                       "p = 500, pm = .3")
-                                      x}
-                             )
-  )
-  xtable(latex_tab_input,
-         align = c("l", rep("c", ncol(latex_tab_input))))
+#> CFA raw data ####
+  lapply(exp2_res$CFA,
+         function(x) x$bias_per[1:10, ])[cindex_lh]
+  lapply(exp2_res$CFA,
+         function(x) x$bias_per[1:10, ])[-cindex_lh]
   
-  # or
-  lapply(list(sem_ed_all, sem_ed_mu, sem_ed_var, sem_ed_cov), function(x){
-    rownames(x) <- c("p = 50, pm = .1",
-                     "p = 50, pm = .3",
-                     "p = 500, pm = .1",
-                     "p = 500, pm = .3")
-    xtable(x,
-           align = c("l", rep("c", ncol(x))) )
-  }
-  )
+  lapply(exp2_res$CFA,
+         function(x) x$ci_cov[1:10, ])[cindex_lh]
+  lapply(exp2_res$CFA,
+         function(x) x$ci_cov[1:10, ])[-cindex_lh]
   
+#> SEM scored ####
+  t(sapply(exp2_res$semS,
+           function(x) x$validReps))
+  
+  # Means of meaned scored data
+  lapply(exp2_res$semS,
+         function(x) round(x$bias_raw[1:2,],2))[cindex_lh]
+  
+  lapply(exp2_res$semS,
+         function(x) x$bias_sd)[cindex_lh]
+  lapply(exp2_res$semS,
+         function(x) x$bias_sd)[-cindex_lh]
+  
+  # Var Covar
+  lapply(exp2_res$semS,
+         function(x) x$bias_per[-c(1:2),])[cindex_lh]
+  lapply(exp2_res$semS,
+         function(x) x$bias_per[-c(1:2),])[-cindex_lh]
+  
+  # Confidence Interval
+  lapply(exp2_res$semS,
+         function(x) x$ci_cov)[cindex_lh]
+  
+  t(sapply(exp2_res$semS,
+           res_ed_ci))[cindex_lh, ]
+  t(sapply(exp2_res$semS,
+           res_ed_ci))[-cindex_lh, ]
+  
+#> lm scored data ####
+  
+  # Bias
+  lapply(exp2_res$lm,
+         function(x) x$bias_per)[cindex_lh]
+  lapply(exp2_res$lm,
+         function(x) x$bias_per)[-cindex_lh]
+  
+  # CI
+  lapply(exp2_res$lm,
+         function(x) x$ci_cov)[cindex_lh]
+  lapply(exp2_res$lm,
+         function(x) x$ci_cov)[-cindex_lh]
 
 # Summary Table -----------------------------------------------------------
 # This is a selected paramters version for summary paper presentation.
 
   col_id <- colnames(sum_exp1_sem$cond4$bias_raw)[c(12, 10, 2:9)]
-  indx <- rownames(sum_exp1_sem$cond4$bias_raw)[c(1, 4, 
-                                                  7, 10, 
-                                                  13, 15, 25)]
+  indx   <- rownames(sum_exp1_sem$cond4$bias_raw)[c(1, 4, 
+                                                    7, 10, 
+                                                    13, 15, 25)]
   sum_exp1_sem$cond4$cond
   sum_exp1_sem$cond4$ci_cov[indx, ]
   
@@ -224,32 +159,4 @@
   
   mt_table <- do.call(rbind, lapply(list_tables, rbind, NA))
 
-  write.csv(mt_table, "~/Desktop/mt_table.csv")
-  
-# LM models ---------------------------------------------------------------
-
-  # Bias
-  sum_exp1_lm$cond1$cond
-  sum_exp1_lm$cond1$bias_per
-  sum_exp1_lm$cond3$cond
-  sum_exp1_lm$cond3$bias_per
-  
-    # HighD
-  sum_exp1_lm$cond2$cond
-  sum_exp1_lm$cond2$bias_per
-  sum_exp1_lm$cond4$cond
-  sum_exp1_lm$cond4$bias_per
-  
-  # CI 
-  
-  sum_exp1_lm$cond1$cond
-  sum_exp1_lm$cond1$ci_cov
-  sum_exp1_lm$cond3$cond
-  sum_exp1_lm$cond3$ci_cov
-  
-    # HighD
-  sum_exp1_lm$cond2$cond
-  sum_exp1_lm$cond2$ci_cov
-  sum_exp1_lm$cond4$cond
-  sum_exp1_lm$cond4$ci_cov
-  
+  write.csv(mt_table, paste0("../output/", filename, "_table.csv") )

@@ -55,6 +55,7 @@ cat(paste0("\n", "------", "\n",
 
 # Attach parm object
 out$parms <- parms
+out$conds <- conds
 
 # Save output -------------------------------------------------------------
 

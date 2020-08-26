@@ -27,22 +27,21 @@
   
 ## SEM estiamtes raw data (saturated model) ##
   # Extract results per conditions
-  semR_res <- lapply(seq_along(1:length(out[[1]]))[-2], # excludes problematic condtion for now
+  semR_res <- lapply(seq_along(1:length(out[[1]])),
                      function(x) res_sum(out, 
                                          model = "semR", 
-                                         condition = x))
-  
-  # Temporary fix for error in condition 2
-  other_sem <- vector("list",8)
-  other_sem[[1]] <- semR_res[[1]]
-  for (i in 2:7) {
-    other_sem[[i+1]] <- semR_res[[i]]
-  }
-  semR_res <- other_sem
+                                         condition = x,
+                                         bias_sd = TRUE))
   
   # Show results all conditions for a given data rep
+  t(sapply(1:length(semR_res),
+         function(x) semR_res[[x]]$validReps))
   lapply(1:length(semR_res),
-         function(x) semR_res[[x]]$bias_per)
+         function(x) round(semR_res[[x]]$bias_raw[1:10,],2))
+  lapply(1:length(semR_res),
+         function(x) semR_res[[x]]$bias_sd)
+  lapply(1:length(semR_res),
+         function(x) semR_res[[x]]$bias_per[-c(1:10),])
   lapply(1:length(semR_res),
          function(x) semR_res[[x]]$ci_cov)
   
@@ -62,13 +61,16 @@
   semS_res <- lapply(1:length(out[[1]]),
                     function(x) res_sum(out, 
                                         model = "semS", 
-                                        condition = x))
+                                        condition = x,
+                                        bias_sd = TRUE))
   
   # Show results for a given condition
   lapply(1:length(out[[1]]),
-         function(x) semS_res[[x]]$bias_per)
+         function(x) semS_res[[x]]$bias_raw[1:2,])
   lapply(1:length(out[[1]]),
-         function(x) semS_res[[x]]$bias_raw)
+         function(x) semS_res[[x]]$bias_sd)
+  lapply(1:length(out[[1]]),
+         function(x) semS_res[[x]]$bias_per[-c(1:2),])
   lapply(1:length(out[[1]]),
          function(x) semS_res[[x]]$ci_cov)
 
@@ -77,6 +79,7 @@
                      function(x) res_sum(out, 
                                          model = "lm", 
                                          condition = x))
+  
   # Show results for a given condition
   lapply(1:length(out[[1]]),
          function(x) lm_res[[x]]$bias_per)
@@ -93,8 +96,9 @@
                      return(x)
                    }
   )
-
+  output$conds <- names(out[[1]])
+  
   saveRDS(
     output, 
-    paste0("../output/", filename, "_res.rds") 
+    paste0("../output/", filename, "_res.rds")
   )
