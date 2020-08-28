@@ -15,7 +15,7 @@
   
 # Check presence
   out[[1]]
-  names(out[[1]])
+  out$conds
   
 # Time Analyses -----------------------------------------------------------
 

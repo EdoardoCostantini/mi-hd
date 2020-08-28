@@ -771,13 +771,13 @@ runCell_int <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./init.R")
-  # cond <- conds[1, ]
+  # cond <- conds[2, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
   # impose missing values;
   
-  Xy <- simData_int(parms, cond)
+  Xy     <- simData_int(parms, cond)
   Xy_mis <- imposeMiss_int(Xy, parms, cond)
 
   # JAV (Transform, then impute)
@@ -804,13 +804,13 @@ runCell_int <- function(cond, parms, rep_status) {
   }
   # DA: Append Axuliary Interaction terms
   if(cond$int_da == TRUE){
-    col_inc <- names(which( !is.na(colMeans(Xy_mis)) ))
+    col_inc  <- names(which( !is.na(colMeans(Xy_mis)) ))
     interact <- computeInteract(Xy_mis[, col_inc],
                                 idVars = col_inc,
                                 ordVars = NULL,
                                 nomVars = NULL,
                                 moderators = col_inc)
-    Xy_mis <- cbind(Xy_mis, interact)
+    Xy_mis   <- cbind(Xy_mis, interact)
   }
   
   # Missing data 

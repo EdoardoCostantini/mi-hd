@@ -1418,8 +1418,8 @@ res_lm_sum <- function(out, condition = 1){
 
 res_ed_est <- function(results, index = 1:2){
   # Internals
-  # results = exp2_res$semR$cond1
-  # index   = 1:2
+  # results = exp2_res$semR$cond8
+  # index   = -c(1:20)
   
   # Prepare objects for distance computation
   method_id <- colnames(results$MCMC_est) != "ref"

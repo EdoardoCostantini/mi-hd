@@ -12,151 +12,164 @@
 
 # Read results from a run of simulation study
   # exp2_res <- readRDS("../output/exp2_simOut_20200812_1449_res.rds") # way out
-  filename <- "exp2_simOut_20200819_1743_res"
-  exp2_res <- readRDS(paste0("../output/", filename, ".rds"))
+  filename <- "exp2_simOut_20200819_1743"
+  out <- readRDS(paste0("../output/", filename, ".rds"))
+  exp2_res <- readRDS(paste0("../output/", filename, "_res.rds"))
 
 # Bias --------------------------------------------------------------------
-  exp2_res$conds
+  
+# Recap of set up  
+
+  out$conds
+  
+  # c  lv  pm   fl ridge
+  # 1  10 0.1 high 1e-01
+  # 2 100 0.1 high 1e-07
+  # 3  10 0.3 high 1e-01
+  # 4 100 0.3 high 1e-07
+  # ------------------ #
+  # 5  10 0.1  low 1e-01
+  # 6 100 0.1  low 1e-07
+  # 7  10 0.3  low 1e-01
+  # 8 100 0.3  low 1e-07
+  
+  list(
+    it_number = out$parms$n_it,
+    mis_var   = out$parms$z_m_id,
+    miss_type = out$parms$missType,
+    lv_rm_x   = out$parms$rm_x,
+    lv_number = "condition specific: 10 or 100",
+    factor_loadings = "a) runif btw .9 and .97; b) runif btw .5 and .6",
+    substantive = "SEM, CFA raw data; SEM, LM scored data (mean of items)"
+  )
   
   # Condition indexes
   cindex_lh <- c(1:4)
-    runif(n_it_tot, .9, .97) #lh
-    runif(n_it_tot, .5, .6)  #ll
   cindex_hd <- c(2, 4)
   cindex_hp <- c(3, 4)
   
+#> SEM scored ####
+  # t(sapply(exp2_res$semS,
+  #          function(x) x$validReps))
+  
+  # Var Covar
+  # PCA issue with variances remains but good performances
+  # HIGH FACTOR LOADINGS
+  lapply(exp2_res$semS,
+         function(x) x$bias_per[-c(1:2),])[cindex_lh]
+  # LOW FACTOR LOADINGS
+  lapply(exp2_res$semS,
+         function(x) x$bias_per[-c(1:2),])[-cindex_lh]
+  
+  # MEANS in terms of standard deviations from the reference
+  lapply(exp2_res$semS,
+         function(x) x$bias_sd)[c(5:8)]
+  
+  # CONFIDENCE INTERVALS
+  # Look at sizes
+  lapply(exp2_res$semS,
+         function(x) x$ci_cov)[c(4,8)]
+  # Look at ED
+  t(sapply(exp2_res$semS,
+           res_ed_ci))
+  
 #> SEM raw data ####
+  # t(sapply(exp2_res$semR,
+  #          function(x) x$validReps))
+  
+  # EUCLIDEAN distance measure for means
+  # LOW FACTOR LOADINGS
   t(sapply(exp2_res$semR,
-           function(x) x$validReps))
-  exp2_res$semR[[4]]$MCMC_est
+           res_ed_est, index = 1:10))[5:8, ]
   
-  # Means
+  # VARIANCES
+  # Good PCA good for all but highest condition with low factor loadings
+  # Last condition is the interesting one: PCA and IURR perform well in all
+  # other conditions but when factor loadings are smaller then PCA starts to
+  # show its biased variances problem, and IURR its biased covariances problem
   lapply(exp2_res$semR,
-         function(x) x$bias_raw[1:10,]
-  )[cindex_lh]
+         function(x) x$bias_per[-c(1:10),])[c(4,8)]
   
-  lapply(exp2_res$semR,
-         function(x) x$bias_raw[1:10,]
-         )[cindex_lh]
-    # Bias in percent makes no sense for means = 0
-  
-  lapply(exp2_res$semR,
-         function(x) x$bias_sd)[cindex_lh]
-    # High factor loadings: PCA and IURR are impressivly good
-  
-  lapply(exp2_res$semR,
-         function(x) x$bias_sd)[-cindex_lh]
-    # Low factor loadings: same pattern
-  
-  # Euclidean distance measure
-  exp2_res$semR[[3]]$MCMC_est[1:10, ] # rows of interest
+  # PCA variance struggle
   t(sapply(exp2_res$semR,
-           res_ed_est, index = 1:10))[cindex_lh, ]
+           res_ed_est, index = 11:20))
+  
+  # PCA covariances domination
   t(sapply(exp2_res$semR,
-           res_ed_est, index = 1:10))[-cindex_lh, ]
+           res_ed_est, index = -c(1:20)))
   
-  # Variances
-  lapply(exp2_res$semR,
-         function(x) x$bias_per[-c(1:10),])[cindex_lh]
-  lapply(exp2_res$semR,
-         function(x) x$bias_per[-c(1:10),])[-cindex_lh]
-    # Last condition is the interesting one: PCA and IURR perform well in all
-    # other conditions but when factor loadings are smaller then PCA starts to
-    # show its biased variances problem, and IURR its biased covariances problem
+  # Confidence Intervals one by one too crowded
+  # lapply(exp2_res$semR,
+  #        function(x) x$ci_cov)[c(4, 8)]
   
-  # Confidence Intervals
-  lapply(exp2_res$semR,
-         function(x) x$ci_cov)[cindex_lh]
-  
+  # Look at Euclidean distance measure
+  # CI are great for PCA!
   t(sapply(exp2_res$semR,
            res_ed_ci))[cindex_lh, ]
   t(sapply(exp2_res$semR,
            res_ed_ci))[-cindex_lh, ]
-    # CI are great for PCA
   
 #> CFA raw data ####
+  # FACTOR LOADINGS: PCA does not even budge with high dim and low factor 
+  # loadings
   lapply(exp2_res$CFA,
          function(x) x$bias_per[1:10, ])[cindex_lh]
   lapply(exp2_res$CFA,
          function(x) x$bias_per[1:10, ])[-cindex_lh]
+  # # CONFIDENCE INTERVALS ARE GOOD AS WELL
+  # lapply(exp2_res$CFA,
+  #        function(x) x$ci_cov[1:10, ])[cindex_lh]
+  # lapply(exp2_res$CFA,
+  #        function(x) x$ci_cov[1:10, ])[-cindex_lh]
   
-  lapply(exp2_res$CFA,
-         function(x) x$ci_cov[1:10, ])[cindex_lh]
-  lapply(exp2_res$CFA,
-         function(x) x$ci_cov[1:10, ])[-cindex_lh]
-  
-#> SEM scored ####
-  t(sapply(exp2_res$semS,
-           function(x) x$validReps))
-  
-  # Means of meaned scored data
-  lapply(exp2_res$semS,
-         function(x) round(x$bias_raw[1:2,],2))[cindex_lh]
-  
-  lapply(exp2_res$semS,
-         function(x) x$bias_sd)[cindex_lh]
-  lapply(exp2_res$semS,
-         function(x) x$bias_sd)[-cindex_lh]
-  
-  # Var Covar
-  lapply(exp2_res$semS,
-         function(x) x$bias_per[-c(1:2),])[cindex_lh]
-  lapply(exp2_res$semS,
-         function(x) x$bias_per[-c(1:2),])[-cindex_lh]
-  
-  # Confidence Interval
-  lapply(exp2_res$semS,
-         function(x) x$ci_cov)[cindex_lh]
-  
-  t(sapply(exp2_res$semS,
-           res_ed_ci))[cindex_lh, ]
-  t(sapply(exp2_res$semS,
-           res_ed_ci))[-cindex_lh, ]
+
   
 #> lm scored data ####
   
-  # Bias
-  lapply(exp2_res$lm,
-         function(x) x$bias_per)[cindex_lh]
-  lapply(exp2_res$lm,
-         function(x) x$bias_per)[-cindex_lh]
-  
-  # CI
-  lapply(exp2_res$lm,
-         function(x) x$ci_cov)[cindex_lh]
-  lapply(exp2_res$lm,
-         function(x) x$ci_cov)[-cindex_lh]
+  # # Bias
+  # # High Factor loadings
+  # lapply(exp2_res$lm,
+  #        function(x) x$bias_per)[cindex_lh]
+  # # Low factor loadings
+  # lapply(exp2_res$lm,
+  #        function(x) x$bias_per)[-cindex_lh]
+  # 
+  # # CI
+  # lapply(exp2_res$lm,
+  #        function(x) x$ci_cov)[cindex_lh]
+  # lapply(exp2_res$lm,
+  #        function(x) x$ci_cov)[-cindex_lh]
 
-# Summary Table -----------------------------------------------------------
-# This is a selected paramters version for summary paper presentation.
-
-  col_id <- colnames(sum_exp1_sem$cond4$bias_raw)[c(12, 10, 2:9)]
-  indx   <- rownames(sum_exp1_sem$cond4$bias_raw)[c(1, 4, 
-                                                    7, 10, 
-                                                    13, 15, 25)]
-  sum_exp1_sem$cond4$cond
-  sum_exp1_sem$cond4$ci_cov[indx, ]
-  
-  sum_exp1_sem$cond4$cond
-  sum_exp1_sem$cond4$bias_per[indx, ]
-  
-  genTableEAM <- function(x){
-    # Generates section of the table for EAM turn in paper
-    store <- NULL
-    for (i in 1:length(indx)) {
-      store <- cbind(store,
-                     t(sum_exp1_sem[[x]]$bias_per[indx, col_id])[, i],
-                     t(sum_exp1_sem[[x]]$ci_cov[indx, col_id])[, i])
-    }
-    return(store)
-  }
-  
-  list_tables <- lapply(list(cond1=1,
-                             cond2=2,
-                             cond3=3,
-                             cond4=4), 
-                        genTableEAM)
-  
-  mt_table <- do.call(rbind, lapply(list_tables, rbind, NA))
-
-  write.csv(mt_table, paste0("../output/", filename, "_table.csv") )
+# # Summary Table -----------------------------------------------------------
+# # This is a selected paramters version for summary paper presentation.
+# 
+#   col_id <- colnames(sum_exp1_sem$cond4$bias_raw)[c(12, 10, 2:9)]
+#   indx   <- rownames(sum_exp1_sem$cond4$bias_raw)[c(1, 4, 
+#                                                     7, 10, 
+#                                                     13, 15, 25)]
+#   sum_exp1_sem$cond4$cond
+#   sum_exp1_sem$cond4$ci_cov[indx, ]
+#   
+#   sum_exp1_sem$cond4$cond
+#   sum_exp1_sem$cond4$bias_per[indx, ]
+#   
+#   genTableEAM <- function(x){
+#     # Generates section of the table for EAM turn in paper
+#     store <- NULL
+#     for (i in 1:length(indx)) {
+#       store <- cbind(store,
+#                      t(sum_exp1_sem[[x]]$bias_per[indx, col_id])[, i],
+#                      t(sum_exp1_sem[[x]]$ci_cov[indx, col_id])[, i])
+#     }
+#     return(store)
+#   }
+#   
+#   list_tables <- lapply(list(cond1=1,
+#                              cond2=2,
+#                              cond3=3,
+#                              cond4=4), 
+#                         genTableEAM)
+#   
+#   mt_table <- do.call(rbind, lapply(list_tables, rbind, NA))
+# 
+#   write.csv(mt_table, paste0("../output/", filename, "_table.csv") )

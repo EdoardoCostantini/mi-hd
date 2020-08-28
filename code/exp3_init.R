@@ -73,7 +73,6 @@
                           paste0("z", parms$yMod_cov, collapse = " + "),
                           " + ",
                           paste0("z", parms$yMod_int, collapse = " : ")
-                          # paste0("z", parms$yMod_int, collapse = "")
   )
   parms$alphaCI <- .95 # confidence level for parameters CI
 
@@ -179,7 +178,7 @@
   
   # Specifications
   pm    <- c(.3)
-  p     <- c(50, 500) # c(50, 500) # number of variables
+  p     <- c(25, 500) # c(25, 500) # number of variables
   r2    <- c(.65)
   
   # Condition dependent Imputation model parameters

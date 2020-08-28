@@ -105,7 +105,7 @@ imposeMiss_lv <- function(dat_in, parms, cond){
 # Experiment 2 - Latent Structure -----------------------------------------
 
 simData_lv <- function(parms, cond){
-  # cond <-  conds[1,]
+  # cond <-  conds[4,]
   n_it_tot <- parms$n_it * cond$lv
   
   # Structural parameters of the measurement model

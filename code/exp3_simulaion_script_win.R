@@ -55,9 +55,9 @@ cat(paste0("\n", "------", "\n",
 
 # Attach parm object
 out$parms <- parms
+out$conds <- conds
 
 # Save output -------------------------------------------------------------
-
 saveRDS(out,
         paste0(parms$outDir,
                parms$results_file_name)
