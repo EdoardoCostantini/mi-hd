@@ -13,10 +13,11 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
   # @parms: the initialization object parms
   
   ## Example inputs
-  # Z = Xy_mis
+  # Z = Xy_mis # or
+  # Z = Xy_MIOP[, CIDX_MOP]
+  # O <- as.data.frame(!is.na(Z))            # matrix index of observed values
   # cond = conds[2,]
   # parms = parms
-  # O <- as.data.frame(!is.na(Z))            # matrix index of observed values
   
   ## output: 
   # - a list of chains imputed datasets at iteration iters
@@ -28,7 +29,7 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
     start.time <- Sys.time()
     
     # Define predictor matrix for MI TRUE with best active set
-    p_imp_id <- names(which(colMeans(O) < 1))
+    p_imp_id <- which(colSums(O) != parms$n)
     predMat <- matrix(rep(0, ncol(Z)^2), ncol = ncol(Z), 
                       dimnames = list(colnames(Z), colnames(Z)))
     col_index <- colnames(predMat) %in% parms$S_all # flexibility interaction!
@@ -40,14 +41,13 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
     methods[vartype != "numeric"] <- "pmm"
     
     # Impute
-    
     imp_MITR_mids <- mice::mice(Z, 
                                 predictorMatrix = predMat,
                                 m = parms$mice_ndt,
                                 maxit = parms$mice_iters,
                                 ridge = 1e-5,
                                 method = methods)
-    
+    imp_MITR_mids$predictorMatrix
     end.time <- Sys.time()
     
     # Store results

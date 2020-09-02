@@ -186,7 +186,7 @@ simData_lv <- function(parms, cond){
 
 simData_int <- function(parms, cond){
   # For internals
-  # cond <- conds[1,]
+  # cond <- conds[2,]
   
   # Generate covaraince matrix
   # For paramters decisions, look back at
@@ -210,32 +210,50 @@ simData_int <- function(parms, cond){
   # Make symmetric
   Sigma[upper.tri(Sigma)] <- t(Sigma)[upper.tri(Sigma)]
   
-  # Gen Axuliariy Variables
+  # Gen Predictors Variables
+  # Generic predictors
   Z <- rmvnorm(n     = parms$n, 
-               mean  = rep(0, ncol(Sigma)), 
+               mean  = rep(parms$item_mean, ncol(Sigma)), 
                sigma = Sigma )
   colnames(Z) <- paste0("z", 1:ncol(Z))
   
+  # y predictor depends on interaction
+  # z3_inte <- apply(Z[, parms$lm_z3_x], 1, prod)
+  # z3_pred <- as.matrix(data.frame(Z[, parms$lm_z3_x], z7z8 = z3_inte))
+  # z3_b    <- rep(parms$b, ncol(z3_pred))
+  # z3_sgn  <- t(z3_b) %*% cov(z3_pred) %*% z3_b # signal
+  # z3_sY   <- (z3_sgn / parms$z3_r2) - z3_sgn
+  # eps     <- rnorm(parms$n, mean = 0, sd = sqrt(z3_sY))
+  # Z[, 3]  <- z3_pred %*% z3_b + eps
+  # Z[, 3]  <- scale(z3_pred %*% z3_b + eps)
+  
   # Gen y variables
   if(cond$int_sub == FALSE){
-    Z_pred <- Z[, parms$yMod_cov]
-    signal <- t(parms$b_main) %*% cov(Z_pred) %*% parms$b_main
-    sY     <- (signal / cond$r2) - signal
-    eps    <- rnorm(parms$n, mean = 0, sd = sqrt(sY))
-    y      <- Z_pred %*% parms$b_main + eps
+    # Z_pred <- Z[, parms$lm_y_x]
+    # signal <- t(parms$b_main) %*% cov(Z_pred) %*% parms$b_main
+    # sY     <- (signal / cond$r2) - signal
+    # eps    <- rnorm(parms$n, mean = 0, sd = sqrt(sY))
+    # y      <- Z_pred %*% parms$b_main + eps
+    # 
+    y_pred   <- Z[, parms$lm_y_x]
+    y_b      <- rep(parms$b, ncol(y_pred))
+    y_sgn    <- t(y_b) %*% cov(y_pred) %*% y_b
+    y_sY       <- (y_sgn / cond$r2) - y_sgn
+    eps      <- rnorm(parms$n, mean = 0, sd = sqrt(y_sY))
+    y        <- y_pred %*% y_b + eps
   }
   if(cond$int_sub == TRUE){
-    int_term <- apply(scale(Z[, parms$yMod_int],
-                            center = TRUE,
-                            scale = FALSE), 1, prod)
-    Z_pred   <- cbind(Z[, parms$yMod_cov], int_term)
-    beta     <- c(parms$b_main, parms$b_int)
-    signal   <- t(beta) %*% cov(Z_pred) %*% beta
-    sY       <- (signal / cond$r2) - signal
-    eps      <- rnorm(parms$n, mean = 0, sd = sqrt(sY))
-    y        <- Z_pred %*% beta + eps
+    y_inte <- apply(scale(Z[, parms$lm_y_i],
+                          center = FALSE,
+                          scale = FALSE), 1, prod)
+    y_pred   <- cbind(Z[, parms$lm_y_x], y_inte)
+    y_b      <- rep(parms$b, ncol(y_pred))
+    y_sgn    <- t(y_b) %*% cov(y_pred) %*% y_b
+    y_sY     <- (y_sgn / cond$r2) - y_sgn
+    eps      <- rnorm(parms$n, mean = 0, sd = sqrt(y_sY))
+    y        <- y_pred %*% y_b + eps
   }
-  
+
   # Combine data
   yZ <- data.frame(y = y, Z)
 
@@ -244,7 +262,7 @@ simData_int <- function(parms, cond){
 
 # yZ <- simData_int(parms = parms, cond = conds[1, ])
 # summary(lm(parms$frm, data = yZ))
-# 
+
 # yZ <- simData_int(parms = parms, cond = conds[2, ])
 # summary(lm(parms$frm_int, data = yZ))
 

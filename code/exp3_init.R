@@ -39,8 +39,8 @@
   parms$n       <- 200 # number of cases for data generation
   
   # "True" values
-  parms$item_mean <- 5
-  parms$item_var  <- 5
+  parms$item_mean <- 2
+  parms$item_var  <- 1
   
   # Variable blocks
   parms$blcky <- 1:1 # dependent variables
@@ -50,33 +50,38 @@
   # y is excluded from this naming convention. Column 1 to 10 of the
   # X matrix, y is appended afterwards
   
-  parms$blck1_r <- .6 # correlation for highly correlated variables
-  parms$blck2_r <- .3 # correlation for correlated variables
+  parms$blck1_r <- 0 # correlation for highly correlated variables
+  parms$blck2_r <- 0 # correlation for correlated variables
   
   # Fully observed variables
   parms$Z_o_mu  <- 0 # mean for gen of fully observed variables
   
   # Variables that will have missingness
   parms$z_m_id  <- c(paste0("z", parms$blck1[1:3]))
-  parms$zm_n <- length(parms$z_m_id)
+  parms$zm_n    <- length(parms$z_m_id)
   
   # y gen / imporntant predictors
   parms$yMod_cov <- parms$blck1[1:3]
   parms$yMod_int <- parms$yMod_cov[1:2]
-  parms$b_main <- rep(1, length(parms$yMod_cov))
-  parms$b_int <- 1
+  parms$b_main   <- rep(1, length(parms$yMod_cov))
+  parms$b_int    <- 1
+  
+  parms$lm_y_x  <- parms$blck1[1:3] # predictors for the substantive linear model
+  parms$lm_y_i  <- parms$lm_y_x[1:2]
+  parms$lm_z3_x <- parms$blck1[7:8] # predictors for the linear model for z3
+  parms$b       <- 1 # for every regression coefficient
+  parms$z3_r2   <- .5
   
 # Models ------------------------------------------------------------------
-  parms$frm <- paste0("y ~ -1 + ",
-                      paste0("z", parms$yMod_cov, collapse = " + "))
+  parms$frm     <- paste0("y ~ -1 + ",
+                          paste0("z", parms$yMod_cov, collapse = " + "))
   parms$frm_int <- paste0("y ~ -1 + ",
                           paste0("z", parms$yMod_cov, collapse = " + "),
                           " + ",
-                          paste0("z", parms$yMod_int, collapse = " : ")
-  )
-  parms$alphaCI <- .95 # confidence level for parameters CI
+                          paste0("z", parms$yMod_int, collapse = " : "))
 
 # Imputation methods ------------------------------------------------------
+  parms$alphaCI <- .95 # confidence level for parameters CI
   parms$meth_sel <- data.frame(DURR_la = TRUE,
                                DURR_el = FALSE,
                                IURR_la = TRUE,
@@ -113,6 +118,7 @@
                      # procedure to solve possible issues of singularity
 
   # PCA
+  parms$SI_iter  <- 10L    # iterations for single imputation in PCA run
   parms$PCA_inter    <- FALSE # whether you want two way variables interactions
   parms$PCA_poly     <- FALSE # whether you want poly terms 
   parms$PCA_mincor   <- .3 # mincor for qucikpred for single imputation auxiliary vars
@@ -179,7 +185,7 @@
   # Specifications
   pm    <- c(.3)
   p     <- c(25, 500) # c(25, 500) # number of variables
-  r2    <- c(.65)
+  r2    <- c(.5)
   
   # Condition dependent Imputation model parameters
   ridge <- c(1e-08, # values from the exp3_cv_bridge_results.R script

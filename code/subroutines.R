@@ -139,7 +139,7 @@ runCell <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./init.R")
-  # cond <- conds[1, ]
+  # cond <- conds[3, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
@@ -162,6 +162,7 @@ runCell <- function(cond, parms, rep_status) {
   imp_DURR_la <- impute_DURR(Z = Xy_mis,
                              O = as.data.frame(O),
                              reg_type = "lasso",
+                             cond = cond,
                              perform = parms$meth_sel$DURR_la,
                              parms = parms)
 
@@ -173,6 +174,7 @@ runCell <- function(cond, parms, rep_status) {
   imp_DURR_el <- impute_DURR(Z = Xy_mis,
                              O = as.data.frame(O),
                              reg_type = "el",
+                             cond = cond,
                              perform = parms$meth_sel$DURR_el,
                              parms = parms)
   update_report("DURR elastic net", rep_status, parms, 
@@ -184,6 +186,7 @@ runCell <- function(cond, parms, rep_status) {
   imp_IURR_la <- impute_IURR(Z = Xy_mis,
                              O = as.data.frame(O),
                              reg_type = "lasso",
+                             cond = cond,
                              perform = parms$meth_sel$IURR_la,
                              parms = parms)
   update_report("IURR lasso", rep_status, parms, 
@@ -194,6 +197,7 @@ runCell <- function(cond, parms, rep_status) {
   imp_IURR_el <- impute_IURR(Z = Xy_mis,
                              O = as.data.frame(O),
                              reg_type = "el",
+                             cond = cond,
                              perform = parms$meth_sel$IURR_el,
                              parms = parms)
   update_report("IURR elastic net", rep_status, parms, 
@@ -203,6 +207,7 @@ runCell <- function(cond, parms, rep_status) {
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
                                  O = as.data.frame(O),
+                                 cond = cond,
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
   update_report("blasso", rep_status, parms, 
@@ -392,7 +397,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   # Given 1 condition, Generates 1 dataset and performs imutations according to
   # selected methods
   ## For internals
-  # cond <- conds[2, ]
+  # cond <- conds[1, ]
   
   ## ----------------------------------------------------------------------- ##
   
@@ -421,6 +426,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   imp_DURR_la <- impute_DURR(Z = Xy_mis,
                              O = as.data.frame(O),
                              reg_type = "lasso",
+                             cond = cond,
                              perform = parms$meth_sel$DURR_la,
                              parms = parms)
   
@@ -432,6 +438,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   imp_DURR_el <- impute_DURR(Z = Xy_mis,
                              O = as.data.frame(O),
                              reg_type = "el",
+                             cond = cond,
                              perform = parms$meth_sel$DURR_el,
                              parms = parms)
   update_report("DURR elastic net", rep_status, parms, 
@@ -444,6 +451,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   imp_IURR_la <- impute_IURR(Z = Xy_mis,
                              O = as.data.frame(O),
                              reg_type = "lasso",
+                             cond = cond,
                              perform = parms$meth_sel$IURR_la,
                              parms = parms)
   update_report("IURR lasso", rep_status, parms, 
@@ -454,6 +462,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   imp_IURR_el <- impute_IURR(Z = Xy_mis,
                              O = as.data.frame(O),
                              reg_type = "el",
+                             cond = cond,
                              perform = parms$meth_sel$IURR_el,
                              parms = parms)
   update_report("IURR elastic net", rep_status, parms, 
@@ -464,6 +473,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
                                  O = as.data.frame(O),
+                                 cond = cond,
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
   update_report("blasso", rep_status, parms, 
@@ -492,6 +502,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   # MICE-CART traditional
   imp_CART <- impute_CART(Z = Xy_mis,
                           O = as.data.frame(O),
+                          cond = cond,
                           perform = parms$meth_sel$MI_CART,
                           parms = parms)
   
@@ -503,6 +514,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   # MICE-RF
   imp_RANF <- impute_RANF(Z = Xy_mis,
                           O = as.data.frame(O),
+                          cond = cond,
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
   
@@ -771,7 +783,7 @@ runCell_int <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./init.R")
-  # cond <- conds[2, ]
+  # cond <- conds[6, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
@@ -779,43 +791,85 @@ runCell_int <- function(cond, parms, rep_status) {
   
   Xy     <- simData_int(parms, cond)
   Xy_mis <- imposeMiss_int(Xy, parms, cond)
-
-  # JAV (Transform, then impute)
-  if(cond$int_sub == TRUE){
-    col_int <- paste0("z", parms$yMod_int)
-    
-    # Fully obsrved
-    int_term <- apply(scale(Xy[, col_int], 
-                            scale = FALSE, center = TRUE), 
-                      1, 
-                      prod)
-    Xy <- cbind(Xy, int_term)
-    colnames(Xy)[colnames(Xy) == "int_term"] <- paste0(col_int, 
-                                                       collapse = "")
-    
-    # W/ missings
-    int_term <- apply(scale(Xy_mis[, col_int], 
-                            center = TRUE,
-                            scale = FALSE), 
-                      1, prod)
-    Xy_mis <- cbind(Xy_mis, int_term)
-    colnames(Xy_mis)[colnames(Xy_mis) == "int_term"] <- paste0(col_int, 
-                                                               collapse = "")
-  }
-  # DA: Append Axuliary Interaction terms
-  if(cond$int_da == TRUE){
-    col_inc  <- names(which( !is.na(colMeans(Xy_mis)) ))
-    interact <- computeInteract(Xy_mis[, col_inc],
-                                idVars = col_inc,
+  
+  # Cast data to method specific format
+  # For Optimal Impuation
+  col_int  <- paste0("z", parms$yMod_int)    # variables interacting
+  z1.z2    <- apply(scale(Xy_mis[, col_int], # compute interaction term
+                         center = FALSE,
+                         scale = FALSE),
+                   1, prod)
+  Xy_MIOP <- cbind(Xy_mis, z1.z2)
+  
+  # For all methods
+  # Generate Interaction terms (for low dimensional condition)
+  if(cond$p < parms$n){
+    interact <- computeInteract(Xy_mis,
+                                idVars = colnames(Xy_mis),
                                 ordVars = NULL,
                                 nomVars = NULL,
-                                moderators = col_inc)
-    Xy_mis   <- cbind(Xy_mis, interact)
+                                moderators = colnames(Xy_mis))
+    Xy_input <- cbind(Xy_mis, interact)
+  } else {
+    Xy_input <- Xy_mis
+  }
+    
+  # Populate it with values if there are missings (single imputation)
+  if(cond$int_da == TRUE){
+    predMatrix <- quickpred(Xy_input, mincor = .3)
+    Xy_mis_DAmids  <- mice(Xy_input,
+                       m               = 1, 
+                       maxit           = 10,
+                       predictorMatrix = predMatrix,
+                       # printFlag       = FALSE,
+                       ridge           = cond$ridge,
+                       method          = "pmm")
+    Xy_input <- complete(Xy_mis_DAmids)
+    Xy_input[, which(names(Xy) %in% parms$z_m_id)] <- 
+      Xy_mis[, which(names(Xy) %in% parms$z_m_id)]
   }
   
   # Missing data 
-  O <- !is.na(Xy_mis) # matrix index of observed values
-  miss_descrps <- colMeans(!O[, parms$z_m_id]) 
+  # O <- !is.na(Xy_mis) # matrix index of observed values
+  miss_descrps <- colMeans(is.na(Xy_mis)[, parms$z_m_id])
+  
+  # Generate an column indexing vector based on condition
+  if(cond$int_sub == FALSE & cond$int_da == FALSE){
+    CIDX_all <- colnames(Xy_input)[!grepl("\\.", 
+                                          colnames(Xy_input))]
+    CIDX_MOP <- colnames(Xy_MIOP)[!grepl("\\.", 
+                                         colnames(Xy_MIOP))]
+    mod_MICE_OP <- mod <- parms$frm
+  }
+  if(cond$int_sub == TRUE & cond$int_da == FALSE){
+    CIDX_all <- colnames(Xy_input)[!grepl("\\.", 
+                                                colnames(Xy_input))]
+    CIDX_MOP <- c(colnames(Xy_MIOP)[!grepl("\\.", 
+                                                  colnames(Xy_MIOP))],
+                  "z1.z2")
+    mod         <- parms$frm_int
+    mod_MICE_OP <- paste0("y ~ -1 + ",
+                          paste0("z", parms$lm_y_x, collapse = " + "),
+                          " + ",
+                          paste0("z", parms$lm_y_i, collapse = "."))
+  }
+  if(cond$int_sub == FALSE & cond$int_da == TRUE){
+    CIDX_all <- colnames(Xy_input)
+    CIDX_MOP <- colnames(Xy_MIOP)[!grepl("\\.", 
+                                           colnames(Xy_MIOP))]
+    mod_MICE_OP <- mod <- parms$frm
+  }
+  if(cond$int_sub == TRUE & cond$int_da == TRUE){
+    CIDX_all <- colnames(Xy_input)
+    CIDX_MOP <- c(colnames(Xy_MIOP)[!grepl("\\.", 
+                                                  colnames(Xy_MIOP))],
+                  "z1.z2")
+    mod         <- parms$frm_int
+    mod_MICE_OP <- paste0("y ~ -1 + ",
+                          paste0("z", parms$lm_y_x, collapse = " + "),
+                          " + ",
+                          paste0("z", parms$lm_y_i, collapse = "."))
+  }
   
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
@@ -823,20 +877,22 @@ runCell_int <- function(cond, parms, rep_status) {
   # Impute according to DURR method
   
   # Lasso
-  imp_DURR_la <- impute_DURR(Z = Xy_mis,
-                             O = as.data.frame(O),
+  imp_DURR_la <- impute_DURR(Z = Xy_input[, CIDX_all],
+                             O = data.frame(!is.na(Xy_input[, CIDX_all])),
                              reg_type = "lasso",
+                             cond = cond,
                              perform = parms$meth_sel$DURR_la,
                              parms = parms)
-
+  
   update_report("DURR lasso", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$DURR_la)
   
   # Elastic Net
-  imp_DURR_el <- impute_DURR(Z = Xy_mis,
-                             O = as.data.frame(O),
+  imp_DURR_el <- impute_DURR(Z = Xy_input[, CIDX_all],
+                             O = data.frame(!is.na(Xy_input[, CIDX_all])),
                              reg_type = "el",
+                             cond = cond,
                              perform = parms$meth_sel$DURR_el,
                              parms = parms)
   
@@ -846,9 +902,10 @@ runCell_int <- function(cond, parms, rep_status) {
   
   # Impute according to IURR method
   # Lasso
-  imp_IURR_la <- impute_IURR(Z = Xy_mis,
-                             O = as.data.frame(O),
+  imp_IURR_la <- impute_IURR(Z = Xy_input[, CIDX_all],
+                             O = data.frame(!is.na(Xy_input[, CIDX_all])),
                              reg_type = "lasso",
+                             cond = cond,
                              perform = parms$meth_sel$IURR_la,
                              parms = parms)
   
@@ -857,9 +914,10 @@ runCell_int <- function(cond, parms, rep_status) {
                 perform = parms$meth_sel$IURR_la)
   
   # Elastic Net
-  imp_IURR_el <- impute_IURR(Z = Xy_mis,
-                             O = as.data.frame(O),
+  imp_IURR_el <- impute_IURR(Z = Xy_input[, CIDX_all],
+                             O = data.frame(!is.na(Xy_input[, CIDX_all])),
                              reg_type = "el",
+                             cond = cond,
                              perform = parms$meth_sel$IURR_el,
                              parms = parms)
   update_report("IURR elastic net", rep_status, parms, 
@@ -867,8 +925,9 @@ runCell_int <- function(cond, parms, rep_status) {
                 perform = parms$meth_sel$IURR_el)
   
   # Impute according to Hans Blasso method
-  imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
-                                 O = as.data.frame(O),
+  imp_blasso <- impute_BLAS_hans(Z = Xy_input[, CIDX_all],
+                                 O = data.frame(!is.na(Xy_input[, CIDX_all])),
+                                 cond = cond,
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
   
@@ -877,8 +936,8 @@ runCell_int <- function(cond, parms, rep_status) {
                 perform = parms$meth_sel$blasso)
   
   # Impute according to van Buuren Ridge
-  imp_bridge <- impute_BRIDGE(Z = Xy_mis, 
-                              O = as.data.frame(O),
+  imp_bridge <- impute_BRIDGE(Z = Xy_input[, CIDX_all],
+                              O = data.frame(!is.na(Xy_input[, CIDX_all])),
                               ridge_p = cond$ridge,
                               parms = parms,
                               perform = parms$meth_sel$bridge)
@@ -888,15 +947,18 @@ runCell_int <- function(cond, parms, rep_status) {
                 perform = parms$meth_sel$bridge)
   
   # Impute according to Howard Et Al 2015 PCA appraoch
-  imp_PCA <- impute_PCA(Z = Xy_mis, O = O, parms = parms)
+  imp_PCA <- impute_PCA(Z = Xy_input[, CIDX_all],
+                        O = data.frame(!is.na(Xy_input[, CIDX_all])), 
+                        parms = parms)
   
   update_report("MICE-PCA", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$MI_PCA)
   
   # MICE-CART traditional
-  imp_CART <- impute_CART(Z = Xy_mis,
-                          O = as.data.frame(O),
+  imp_CART <- impute_CART(Z = Xy_input[, CIDX_all],
+                          O = data.frame(!is.na(Xy_input[, CIDX_all])),
+                          cond = cond,
                           perform = parms$meth_sel$MI_CART,
                           parms = parms)
   
@@ -905,8 +967,9 @@ runCell_int <- function(cond, parms, rep_status) {
                 perform = parms$meth_sel$MI_CART)
   
   # MICE-RF
-  imp_RANF <- impute_RANF(Z = Xy_mis,
-                          O = as.data.frame(O),
+  imp_RANF <- impute_RANF(Z = Xy_input[, CIDX_all],
+                          O = data.frame(!is.na(Xy_input[, CIDX_all])),
+                          cond = cond,
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
   
@@ -915,8 +978,8 @@ runCell_int <- function(cond, parms, rep_status) {
                 perform = parms$meth_sel$MI_RF)
   
   # MICE w/ true model
-  imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
-                                O = O,
+  imp_MICE_OP <- impute_MICE_OP(Z = Xy_input[, CIDX_all],
+                                O = data.frame(!is.na(Xy_input[, CIDX_all])),
                                 cond = cond,
                                 perform = parms$meth_sel$MI_OP,
                                 parms = parms)
@@ -944,17 +1007,10 @@ runCell_int <- function(cond, parms, rep_status) {
   # For each imp method, analyse all datasets based on model defined in init.R
 
   # Analysis model
-  SAT_mod <- SAT_mod_write(c("y", parms$z_m_id))
-  if(cond$int_sub == FALSE){
-    mod <- parms$frm
-  } else {
-    mod <- paste0("y ~ -1 + ",
-                  paste0("z", parms$yMod_cov, collapse = " + "),
-                  " + ",
-                  paste0("z", parms$yMod_int, collapse = ""))
-  }
+  # generate Saturated Model formula
+  SAT_mod     <- SAT_mod_write(c("y", parms$z_m_id))
 
-  # Sem model
+  # Fit sem model
   sem_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
                           DURR_el = imp_DURR_el$dats,
                           IURR_la = imp_IURR_la$dats,
@@ -981,13 +1037,14 @@ runCell_int <- function(cond, parms, rep_status) {
                          blasso  = imp_blasso$dats,
                          MI_PCA  = imp_PCA$dats,
                          MI_CART = imp_CART$dats,
-                         MI_RF   = imp_RANF$dats,
-                         MI_OP   = imp_MICE_OP$dats), 
+                         MI_RF   = imp_RANF$dats), 
                     fit_lm_models, mod = mod)
+  lm_fits$MI_OP <- fit_lm_models(imp_MICE_OP$dats, 
+                                 mod = mod_MICE_OP) # sligthly different
   
   # Single dataset
   lm_sndt <- fit_lm_models(list(missFor = imp_missFor$dats, 
-                                GS      = Xy, 
+                                GS      = Xy,
                                 CC      = Xy_mis[rowSums(!O) == 0, ]),
                            mod = mod)
   

@@ -33,9 +33,9 @@ cat(paste0("SIMULATION PROGRESS REPORT",
 sim_start <- Sys.time()
 
 ## Run the computations in parallel on the 'clus' object:
-out <- parLapply(cl = clus, 
-                 X = 1 : parms$dt_rep,
-                 fun = doRep, 
+out <- parLapply(cl    = clus, 
+                 X     = 1 : parms$dt_rep,
+                 fun   = doRep, 
                  conds = conds, 
                  parms = parms)
 

@@ -14,11 +14,11 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
   ## Body
   if(perform == TRUE){
     p  <- ncol(Z) # number of variables [indexed with ]
-    
-    p_imp    <- sum(colMeans(O) < 1)
-    p_imp_id <- names(which(colMeans(O) < 1))
     nr       <- colSums(!O[, colMeans(O) < 1])
-    
+
+    # Craete a copy of Z to be processed
+    Zm <- Z
+
     # To store imputed values and check convergence
     imp_CART_val <- vector("list", parms$chains)
     names(imp_CART_val) <- seq(1:parms$chains)
@@ -33,21 +33,21 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
       names(imp_CART_dat) <- seq(1:parms$iters)
       
       # Storing imputate values for each iteration (per chain)
-      imps <- lapply(p_imp_id, function(x) {
+      imps <- lapply(parms$z_m_id, function(x) {
         matrix(data = NA, nrow = parms$iters, ncol = nr[x],
                dimnames = list(NULL, rownames(Z[!O[, x],]) ))
       })
       
       Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
       imp_CART_dat$`1` <- Zm
-      for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
-                                              p_imp_id[i]]
+      for (i in 1:parms$zm_n) imps[[i]][1, ] <- Zm[!O[, parms$z_m_id[i]], 
+                                              parms$z_m_id[i]]
       
       for (m in 2:parms$iters) {
         print(paste0("CART - Chain: ", cc, "/", parms$chains, 
                      "; Iter: ", m, "/", parms$iters))
-        for (j in 1:p_imp) {
-          J <- which(colnames(Zm) %in% p_imp_id[j])
+        for (j in 1:parms$zm_n) {
+          J <- which(colnames(Zm) %in% parms$z_m_id[j])
           # Select data
           y_obs <- z_j_obs  <- Zm[O[, J] == TRUE, J]
           y_mis <- zm_mj    <- Zm[O[, J] == FALSE, J] # useless

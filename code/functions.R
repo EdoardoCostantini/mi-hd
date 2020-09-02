@@ -195,8 +195,8 @@ rr_est_lasso <- function(X, y, parms, fam="gaussian"){
     # y <- Boston$medv
     # fam <- "gaussian"
   ## Internals from simualtion
-  # X = X_obs_bs
-  # y = y_obs_bs
+  # X = X_obs
+  # y = y_obs
   # parms = parms
   # fam = glmfam
   
