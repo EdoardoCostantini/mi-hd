@@ -2,8 +2,21 @@
 Repository hosting project high-dimensional imputation comparison.
 
 ## Summary
-Missing data handling can be performed with principled missing data treatment such as Full Information Maximum Likelihood (FIML) and Multiple Imputation by Chained Equations (MICE). These established methods perform well with low dimensional datasets but high-dimensional scenarios still present challenges. Parametrising the imputation model when p > n is no easy task. Even when the dataset itself is not high-dimensional, trying to include all the interactions and polynomial terms can result in a p>n problem. 
-Many algorithms have been proposed to tackle the challenges of missing data in high-dimensional datasets. This projects aims at comparing some of the most popular.
+Reasearchers working with large social surveys need tools to correct for the bias introduced by nonresponses.
+The large number of items recorded in these surveys, coupled with their longitudinal nature and the necessity
+of preserving complex interactions and nonlinear relations, easily produces high-dimensional ($p>n$) imputation 
+problems that prevent a straightforward application of imputation algorithms such as MICE.
 
-## Notes
-As for now, this repository contains simple notes on the direction of the project.
+Furthermore, when employing Multiple Imputation to deal with missing values, data handlers tend to prefer including more
+predictors in the imputation models as to reduce chances of uncongenial imputation and analysis models.
+High-dimensional data imputation settings represent both an obstacle and an opportunity in this sense: 
+an obstacle, as in the presence of high-dimensional data it is simply not possible to include all variables in 
+standard parametric imputation models; 
+an opportunity, because the large amount of features available has the potential to reduces the chances of 
+leaving out of the imputation models important predictors of missignenss.
+
+With this study we set out to present a thorough review and comparison of MI approaches for high-dimensional 
+datasets. The goal is assessing how they meet the requirements of statistical validity of the analysis 
+performed on the treated data.
+
+
