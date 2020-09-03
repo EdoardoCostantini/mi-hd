@@ -2,8 +2,9 @@
 .Rhistory
 .Rapp.history
 
-# Session Data files
+# Data files
 .RData
+*.soft.gz
 
 # Example code in package build process
 *-Ex.R
@@ -45,5 +46,13 @@ rsconnect/
 # swp files
 *.swp
 
+
+
 # Ignore folder with notes
 /notes/data_notes
+
+# Ignore with packages
+/packages/
+
+# Ignore .idea folder
+/.idea/
