@@ -50,8 +50,8 @@
   # y is excluded from this naming convention. Column 1 to 10 of the
   # X matrix, y is appended afterwards
   
-  parms$blck1_r <- 0 # correlation for highly correlated variables
-  parms$blck2_r <- 0 # correlation for correlated variables
+  parms$blck1_r <- .6 # correlation for highly correlated variables
+  parms$blck2_r <- .3 # correlation for correlated variables
   
   # Fully observed variables
   parms$Z_o_mu  <- 0 # mean for gen of fully observed variables

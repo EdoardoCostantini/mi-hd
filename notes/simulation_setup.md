@@ -60,3 +60,16 @@ analysis when the data imputed is high-dimensional.
 * FMI (interpreted as the relative loss of efficacy)
 * computational speed; complexity of specification
 
+
+## Experiment 3
+* Non-linear MAR: Collins et al 2001 found that including the variables responsible for nonlinear MAR 
+	missingness was sufﬁcient to eliminate bias; that is, it was not necessary to include a 
+	nonlinear transformation of the variable. Howard et al 2016 say that "it is theoretically possible 
+	that including such nonlinear terms (e.g., squared auxiliary variables and interactions among 
+	auxiliary variables) may account more fully for the missingness mechanism, though we do not know how 
+	likely this is to occur in practice. In the present study, we include such interaction terms in the 
+	set of auxiliary variables from which principal components are computed." In my study I have an 
+	experimental factor that is presence of the interaction in the response model generating proabiblity
+	of missingness to check just that: is it suffcient to include the variables responsible or do we need
+	to keep into account the interaction of the non-linear mar
+	

@@ -783,7 +783,7 @@ runCell_int <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./init.R")
-  # cond <- conds[6, ]
+  # cond <- conds[5, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
@@ -815,19 +815,19 @@ runCell_int <- function(cond, parms, rep_status) {
   }
     
   # Populate it with values if there are missings (single imputation)
-  if(cond$int_da == TRUE){
-    predMatrix <- quickpred(Xy_input, mincor = .3)
-    Xy_mis_DAmids  <- mice(Xy_input,
-                       m               = 1, 
-                       maxit           = 10,
-                       predictorMatrix = predMatrix,
-                       # printFlag       = FALSE,
-                       ridge           = cond$ridge,
-                       method          = "pmm")
-    Xy_input <- complete(Xy_mis_DAmids)
-    Xy_input[, which(names(Xy) %in% parms$z_m_id)] <- 
-      Xy_mis[, which(names(Xy) %in% parms$z_m_id)]
-  }
+  # if(cond$int_da == TRUE){
+  #   predMatrix <- quickpred(Xy_input, mincor = .3)
+  #   Xy_mis_DAmids  <- mice(Xy_input,
+  #                      m               = 1, 
+  #                      maxit           = 10,
+  #                      predictorMatrix = predMatrix,
+  #                      # printFlag       = FALSE,
+  #                      ridge           = cond$ridge,
+  #                      method          = "pmm")
+  #   Xy_input <- complete(Xy_mis_DAmids)
+  #   Xy_input[, which(names(Xy) %in% parms$z_m_id)] <- 
+  #     Xy_mis[, which(names(Xy) %in% parms$z_m_id)]
+  # }
   
   # Missing data 
   # O <- !is.na(Xy_mis) # matrix index of observed values
@@ -873,6 +873,16 @@ runCell_int <- function(cond, parms, rep_status) {
   
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
+  
+  # Impute according to Howard Et Al 2015 PCA appraoch
+  imp_PCA <- impute_PCA(Z     = Xy_mis,
+                        O     = data.frame(!is.na(Xy_mis)),
+                        DA    = cond$int_da,
+                        parms = parms)
+  
+  update_report("MICE-PCA", rep_status, parms, 
+                cnd = cond,
+                perform = parms$meth_sel$MI_PCA)
   
   # Impute according to DURR method
   
@@ -945,15 +955,6 @@ runCell_int <- function(cond, parms, rep_status) {
   update_report("bridge", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$bridge)
-  
-  # Impute according to Howard Et Al 2015 PCA appraoch
-  imp_PCA <- impute_PCA(Z = Xy_input[, CIDX_all],
-                        O = data.frame(!is.na(Xy_input[, CIDX_all])), 
-                        parms = parms)
-  
-  update_report("MICE-PCA", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$MI_PCA)
   
   # MICE-CART traditional
   imp_CART <- impute_CART(Z = Xy_input[, CIDX_all],
