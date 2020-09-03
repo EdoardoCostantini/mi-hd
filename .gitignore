@@ -3,7 +3,7 @@
 .Rapp.history
 
 # Data files
-.RData
+*.RData
 *.soft.gz
 
 # Example code in package build process
