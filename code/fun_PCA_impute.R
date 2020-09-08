@@ -2,7 +2,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_PCA <- function(Z, O, DA = FALSE, parms = parms){
+impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values, 
@@ -28,11 +28,10 @@ impute_PCA <- function(Z, O, DA = FALSE, parms = parms){
     
     # Data
     p <- ncol(Z) # number of variables [INDEX with j]
+    Z_aux <- Z
     
     # Separate variables target of imputation from auxiliary variables 
     target <- which(colnames(Z) %in% parms$z_m_id)
-    # Z_aux <- Z[, -target]
-    # Z_tar <- Z[, target]
     
     # Generate DA version of Z_aux if required
     if(DA == TRUE){
@@ -41,11 +40,11 @@ impute_PCA <- function(Z, O, DA = FALSE, parms = parms){
       twoWays <- computeInteract(scale(Z,
                                        center = TRUE,
                                        scale  = FALSE),
-                                 idVars = colnames(Xy_mis),
+                                 idVars = colnames(Z),
                                  ordVars = NULL,
                                  nomVars = NULL,
-                                 moderators = colnames(Xy_mis))
-      Z_aux <- cbind(Xy_mis, twoWays)
+                                 moderators = colnames(Z))
+      Z_aux <- cbind(Z, twoWays)
     }
     
     if(sum(is.na(Z_aux[, -target])) > 0){
@@ -69,7 +68,7 @@ impute_PCA <- function(Z, O, DA = FALSE, parms = parms){
       Z_out <- Z_aux
       
     } else {
-      Z_out <- Xy_mis # Need it for output consistency
+      Z_out <- Z_aux # Need it for output consistency
       
     }
     

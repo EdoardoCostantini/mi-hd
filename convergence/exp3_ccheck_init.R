@@ -21,26 +21,31 @@ parms$store <- c(cond         = TRUE,
                  imp_values   = TRUE)
 
 # Decide which methods you care about for the convergence check
-parms$meth_sel <- data.frame(DURR_la = TRUE,
-                             DURR_el = FALSE,
-                             IURR_la = TRUE,
-                             IURR_el = FALSE,
-                             blasso  = TRUE,
-                             bridge  = TRUE,
-                             MI_PCA  = TRUE,
-                             MI_CART = TRUE,
-                             MI_RF   = TRUE,
+parms$meth_sel <- data.frame(DURR_la    = TRUE,
+                             DURR_SI    = TRUE,
+                             IURR_la    = TRUE,
+                             IURR_SI    = TRUE,
+                             blasso     = TRUE,
+                             blasso_SI  = TRUE,
+                             bridge     = TRUE,
+                             bridge_SI  = TRUE,
+                             MI_PCA     = TRUE, # always true if SI is required
+                             MI_CART    = TRUE,
+                             MI_CART_SI = TRUE,
+                             MI_RF      = TRUE,
+                             MI_RF_SI   = TRUE,
                              MI_OP   = TRUE,
                              missFor = TRUE,
                              GS      = TRUE,
                              CC      = TRUE
 )
+
 parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
 
 # Decide which paramters suit best the convergence check
 parms$dt_rep     <- 2 # 10 # replications for averaging results (200 goal)
-parms$chains     <- 5 # 5  # number of parallel chains for convergence check
-parms$iters      <- 5 # 250 
+parms$chains     <- 2 # 5  # number of parallel chains for convergence check
+parms$iters      <- 10 # 250 
 parms$burnin_imp <- 0 # no need, I want to see the first part as well
 parms$ndt        <- parms$chains # same chians as dataset in mice like imp
 parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
@@ -48,8 +53,8 @@ parms$pos_dt     <- (parms$burnin_imp+1):parms$iters # candidate datasets (after
 parms$keep_dt    <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # keep 1 dataset every thin
 
 # For blasso
-parms$chains_bl     <- 5 # number of parallel chains for convergence check
-parms$iters_bl      <- 5
+parms$chains_bl     <- 2 # number of parallel chains for convergence check
+parms$iters_bl      <- 10
 parms$burnin_imp_bl <- 0 # how many imputation iterations should be discarded
 parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
 parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
@@ -82,5 +87,5 @@ parms$description <- c("For the most challanging condition, data generation is r
                         then be used to check convergence")
 
 # Fix condition to desired one for convergence check
-conds <- conds[c(12), ]
+conds <- conds[8, ]
   # condition 12 is the complex: interactions everywhere and larger dataset to "scan"

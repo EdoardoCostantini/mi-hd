@@ -11,9 +11,9 @@
   # Itereations, repetitions, etc
   parms$dt_rep     <- 10# 500 replications for averaging results
   parms$chains     <- 1 # 1   number of parallel chains for convergence check
-  parms$iters      <- 5 # 75  total iterations
+  parms$iters      <- 2 # 75  total iterations
   parms$burnin_imp <- 0 # 50  how many imputation iterations discarded
-  parms$ndt        <- 5 # 10  number of imputed datasets to pool esitmaes from
+  parms$ndt        <- 2 # 10  number of imputed datasets to pool esitmaes from
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
   parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidates
   parms$keep_dt <- parms$pos_dt[seq(1, 
@@ -22,7 +22,7 @@
   
   # For blasso
   parms$chains_bl     <- 1 # 1 
-  parms$iters_bl      <- 5 # 300  total iterations
+  parms$iters_bl      <- 2 # 300  total iterations
   parms$burnin_imp_bl <- 0 # 250 discarded iterations
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate
@@ -39,7 +39,7 @@
   parms$n       <- 200 # number of cases for data generation
   
   # "True" values
-  parms$item_mean <- 2
+  parms$item_mean <- 0
   parms$item_var  <- 1
   
   # Variable blocks
@@ -61,36 +61,42 @@
   parms$zm_n    <- length(parms$z_m_id)
   
   # y gen / imporntant predictors
-  parms$yMod_cov <- parms$blck1[1:3]
+  parms$yMod_cov <- parms$blck1[1:4]
   parms$yMod_int <- parms$yMod_cov[1:2]
+  parms$zInt_id  <- paste0("z", parms$yMod_int)
+  parms$int_cen  <- FALSE
   parms$b_main   <- rep(1, length(parms$yMod_cov))
   parms$b_int    <- 1
   
-  parms$lm_y_x  <- parms$blck1[1:3] # predictors for the substantive linear model
+  parms$lm_y_x  <- parms$blck1[1:4] # predictors for the substantive linear model
   parms$lm_y_i  <- parms$lm_y_x[1:2]
-  parms$lm_z3_x <- parms$blck1[7:8] # predictors for the linear model for z3
+  
   parms$b       <- 1 # for every regression coefficient
   parms$z3_r2   <- .5
   
 # Models ------------------------------------------------------------------
-  parms$frm     <- paste0("y ~ -1 + ",
+  parms$frm     <- paste0("y ~ ",
                           paste0("z", parms$yMod_cov, collapse = " + "))
-  parms$frm_int <- paste0("y ~ -1 + ",
+  parms$frm_int <- paste0("y ~ ",
                           paste0("z", parms$yMod_cov, collapse = " + "),
                           " + ",
-                          paste0("z", parms$yMod_int, collapse = " : "))
+                          paste0("z", parms$yMod_int, collapse = "."))
 
 # Imputation methods ------------------------------------------------------
   parms$alphaCI <- .95 # confidence level for parameters CI
-  parms$meth_sel <- data.frame(DURR_la = TRUE,
-                               DURR_el = FALSE,
-                               IURR_la = TRUE,
-                               IURR_el = FALSE,
-                               blasso  = TRUE,
-                               bridge  = TRUE,
-                               MI_PCA  = TRUE,
-                               MI_CART = TRUE,
-                               MI_RF   = TRUE,
+  parms$meth_sel <- data.frame(DURR_la    = TRUE,
+                               DURR_SI    = TRUE,
+                               IURR_la    = TRUE,
+                               IURR_SI    = TRUE,
+                               blasso     = TRUE,
+                               blasso_SI  = TRUE,
+                               bridge     = TRUE,
+                               bridge_SI  = TRUE,
+                               MI_PCA     = TRUE,
+                               MI_CART    = TRUE,
+                               MI_CART_SI = TRUE,
+                               MI_RF      = TRUE,
+                               MI_RF_SI   = TRUE,
                                MI_OP   = TRUE,
                                missFor = TRUE,
                                GS      = TRUE,
@@ -103,10 +109,13 @@
   parms$missType <- c("high", "low", "tails")[3]
   
   # Response Model (rm)
+  # parms$rm_x <- c("y", 
+  #                 paste0("z", 
+  #                        (tail(parms$yMod_cov, 1)+1):
+  #                          (tail(parms$yMod_cov, 1)+2)))
   parms$rm_x <- c("y", 
                   paste0("z", 
-                         (tail(parms$yMod_cov, 1)+1):
-                           (tail(parms$yMod_cov, 1)+2)))
+                         (tail(parms$yMod_cov, 1))))
   parms$rm_x_int <- c(parms$rm_x, "int_term")
   
   # weighting the importance of predictors: all the same

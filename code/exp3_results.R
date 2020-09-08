@@ -13,6 +13,11 @@
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))
   
+  # Describe run
+  out$parms$n
+  out$parms$missType
+  out$parms$b_int
+  
 # Check presence
   out[[1]]
   names(out[[1]])
@@ -54,6 +59,7 @@
   # Show results for a given condition
   lapply(1:length(out[[1]]),
          function(x) lm_res[[x]]$bias_per)
+  
   lapply(1:length(out[[1]]),
          function(x) lm_res[[x]]$ci_cov)
 

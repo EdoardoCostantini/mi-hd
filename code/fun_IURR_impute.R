@@ -9,17 +9,17 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
   ## For internals: run subroutines.R until impute_IURR, then
   # Z = Xy_mis
   # Z = Xy_input[, CIDX_all]
-  # O <- as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
+  # O <- as.data.frame(!is.na(Z))            # matrix index of observed values
   # reg_type = c("el", "lasso")[2] # imputation model penality type
   
   ## Body
   if(perform == TRUE){
     p  <- ncol(Z) # number of variables [indexed with j]
-    nr <- colSums(!O[, colMeans(O) < 1])
-
-    # Craete a copy of Z to be processed
-    Zm <- Z
-        
+    
+    p_imp    <- sum(colMeans(O) < 1)
+    p_imp_id <- names(which(colMeans(O) < 1))
+    nr       <- colSums(!O[, colMeans(O) < 1])
+    
     # To store imputed values and check convergence
     imp_IURR_val <- vector("list", parms$chains)
      names(imp_IURR_val) <- seq(1:parms$chains)
@@ -36,23 +36,23 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
         names(imp_IURR_dat) <- seq(1:parms$iters)
         
       # Storing imputate values for each iteration (per chain)
-      imps <- lapply(parms$z_m_id, function(x) {
+      imps <- lapply(p_imp_id, function(x) {
         matrix(data = NA, nrow = parms$iters, ncol = nr[x],
                dimnames = list(NULL, rownames(Z[!O[, x],]) ))
       })
       
-      # Fill in and store initial imputations
-      Zm[, parms$z_m_id] <- init_dt_i(Z[, parms$z_m_id], 
-                                      missing_type(Z[, parms$z_m_id]))
+      Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
         imp_IURR_dat$`1` <- Zm
-      for (i in 1:parms$zm_n) imps[[i]][1, ] <- Zm[!O[, parms$z_m_id[i]], 
-                                                   parms$z_m_id[i]]
+        for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                                p_imp_id[i]]
       
       for (m in 2:parms$iters) {
         print(paste0("IURR - Chain: ", cc, "/", parms$chains, 
                      "; Iter: ", m, "/", parms$iters))
-        for (j in 1:parms$zm_n) {
-          J <- which(colnames(Zm) %in% parms$z_m_id[j])
+        pb <- txtProgressBar(min = 0, max = p_imp, style = 3)
+        
+        for (j in 1:p_imp) {
+          J <- which(colnames(Zm) %in% p_imp_id[j])
           # Select data
           y_obs <- z_j_obs  <- Zm[O[, J] == TRUE, J]
           y_mis <- zm_mj    <- Zm[O[, J] == FALSE, J] # useless
@@ -94,18 +94,21 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
                                   parms = parms)
           }
           if(glmfam == "binomial"){
-            zm_j <- imp_dich_IURR(model = regu.mod,
+            zm_j <- imp_dich_DURR(model = regu.mod,
                                   X_tr = X_obs, y_tr = y_obs,
                                   X_te = X_mis, 
                                   parms = parms)
           }
           if(glmfam == "multinomial"){
-            zm_j <- imp_multi_IURR(regu.mod, X_obs_bs, y_obs_bs, X_mis, parms)
+            zm_j <- imp_multi_DURR(regu.mod, X_obs_bs, y_obs_bs, X_mis, parms)
           }
           
           # Append imputation
           Zm[!O[, J], J] <- zm_j # update data
           imps[[j]][m, ] <- zm_j # save iteration imputation
+          
+          # Monitor Progress
+          setTxtProgressBar(pb, j)
         }
       imp_IURR_dat[[m]] <- Zm
       }
@@ -128,5 +131,4 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
                 succ_ratio = NULL)
     )
   }
-  
 }

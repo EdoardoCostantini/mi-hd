@@ -28,24 +28,41 @@ data.frame(
 )
 
 # What to show
-iters_range <- 1:250 # which set of iterations
-y_range <- c(-.5, .5)
+iters_range <- 1:10 # which set of iterations
+y_range <- c(1, 3)
+str(out)
 
+# Print ALL
+exp_dat <- 2
+lapply(seq_along(out_cnv$parms$method[1:14]), function(x){
+  mean_traceplot(out_cnv, 
+                 method = out_cnv$parms$method[x], 
+                 dat = exp_dat, 
+                 y_range = y_range, iters = iters_range)}
+)
+
+# Study specific imputations
 # DURR_la (50-100 good for all)
-exp_dat <- 8
+exp_dat <- 1
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[1], 
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
 # IURR_la (50-100 good for all)
-exp_dat <- 8
+exp_dat <- 1
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[2], 
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
+
+exp_dat <- 1
+mean_traceplot(out_cnv, 
+               method = out_cnv$parms$method[3], 
+               dat = exp_dat, 
+               y_range = y_range, iters = iters_range)
 # blasso (200-300 is a good range to chose from)
-exp_dat <- 9
-iters_range_bl <- 1:500
+exp_dat <- 1
+iters_range_bl <- 1:2
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[3], 
                dat = exp_dat, 

@@ -1,43 +1,83 @@
 ### Title:    Checking parts of experiment 3 work as expected
 ### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
-### Created:  2020-05-19
+### Created:  2020-08-31
 
-  rm(list=ls())
-  source("./init_general.R")
-  source("./exp3_init.R")
+rm(list=ls())
+source("./init_general.R")
+source("./exp3_init.R")
 
-# > works for all conditions ----------------------------------------------
+# Effects of missingness imposition on estiamtes --------------------------
 
-  all_conds_data <- lapply(1:nrow(conds), function(x){
-    X <- simData_lv(parms, conds[x,])
-    Xy_mis <- imposeMiss_lv(X, parms, conds[x, ])
-    return(Xy_mis)
-  })
-  length(all_conds_data)
+# > Part 1: Simple case ---------------------------------------------------
 
-# > explaied variance on averegae -------------------------------------------
+rm(list = ls())
+source("./init_general.R")
+source("./exp3_init.R")
 
-  cond <- conds[1, ]
-  res <- NULL
+# Set params
+# parms$n <- 1e4 # changes nothing
+# parms$lm_y_x <- 1:2 # changes nothing
+# parms$int_cen <- TRUE # changes very little so keep FALSE
+# parms$z_m_id <- "z1"# increases bias but does not reduce coverage
+# parms$item_mean <- 0 # if not 0, CI for CC will be a bit better
+# parms$rm_x <- c("y")
+cond <- conds[2, ]
+
+# Simulation Set up
+set.seed(202019)
+reps <- 1e4
+CD_res <- CC_res <- NULL
+ci.store <- vector("list", reps)
+
+pb <- txtProgressBar(min = 0, max = reps, style = 3)
+
+for (r in 1:reps) {
+  # Gen Data
+  Xy     <- simData_int(parms, cond)
   
+  # Impose missing values
+  Xy_mis <- imposeMiss_int(Xy, parms, cond)
   
-  for (i in 1:1e3) {
-    Xy <- simData_int(parms, cond)
-    
-    if(cond$int_sub == FALSE){
-      lm_fit <- summary(lm(parms$frm, data = Xy))
-    } else {
-      lm_fit <- summary(lm(parms$frm_int, data = Xy))
+  # Fit stuff
+  fit.list <- lapply(list(Xy = Xy,
+                          Xy_mis = Xy_mis), function(x) lm(y ~ z1 * z2 + z3 + z4, data = x))
+  coef.list <- lm_EST(fit.list)#[-1, ]
+  ci.list   <- lm_CI(fit.list)#[-c(1, 7), ]
+  
+  # Estiamtes
+  CD_res <- cbind(CD_res, coef.list[-1,1])
+  CC_res <- cbind(CC_res, coef.list[-1,2])
+  
+  # CI coverage
+  ci.store[[r]] <- ci.list[-which(rownames(ci.list) %in% "(Intercept)"), ]
+  
+  # Monitoring
+  setTxtProgressBar(pb, r)
+}
+
+# MCMC Estiamtes
+  res <- sapply(list(CD = CD_res, 
+                     CC = CC_res), 
+                rowMeans)
+
+# Confidence Interval Coverage
+  ci.list <- list(CD = NULL,
+                  CC = NULL)
+  for (i in 1:length(ci.store)) {
+    str_thrs <- nrow(ci.store[[i]])/2
+    ci_low   <- ci.store[[i]][1:str_thrs, ]
+    ci_hig   <- ci.store[[i]][-(1:str_thrs), ]
+    for (j in 1:ncol(ci_low)) {
+      ci.list[[j]] <- rbind(ci.list[[j]], ci_low[, j] < res[, 1] & res[, 1] < ci_hig[, j])
     }
-    res[i] <-  lm_fit$r.squared
   }
   
-  c(true = cond$r2, 
-    avg = mean(res))
-  
-# > effects of missingness imposition on estiamtes --------------------------
-  
+  round((res[, 2] - res[, 1])/res[, 1]*100, 0)
+  round(sapply(ci.list, colMeans)*100, 0)
+
+# > Part 2: Compare with JAV imputation -----------------------------------
+
   rm(list=ls())
   source("./init_general.R")
   source("./exp3_init.R")
@@ -49,8 +89,6 @@
   r     <- 1
   HDrun <- FALSE
   
-  # cond$r2 <- .9
-  # cond$pm <- .7
   set.seed(1234)
   
   # Make it a function
@@ -70,94 +108,49 @@
     MI_NOV_b <- MI_JAV_b <- MI_HD_b <- NULL
     pm <- matrix(NA, nrow = reps, ncol = parms$zm_n)
     
+    pb <- txtProgressBar(min = 0, max = reps, style = 3)
+    
     # Perform analysis
     for (r in 1:reps) {
+      # Gen one fully-obs data
       Xy     <- simData_int(parms, cond)
+      
+      # Impose missing values
       Xy_mis <- imposeMiss_int(Xy, parms, cond)
       
-      # Cast data to method specific format
-      # For Optimal Impuation
-      col_int  <- paste0("z", parms$yMod_int)    # variables interacting
-      z1.z2    <- apply(scale(Xy_mis[, col_int], # compute interaction term
-                              center = FALSE,
-                              scale = FALSE),
-                        1, prod)
-      Xy_MIOP <- cbind(Xy_mis, z1.z2)
-      
-      # For all methods
-      # Generate Interaction terms (for low dimensional condition)
-      if(cond$p < parms$n){
-        interact <- computeInteract(Xy_mis,
+      # Generate Interaction terms
+      if(cond$p < parms$n){ 
+        # LOW DIM
+        interact <- computeInteract(scale(Xy_mis,
+                                          center = parms$int_cen,
+                                          scale  = FALSE),
                                     idVars = colnames(Xy_mis),
                                     ordVars = NULL,
                                     nomVars = NULL,
                                     moderators = colnames(Xy_mis))
         Xy_input <- cbind(Xy_mis, interact)
       } else {
-        Xy_input <- Xy_mis
+        # HIGH DIM (only known interaction for optimal model)
+        int    <- apply(scale(Xy_mis[, parms$zInt_id], # compute interaction term
+                              center = parms$int_cen,
+                              scale  = FALSE),
+                        1, prod)
+        Xy_input <- data.frame(Xy_mis, z1.z2 = int)
       }
       
-      # Populate it with values if there are missings (single imputation)
-      if(cond$int_da == TRUE){
-        predMatrix <- quickpred(Xy_input, mincor = .3)
-        Xy_mis_DAmids  <- mice(Xy_input,
-                               m               = 1, 
-                               maxit           = parms$SI_iter,
-                               predictorMatrix = predMatrix,
-                               # printFlag       = FALSE,
-                               ridge           = cond$ridge,
-                               method          = "pmm")
-        Xy_input <- complete(Xy_mis_DAmids)
-        Xy_input[, which(names(Xy) %in% parms$z_m_id)] <- 
-          Xy_mis[, which(names(Xy) %in% parms$z_m_id)]
-      }
-      
-      # Missing data 
-      # O <- !is.na(Xy_mis) # matrix index of observed values
+      # Missing data
       miss_descrps <- colMeans(is.na(Xy_mis)[, parms$z_m_id])
       
       # Generate an column indexing vector based on condition
-      if(cond$int_sub == FALSE & cond$int_da == FALSE){
-        CIDX_all <- colnames(Xy_input)[!grepl("\\.", 
-                                              colnames(Xy_input))]
-        CIDX_MOP <- colnames(Xy_MIOP)[!grepl("\\.", 
-                                             colnames(Xy_MIOP))]
-        mod_MICE_OP <- mod <- parms$frm
-      }
-      if(cond$int_sub == TRUE & cond$int_da == FALSE){
-        CIDX_all <- colnames(Xy_input)[!grepl("\\.", 
-                                              colnames(Xy_input))]
-        CIDX_MOP <- c(colnames(Xy_MIOP)[!grepl("\\.", 
-                                               colnames(Xy_MIOP))],
-                      "z1.z2")
-        mod         <- parms$frm_int
-        mod_MICE_OP <- paste0("y ~ -1 + ",
-                              paste0("z", parms$lm_y_x, collapse = " + "),
-                              " + ",
-                              paste0("z", parms$lm_y_i, collapse = "."))
-      }
-      if(cond$int_sub == FALSE & cond$int_da == TRUE){
-        CIDX_all <- colnames(Xy_input)
-        CIDX_MOP <- colnames(Xy_MIOP)[!grepl("\\.", 
-                                             colnames(Xy_MIOP))]
-        mod_MICE_OP <- mod <- parms$frm
-      }
-      if(cond$int_sub == TRUE & cond$int_da == TRUE){
-        CIDX_all <- colnames(Xy_input)
-        CIDX_MOP <- c(colnames(Xy_MIOP)[!grepl("\\.", 
-                                               colnames(Xy_MIOP))],
-                      "z1.z2")
-        mod         <- parms$frm_int
-        mod_MICE_OP <- paste0("y ~ -1 + ",
-                              paste0("z", parms$lm_y_x, collapse = " + "),
-                              " + ",
-                              paste0("z", parms$lm_y_i, collapse = "."))
-      }
+      col <- indexing_columns(Xy_input, cond)
       
       ## SINGLE DATA ##
-      lm_sndt <- fit_lm_models(list(GS      = Xy,
-                                    CC      = Xy_mis),
-                               mod = mod)
+      lm_SDin <- lapply(list(GS = Xy,
+                             CC = Xy_mis), 
+                        add_int_term, 
+                        parms = parms
+      )
+      lm_sndt <- fit_lm_models(lm_SDin, mod = col$lm_mod)
       
       GS_b  <- rbind(GS_b, coef(lm_sndt$GS))
       GS_se <- rbind(GS_se, summary(lm_sndt$GS)$coefficients[, 2])
@@ -166,43 +159,47 @@
       
       ## MULTIPLE IMPUTATION ##
       # High Dimensional method 
-      imp_HD <- impute_DURR(Z = Xy_input[, CIDX_all],
-                            O = data.frame(!is.na(Xy_input[, CIDX_all])),
+      imp_HD <- impute_DURR(Z = Xy_input[, col$CIDX],
+                            O = data.frame(!is.na(Xy_input[, col$CIDX])),
                             reg_type = "lasso",
                             cond = cond,
                             perform = HDrun,
                             parms = parms)
       
       # OPTIMAL MICE Ignoring Interaction
-      imp_MICE_OP_NOV <- impute_MICE_OP(Z       = Xy_mis,
-                                        O       = data.frame(!is.na(Xy_mis)),
-                                        cond    = cond,
-                                        perform = TRUE,
-                                        parms   = parms)
+      imp_MICE_NOV <- impute_MICE_OP(Z = Xy_mis,
+                                     O = data.frame(!is.na(Xy_mis)),
+                                     cond = cond,
+                                     perform = TRUE,
+                                     parms = parms)
       
       # OPTIMAL MICE Not Ignoring interaction
-      imp_MICE_OP_JAV <- impute_MICE_OP(Z = Xy_MIOP[, CIDX_MOP],
-                                        O = data.frame(!is.na(Xy_MIOP[, CIDX_MOP])),
-                                        cond = cond,
-                                        perform = TRUE,
-                                        parms = parms)
+      imp_MICE_JAV <- impute_MICE_OP(Z = Xy_input[, col$CIDX_MOP],
+                                     O = data.frame(!is.na(Xy_input[, col$CIDX_MOP])),
+                                     cond = cond,
+                                     perform = TRUE,
+                                     parms = parms)
+      lm_MIin <- lapply(list(imp_HD = imp_HD$dats,
+                             OP_NOV = imp_MICE_NOV$dats,
+                             OP_JAV = imp_MICE_JAV$dats), 
+                        function(x) lapply(x, 
+                                           add_int_term, 
+                                           parms = parms))
       
-      # Fit Models
-      MICE_HD <- fit_lm_models(imp_HD$dats,
-                               mod = mod)
-      MICE_OP_NOV <- fit_lm_models(imp_MICE_OP_NOV$dats,
-                                   mod = mod)
-      MICE_OP_JAV <- fit_lm_models(imp_MICE_OP_JAV$dats,
-                                   mod = mod_MICE_OP)
+      # Fit models
+      lm_fits <- lapply(lm_MIin, fit_lm_models, mod = col$lm_mod)
       
       # Pool
       if(HDrun == TRUE){
-        MI_HD_b  <- rbind(MI_HD_b, lm_pool_EST_f(MICE_HD))
+        MI_HD_b  <- rbind(MI_HD_b, lm_pool_EST_f(lm_fits$imp_HD))
       } else {
-        MI_HD_b  <- rbind(MI_HD_b, rep(NA, length(lm_pool_EST_f(MICE_OP_NOV))))
+        MI_HD_b  <- rbind(MI_HD_b, rep(NA, length(lm_pool_EST_f(lm_fits$OP_NOV))))
       }
-      MI_NOV_b <- rbind(MI_NOV_b, lm_pool_EST_f(MICE_OP_NOV))
-      MI_JAV_b <- rbind(MI_JAV_b, lm_pool_EST_f(MICE_OP_JAV))
+      MI_NOV_b <- rbind(MI_NOV_b, lm_pool_EST_f(lm_fits$OP_NOV))
+      MI_JAV_b <- rbind(MI_JAV_b, lm_pool_EST_f(lm_fits$OP_JAV))
+      
+      # Monitoring
+      setTxtProgressBar(pb, r)
     }
     
     # Effect of missingness on analysis
@@ -235,31 +232,39 @@
   parms$keep_dt    <- parms$pos_dt[seq(1, 
                                        length(parms$pos_dt), 
                                        parms$thin)] # keep 1 dataset every thin
-  parms$n          <- 1e3
   parms$mice_ndt   <- 10
   parms$mice_iters <- 20
   parms$SI_iter    <- 3e2
-  parms$missType <- c("high", "low", "tails")[1]
+  parms$n          <- 2e2
+  parms$missType   <- c("high", "low", "tails")[3]
   
   # Use function for single condition
-  check_missImpact(i = 1, reps = 50, conds, parms, HDrun = FALSE)
-  
+  # res_1 <- check_missImpact(i = 6, reps = 20, 
+  #                           conds, parms, 
+  #                           HDrun = TRUE)
+  set.seed(1234)
+  check_missImpact(i = 2, reps = 500, 
+                   conds, parms, 
+                   HDrun = FALSE)
+
   # Parallel apply function to all conditions of interest
-  # parms$missType <- "tails"
-  out <- mclapply(X        = 5:8,
+  parms$n          <- 2e2
+  parms$int_cen  <- FALSE
+  parms$missType <- "tails"
+  out <- mclapply(X        = 1:4,
                   FUN      = check_missImpact,
-                  reps     = 50,
+                  reps     = 5e2,
                   conds    = conds,
                   parms    = parms,
-                  HDrun    = TRUE,
+                  HDrun    = FALSE,
                   mc.cores = ( 4 ) )
+  
   lapply(out, function(x) round(x$BPR_lm, 1))
   lapply(out, function(x) round(x$out_lm, 3))
   out
 
-
 # Convergence for single imputation ----------------------------------------
-  
+# PCA method needs needs this single imputation run before PCs are extracted.
   rm(list=ls())
   source("./init_general.R")
   source("./exp3_init.R")
@@ -308,26 +313,26 @@
   source("./init_general.R")
   source("./exp3_init.R")
   
-  # Fix parameters to manageble task
-  parms$dt_rep     <- 5# 500 replications for averaging results
+  # Fix parameters to make manageble task
+  parms$dt_rep     <- 2# 500 replications for averaging results
   parms$chains     <- 1 # 1   number of parallel chains for convergence check
-  parms$iters      <- 5 # 75  total iterations
+  parms$iters      <- 2 # 75  total iterations
   parms$burnin_imp <- 0 # 50  how many imputation iterations discarded
-  parms$ndt        <- 5 # 10  number of imputed datasets to pool esitmaes from
+  parms$ndt        <- 2 # 10  number of imputed datasets to pool esitmaes from
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
   parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidates
   parms$keep_dt <- parms$pos_dt[seq(1, 
                                     length(parms$pos_dt), 
                                     parms$thin)] # keep 1 dataset every thin
   parms$chains_bl     <- 1 # 1 
-  parms$iters_bl      <- 5 # 2e3  total iterations
+  parms$iters_bl      <- 2 # 2e3  total iterations
   parms$burnin_imp_bl <- 0 # 1950 discarded iterations
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
                                              length(parms$pos_dt_bl), 
                                              parms$thin_bl)]
-  parms$mice_iters <- 5 #  20
+  parms$mice_iters <- 2 #  20
   parms$mice_ndt   <- parms$ndt
   
   parms$store <- c(cond         = TRUE,
@@ -339,7 +344,17 @@
                    lm_CI        = TRUE,
                    miss_descrps = TRUE,
                    run_time_min = TRUE,
-                   imp_values   = FALSE)
+                   imp_values   = TRUE)
+  
+  # Single run of doRep
+  check_doRep <- doRep(1, conds = conds, parms = parms, debug = FALSE)
+  
+  lapply(check_doRep, 
+         function(x) round(x$lm_EST, 1)) # everything is there
+  lapply(check_doRep[5:8], 
+         function(x) round(x$lm_EST, 1)) # DA includes the two version of DA
+  lapply(check_doRep[-(5:8)], 
+         function(x) round(x$lm_EST, 1)) # not DA have the regular methods
   
   # Run mcapply
   out <- mclapply(X        = 1 : parms$dt_rep,
@@ -349,37 +364,38 @@
                   debug    = FALSE,
                   mc.cores = ( parms$dt_rep ) )
   out$parms <- parms
+  out$conds <- conds
   
-  # Apply some rsults functions
-  
-  condition <- 1
-  select_cond <- names(out[[1]])[condition]
-  
+  # Check results presence
   # Time
-  out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
-  colnames(out_time) <- names(out[[1]])
-  t(out_time)
+  out_time <- sapply((1:nrow(out$conds))[-(5:8)], 
+                     res_sem_time, out = out)
+  colnames(out_time) <- paste0("cond_", 1:nrow(out$conds))[-(5:8)]
   
-  # Analysis
-  out[[1]]$`cond_0.3_1e-05_0.65_FALSE_FALSE_FALSE_25`$sem_EST
-  out[[1]]$`cond_0.3_1e-05_0.65_FALSE_FALSE_FALSE_25`$lm_EST
+  out_time_DA <- sapply((1:nrow(out$conds))[(5:8)], 
+                     res_sem_time, out = out)
+  colnames(out_time_DA) <- paste0("cond_", 1:nrow(out$conds))[(5:8)]
+  
+  out_time
+  out_time_DA
+  
   ## SEM estiamtes raw data (saturated model) ##
   # Extract results per conditions
-  sem_res <- lapply(1:length(out[[1]]),
+  sem_res <- lapply(1:nrow(out$conds),
                      function(x) res_sum(out, 
                                          model = "sem", 
                                          condition = x))
   
-  lm_res <- lapply(1:length(out[[1]]),
+  lm_res <- lapply(1:nrow(out$conds),
                     function(x) res_sum(out, 
                                         model = "lm", 
                                         condition = x))
   
-  # Show results all conditions for a given data rep
-  lapply(1:length(out[[1]]),
+  # Show results all conditions
+  lapply(1:nrow(out$conds),
          function(x) sem_res[[x]]$bias_per)
   
-  lapply(1:length(out[[1]]),
+  lapply(1:nrow(out$conds),
          function(x) lm_res[[x]]$bias_per)
   
   
