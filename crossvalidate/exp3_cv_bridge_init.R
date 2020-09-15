@@ -6,19 +6,25 @@
 # Modify parms ------------------------------------------------------------
 
 # Which imputation method to use
-parms$meth_sel <- data.frame(DURR_la = FALSE,
-                             DURR_el = FALSE,
-                             IURR_la = FALSE,
-                             IURR_el = FALSE,
-                             bridge  = TRUE,  # the one we want to study
-                             blasso  = FALSE,
-                             MI_PCA  = FALSE,
-                             MI_CART = FALSE,
-                             MI_RF   = FALSE,
-                             MI_OP   = FALSE,
+parms$meth_sel <- data.frame(DURR_la    = FALSE,
+                             DURR_SI    = FALSE,
+                             IURR_la    = FALSE,
+                             IURR_SI    = FALSE,
+                             blasso     = FALSE,
+                             blasso_SI  = FALSE,
+                             bridge     = TRUE,
+                             bridge_SI  = FALSE,
+                             MI_PCA     = FALSE, # can avoid, no *_SI methods
+                             MI_CART    = FALSE,
+                             MI_CART_SI = FALSE,
+                             MI_RF      = FALSE,
+                             MI_RF_SI   = FALSE,
+                             MI_OP   = TRUE,
                              missFor = TRUE,
                              GS      = TRUE,
-                             CC      = TRUE)
+                             CC      = TRUE
+)
+
 parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
 
 # What to store (FMI for crossvalidation)
@@ -37,14 +43,14 @@ parms$store <- c(cond         = TRUE,
 # Itereations, repetitions, etc
 parms$dt_rep     <- 10
 parms$chains     <- 1 
-parms$iters      <- 75#75
-parms$burnin_imp <- 50#50
-parms$ndt        <- 10#10
+parms$iters      <- 75 #75
+parms$burnin_imp <- 50 #50
+parms$ndt        <- 10 #10
 parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
-parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
-parms$keep_dt <- parms$pos_dt[seq(1, 
-                                  length(parms$pos_dt), 
-                                  parms$thin)] # keep 1 dataset every thin
+parms$pos_dt     <- (parms$burnin_imp+1):parms$iters
+parms$keep_dt    <- parms$pos_dt[seq(1, 
+                                     length(parms$pos_dt), 
+                                     parms$thin)]
 
 # Report names
 parms$report_file_name <- paste0("exp",
@@ -71,5 +77,3 @@ conds <- expand.grid(pm, ridge, r2, int_sub, int_rm, int_da, p)
     
   colnames(conds) <- c("pm", "ridge", "r2", "int_sub", "int_rm", "int_da", "p")
 conds <- conds[!(conds$p == p[2] & conds$int_da == TRUE), ]
-
-

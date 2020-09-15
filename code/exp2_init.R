@@ -9,7 +9,7 @@
   parms$exp <- 2 # second experiment - latent structure
 
 # Itereations, repetitions, etc
-  parms$dt_rep     <- 10# 500 replications for averaging results (200 goal)
+  parms$dt_rep     <- 2 # 500 replications for averaging results (200 goal)
   parms$chains     <- 1 # 1   number of parallel chains for convergence check
   parms$iters      <- 5 # 75
   parms$burnin_imp <- 0 # 50  how many imputation iterations should be discarded
@@ -175,3 +175,7 @@
                        stringsAsFactors = FALSE)
   conds <- cbind(conds, ridge)
     colnames(conds) <- c("lv", "pm", "fl", "ridge")
+
+    conds[, c("fl", "pm", "lv")]
+    
+  xtable::xtable(conds[, c("fl", "pm", "lv")])

@@ -217,35 +217,20 @@ simData_int <- function(parms, cond){
                sigma = Sigma )
   colnames(Z) <- paste0("z", 1:ncol(Z))
   
-  # y predictor depends on interaction
-  # z3_inte <- apply(Z[, parms$lm_z3_x], 1, prod)
-  # z3_pred <- as.matrix(data.frame(Z[, parms$lm_z3_x], z7z8 = z3_inte))
-  # z3_b    <- rep(parms$b, ncol(z3_pred))
-  # z3_sgn  <- t(z3_b) %*% cov(z3_pred) %*% z3_b # signal
-  # z3_sY   <- (z3_sgn / parms$z3_r2) - z3_sgn
-  # eps     <- rnorm(parms$n, mean = 0, sd = sqrt(z3_sY))
-  # Z[, 3]  <- z3_pred %*% z3_b + eps
-  # Z[, 3]  <- scale(z3_pred %*% z3_b + eps)
-  
   # Gen y variables
   if(cond$int_sub == FALSE){
-    # Z_pred <- Z[, parms$lm_y_x]
-    # signal <- t(parms$b_main) %*% cov(Z_pred) %*% parms$b_main
-    # sY     <- (signal / cond$r2) - signal
-    # eps    <- rnorm(parms$n, mean = 0, sd = sqrt(sY))
-    # y      <- Z_pred %*% parms$b_main + eps
-    # 
     y_pred   <- Z[, parms$lm_y_x]
     y_b      <- rep(parms$b, ncol(y_pred))
     y_sgn    <- t(y_b) %*% cov(y_pred) %*% y_b
-    y_sY       <- (y_sgn / cond$r2) - y_sgn
+    y_sY     <- (y_sgn / cond$r2) - y_sgn
     eps      <- rnorm(parms$n, mean = 0, sd = sqrt(y_sY))
     y        <- y_pred %*% y_b + eps
   }
   if(cond$int_sub == TRUE){
     y_inte <- apply(scale(Z[, parms$lm_y_i],
-                          center = FALSE,
-                          scale = FALSE), 1, prod)
+                          center = parms$int_cen,
+                          scale = FALSE), 
+                    1, prod)
     y_pred   <- cbind(Z[, parms$lm_y_x], y_inte)
     y_b      <- rep(parms$b, ncol(y_pred))
     y_sgn    <- t(y_b) %*% cov(y_pred) %*% y_b
@@ -273,8 +258,8 @@ imposeMiss_int <- function(dat_in, parms, cond){
   # the original data with imposed missingness on all the items 
   # indicated as target int parms$z_m_id
   ## Example Inputs
-  # cond <- conds[3,]
-  # dat_in   <- simData_int(parms, cond)
+  # cond   <- conds[4, ]
+  # dat_in <- simData_int(parms, cond)
   
   # Body
   # Define non-response vector
@@ -286,8 +271,7 @@ imposeMiss_int <- function(dat_in, parms, cond){
       nR <- simMissingness(pm    = cond$pm,
                            data  = dat_in,
                            preds = parms$rm_x,
-                           type  = parms$missType,
-                           beta  = parms$auxWts)
+                           type  = parms$missType)
       
       # Fill in NAs
       dat_out[nR, i] <- NA
@@ -295,12 +279,10 @@ imposeMiss_int <- function(dat_in, parms, cond){
   }
   
   if(cond$int_rm == TRUE){
-    int_term <- apply(scale(dat_in[, 
-                                   parms$rm_x[-which(parms$rm_x == "y")]],
-                            center = TRUE,
+    int_term <- apply(scale(dat_in[, parms$rm_x],
+                            center = parms$int_cen,
                             scale = FALSE),
-                      1, 
-                      prod)
+                      1, prod)
     Z_pred   <- cbind(dat_in, int_term)
     for (i in parms$z_m_id) {
       nR <- simMissingness(pm    = cond$pm,

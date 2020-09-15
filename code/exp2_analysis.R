@@ -49,9 +49,7 @@
   cindex_hp <- c(3, 4)
   
 #> SEM scored ####
-  # t(sapply(exp2_res$semS,
-  #          function(x) x$validReps))
-  
+
   # Var Covar
   # PCA issue with variances remains but good performances
   # HIGH FACTOR LOADINGS

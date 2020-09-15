@@ -2,20 +2,19 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_BLAS_hans <- function(Z, O, cond, parms, perform = TRUE){
+impute_BLAS_hans <- function(Z, O, parms, perform = TRUE){
   
   # Prep data ---------------------------------------------------------------
   # Z = Xy_mis
   # Z = Xy_input[, CIDX_all]
-  # O = as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
+  # O = as.data.frame(!is.na(Z))            # matrix index of observed values
   if(perform == TRUE){
-    
     p  <- ncol(Z) # number of variables [indexed with j]
-    r  <- colSums(O[, colMeans(O) < 1])
-    nr <- colSums(!O[, colMeans(O) < 1])
     
-    # Craete a copy of Z to be processed
-    Zm <- Z
+    p_imp    <- sum(colMeans(O) < 1)
+    p_imp_id <- names(which(colMeans(O) < 1))
+    r        <- colSums(O[, colMeans(O) < 1])
+    nr       <- colSums(!O[, colMeans(O) < 1])
     
     # To store imputed values and check convergence
     imp_blasso_val <- vector("list", parms$chains_bl)
@@ -31,50 +30,47 @@ impute_BLAS_hans <- function(Z, O, cond, parms, perform = TRUE){
       imp_blasso_dat <- vector("list", parms$iters_bl)
       names(imp_blasso_dat) <- seq(1:parms$iters_bl)
       
-      # Zm <- init_dt_i(Z, missing_type(Z)) # initialize data for each chain
-      Zm[, parms$z_m_id] <- init_dt_i(Z[, parms$z_m_id], 
-                                      missing_type(Z[, parms$z_m_id]))
+      Zm <- init_dt_i(Z, missing_type(Z)) # initialize data for each chain
       imp_blasso_dat$`1` <- Zm
-      
       # Empty storing objects for MCMC samples
       # For each, I need one slot per imputaiton model
       
       # regression coefficients
-      Beta.out <- lapply(1:parms$zm_n, matrix, data= NA, nrow=parms$iters_bl, ncol=ncol(Z)-1)
-      for (i in 1:parms$zm_n) Beta.out[[i]][1, ] <- rep(0, ncol(Z)-1)
+      Beta.out <- lapply(1:p_imp, matrix, data= NA, nrow=parms$iters_bl, ncol=ncol(Z)-1)
+      for (i in 1:p_imp) Beta.out[[i]][1, ] <- rep(0, ncol(Z)-1)
       
       # Error variance
-      Sig.out <- lapply(1:parms$zm_n, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
-      for (i in 1:parms$zm_n) Sig.out[[i]][1, ] <- 1
+      Sig.out <- lapply(1:p_imp, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
+      for (i in 1:p_imp) Sig.out[[i]][1, ] <- 1
       
       # tau parameter in Hans 2009 and 10 blasso model
-      Tau.out <-  lapply(1:parms$zm_n, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
-      for (i in 1:parms$zm_n) Tau.out[[i]][1, ] <- 1
+      Tau.out <-  lapply(1:p_imp, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
+      for (i in 1:p_imp) Tau.out[[i]][1, ] <- 1
       
       # phi parameter in Hans 2010 blasso model
-      Phi.out <-  lapply(1:parms$zm_n, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
-      for (i in 1:parms$zm_n) Phi.out[[i]][1, ] <- .5
+      Phi.out <-  lapply(1:p_imp, matrix, data = NA, nrow = parms$iters_bl, ncol = 1)
+      for (i in 1:p_imp) Phi.out[[i]][1, ] <- .5
       
       # Imputed scores
-      Imp.out <- lapply(parms$z_m_id, function(x) {
+      Imp.out <- lapply(p_imp_id, function(x) {
         matrix(data = NA, nrow = parms$iters_bl, ncol = nr[x],
                dimnames = list(NULL, rownames(Zm[!O[, x],]) ))
       })
-      for (i in 1:parms$zm_n) Imp.out[[i]][1, ] <- Zm[!O[, parms$z_m_id[i]], 
-                                                 parms$z_m_id[i]]
+      for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                                 p_imp_id[i]]
       
       # Latent variable for probit models
-      lv.out <- lapply(1:parms$zm_n, function(x) {
+      lv.out <- lapply(1:p_imp, function(x) {
         matrix(NA, ncol = r[x], nrow = parms$iters_bl)
       })
-      for (i in 1:parms$zm_n) lv.out[[i]][1, ] <- 0
+      for (i in 1:p_imp) lv.out[[i]][1, ] <- 0
       
       # Loop across Iteration
       for (m in 2:parms$iters_bl) {
         print(paste0("BLASSO - Chain: ", cc, "/", parms$chains_bl, "; Iter: ", m, "/", parms$iters_bl))
         # Loop across variables (cycle)
-        for (j in 1:parms$zm_n) {
-          J <- which(colnames(Zm) %in% parms$z_m_id[j])
+        for (j in 1:p_imp) {
+          J <- which(colnames(Zm) %in% p_imp_id[j])
           zj_obs <- Zm[O[, J], J]
           zj_mis <- Zm[!O[, J], J]
           Z_obs <- as.matrix(Zm[O[, J], -J])
@@ -172,7 +168,7 @@ impute_BLAS_hans <- function(Z, O, cond, parms, perform = TRUE){
           Beta.out[[j]][m, ] <- as.vector(pdraw$beta)
           Sig.out[[j]][m]    <- pdraw$sig2
           Tau.out[[j]][m]    <- ifelse(pdraw$tau > 0, pdraw$tau, Tau.out[[j]][m-1])
-          # In unlikely scenario where Tau is smaller than 0, keep previous draw
+          # In unlikly scenario wehre Tau is smaller than 0, keep previous draw
           # not solid
           Phi.out[[j]][m]    <- pdraw$phi
           Imp.out[[j]][m, ]  <- pdraw_zj_imp

@@ -2,7 +2,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_PCA <- function(Z, O, parms = parms){
+impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values, 
@@ -17,9 +17,10 @@ impute_PCA <- function(Z, O, parms = parms){
   # - imputation run time
   
   # For internals
-  # Z = Xy_mis
   # Z = Xy_input[, CIDX_all]
+  # Z = Xy_mis
   # O = as.data.frame(!is.na(Z)) # matrix index of observed values
+  # DA = cond$int_da
   
   ## body:
   if(parms$meth_sel$MI_PCA == TRUE){
@@ -27,38 +28,80 @@ impute_PCA <- function(Z, O, parms = parms){
     
     # Data
     p <- ncol(Z) # number of variables [INDEX with j]
-    n <- nrow(Z) # number of observations
+    Z_aux <- Z
     
-    # Separate analysis model variables from auxiliary variables 
-    Z_aux <- Z[, -which(names(Z) %in% parms$z_m_id)]
-    Z_mod <- Z[, which(names(Z) %in% parms$z_m_id)]
+    # Separate variables target of imputation from auxiliary variables 
+    target <- which(colnames(Z) %in% parms$z_m_id)
+    
+    # Generate DA version of Z_aux if required
+    print("PCA Impute: Preprocessing")
+    if(DA == TRUE){
+      # Create an augmented Z dataset (inlcuding ALL interaction)
+      print("PCA Impute: Creating Two Way Interactions")
+      twoWays <- computeInteract(scale(Z,
+                                       center = parms$int_cen,
+                                       scale  = FALSE),
+                                 idVars = colnames(Z),
+                                 ordVars = NULL,
+                                 nomVars = NULL,
+                                 moderators = colnames(Z))
+      Z_aux <- cbind(Z, twoWays)
+    }
+    
+    if(sum(is.na(Z_aux[, -target])) > 0){
+      # Fill in cases when ZDA has missing values
+      print("PCA Impute: Filling in auxiliary NAs")
+      
+      pMat     <- quickpred(Z_aux, mincor = .3)
+      ZDA_mids <- mice(Z_aux,
+                       m               = 1, 
+                       maxit           = parms$SI_iter,
+                       predictorMatrix = pMat,
+                       printFlag       = FALSE,
+                       ridge           = cond$ridge,
+                       method          = "pmm")
+      Z_out <- complete(ZDA_mids)
+      
+      # Define Single Imputed data as the auxiliary set
+      Z_aux[, -target] <- Z_out[, -target]
+      
+      # Define dataset for output (will be used by other imputation methods)
+      Z_out <- Z_aux
+      
+    } else {
+      Z_out <- Z_aux # Need it for output consistency
+      
+    }
     
     # Extract PCs
-    pcaOut <- prcomp(Z_aux, scale = TRUE, retx = TRUE)
+    pcaOut <- prcomp(Z_aux[, -target], scale = TRUE, retx = TRUE)
     
     ## Compute and store the cumulative proportion of variance explained by
     ## the component scores:
     rSquared <- cumsum(pcaOut$sdev^2) / sum(pcaOut$sdev^2)
     
     ## Extract the principal component scores:
-    Z_pca   <- pcaOut$x[, rSquared < parms$PCA_pcthresh]
+    Z_pca <- pcaOut$x[, rSquared < parms$PCA_pcthresh]
     
     ## Define Imputation methods
-    Z_4imp <- cbind(Z_mod, Z_pca)
-      methods <- rep("norm", ncol(Z_4imp))
-      vartype <- sapply(Z_4imp, class)
+    Z_input <- cbind(Z[, target], Z_pca)
+      methods <- rep("norm", ncol(Z_input))
+      vartype <- sapply(Z_input, class)
       methods[vartype != "numeric"] <- "pmm"
       
     ## Impute
-    imp_PCA_mids <- mice::mice(Z_4imp,
+    print("PCA Impute: Performing Multiple Imputation")
+    imp_PCA_mids <- mice::mice(Z_input,
                                m      = parms$mice_ndt,
                                maxit  = parms$mice_iters,
+                               printFlag = FALSE,
                                ridge  = cond$ridge,
                                method = methods)
     
     end.time <- Sys.time()
     
     # Store results
+    print("PCA Impute: Storing Results")
     imp_PCA_PC_dats <- mice::complete(imp_PCA_mids, "all")
     
     # Fill into orignal datasets the imputations (get rid of PCs)
@@ -74,11 +117,13 @@ impute_PCA <- function(Z, O, parms = parms){
     return(list(dats = imp_PCA_dats,
                 imps = imp_PCA_imps,
                 time = imp_PCA_time,
-                mids = imp_PCA_mids))
+                mids = imp_PCA_mids,
+                dtIN = Z_out))
   } else {
     return(list(dats = NULL,
                 imps = NULL,
                 time = NULL,
-                mids = NULL))
+                mids = NULL,
+                dtIN = NULL))
   }
 }

@@ -7,17 +7,17 @@
 
 impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
   ## Description
-  # Z = Xy_mis_DA_fill[, CIDX_all]
+  # Z = Xy_input
   # O <- as.data.frame(!is.na(Z))            # matrix index of observed values
   # reg_type = c("el", "lasso")[2] # imputation model penality type
   
   ## Body
   if(perform == TRUE){
     p  <- ncol(Z) # number of variables [indexed with j]
-    nr <- colSums(!O[, colMeans(O) < 1])
     
-    # Craete a copy of Z to be processed
-    Zm   <- Z
+    p_imp    <- sum(colMeans(O) < 1)
+    p_imp_id <- names(which(colMeans(O) < 1))
+    nr       <- colSums(!O[, colMeans(O) < 1])
     
     # To store imputed values and check convergence
     imp_DURR_val <- vector("list", parms$chains)
@@ -32,28 +32,28 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
       imp_DURR_dat <- vector("list", parms$iters)
         names(imp_DURR_dat) <- seq(1:parms$iters)
       
-      # Create storing object for imputated values
-      imps <- lapply(parms$z_m_id, function(x) {
+      imps <- lapply(p_imp_id, function(x) {
         matrix(data = NA, nrow = parms$iters, ncol = nr[x],
                dimnames = list(NULL, rownames(Z[!O[, x],]) ))
       })
       
-      # Fill in and store initial imputations
-      Zm[, parms$z_m_id] <- init_dt_i(Z[, parms$z_m_id], 
-                                      missing_type(Z[, parms$z_m_id]))
+      Zm <- init_dt_i(Z, missing_type(Z)) # reinitialize data
         imp_DURR_dat$`1` <- Zm
-      for (i in 1:parms$zm_n) imps[[i]][1, ] <- Zm[!O[, parms$z_m_id[i]], 
-                                                   parms$z_m_id[i]]
+        for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                                p_imp_id[i]]
         
       for (m in 2:parms$iters) {
+        # Monitor progres
         print(paste0("DURR - Chain: ", cc, "/", parms$chains, 
                      "; Iter: ", m, "/", parms$iters))
-        for (j in 1:parms$zm_n) {
-          J <- which(colnames(Zm) %in% parms$z_m_id[j])
+        pb <- txtProgressBar(min = 0, max = p_imp, style = 3)
+        
+        for (j in 1:p_imp) {
+          J <- which(colnames(Zm) %in% p_imp_id[j])
           # 1. Generate bootstrap data set (for each j!)
           # Generate bootstrap sample
-          idx_bs <- sample(1:nrow(Zm), nrow(Zm), replace = TRUE)
-          Zm_bs  <- Zm[idx_bs, ]
+          idx_bs   <- sample(1:nrow(Zm), nrow(Zm), replace = TRUE)
+          Zm_bs <- Zm[idx_bs, ]
           
           # Select data
           y_obs_bs <- Zm_bs[O[idx_bs, J], J]  # z_j_obs
@@ -93,9 +93,13 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
           # Append imputation
           Zm[is.na(Z[, J]), J] <- zm_j
           imps[[j]][m, ] <- zm_j # save iteration imputation thing
-        }
-        imp_DURR_dat[[m]] <- Zm
+          
+          # Monitor Progress
+          setTxtProgressBar(pb, j)
       }
+        close(pb)
+        imp_DURR_dat[[m]] <- Zm
+      }  
       imp_DURR_val[[cc]] <- imps
     }
     

@@ -1,0 +1,120 @@
+\maketitle
+\subsection{Experiment 1: Multivaraite Normal Data}
+
+The performance of the selected methods was compared through a Monte Carlo simulation study. Performances
+were assessed in terms of how well the incomplete-data analysis remained statistically valid after missing 
+data was treated. Assuming the complete-data analysis is statistically valid, MI should allow for unbiased
+and confidence valid analysis of the incomplete data.
+
+\subsubsection{Experimental Conditions}
+
+Two design parameters were varied in the simulation: the proportion of (per variable) missing cases ($pm$), with levels $\{.1, .3\}$; 
+and the number of features of the dataset ($p$), with levels $\{50, 500\}$. 
+In all conditions, 200 observations were generated ($n = 200$) and the entire data set was considered when 
+conducting imputations, so that the higher dimensionality of the data resulted in a higher number of potential 
+auxiliary variables.
+
+\begin{table}[h]
+	\centering
+	\caption{Experiment 1 conditions ($n = 200$)}
+	\break
+	\begin{tabular}{ c c c c }
+		Cond 	& n   & pm 	& p 	\\ 
+		 \hline
+		 1	& 200 & .1 	& 50  	\\  
+		 2	& 200 & .1 	& 500 	\\
+		 3	& 200 & .3 	& 50  	\\
+		 4	& 200 & .3 	& 500 	\\
+		 \hline
+	\end{tabular}
+	\label{table:exp1_conds}
+\end{table}
+
+500 data sets were generated for each condition. After imputation, the MLE estimates and standard errors of 
+the means, variances and covariances, of the variables originally with missing values, were estimated and 
+pooled across multiply imputed datasets according to \citet{rubin:1987}'s rules.
+
+\subsubsection{Data Generation}
+
+A dataset X, with dimensionality $n \times p$ (with n = number of observations and p = number of features),
+was generated according to the standard normal multivariate model:
+
+\begin{equation}
+	X = MVN(\mu_0 = \bf{0}, \Sigma_0) \label{eq:MVN}
+\end{equation}
+
+where $\mu_0$ is a $p \times 1$ vector of 0s, and $\Sigma_0$ is a $p \times p$ correlation matrix. Variables were divided in 
+three correlation blocks: high, mid and low correlation. Five variables belonged to block 1 and were correlated among themselves with 
+a correlation coefficient $\rho_1 = .6$. Another five variables belonged to block 2 and were correlated among themselves, and with variables in 
+block 1, with $\rho_2 = .3$. All remaining variables belonged to block 3 and were correlated among themselves, and with variables in 
+block 1 and 2, with $\rho_3 = .01$. 
+
+$$
+\begin{matrix}
+		& Block 1 	& Block 2	& Block 3	\\
+	Block 1	& \rho_1	& \rho_2 	& \rho_3 	\\
+	Block 2 & \rho_2	& \rho_2	& \rho_3 	\\
+	Block 3	& \rho_3 	& \rho_3	& \rho_3 	\\
+\end{matrix}
+$$
+
+After sampling the values of X from equation \ref{eq:MVN}, all columns were rescaled to match means, variances, and 
+covariances of continuously treated items in EVS waves. This was done to facilitate the interpretation of the findings
+in terms of real data applications. 
+
+\iffalse %comment out this section for now
+Looking at 10 points EVS items on democratic beliefs and moral values in the 2017 
+EVS wave, we noticed that on average these items have means and variances around 5. Hence, each variable in X was centred 
+around 5 (instead of 0) and scaled to have variance around 5 (instead of 1). As a result the covariances between variables
+were also rescaled to match EVS data: correlations of .6 and .3 translated to covariances of 3 and 1.5 respectively.
+\fi
+
+\subsubsection{Missing Data Imposition}
+
+Missing values were imposed on six variables, three in block 1 and three in block 2, using the cumulative logistic distribution
+to define the probability of missingness based on a linear combination of four scaled columns of $X$.
+
+\begin{equation}
+	P(y_t = MISS | X) = G(\tilde{X} \theta) \label{eq:PBT_imp}
+\end{equation}
+
+where $y_t$ is a variable target of missing values imposition ($t = 1,...,T$, with $T$ = 6), $G$ is the standard cumulative logistic distribution 
+(with location and scale parameters equal to 0 and 1 respectively), $\tilde{X}$ is a $n \times 4$ standardized subset of $X$, 
+including only the determinants of missingness, and $\theta$ is a vector of regression coefficients. 
+
+$\tilde{X}$ was composed of 2 variables from block 1 and 2 from block 2. Of the two variables from both blocks,
+one was selected as target of missing values itself, and the other was fully observed. All variables have same weight
+in the linear combination $\tilde{X}\theta$.
+
+\iffalse %comment out this section for now
+The value of the linear predictor was also "off-setted" to induce missingness in the lower tail of the distribution
+of linear predictor $\tilde{X}\theta$. This procedure does not imply that missingness in the target variable depends 
+on the target variable itself, as the offset is applied based on the values of $\tilde{X}$.
+\fi
+
+Overall, the missing data imposition procedure allowed to: 
+(1) specify a general missing data pattern; 
+(2) work with a MAR missingness set up;
+(3) impose a desired proportion of missing values on each target variable; 
+(4) induce substantive bias for parameters estimates of complete case analysis (between 20 and 30 percent of 
+the size of the reference "true" value of the parameter).
+
+\subsubsection{Imputation Methods and Analyses Model}
+
+For each simulated data set, imputation was performed according to all the methods referenced to in the introduction.
+
+As traditional parametric MI could not be applied to cases with $p > n$, we ran, for reference, a standard mice imputation 
+routine that used all variables in block 1 and 2 (10 in total), which included all predictors of missingness and no 
+auxiliary junk variables. Results from this "oracle" run are referred to as MI Optimal run (MI-OP). 
+We have also considered two single dataset missing data handling approaches: MissForest \citep{stekhovenBuhlmann:2011} as 
+implemented in the R package 'misForest' (here referred to as 'missFor'), and Complete Case analysis (CC), performed 
+using only complete rows of the data.
+
+Convergence of the imputations was checked through visual examination of trace plots showing the mean imputed values
+for each variable at each iteration. In the most complex condition, ($p = 500, pm = .3$), all methods converged after 
+after approximately 20 iterations. In the simulation study we run a single chain of the MI algorithms for 50 
+iterations, considering the first 20 as burn-in, and selecting 10 imputed datasets through thinning.
+
+Maximum Likelihood Estimates of the means, variances, and covariances of the six variables with missing values  
+were obtained by fitting a saturated model to the treated data, and pooling the multiple estimates when necessary. 
+Finally, "Gold Standard" (GS) MLEs of the same parameters were obtained from the fully observed data sets (before missing data imposition).

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2020.3.2)  13 JUL 2020 12:23
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2020.3.2)  15 SEP 2020 10:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -145,6 +145,21 @@ LaTeX Info: Redefining \cite on input line 694.
 
 LaTeX Warning: Label `table:exp1_conds' multiply defined.
 
+
+LaTeX Warning: Label `eq:PBT_imp' multiply defined.
+
+
+LaTeX Warning: Label `eq:bias_p' multiply defined.
+
+
+LaTeX Warning: Label `eq:eu_dist' multiply defined.
+
+
+LaTeX Warning: Label `eq:ci_cov' multiply defined.
+
+
+LaTeX Warning: Label `table:exp1_conds' multiply defined.
+
 )
 \openout1 = `00_manuscript.aux'.
 
@@ -230,26 +245,27 @@ File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 28.
 )
-(./02_methods.tex
+(./02_methods.tex (./02_methods_exp1.tex
 Overfull \hbox (6.1579pt too wide) in paragraph at lines 4--8
 \OT1/cmr/m/n/10 sim-u-la-tion study. Per-for-mances were as-sessed in terms of 
 how well the incomplete-
  []
 
-[2] [3] [4]) (./03_results.tex [5]
+[2] [3]) (./02_methods_exp2.tex [4] [5] [6]) [7]) (./03_results.tex [8]
 Overfull \hbox (167.69511pt too wide) in paragraph at lines 74--74
  [][] 
  []
 
-[6]) (./04_conclusions.tex [7]) (./00_manuscript.bbl) [8] (./00_manuscript.aux)
+[9]) (./04_conclusions.tex [10]) (./00_manuscript.bbl) [11]
+(./00_manuscript.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 2666 strings out of 492616
- 36387 string characters out of 6129482
- 118842 words of memory out of 5000000
+ 2672 strings out of 492616
+ 36497 string characters out of 6129482
+ 118843 words of memory out of 5000000
  6520 multiletter control sequences out of 15000+600000
  14280 words of font info for 50 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -267,10 +283,10 @@ l/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/
 texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/tex
 live/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texl
 ive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on 00_manuscript.pdf (8 pages, 175098 bytes).
+Output written on 00_manuscript.pdf (11 pages, 188860 bytes).
 PDF statistics:
- 83 PDF objects out of 1000 (max. 8388607)
- 59 compressed objects within 1 object stream
+ 92 PDF objects out of 1000 (max. 8388607)
+ 65 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -155,6 +155,66 @@ withErrorTracing = function(expr, silentSuccess=FALSE) {
   if (vexpr$visible) vexpr$value else invisible(vexpr$value)
 }
 
+# Defining columns based on condition
+indexing_columns <- function(Xy_input, cond){
+  
+  if(cond$int_sub == FALSE & cond$int_da == FALSE){
+    CIDX_all <- colnames(Xy_input)[!grepl("\\.", 
+                                          colnames(Xy_input))]
+    CIDX_MOP <- colnames(Xy_input)[!grepl("\\.", 
+                                         colnames(Xy_input))]
+    lm_mod   <- parms$frm
+  }
+  
+  if(cond$int_sub == TRUE & cond$int_da == FALSE){
+    CIDX_all <- colnames(Xy_input)[!grepl("\\.", 
+                                          colnames(Xy_input))]
+    CIDX_MOP <- c(colnames(Xy_input)[!grepl("\\.", 
+                                           colnames(Xy_input))],
+                  "z1.z2")
+    lm_mod   <- parms$frm_int
+  }
+  
+  if(cond$int_sub == FALSE & cond$int_da == TRUE){
+    CIDX_all <- colnames(Xy_input)
+    CIDX_MOP <- colnames(Xy_input)[!grepl("\\.", 
+                                         colnames(Xy_input))]
+    lm_mod <- parms$frm
+  }
+  
+  if(cond$int_sub == TRUE & cond$int_da == TRUE){
+    CIDX_all <- colnames(Xy_input)
+    CIDX_MOP <- c(colnames(Xy_input)[!grepl("\\.", 
+                                           colnames(Xy_input))],
+                  "z1.z2")
+    lm_mod   <- parms$frm_int
+  }
+  
+  return(list(CIDX     = CIDX_all,
+              CIDX_MOP = CIDX_MOP,
+              lm_mod   = lm_mod))
+  
+}
+
+# Function to add interaction term post imputation
+# this way I can have only one lm modle specifcation for the
+# itneraction term
+add_int_term <- function(x, parms){
+  # x <- imp_DURR_la$dats$'1'
+  int_name <- paste0(parms$zInt_id, collapse = ".")
+  if(!int_name %in% colnames(x)){
+    int <- apply(scale(x[, parms$zInt_id],
+                         center = parms$int_cen, 
+                         scale = FALSE),
+                   1, prod)
+    out <- data.frame(cbind(x, int))
+    colnames(out)[colnames(out) == "int"] <- int_name
+  } else {
+    out <- x
+  }
+  return(out)
+}
+
 # Estimation --------------------------------------------------------------
 
 rr_est_ridge <- function(X, y, parms, fam="gaussian"){
@@ -1179,6 +1239,9 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
   })
   # Store Objects
+  avg <- avg[, colSums(is.nan(avg)) == 0] 
+    # get rid of NaNs that come up in exp3 for conditions that are not using 
+    # certain methods
   validReps  <- avg["rep", ] # number of successes
   avg        <- avg[-which(rownames(avg) == "rep"), ]
   psd_tr_vec <- avg[, "GS"] # pseudo true values
@@ -1241,6 +1304,10 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     }
     rowMeans(store, na.rm = TRUE) # MCMC statistics 
   })
+  
+  CIC <- CIC[, colSums(is.nan(CIC)) == 0] 
+    # get rid of NaNs that come up in exp3 for conditions that are not using 
+    # certain methods
   rownames(CIC) <- rownames(bias)
   
   # Output

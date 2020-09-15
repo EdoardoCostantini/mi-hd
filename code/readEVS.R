@@ -8,7 +8,7 @@ library(labelled) # to extract valriables labels
 
 # Read Data ---------------------------------------------------------------
 
-  dat <- 2
+  dat <- 1
   file_loc <- c("/Users/Work/Data/ZA7500_v3-0-0.dta/",
                 "/Users/Work/Data/ZA7502_v1-0-0.dta/")[dat]
   
@@ -19,6 +19,8 @@ library(labelled) # to extract valriables labels
                  "ZA7502_v1-0-0_missing.txt")[dat]
   
   EVS2017 <- haven::read_dta(paste0(file_loc, file_name))
+  dim(EVS2017)
+  
   var_exclude <- c("v277", "mm_v277_fu")
   EVS2017 <- EVS2017[, -c(which( names(EVS2017) %in% var_exclude ))]
   EVS2017_GE_prepro <- as.data.frame(EVS2017[EVS2017$country == "276", ])

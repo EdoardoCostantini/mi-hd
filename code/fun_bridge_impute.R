@@ -7,17 +7,18 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
   
   # Prep data ---------------------------------------------------------------
   # Z = Xy_mis
-  # Z = Xy_input[, CIDX_all]
-  # O = as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
+  # Z = Xy_input[, col$CIDX]
+  # O = as.data.frame(!is.na(Z))            # matrix index of observed values
   # ridge_p = cond$ridge
+  
   if(perform == TRUE){
     
     tryCatch({
       p  <- ncol(Z) # number of variables [indexed with J]
-      nr       <- colSums(!O[, colMeans(O) < 1])
       
-      # Craete a copy of Z to be processed
-      Zm <- Z
+      p_imp    <- sum(colMeans(O) < 1)
+      p_imp_id <- names(which(colMeans(O) < 1))
+      nr       <- colSums(!O[, colMeans(O) < 1])
       
       # To store imputed values and check convergence
       imp_bridge_val <- vector("list", parms$chains)
@@ -33,27 +34,24 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
         imp_bridge_dat <- vector("list", parms$iters)
         names(imp_bridge_dat) <- seq(1:parms$iters)
         
-        
-        # Fill in and store initial imputations
-        Zm[, parms$z_m_id] <- init_dt_i(Z[, parms$z_m_id], 
-                                        missing_type(Z[, parms$z_m_id]))
+        Zm <- init_dt_i(Z, missing_type(Z)) # initialize data for each chain
         imp_bridge_dat$`1` <- Zm
         # Empty storing objects for MCMC samples
         
         # Imputed scores
-        Imp.out <- lapply(parms$z_m_id, function(x) {
+        Imp.out <- lapply(p_imp_id, function(x) {
           matrix(data = NA, nrow = parms$iters, ncol = nr[x],
                  dimnames = list(NULL, rownames(Zm[!O[, x],]) ))
         })
-        for (i in 1:parms$zm_n) Imp.out[[i]][1, ] <- Zm[!O[, parms$z_m_id[i]], 
-                                                   parms$z_m_id[i]]
+        for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                                   p_imp_id[i]]
         
         # Loop across Iteration
         for (m in 2:parms$iters) {
           print(paste0("bridge - Chain: ", cc, "/", parms$chains, "; Iter: ", m, "/", parms$iters))
           # Loop across variables (cycle)
-          for (j in 1:parms$zm_n) {
-            J <- which(colnames(Zm) %in% parms$z_m_id[j])
+          for (j in 1:p_imp) {
+            J <- which(colnames(Zm) %in% p_imp_id[j])
             zj_obs <- Zm[O[, J], J]
             zj_mis <- Zm[!O[, J], J]
             Z_obs <- as.matrix(Zm[O[, J], -J])
