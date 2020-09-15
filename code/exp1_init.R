@@ -9,7 +9,7 @@
   parms$exp <- 1 # which experiment is been run
 
 # Itereations, repetitions, etc
-  parms$dt_rep     <- 500  # replications for averaging results (200 goal)
+  parms$dt_rep     <- 5 # 500 replications for averaging results (200 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
   parms$iters      <- 5 # 50
   parms$burnin_imp <- 0 # 20 how many imputation iterations should be discarded

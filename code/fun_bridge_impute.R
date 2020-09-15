@@ -7,8 +7,10 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
   
   # Prep data ---------------------------------------------------------------
   # Z = Xy_mis
-  # O = as.data.frame(!is.na(Xy_mis))            # matrix index of observed values
+  # Z = Xy_input[, col$CIDX]
+  # O = as.data.frame(!is.na(Z))            # matrix index of observed values
   # ridge_p = cond$ridge
+  
   if(perform == TRUE){
     
     tryCatch({

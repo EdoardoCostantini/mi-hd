@@ -72,7 +72,6 @@
   parms$lm_y_i  <- parms$lm_y_x[1:2]
   
   parms$b       <- 1 # for every regression coefficient
-  parms$z3_r2   <- .5
   
 # Models ------------------------------------------------------------------
   parms$frm     <- paste0("y ~ ",
@@ -97,11 +96,10 @@
                                MI_CART_SI = TRUE,
                                MI_RF      = TRUE,
                                MI_RF_SI   = TRUE,
-                               MI_OP   = TRUE,
-                               missFor = TRUE,
-                               GS      = TRUE,
-                               CC      = TRUE
-  )
+                               MI_OP      = TRUE,
+                               missFor    = TRUE,
+                               GS         = TRUE,
+                               CC         = TRUE)
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
     # (GS, CC always last, alwyas present)
   
@@ -127,16 +125,11 @@
                      # procedure to solve possible issues of singularity
 
   # PCA
-  parms$SI_iter  <- 10L    # iterations for single imputation in PCA run
-  parms$PCA_inter    <- FALSE # whether you want two way variables interactions
-  parms$PCA_poly     <- FALSE # whether you want poly terms 
-  parms$PCA_mincor   <- .3 # mincor for qucikpred for single imputation auxiliary vars
-  parms$PCA_maxpw    <- 2L # polynomials order
-  parms$PCA_pcthresh <- .5 # proportion of vairance for selection of PCs
-  parms$formula <- paste0("y", sep = ", ",
-                          paste0("z", parms$yMod_cov, collapse = ", "), sep = ", ",
-                          paste0(paste0("z", parms$yMod_int), collapse = ""))
-  
+  parms$SI_iter      <- 10L   # 200L # iterations for single imputation in PCA run
+
+  # parms$formula <- paste0("y", sep = ", ",
+  #                         paste0("z", parms$yMod_cov, collapse = ", "), sep = ", ",
+  #                         paste0(paste0("z", parms$yMod_int), collapse = ""))
   
   # Random Forest
   parms$rfntree <- 10
@@ -195,6 +188,9 @@
   pm    <- c(.3)
   p     <- c(25, 500) # c(25, 500) # number of variables
   r2    <- c(.5)
+    # Note that if you are excluding the intercept you are inflating the
+    # R squared. Howver, this does not really matter for the inference on
+    # the regression coefficients.
   
   # Condition dependent Imputation model parameters
   ridge <- c(1e-08, # values from the exp3_cv_bridge_results.R script

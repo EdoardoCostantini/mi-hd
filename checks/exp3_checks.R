@@ -8,6 +8,9 @@ source("./init_general.R")
 source("./exp3_init.R")
 
 # Effects of missingness imposition on estiamtes --------------------------
+# Check the effect of the missingness on the coefficients estiamtes. I see
+# that the biasing of the coefficients requires the variables defining the
+# prob of missingness need to be involved in the analysis model.
 
 # > Part 1: Simple case ---------------------------------------------------
 
@@ -83,7 +86,7 @@ for (r in 1:reps) {
   source("./exp3_init.R")
   
   # Tweak paramters
-  i     <- 2
+  i     <- 4
   cond  <- conds[i, ]
   reps  <- 2
   r     <- 1
@@ -234,23 +237,14 @@ for (r in 1:reps) {
                                        parms$thin)] # keep 1 dataset every thin
   parms$mice_ndt   <- 10
   parms$mice_iters <- 20
-  parms$SI_iter    <- 3e2
-  parms$n          <- 2e2
-  parms$missType   <- c("high", "low", "tails")[3]
   
   # Use function for single condition
-  # res_1 <- check_missImpact(i = 6, reps = 20, 
-  #                           conds, parms, 
-  #                           HDrun = TRUE)
   set.seed(1234)
   check_missImpact(i = 2, reps = 500, 
                    conds, parms, 
                    HDrun = FALSE)
 
   # Parallel apply function to all conditions of interest
-  parms$n          <- 2e2
-  parms$int_cen  <- FALSE
-  parms$missType <- "tails"
   out <- mclapply(X        = 1:4,
                   FUN      = check_missImpact,
                   reps     = 5e2,
@@ -270,9 +264,9 @@ for (r in 1:reps) {
   source("./exp3_init.R")
   
   set.seed(1234)
-  convCheck <- mclapply(X = 1:3,
+  convCheck <- mclapply(X = 1:5,
                         FUN = function(i = 8){
-                          cond <- conds[8, ]
+                          cond   <- conds[8, ]
                           Xy     <- simData_int(parms, cond)
                           Xy_mis <- imposeMiss_int(Xy, parms, cond)
                           
@@ -296,16 +290,35 @@ for (r in 1:reps) {
                                                  method          = "norm")
                           return(Xy_mis_DAmids)
                         },
-                        mc.cores = 3
+                        mc.cores = 5
   )
-  lapply(convCheck, plot,
-         y = c("z1", "z2", "z1.z2", "z3.z4"),
+
+  # Save output
+  store.out <- list(convCheck = convCheck,
+                    parms = parms,
+                    cond  = conds[8,],
+                    note  = "convCheck contains a list of mids objects to check
+                    that the single imputation of the target variables and interaction
+                    terms obtained for exp3 DA strategy converges. 5 imputations are done
+                    in parallel chans to see after how many iterations they converge. In
+                    the practical use, only 1 chain (so only 1 imptuation) will be 
+                    performed")
+  
+  saveRDS(store.out, "../checks/exp3_checks_SI_convCheck.rds") 
+  
+  # Read Output
+  store.read <- readRDS("../checks/exp3_checks_SI_convCheck.rds")
+  
+  # Analyse Output
+  lapply(store.read$convCheck, plot,
+         y = c("z1", "z2", "z3", "z1.z2"),
          layout=c(2, 4))
   
-  lapply(convCheck, plot,
+  lapply(store.read$convCheck, plot,
          y = c("y.z1", "z2.z3", "z1.z2", "z3.z4"),
          layout=c(2, 4))
-  # Settlede on a 300 iterations for single imputation
+  # 200 iterations for single imputation should be fine based
+  # on these results
 
 # mcapply run -------------------------------------------------------------
 
@@ -368,7 +381,7 @@ for (r in 1:reps) {
   
   # Check results presence
   # Time
-  out_time <- sapply((1:nrow(out$conds))[-(5:8)], 
+  out_time <- sapply((1:nrow(out$conds))[-(5:8)],
                      res_sem_time, out = out)
   colnames(out_time) <- paste0("cond_", 1:nrow(out$conds))[-(5:8)]
   

@@ -34,11 +34,12 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
     target <- which(colnames(Z) %in% parms$z_m_id)
     
     # Generate DA version of Z_aux if required
+    print("PCA Impute: Preprocessing")
     if(DA == TRUE){
       # Create an augmented Z dataset (inlcuding ALL interaction)
       print("PCA Impute: Creating Two Way Interactions")
       twoWays <- computeInteract(scale(Z,
-                                       center = TRUE,
+                                       center = parms$int_cen,
                                        scale  = FALSE),
                                  idVars = colnames(Z),
                                  ordVars = NULL,

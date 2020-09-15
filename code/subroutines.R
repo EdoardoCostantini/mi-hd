@@ -205,7 +205,6 @@ runCell <- function(cond, parms, rep_status) {
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
                                  O = as.data.frame(O),
-                                 cond = cond,
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
   update_report("blasso", rep_status, parms, 
@@ -223,7 +222,7 @@ runCell <- function(cond, parms, rep_status) {
                 perform = parms$meth_sel$bridge)
 
   # Impute according to Howard Et Al 2015 PCA appraoch
-  imp_PCA <- impute_PCA(Z = Xy_mis, O = O, parms = parms)
+  imp_PCA <- impute_PCA(Z = Xy_mis, O = O, cond = cond, parms = parms)
   update_report("MICE-PCA", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$MI_PCA)
@@ -471,7 +470,6 @@ runCell_lv <- function(cond, parms, rep_status) {
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
                                  O = as.data.frame(O),
-                                 cond = cond,
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
   update_report("blasso", rep_status, parms, 
@@ -491,7 +489,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   
   ## ----------------------------------------------------------------------- ##
   # Impute according to Howard Et Al 2015 PCA appraoch
-  imp_PCA <- impute_PCA(Z = Xy_mis, O = O, parms = parms)
+  imp_PCA <- impute_PCA(Z = Xy_mis, O = O, cond = cond, parms = parms)
   update_report("MICE-PCA", rep_status, parms, 
                 cnd = cond,
                 perform = parms$meth_sel$MI_PCA)
@@ -878,10 +876,11 @@ runCell_int <- function(cond, parms, rep_status) {
                               parms = parms,
                               perform = parms$meth_sel$bridge)
   
-  imp_bridge_SI <- impute_BLAS_hans(Z = imp_PCA$dtIN,
-                                    O = data.frame(!is.na(imp_PCA$dtIN)),
-                                    parms = parms,
-                                    perform = (parms$meth_sel$bridge_SI & cond$int_da))
+  imp_bridge_SI <- impute_BRIDGE(Z = imp_PCA$dtIN,
+                                 O = data.frame(!is.na(imp_PCA$dtIN)),
+                                 ridge_p = cond$ridge,
+                                 parms = parms,
+                                 perform = (parms$meth_sel$bridge_SI & cond$int_da))
   
   # MICE-CART traditional
   imp_CART <- impute_CART(Z = Xy_input[, col$CIDX],
@@ -891,10 +890,10 @@ runCell_int <- function(cond, parms, rep_status) {
                           parms = parms)
   
   imp_CART_SI <- impute_CART(Z = imp_PCA$dtIN,
-                          O = data.frame(!is.na(imp_PCA$dtIN)),
-                          cond = cond,
-                          perform = (parms$meth_sel$MI_CART_SI & cond$int_da),
-                          parms = parms)
+                             O = data.frame(!is.na(imp_PCA$dtIN)),
+                             cond = cond,
+                             perform = (parms$meth_sel$MI_CART_SI & cond$int_da),
+                             parms = parms)
   
   # MICE-RF
   imp_RANF <- impute_RANF(Z = Xy_input[, col$CIDX],
@@ -1012,7 +1011,7 @@ runCell_int <- function(cond, parms, rep_status) {
   sem_fmi <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
                     .fmi_compute)
   
-  # append single imputations, and GS and CC results
+  # Select parameters that involve vairables with missing values
   indx_EST <- unique(c(sapply(parms$z_m_id, 
                               grep, 
                               x = rownames(sem_pool_MI_EST) ) ) )
@@ -1020,6 +1019,7 @@ runCell_int <- function(cond, parms, rep_status) {
                               grep, 
                               x = rownames(sem_pool_MI_CI) ) ) )
   
+  # Append single imputations, and GS and CC results
   sem_gather_EST <- cbind(sem_pool_MI_EST,
                           sem_EST(sem_sndt))[sort(indx_EST), ]
   
@@ -1027,7 +1027,7 @@ runCell_int <- function(cond, parms, rep_status) {
                          sem_CI(sem_sndt))[sort(index_CI), ]
   
   # LM models
-  lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
+  lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0],
                         lm_pool_EST_f)
   lm_pool_CI  <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
                         lm_pool_CI_f)
