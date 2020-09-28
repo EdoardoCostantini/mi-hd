@@ -73,35 +73,6 @@ imposeMiss <- function(dat_in, parms, cond){
   return( dat_out )
 }
 
-imposeMiss_lv <- function(dat_in, parms, cond){
-  ## Description
-  # Given a fully observed dataset and a param object containing 
-  # info on the (latent) imposition mechanism, it returns a version of
-  # the original data with imposed missingness on all the items 
-  # indicated as target int parms$z_m_id
-  ## Example Inputs
-  # cond <- conds[1,]
-  # dat_in   <- simData_lv(parms, cond)
-  
-  # Body
-  # Define non-response vector
-  dat_out <- dat_in$dat
-  for (i in 1:parms$zm_n) {
-    nR <- simMissingness(pm    = cond$pm,
-                         data  = dat_in$scores_lv,
-                         preds = parms$rm_x,
-                         type  = parms$missType,
-                         beta  = parms$auxWts)
-    
-    # Fill in NAs
-    dat_out[nR, parms$z_m_id[i]] <- NA
-  }
-  
-  # Result
-  return( dat_out )
-}
-
-
 # Experiment 2 - Latent Structure -----------------------------------------
 
 simData_lv <- function(parms, cond){
@@ -181,6 +152,34 @@ simData_lv <- function(parms, cond){
 
 # Use function
 # simData_lv()
+
+imposeMiss_lv <- function(dat_in, parms, cond){
+  ## Description
+  # Given a fully observed dataset and a param object containing 
+  # info on the (latent) imposition mechanism, it returns a version of
+  # the original data with imposed missingness on all the items 
+  # indicated as target int parms$z_m_id
+  ## Example Inputs
+  # cond <- conds[1,]
+  # dat_in   <- simData_lv(parms, cond)
+  
+  # Body
+  # Define non-response vector
+  dat_out <- dat_in$dat
+  for (i in 1:parms$zm_n) {
+    nR <- simMissingness(pm    = cond$pm,
+                         data  = dat_in$scores_lv,
+                         preds = parms$rm_x,
+                         type  = parms$missType,
+                         beta  = parms$auxWts)
+    
+    # Fill in NAs
+    dat_out[nR, parms$z_m_id[i]] <- NA
+  }
+  
+  # Result
+  return( dat_out )
+}
 
 # Experiment 3: Interactions ----------------------------------------------
 
@@ -294,6 +293,42 @@ imposeMiss_int <- function(dat_in, parms, cond){
       # Fill in NAs
       dat_out[nR, i] <- NA
     }
+  }
+  
+  # Result
+  return( dat_out )
+}
+
+
+# Experiment 4 ------------------------------------------------------------
+
+imposeMiss_evs <- function(dat_in, parms, cond){
+  ## Description
+  # Given a fully observed dataset and a param object containing the regression
+  # coefficients of the model to impose missingness, it returns a version of
+  # the original data with imposed missingness on all the variables indicated
+  # as target int parms$z_m_id
+  ## Example Inputs
+  # cond <- conds[1,]
+  # dat_in   <- simData_exp1(cond, parms)
+  
+  # Body
+  # Define non-response vector
+  dat_out <- dat_in
+  rm_x  <- dat_in[, parms$rm_x]
+  
+  # Recode trust in others 1 = low, 4 = high
+  rm_x[,1] <- match(rm_x[,1], max(rm_x[,1]):min(rm_x[,1]) )
+  
+  for (i in 1:parms$zm_n) {
+    nR <- simMissingness(pm    = cond$pm,
+                         data  = rm_x,
+                         preds = parms$rm_x,
+                         type  = parms$missType,
+                         beta  = parms$auxWts)
+    
+    # Fill in NAs
+    dat_out[nR, parms$z_m_id[i]] <- NA
   }
   
   # Result

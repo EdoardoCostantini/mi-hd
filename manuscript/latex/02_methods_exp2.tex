@@ -38,9 +38,7 @@ available.
 	\label{table:exp1_conds}
 \end{table}
 
-500 data sets were generated for each condition. After imputation, the MLE estimates and standard errors of 
-the means, variances and covariances, of the variables originally with missing values, were estimated and 
-pooled across multiply imputed datasets according to \citet{rubin:1987}'s rules.
+500 data sets were generated for each condition. 
 
 \subsubsection{Data Generation}
 
@@ -63,52 +61,33 @@ Items were then generated assuming no correlation between their measurment error
 
 \subsubsection{Missing Data Imposition}
 
-BOOKMARK!
-
-Missing values were imposed on six variables, three in block 1 and three in block 2, using the cumulative logistic distribution
-to define the probability of missingness based on a linear combination of four scaled columns of $X$.
-
-\begin{equation}
-	P(y_t = MISS | X) = G(\tilde{X} \theta) \label{eq:PBT_imp}
-\end{equation}
-
-where $y_t$ is a variable target of missing values imposition ($t = 1,...,T$, with $T$ = 6), $G$ is the standard cumulative logistic distribution 
-(with location and scale parameters equal to 0 and 1 respectively), $\tilde{X}$ is a $n \times 4$ standardized subset of $X$, 
-including only the determinants of missingness, and $\theta$ is a vector of regression coefficients. 
-
-$\tilde{X}$ was composed of 2 variables from block 1 and 2 from block 2. Of the two variables from both blocks,
-one was selected as target of missing values itself, and the other was fully observed. All variables have same weight
-in the linear combination $\tilde{X}\theta$.
-
-\iffalse %comment out this section for now
-The value of the linear predictor was also "off-setted" to induce missingness in the lower tail of the distribution
-of linear predictor $\tilde{X}\theta$. This procedure does not imply that missingness in the target variable depends 
-on the target variable itself, as the offset is applied based on the values of $\tilde{X}$.
-\fi
-
-Overall, the missing data imposition procedure allowed to: 
-(1) specify a general missing data pattern; 
-(2) work with a MAR missingness set up;
-(3) impose a desired proportion of missing values on each target variable; 
-(4) induce substantive bias for parameters estimates of complete case analysis (between 20 and 30 percent of 
-the size of the reference "true" value of the parameter).
+Missing values were imposed on ten items measuring two highly correlated latent vairables (5 items for each).
+The probability of missingness was determined by a linear combination of the the other two highly correlated
+latente variables.
 
 \subsubsection{Imputation Methods and Analyses Model}
 
-For each simulated data set, imputation was performed according to all the methods referenced to in the introduction.
+For each simulated data set, imputation was performed according to the same set of imputation methods as in 
+experiment 1.
 
-As traditional parametric MI could not be applied to cases with $p > n$, we ran, for reference, a standard mice imputation 
-routine that used all variables in block 1 and 2 (10 in total), which included all predictors of missingness and no 
-auxiliary junk variables. Results from this "oracle" run are referred to as MI Optimal run (MI-OP). 
-We have also considered two single dataset missing data handling approaches: MissForest \citep{stekhovenBuhlmann:2011} as 
-implemented in the R package 'misForest' (here referred to as 'missFor'), and Complete Case analysis (CC), performed 
-using only complete rows of the data.
+We crossvalidated the ridge parameter used in the bridge imputation method by imputing the dataset under a 
+a range of ridge penalties (8 values equally spaced between .1 and 1e-08) and selecting the value that, 
+for each condition, granted the lowest average fmi for the analysis model parameters of interest.
+
+In this set up, the "oracle" standard mice imputation ("MI-OP") imputed all items with missing values using only 
+the other 19 items corresponding to the 4 most correlated latent vairables. This included all items measuring the 
+latent constructs determining the response probability.
 
 Convergence of the imputations was checked through visual examination of trace plots showing the mean imputed values
-for each variable at each iteration. In the most complex condition, ($p = 500, pm = .3$), all methods converged after 
+for each variable at each iteration. In the most complex condition, ($lv = 100, pm = .3$), all methods converged after 
 after approximately 20 iterations. In the simulation study we run a single chain of the MI algorithms for 50 
 iterations, considering the first 20 as burn-in, and selecting 10 imputed datasets through thinning.
+The only exception was 'blasso' which required around 1000 iterations to reach satistifactory stationarity and mixing
+of multiple chains of imputation.
 
-Maximum Likelihood Estimates of the means, variances, and covariances of the six variables with missing values  
-were obtained by fitting a saturated model to the treated data, and pooling the multiple estimates when necessary. 
-Finally, "Gold Standard" (GS) MLEs of the same parameters were obtained from the fully observed data sets (before missing data imposition).
+Three main types of analysis model were applied: a Confirmatory Factor Analysis to obtain estiamtes of 
+the factor loadings was run on the raw data; a saturated model was fitted to the raw data to obtain MLE 
+estiamtes of the means, variances, and covariances of the items with missing values. The items measuring
+every latent variable were averaged as to obtain a scale score. The saturated model fitted to the raw
+data was also fitted on the scales obtained with the imputed values to assess the performance in a context
+that is similar to a real survey data application.

@@ -12,7 +12,7 @@
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))
-  
+
 # Check presence
   out[[1]]
   out$conds
@@ -96,7 +96,8 @@
                      return(x)
                    }
   )
-  output$conds <- names(out[[1]])
+  output$parms <- out$parms
+  output$conds <- out$conds
   
   saveRDS(
     output, 

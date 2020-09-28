@@ -1,0 +1,73 @@
+\maketitle
+\subsection{Experiment 4: Resampling Study}
+
+\subsubsection{Analysis models}
+
+In this study we defined two analysis models following two sociological published articles: 
+Immerzeel Et Al 2017 and Koneke 2014. As a result we considered:
+\begin{itemize}
+	\item a linear regression of euthanastia attitutes on institutional trust measures (general trust, 
+		trust in the state, etc.) and other covariates
+	\item a linear regression of left/right voting tendencies on sex, SES, religion and other covariates
+\end{itemize}
+
+\paragraph{Model 1: Euthanasia acceptance}
+For now, many vairbales have been recoded, I actually do not thing I will keep this.
+(results are ofcourse the same just with inverted signs of the variables with recoded
+order; for imputation this is entierly irrelevant, for analysis models might be
+a comment but not so relevant)
+
+\begin{itemize}
+	\item euthanasia acceptance (v156) (DV)
+	\item General Trust (v31) Dichotomous variable (1 = having general trust)
+	\item Confidence in healtcare sustem (v126) (1 to 4, 1 = low, 4 = high)
+	\item Confidence in press (v118) (1 to 4, 1 = low, 4 = high)
+	\item Confidence in state (v120, v121, v127. v131), items recoded  (1 to 4, 
+		1 = low, 4 = high), mean taken.
+	\item Age (age)
+	\item Education (v243\_ISCED\_1) treated as continuous
+	\item Sex (v225, male = 1)
+	\item Religiousness (v6) recoded 0 to 3, with 0 not religious, 3 high
+	\item Denomination (v51v52), kept all categories in dataset
+\end{itemize}
+
+\paragraph{Model 2: Left/Right voting tendencies}
+
+Variables were oberationalized as follow:
+\begin{itemize}
+	\item LEFT\/RIGHT vote (v174\_LR): a continuous vairables in the range from 1 (left) to 10 (right)
+		(this is DV, see papers for description)
+	\item sex (female = 1)
+	\item nativist attitudes, as made up of items v185 to v187, and interval mean scale
+	\item low and order: opinion on strong leader (v145); opinion on order (v110)
+	\item political interest (v97)
+	\item political action as interval mean scale based on items v98:v1010
+	\item SES (v246\_egp) treated as categorical
+	\item Age (age) 
+	\item Education (v243\_ISCED\_1)
+	\item Marital Status based on v234 recoded into 3 categories (yes, no, never)
+	\item Religiousness (v54) as frequence of attendence recoded to 3 cateogries of frequency (0 = none, 2 = high)
+	\item Denomination (v51v52), kept all categories in dataset
+	\item Urbanization of area based on v276\_r		
+	\item Religion: in the reference paper the question is a combination of do you belong to religion? if yes, which?
+		In EVS, this is question v51 and v52. Maybe there is a version that combines the info. Check.
+	\item Degree of religiosity: is there an EVS question for this? I think so, check (0-10). v54 to v56 cover this a bit.
+	\item Gender: Need to find in EVS v225
+	\item Parents Origin: how? Both parents separately? Need to combine father born in same country v230, yes/no; and 
+		v231b country of birth of father. Same for mother (v232 and v232b)
+\end{itemize}
+
+\subsubsection{Variable Operationalization}
+
+\subsubsection{Response model}
+Missingness is imposed accoridng to the usual algorithm that generates a response vector
+with a desired proportion of missing values based on a linear combination of 1 or more
+predictors (with weighted importance). As predictors we have for now selected education (v243\_ISCED\_1),
+and trust (v34) in people the interviewee does not know. The simplistic non-response mechanisms 
+is that people with low eductaion and low trust tend to avoid answering more questinos.
+
+Six vairables are identified as target of missings: the 3 vairables making up the interval scale
+for nativist attitudes (IV scale), left/right vote (DV), trust in the press (IV item), euthanesia 
+acceptance (DV).
+
+

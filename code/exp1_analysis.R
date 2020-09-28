@@ -161,6 +161,9 @@
 
   write.csv(mt_table, "~/Desktop/mt_table.csv")
   
+  xtable(mt_table,
+         align = c("l", rep("c", ncol(mt_table))))
+  
 # LM models ---------------------------------------------------------------
 
   # Bias

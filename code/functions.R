@@ -1217,14 +1217,14 @@ res_sem_time <- function(out, condition = 1){
 }
 
 res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
-  # model = "semS" # the first part of the name of a result object stored
+  # model = "semR" # the first part of the name of a result object stored
                    # in out 
   # model = "lm"
   # condition = 1
   
   ## Prep ##
   est <- paste0(model, "_EST")
-  ci <- paste0(model, "_CI")
+  ci  <- paste0(model, "_CI")
   select_cond <- names(out[[1]])[condition]
   
   ## Step 2. Bias ##
@@ -1265,19 +1265,39 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   # Bias as percentage of true value
   bias_per <- cbind(ref = round(psd_tr_vec, 3),
                     round(
-                      abs(bias)/psd_tr_vec*100, 
+                      bias/psd_tr_vec*100, 
                       0)
   )
   
   meths <- out$parms$methods[-which(out$parms$methods == "GS")]
   # Bias Mean Standardized
   if(bias_sd == TRUE){
+    # means_indx <- grep("~1", rownames(avg))
+    # vars_indx  <- means_indx + length(means_indx)
+    # bias_sd <- round(
+    #   (avg[means_indx, ] - psd_tr_vec[means_indx])/
+    #     sqrt(psd_tr_vec[vars_indx]),
+    #   3)
+    
     means_indx <- grep("~1", rownames(avg))
-    vars_indx <- means_indx + length(means_indx)
+    
+    sd_emp <- sapply(out$parms$methods, function(m){
+      # m <- out$parms$methods[9]
+      store <- NULL
+      for (i in 1:out$parms$dt_rep) {
+        succ_method <- colnames(out[[i]][[select_cond]][[est]])
+        store <- cbind(store, 
+                       out[[i]][[select_cond]][[est]][,
+                                                      succ_method %in% m]
+        )
+      }
+      return( apply(t(store)[, means_indx], 2, sd) )
+    })
+    
     bias_sd <- round(
-      (avg[means_indx, ] - psd_tr_vec[means_indx])/
-        sqrt(psd_tr_vec[vars_indx]),
+      (avg[means_indx, ] - psd_tr_vec[means_indx]) / sd_emp,
       3)
+    
   } else {
     bias_sd <- NULL
   }
