@@ -7,6 +7,7 @@
   library(labelled) # to extract valriables labels
   library(mice)
   library(dplyr)
+  library(forcats) # for fct_collapse() function to recode factors
   
   source("./functions_EVS.R")
 
@@ -23,15 +24,16 @@
 
   int.df <- as.data.frame(int.dt)
   int.df$country_org <- int.df$country #original country variable
-  int.df$country <- factor(int.df[, "country"],
-                           levels = val_labels(int.df[, "country"]),
-                           labels = names(val_labels(int.df[, "country"])))
+  # int.df$country <- factor(int.df[, "country"],
+  #                          levels = val_labels(int.df[, "country"]),
+  #                          labels = names(val_labels(int.df[, "country"])))
 
 # Decisions ---------------------------------------------------------------
   
   # Subset data
   subsample <- c(1, 4)
-  countries  <- c("France", "Germany", "Italy", "Netherlands")
+  # countries  <- c("France", "Germany", "Italy", "Netherlands")
+  countries  <- c(France = 250, Germany = 276, Italy = 380, Netherlands = 528)
   
   int.df <- int.df %>%
     filter(mm_select_sample %in% subsample) %>%
@@ -91,9 +93,9 @@
   
   # Combine Information from the two variables
   v51v52_comb <- case_when(int.df[, den[1]] == 1 ~ int.df[, den[2]],
-                        # If you belong to a denomination, to which?
-                        int.df[, den[1]] == 2 ~ 0)
-                        # If you do not, then have value 0
+                           # If you belong to a denomination, to which?
+                           int.df[, den[1]] == 2 ~ 0)
+                           # If you do not, then have value 0
   val_labels(v51v52_comb) <- c("No Religion" = 0, 
                                val_labels(v51v52_comb)[val_labels(v51v52_comb) > 0])
   int.df$v51v52_comb <- v51v52_comb
@@ -103,7 +105,7 @@
   
 # Sex
   sex <- "v225"
-  int.df$v225 <- recode(int.df$v225, "2" = 0)
+  # int.df$v225 <- recode(int.df$v225, "2" = 0)
   
 # Union Membership
   um <- "v11"
@@ -152,10 +154,8 @@
 # Get desired data --------------------------------------------------------
 
   # Perform Variable Selection
-  EVS2017 <- int.df %>%
-    select(all_of( var_vec ))
+  EVS2017 <- dplyr::select(int.df, var_vec)
   dim(EVS2017)
-  # all_of gets rid of vector of names ambiguity
   
 # Dealing with missing data -----------------------------------------------
 
@@ -203,19 +203,8 @@
     mutate_if(colnames(EVS2017) %in% inc, as.numeric)  %>%
     mutate_if(colnames(EVS2017) %in% pol, as.numeric)  %>%
     mutate_if(colnames(EVS2017) %in% SES, as.factor)
-  
-  # Fix some things
-  EVS2017_cl$country <- droplevels(EVS2017_cl$country)
-  levels(EVS2017_cl$v51v52_comb) <- names(val_labels(EVS2017$v51v52_comb))
-  levels(EVS2017_cl$v246_egp) <- names(val_labels(EVS2017$v246_egp))[-c(1:7, 19)]
-  
-  cbind(
-    table(EVS2017_cl$v246_egp),
-    table(EVS2017$v246_egp)
-  )
 
   # Make ID column as row name
-  
   EVS2017_cl <- data.frame(EVS2017_cl, row.names = 1)[, -c(249, 250)]
   sapply(EVS2017_cl, class)
   
@@ -240,50 +229,161 @@
                     paste0(names(which(predMat[v, ] != 0)), collapse = ", "))
   }
   
-  # # Perform Convergence check
-  # mids_pmm <- mice::mice(EVS2017_cl, 
-  #                        m = 5, maxit = 200,
-  #                        predictorMatrix = predMat,
-  #                        method = "pmm")
-  # saveRDS(mids_pmm, "../output/exp4_ccheck_mids_pmm.rds")
-  # 
-  # # CHECK Imputations for EACH VAR TYPE
-  # EVS2017_full <- complete(mids_pmm)
-  # sapply(EVS2017_full, class)
-  # 
-  # lapply(var_list[5], function(x){
-  #   list((EVS2017 %>%
-  #            select(x))[1:20, 1],
-  #         (EVS2017_full %>%
-  #            select(x))[1:20, 1])
-  # })
-  # 
-  # var_target <- names(which(missPat[nrow(missPat), ] != 0)) # target of miss
-  # plot(mids_pmm, y = var_target[var_target %in% c(var_list$ord[21:30])])
-  # 
-  # # Perform Single imputation to generate desired data
+  # Perform Convergence check
+  mids_pmm <- mice::mice(EVS2017_cl,
+                         m = 5, maxit = 200,
+                         predictorMatrix = predMat,
+                         method = "pmm")
+  saveRDS(mids_pmm, "../convergence/exp4_ccheck_mids_pmm.rds")
+
+  var_target <- names(which(missPat[nrow(missPat), ] != 0))
+  plot(mids_pmm, y = var_target[var_target %in% var_vec[1:20]])
+  
+  # Final Version
   # mids_final <- mice::mice(EVS2017_cl, 
-  #                          m = 1, maxit = 1e2,
+  #                          m = 1, maxit = 1e2, # NEED TO RUN SERIOUSLY
   #                          predictorMatrix = predMat,
   #                          method = "pmm")
+  # mids_final$loggedEvents
+  # EVS2017_psuedo <- complete(mids_final)
   
-  # Fake version
-  mids_final <- mice::mice(EVS2017_cl, 
-                           m = 1, maxit = 1,
-                           predictorMatrix = predMat,
-                           method = "pmm")
+  # or simply save 1 dataset from the 5 you have in the mids_pmm output
+  mids_pmm <- readRDS("../convergence/exp4_ccheck_mids_pmm.rds")
+  EVS2017_psuedo <- complete(mids_pmm, action = 1)
+  
+## Fix factors ------------------------------------------------------------- ##
+  
+  EVS2017_final <- sapply(colnames(EVS2017_psuedo), 
+                          fix.factor, 
+                          dt_h = EVS2017,
+                          dt_imp = EVS2017_psuedo,
+                          simplify = FALSE,
+                          USE.NAMES = TRUE)
+  EVS2017_final <- do.call(data.frame, EVS2017_final)
+  
+## Fix Low variance variables ---------------------------------------------- ##
+  # EVS2017_cl <- readRDS("../data/exp4_EVS2017_full.rds")$orig
+  # EVS2017_final <- readRDS("../data/exp4_EVS2017_full.rds")$full
 
-  mids_final$loggedEvents
-  
-  EVS2017_psuedo <- complete(mids_final)
-# 
+  # Generate model matrix
+  mm <- model.matrix(~., EVS2017_final)[, -1]
 
+  # Get rid of constants (might happen for 1 unpopular dummy code)
+  const <- names(which(apply(mm, 2, var) == 0))
+  mm  <- mm[, !colnames(mm) %in% const]
   
-  # Save Results of cleaning and imputation
+  # Find Dummies that have 95% of observations in 1 category
+  tabular <- apply(mm, 2, table)
+  
+  # Select only dummies
+  tabular <- tabular[sapply(tabular, length) == 2]
+  
+  # Vector of dummy names to discard / things to collapse
+  dum.disc <- lapply(tabular, function(x) {
+    x[1] / sum(x) > .95 | x[1] / sum(x) < 1-.95
+  })
+  dum.disc <- names(which(dum.disc == TRUE))
+
+  # Check their concentartion
+  disc.df <- data.frame(Concentration = sapply(tabular[dum.disc], function(x) {
+    round(x[1] / sum(x), 3)
+  }))
+  
+  # Find collinear variables
+  coll.vars <- find.collinear(mm)
+  
+  ## Deal w/ originally dichotmous variables
+  # Originally dichotmous variables will be discarded
+  bin.disc <- grep("not mentioned", dum.disc, value = TRUE) # identify
+  bin.disc <- gsub("not mentioned", "", bin.disc) # clean
+  bin.disc <- c(bin.disc, "v169")
+  EVS2017_final <- EVS2017_final[ , !colnames(EVS2017_final) %in% bin.disc] # get rid of
+  
+  ## Deal w/ categorical "non-variables"
+  # Dummies for unpopular categories need to be dealt on a case by case basis
+  
+  # Religiosity
+    round(prop.table(table(EVS2017_final$v51v52_comb)), 3)
+    
+    # Collapse the very unpopular categories
+    denom <- fct_collapse(EVS2017_final$v51v52_comb,
+                          protestant = c("Protestant"),
+                          christian = c("Roman catholic"),
+                          none = c("No Religion",
+                                   "Orthodox",
+                                   "Buddhist", 
+                                   "Free church/Non-conformist/Evangelical",
+                                   "Muslim",
+                                   "Hindu",
+                                   "Jew",
+                                   "Other")
+    )
+    round(prop.table(table(denom)), 3)
+    
+    # Replace variable in original data
+    EVS2017_final$v51v52_comb <- denom
+    
+  # v234 marital status
+    prop.table(table(EVS2017_final$v234))
+    v234 <- fct_collapse(EVS2017_final$v234,
+                         partner = c("married",
+                                     "registered partnership"),
+                         never = c("never married and never registered partnership"),
+                         past = c("divorced", "widowed", "separated")
+    )
+    prop.table(table(v234))
+    EVS2017_final$v234 <- v234
+    
+  # v238: do you live with your parents/parents in law
+    prop.table(table(EVS2017_final$v238))*100
+    v238 <- fct_collapse(EVS2017_final$v238,
+                         yes = c("yes, own parent(s)",
+                                     "yes, both own parent(s) and parent(s) in law",
+                                     "yes, parent(s) in law"),
+                         no = c("no")
+    )
+    prop.table(table(v238))*100
+    EVS2017_final$v238 <- v238
+    
+  # v244: 
+    prop.table(table(EVS2017_final$v244))*100
+    v244 <- fct_collapse(EVS2017_final$v244,
+                         full = c("30h a week or more", "military service", "self employed"),
+                         part = c("less then 30h a week"),
+                         none = c("unemployed", "other", 
+                                  "student", "disabled",
+                                  "homemaker not otherwise employed")
+    )
+    prop.table(table(v244))*100
+    EVS2017_final$v244 <- v244
+    
+  # v246: SES
+    prop.table(table(EVS2017_final$v246))*100
+    v246 <- fct_collapse(EVS2017_final$v246,
+                         I = c("I :Higher Controllers"),
+                         II = c("II :Lower Controllers"),
+                         III = c("IIIa:Routine Nonmanual", 
+                                 "IIIb:Lower Sales-Service"),
+                         IV = c("IVa:Selfempl with empl",
+                                "IVb:Selfempl no empl",
+                                "IVc:Selfempl Farmer"),
+                         V_VI = c("V :Manual Supervisors",
+                                  "VI :Skilled Worker"),
+                         VII = c("VIIa:Unskilled Worker", "VIIb:Farm Labor")
+    )
+    prop.table(table(v246))*100
+    EVS2017_final$v246_egp <- v246
+    
+    dim(EVS2017_final)
+    
+## Save Results of cleaning and imputation --------------------------------- ##  
   out <- list(orig = EVS2017_cl,
-              full = EVS2017_psuedo,
+              full = EVS2017_final,
               note = paste0("2017 EVS dataset for selected countries and ",
-                            "variables, ready for resampling study.") 
+                            "variables, ready for resampling study.",
+                            " The two dataset have different dim because",
+                            " after imputation a check for collinear vars",
+                            " and constants is performed to exclude them") 
               )
   
   saveRDS(out, "../data/exp4_EVS2017_full.rds")

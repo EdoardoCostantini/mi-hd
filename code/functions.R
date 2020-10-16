@@ -47,6 +47,7 @@ missing_type <- function(Z){
   # Input: a dataset with missing values
   #   examples:
   #     @Z <- mice::boys
+  #     Z <- Z_mm
   # Output: a list containing the names of the variables to be imputed in different formats
   # Notes: - integer and numeric variables are considered (inaccurately) both as continuous;
   #        - dataframes are subsetted with [] to preserve structure
@@ -83,7 +84,8 @@ init_dt_i <- function(Z0, missVarInfo){
   # Notes: integer and numeric variables are considered (inaccurately) both as continuous
   ## Input examples from simulation
   # Z0 <- Z
-  # missVarInfo <- missing_type(Z)
+  # Z0 <- Z_mm
+  # missVarInfo <- missing_type(Z0)
   
   # Make oredered factors as numeric
   if( (length(missVarInfo$ordeVars))!=0 ){
@@ -395,6 +397,146 @@ SAT_mod_write <- function(var_id){
   return(SAT_mod)
 }
 
+exp4_fit_mod1 <- function(multi_dt){
+  ## Description:
+  # Given a list of complete datasets it fits a linear model
+  # to obtain standardized regression coefficients (all vairables 
+  # are centered and standardized)
+  ## Example internals
+  # multi_dt <- imp_DURR_la$dats
+  # multi_dt <- si_data
+  if(!is.null(multi_dt)){
+    models <- lapply(multi_dt,
+                     function(m){
+                       # m <- multi_dt[["GS"]]
+                       # Euthanasia
+                       euth <- m$v156
+
+                       # Country
+                       country <- m$country
+                       
+                       # General Trust
+                       trust.g <- m$v31
+                       
+                       # Confidence in Health care sys
+                       trust.hs <- match(m$v126, 4:1)
+                       
+                       # Confidence in press
+                       trust.pr <- m$v118
+                       
+                       # Confidence in state scale (need to create scale)
+                       trust.s.var <- c("v121", "v120", "v127", "v131")
+                       invCod <- sapply(trust.s.var, 
+                                        function(x) match(m[, x], 4:1))
+                       m[, trust.s.var] <- invCod
+                       trust.s <- rowMeans(m[, trust.s.var]) # inverted
+                       
+                       # Age
+                       age <- m$age
+                       
+                       # Education
+                       edu <- m$v243_ISCED_1
+                       
+                       # Gender (1 = male)
+                       sex <- m$v225
+                       
+                       # Religiousness
+                       rel <- match(m$v6, 4:1)-1
+                       
+                       # Religious Denomination
+                       denom <- m$v51v52_comb
+
+                       # Fit mode
+                       mod <- lm(euth ~
+                                   trust.g + trust.hs + trust.pr + trust.s +
+                                   edu + sex + age + rel + denom + country)
+                       return(mod)
+                     }
+                     )
+  } else {models = NULL}
+  return(models)
+}
+
+exp4_fit_mod2 <- function(multi_dt){
+  ## Description:
+  # Given a list of complete datasets it fits a linear model
+  # to obtain standardized regression coefficients (all vairables 
+  # are centered and standardized)
+  ## Example internals
+  # multi_dt <- imp_DURR_la$dats
+  # multi_dt <- si_data
+  if(!is.null(multi_dt)){
+    models <- lapply(multi_dt,
+                     function(m){
+                       # Left / Right voting
+                       lr <- m$v174_LR
+                       
+                       # Country
+                       country <- m$country  
+
+                       # Female
+                       female <- relevel(m$v225, ref = "male")
+                       
+                       # Employment Status  
+                       SES <- m$v246_egp
+                       
+                       # Native attitudes (mean of itmes)  
+                       nativ <- c("v185", # jobs
+                                  "v186", # crime
+                                  "v187"  # strain on welfare
+                       )
+                       NatAt <- rowMeans(m[, nativ])
+                       
+                       # Authoritarian Attitudes
+                       # Low and order attitudes
+                       strongL <- match(m$v145, 4:1)
+                       order <- forcats::fct_collapse(m$v110,
+                                                      no = c("fighting rising prices", 
+                                                             "more say in important government decisions", 
+                                                             "protect freedom of speech"),
+                                                      yes = c("maintaining order in nation")
+                       )
+                       
+                       # Political Interest
+                       polInterest <- match(m$v97, 4:1)
+                       
+                       # Political Action
+                       action <- paste0("v", 98:101)
+                       polAction <- rowMeans(m[, action])
+                       polAction_r <- case_when(
+                         polAction %in% 1 ~ 3, # have done all
+                         polAction %in% seq(1.25, 2.75, by = .25) ~ 2,
+                         polAction %in% 3 ~ 1 # would never do any
+                       )
+                       
+                       # Covariates
+                       age <- m$age
+                       edu <- m$v243_ISCED_1
+                       mat <- m$v234
+                       
+                       # urb <- m$v276_r
+                       urb <- forcats::fct_collapse(m$v276_r,
+                                                    less5e3 = c("under 5000"),
+                                                    mid_5e3_2e4 = c("5000-20000"),
+                                                    mid_2e4_1e5 = c("20000-100000"),
+                                                    more1e5 = c("100000-500000", 
+                                                                "500000 and more")
+                       )
+                       # Religiousness
+                       rel <- match(m$v6, 4:1)-1
+                       
+                       # Denomination
+                       denom <- m$v51v52_comb
+                      
+                       # Fit model
+                       mod <- lm(lr ~ female + NatAt + strongL + polInterest +
+                                   polAction_r + age + edu + rel + denom + country)
+                       return(mod)
+                     }
+    )
+  } else {models = NULL}
+  return(models)
+}
 
 # Imputation --------------------------------------------------------------
 
@@ -541,16 +683,44 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
     AS <- rr_coef_no0[-1] # predictors active set
   
   # MLE estimate of model parameters
+  # # ORIGINAL  
+  # # 1. define starting values
+  #   if(identical(rr_coef_no0, "(Intercept)")){
+  #     lm_fit <- lm(y_tr ~ 1)
+  #     X_mle <- model.matrix(y_tr ~ 1)
+  #   } else {
+  #     X_mle <- model.matrix(y_tr ~ X_tr[, AS])
+  #     lm_fit <- lm(y_tr ~ X_tr[, AS])
+  #   }
+  #   startV <- c(coef(lm_fit), sigma(lm_fit))
     
-  # 1. define starting values
+  # UDPATE
+    # 1. define starting values
     if(identical(rr_coef_no0, "(Intercept)")){
       lm_fit <- lm(y_tr ~ 1)
       X_mle <- model.matrix(y_tr ~ 1)
     } else {
-      X_mle <- model.matrix(y_tr ~ X_tr[, AS])
       lm_fit <- lm(y_tr ~ X_tr[, AS])
+      X_mle  <- model.matrix(y_tr ~ X_tr[, AS])
+      colnames(X_mle) <- str_replace(colnames(X_mle), ".*]+", "")
+      
+      b.estimated <- coef(lm_fit)[!is.na(coef(lm_fit))]
+      b.names <- str_replace(names(b.estimated), ".*]+", "")
+      
+      X_mle  <- X_mle[, colnames(X_mle) %in% b.names]
+      # Fix NAs when coefficinet cannot be estiamted because variable
+      # is near constant
     }
-    startV <- c(coef(lm_fit), sigma(lm_fit))
+    
+    # Option 1: Get rid of estimate
+    startV <- c(coef(lm_fit)[!is.na(coef(lm_fit))], 
+                # keep only coefficients for variables that were not kicked
+                # out of the equation
+                sigma(lm_fit))
+    
+    # # Option 2: Include but give custom 0 as initial value
+    # startV <- c(coef(lm_fit), sigma(lm_fit))
+    # startV[is.na(startV)] <- 0
     
   # 2. optimize loss function
     MLE_fit <- optim(startV, 
@@ -575,6 +745,8 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
                      sd = pdraws_par[2])
     } else {
       X_ppd <- model.matrix( ~ X_te[, AS]) # X for posterior pred dist
+      colnames(X_ppd) <- str_replace(colnames(X_ppd), ".*]+", "")
+      X_ppd  <- X_ppd[, colnames(X_ppd) %in% b.names]
       b_ppd <- pdraws_par[-length(pdraws_par)] # betas for posterior pred dist
       sigma_ppd <- tail(pdraws_par, 1) # sigma for posterior pred dist
       y_imp <- rnorm(n = nrow(X_te),
@@ -965,6 +1137,7 @@ lm_pool_CI_f <- function(fits){
   
   ## Example internals
   # fits <- lm_fits[[1]]
+  # fits <- m1_mi$DURR_la
   
   # Do we have fits for a given imputation method?
   m <- length(fits)
@@ -979,7 +1152,8 @@ lm_pool_CI_f <- function(fits){
   all_vcov <- lapply(X = summa_models,
                      FUN = function(x) vcov(x))
   
-  U_bar <- diag(Reduce('+', all_vcov) / m)
+  U_bar <- na.omit(diag(Reduce('+', all_vcov) / m))
+  # to exclude coefficeints for constant dummyes 
   
   B <- diag(1 / (m-1) * (t(coefs) - Q_bar) %*% t(t(coefs) - Q_bar))
   
@@ -1111,6 +1285,22 @@ scorify <- function(dat_in, cond, parms){
     
 }
 
+find.collinear <- function(x, threshold = 0.999) {
+  # Find collinear predictors to be excluded from imputation model
+  # Credits to mice package
+  nvar <- ncol(x)
+  x <- data.matrix(x)
+  r <- !is.na(x)
+  nr <- apply(r, 2, sum, na.rm = TRUE)
+  ord <- order(nr, decreasing = TRUE)
+  xo <- x[, ord, drop = FALSE]
+  varnames <- dimnames(xo)[[2]]
+  z <- suppressWarnings(cor(xo, use = "pairwise.complete.obs"))
+  hit <- outer(seq_len(nvar), seq_len(nvar), "<") & (abs(z) >= threshold)
+  out <- apply(hit, 2, any, na.rm = TRUE)
+  return(varnames[out])
+}
+
 # Results -----------------------------------------------------------------
 
 bias_est <- function(x, x_true) {
@@ -1164,18 +1354,23 @@ extract_results <- function(cond_name, output, dt_rep){
 mean_traceplot <- function(out, 
                            dat = 1, # which data repetition should I show?
                            method = "blasso", # same name as in parms
-                           y_range = c(-10, 20),
+                           y_center = FALSE,
+                           y_range = c(0, 10),
                            iters = 1:5){
   ## Internals
-  # out <- out_cnv
-  # iters = 200:300
+  # out = out_cnv
+  # dat = 7
+  # iters = 1:50
+  # y_center = TRUE
+  # y_range = c(1, 1)
+  # method = out_cnv$parms$method[1]
 
   ## Description
   # It prints the traceplots for the mean imputed values in each iteration
   # in different chains, by variable, one dataset, one imputation method
-  
   # Display in same pane
   par(mfrow = c(3, ceiling(out$parms$zm_n/3)))
+  
   # Plot
   # Are imputations of mids class?
   if(class(out[[dat]][[1]]$imp_values[[method]]) == "mids"){
@@ -1186,24 +1381,60 @@ mean_traceplot <- function(out,
       # Mean imputed value across individuals in each iteration
       mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[1]][[v]][iters, ])
       
+      # Modify display option based on preference
+      ifelse(y_center == TRUE, 
+             y_range_T <- c(mean(mean_imp) - y_range[1], 
+                            mean(mean_imp) + y_range[2]),
+             y_range_T <- y_range)
+      
+      # Plot chain 1
       plot(iters, mean_imp, type = "l",
          main = method,
-         ylim = y_range,
-         ylab = paste0("z", v), xlab = "Iteration")
-      # plot(seq(out$parms$iters)[iters], mean_imp, type = "l",
-      #      main = method,
-      #      ylim = y_range,
-      #      ylab = paste0("z", v), xlab = "Iteration")
+         ylim = y_range_T,
+         ylab = out$parms$z_m_id[v], # old paste0("z", v)
+         xlab = "Iteration",
+         lwd  = 1)
       
-      # CHAIN 2 to m 
+      # Plot chain 2 to m 
       for (i in 2:(out$parms$chains)) {
         mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[i]][[v]][iters, ])
-        lines(iters, mean_imp)
+        lines(iters, mean_imp, col = i+1, lwd  = 1)
       }
     }
   }
 }
+ 
+# Rhat convergence checks 
+Rhat.sim <- function(out, cond = 1, meth, dat, iter_max = NULL){
+  ## Description
+  # Given the simulation output with multiple chains, a condition number, 
+  # an imputation method name, and a data repetition indicator, it gives 
+  # an Rhat qunatifying the ratio of the between and within chain variance
+  # The iters_range is used if you want to check convergence at a different
+  # point of the chain (other than the complete chain)
   
+  ## Internals:
+  # out  = out_cnv
+  # cond = 1  # some condition
+  # meth = out_cnv$parms$method[[1]]
+  # dat  = 1
+  # iter_max = NULL
+  
+  ## Body
+  # Check if iter_max is given
+  if(is.null(iter_max)) iter_max <- out$parms$iters
+    
+  # Get the Rhat
+  Rhat.sim.out <- sapply(1:out$parms$zm_n, function(v){
+    sims <- sapply(1:out$parms$chains, function(j) {
+      rowMeans(out[[dat]][[cond]]$imp_values[[meth]][[j]][[v]][1:iter_max, ])
+    })
+    Rhat(sims)
+  })
+  names(Rhat.sim.out) <- out$parms$z_m_id
+  return(Rhat.sim.out)
+}
+
 res_sem_time <- function(out, condition = 1){
   # Sem Model
   select_cond <- names(out[[1]])[condition]
@@ -1217,36 +1448,39 @@ res_sem_time <- function(out, condition = 1){
 }
 
 res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
-  # model = "semR" # the first part of the name of a result object stored
+  # model = "sem" # the first part of the name of a result object stored
                    # in out 
   # model = "lm"
+  # model = "m2"
   # condition = 1
   
   ## Prep ##
   est <- paste0(model, "_EST")
   ci  <- paste0(model, "_CI")
   select_cond <- names(out[[1]])[condition]
-  
+
   ## Step 2. Bias ##
   avg <- sapply(out$parms$methods, function(m){
+    # m <- out$parms$methods[4]
     store <- NULL
     for (i in 1:out$parms$dt_rep) {
+      # i <- 1
       succ_method <- colnames(out[[i]][[select_cond]][[est]])
-      store <- cbind(store, 
-                     out[[i]][[select_cond]][[est]][, 
-                                                     succ_method %in% m])
+      result <- out[[i]][[select_cond]][[est]][, succ_method %in% m]
+      store <- cbind(store, as.numeric(result))
     }
     c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
   })
+  
   # Store Objects
-  avg <- avg[, colSums(is.nan(avg)) == 0] 
+  avg <- data.frame(avg[, colSums(is.nan(avg)) == 0])
     # get rid of NaNs that come up in exp3 for conditions that are not using 
     # certain methods
   validReps  <- avg["rep", ] # number of successes
   avg        <- avg[-which(rownames(avg) == "rep"), ]
   psd_tr_vec <- avg[, "GS"] # pseudo true values
   
-  if(out$parms$exp == 1 & nchar(rownames(avg)[1])<1){
+  if(out$parms$exp == 1 & nchar(rownames(avg)[1]) < 1){
     # Fixes a problem of old results from privous runs of eperiment 1
     # in the future I will delte these part as exp 1 results wiil be
     # uniform with rest
@@ -1272,12 +1506,6 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   meths <- out$parms$methods[-which(out$parms$methods == "GS")]
   # Bias Mean Standardized
   if(bias_sd == TRUE){
-    # means_indx <- grep("~1", rownames(avg))
-    # vars_indx  <- means_indx + length(means_indx)
-    # bias_sd <- round(
-    #   (avg[means_indx, ] - psd_tr_vec[means_indx])/
-    #     sqrt(psd_tr_vec[vars_indx]),
-    #   3)
     
     means_indx <- grep("~1", rownames(avg))
     
@@ -1325,7 +1553,13 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     rowMeans(store, na.rm = TRUE) # MCMC statistics 
   })
   
-  CIC <- CIC[, colSums(is.nan(CIC)) == 0] 
+  if(is.vector(CIC)){ # if it's a vector make it a dataframe with special care
+    CIC_nan <- data.frame(t(is.nan(CIC)))
+    CIC <- data.frame(t(CIC[colSums(CIC_nan) == 0]))
+  } else {
+    CIC <- CIC[, colSums(is.nan(CIC)) == 0] 
+    CIC <- data.frame(CIC)
+  }
     # get rid of NaNs that come up in exp3 for conditions that are not using 
     # certain methods
   rownames(CIC) <- rownames(bias)
@@ -1554,16 +1788,19 @@ bridge_cv <- function(out, mods = NULL){
     for (dt in 1:out$parms$dt_rep) {
       store_1 <- cbind(store_1, unlist(out[[dt]][[i]]$fmi[mods]))
     }
-    # store_0 <- cbind(store_0, rowMeans(store_1))
+    # Withing the same condition, take mean of average fmi from 
+    # each data repetition
     store_0[[i]] <- rowMeans(store_1)
   }
   ridge_range <- length(unique(out$conds$ridge))
   names(store_0) <- rep(unique(out$conds$ridge), nrow(out$conds)/ridge_range)
   
+  # Within the same condition, take mean of the m1 and m2 fmis
+  # (previously aggregated across datasets)
   avg_fmi <- round(sapply(store_0, mean), 3)
   
   # Select ridge value with lowest average FMI
-  i <- 1; j <- i+ridge_range-1
+  i <- 1; j <- i + ridge_range - 1
   ridge_s <- NULL
   for (r in 1:(length(avg_fmi)/ridge_range)) {
     ridge_s[r] <- as.numeric(names(which.min(avg_fmi[i:j])))

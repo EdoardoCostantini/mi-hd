@@ -13,6 +13,9 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
   
   ## Body
   if(perform == TRUE){
+    
+    tryCatch({
+    
     p  <- ncol(Z) # number of variables [indexed with ]
     
     p_imp    <- sum(colMeans(O) < 1)
@@ -51,11 +54,14 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
           # Select data
           y_obs <- z_j_obs  <- Zm[O[, J] == TRUE, J]
           y_mis <- zm_mj    <- Zm[O[, J] == FALSE, J] # useless
-          X_obs <- Wm_j_obs <- as.matrix(Zm[O[, J] == TRUE, -J])
-            X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
-          X_mis <- Wm_mj    <- as.matrix(Zm[O[, J] == FALSE, -J])
-            X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
-          
+          # X_obs <- Wm_j_obs <- as.matrix(Zm[O[, J] == TRUE, -J])
+          #   X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
+          # X_mis <- Wm_mj    <- as.matrix(Zm[O[, J] == FALSE, -J])
+          #   X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
+
+          X_obs <- Zm[O[, J] == TRUE, -J]
+          X_mis <- Zm[O[, J] == FALSE, -J]
+            
           # Fit tree
           fit <- rpart::rpart(y_obs ~ ., 
                               data = as.data.frame(cbind(y_obs, X_obs)), 
@@ -65,6 +71,7 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
           # Generate imputations
           leafnr <- floor(as.numeric(row.names(fit$frame[fit$where, 
                                                          ])))
+          
           fit$frame$yval <- as.numeric(row.names(fit$frame))
           nodes <- predict(object = fit, newdata = as.data.frame(X_mis))
           donor <- lapply(nodes, function(s) y_obs[leafnr == s])
@@ -90,6 +97,17 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
                                 start.time, 
                                 units = "mins"))
     )
+    
+  }, error = function(e){
+    err <- paste0("Original Error: ", e)
+    print(err)
+    return(list(dats = NULL,
+                imps = NULL,
+                time = NULL)
+    )
+  }
+  )
+    
   } else {
     return(list(dats = NULL,
                 imps = NULL,

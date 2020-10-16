@@ -9,21 +9,21 @@
   parms$exp <- 4 # which experiment is been run
 
   # Itereations, repetitions, etc
-  parms$dt_rep     <- 10# 500 replications for averaging results
-  parms$chains     <- 1 # 1   number of parallel chains for convergence check
-  parms$iters      <- 2 # 75  total iterations
-  parms$burnin_imp <- 0 # 50  how many imputation iterations discarded
-  parms$ndt        <- 2 # 10  number of imputed datasets to pool esitmaes from
+  parms$dt_rep     <- 5 # 500 replications for averaging results
+  parms$chains     <- 1  # 1   number of parallel chains for convergence check
+  parms$iters      <- 10 # 60  total iterations
+  parms$burnin_imp <- 5  # 50  how many imputation iterations discarded
+  parms$ndt        <- 5  # 10  number of imputed datasets to pool esitmaes from
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
-  parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidates
-  parms$keep_dt <- parms$pos_dt[seq(1, 
-                                    length(parms$pos_dt), 
-                                    parms$thin)] # keep 1 dataset every thin
+  parms$pos_dt     <- (parms$burnin_imp+1):parms$iters # candidates
+  parms$keep_dt    <- parms$pos_dt[seq(1, 
+                                       length(parms$pos_dt), 
+                                       parms$thin)] # keep 1 dataset every thin
   
   # For blasso
-  parms$chains_bl     <- 1 # 1 
-  parms$iters_bl      <- 2 # 300  total iterations
-  parms$burnin_imp_bl <- 0 # 250 discarded iterations
+  parms$chains_bl     <- 1  # 1 
+  parms$iters_bl      <- 10 # 60 total iterations
+  parms$burnin_imp_bl <- 5  # 50 discarded iterations
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
@@ -31,7 +31,7 @@
                                              parms$thin_bl)]
   
   # For mice-like algorithms
-  parms$mice_iters <- 5 #  20
+  parms$mice_iters <- 2 # 20
   parms$mice_ndt   <- parms$ndt # mice keeps data in a different way
   
 # Data gen ----------------------------------------------------------------
@@ -81,31 +81,29 @@
 
 # Imputation methods ------------------------------------------------------
   parms$alphaCI <- .95 # confidence level for parameters CI
-  parms$meth_sel <- data.frame(DURR_la    = TRUE,
-                               DURR_SI    = TRUE,
-                               IURR_la    = TRUE,
-                               IURR_SI    = TRUE,
+  parms$meth_sel <- data.frame(DURR_la    = FALSE,
+                               IURR_la    = FALSE,
                                blasso     = TRUE,
-                               blasso_SI  = TRUE,
-                               bridge     = TRUE,
-                               bridge_SI  = TRUE,
-                               MI_PCA     = TRUE,
-                               MI_CART    = TRUE,
-                               MI_CART_SI = TRUE,
-                               MI_RF      = TRUE,
-                               MI_RF_SI   = TRUE,
-                               MI_OP      = TRUE,
+                               bridge     = FALSE,
+                               MI_PCA     = FALSE,
+                               MI_CART    = FALSE,
+                               MI_RF      = FALSE,
+                               MI_OP      = FALSE,
                                missFor    = TRUE,
+                               mean       = TRUE,
                                GS         = TRUE,
                                CC         = TRUE)
+  
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
-    # (GS, CC always last, alwyas present)
+    # (missFor, mean, GS, CC always last, alwyas present)
   
   # Location
   parms$missType <- c("high", "low", "tails")[2]
   
   # Response Model (rm)
-  parms$rm_x <- c("v35", "v243_ISCED_1")
+  parms$rm_x <- c("age",          # for item- not unit-nonresponse!
+                  "v243_ISCED_1", # education
+                  "v35")          # trust new person
   
   # weighting the importance of predictors: all the same
   parms$auxWts <- rep(1, length(parms$rm_x))
@@ -115,16 +113,18 @@
                      # procedure to solve possible issues of singularity
 
   # PCA
-  parms$SI_iter      <- 10L   # 200L # iterations for single imputation in PCA run
+  parms$SI_iter      <- 10L  # 200L # iterations for single imputation in PCA run
+  parms$PCA_pcthresh <- .5 # proportion of vairance for selection of PCs
   
   # Random Forest
   parms$rfntree <- 10
   
   # MICE true
-  parms$S_all <- c("y", 
-                   paste0("z", parms$blck1),
-                   paste0("z", parms$blck2),
-                   paste0(paste0("z", parms$yMod_int), collapse = ""))
+  parms$S_all <- c(parms$rm_x,   # variables influencing the missingness
+                   parms$z_m_id, # imputation of v118 will not use v118 even if its here
+                   paste0("v", c(31, 126, 120:121, 127, 131, 225, 6,
+                                 145, 110, 97:101, 234, 54)),
+                   "v51v52_comb", "v246_egp", "v276_r")
 
 # Simulation desing -------------------------------------------------------
   # Replicability
@@ -149,29 +149,34 @@
           Results are therefore given per dataset in condition")
   
 # Storing prefrences ------------------------------------------------------
+  # Parameters to store
+  parms$m1_par <- c("rel")
+  parms$m2_par <- c("NatAt")
+  
   # Needs to match the location and name of the output list
-    
   parms$store <- c(cond         = TRUE,
                    dat_full     = FALSE,
                    dat_miss     = FALSE,
-                   sem_EST      = TRUE,
-                   sem_CI       = TRUE,
-                   lm_EST       = TRUE,
-                   lm_CI        = TRUE,
+                   m1_EST       = TRUE,
+                   m1_CI        = TRUE,
+                   m2_EST       = TRUE,
+                   m2_CI        = TRUE,
                    fmi          = FALSE,
                    miss_descrps = TRUE,
                    run_time_min = TRUE,
                    imp_values   = FALSE)
   
 # Conditions --------------------------------------------------------------
-
+  
+  # Fixed random factor
+  parms$pm <- c(.1, .2) # make this a random factor
+  
   # Experimental factors
-  pm    <- c(.1, .3)
-  n     <- c(200, 1e3) # number of observations
+  n     <- c(1e3, 3e2) # number of observations
   
   # Dataframe of conditions  
-  conds <- expand.grid(n = n, pm = pm)
+  conds <- expand.grid(n = n)
   
   # Add ridge specification for each condition
-  conds <- cbind(conds, ridge = rep(1e-05, nrow(conds)))
+  conds <- cbind(conds, ridge = c(1e-4, 1e2))
   

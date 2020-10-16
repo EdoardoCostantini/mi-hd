@@ -26,19 +26,31 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
   
   ## body:
   if(perform == TRUE){
+    
+    tryCatch({
+      
     start.time <- Sys.time()
     
     # Define predictor matrix for MI TRUE with best active set
-    p_imp_id <- which(colSums(O) != parms$n)
+    p_imp_id <- which(colSums(O) != nrow(O))
     predMat <- matrix(rep(0, ncol(Z)^2), ncol = ncol(Z), 
                       dimnames = list(colnames(Z), colnames(Z)))
     col_index <- colnames(predMat) %in% parms$S_all # flexibility interaction!
     predMat[p_imp_id, col_index] <- 1
     
+    
     # Define methods
     methods <- rep("norm", ncol(Z))
     vartype <- sapply(Z, class)
     methods[vartype != "numeric"] <- "pmm"
+    
+    # For Experiment 4: optimal predictors are found with mice function
+    if(parms$exp == 4){
+      predMat <- quickpred(Z,
+                           mincor = .3,
+                           include = parms$S_all)
+      methods <- "pmm"
+    }
     
     # Impute
     imp_MITR_mids <- mice::mice(Z, 
@@ -47,7 +59,6 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
                                 maxit = parms$mice_iters,
                                 ridge = 1e-5,
                                 method = methods)
-    imp_MITR_mids$predictorMatrix
     end.time <- Sys.time()
     
     # Store results
@@ -59,6 +70,19 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
                 imps = imp_MITR_imps,
                 time = imp_MITR_time,
                 mids = imp_MITR_mids))
+    
+    
+    }, error = function(e){
+      err <- paste0("Original Error: ", e)
+      print(err)
+      return(list(dats = NULL,
+                  imps = NULL,
+                  time = NULL,
+                  mids = NULL)
+      )
+    }
+    )
+
   } else {
     return(list(dats = NULL,
                 imps = NULL,

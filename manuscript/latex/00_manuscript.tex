@@ -34,10 +34,31 @@
 
 \begin{document}
 
-\input{01_intro.tex}
-\input{02_methods.tex}
-\input{03_results.tex}
-\input{04_conclusions.tex}
+% Introduction
+
+\input{01_section.tex}
+
+% Algorithms and Imputation Methods
+
+\input{02_section.tex}
+
+% Simulation Studies
+
+\input{03_section.tex}
+
+% Resampling Study
+
+\input{04_section.tex}
+
+% Discussion
+
+\input{05_section.tex}
+
+% Conclusions
+
+\input{06_section.tex}
+
+% Appendices
 
 % Bibliography
 \bibliographystyle{apalike}
@@ -51,7 +72,7 @@
 % terminal compile strategy:
 % 0. Go to folder containing 00_manuscript.tex
 % 1. pdflatex 00_manuscript.tex
-% 2. bibtex 00_manuscript
+% 2. bibtex   00_manuscript
 % 3. pdflatex 00_manuscript.tex
 % 4. pdflatex 00_manuscript.tex
 % Source: https://www.latex-tutorial.com/tutorials/bibtex/

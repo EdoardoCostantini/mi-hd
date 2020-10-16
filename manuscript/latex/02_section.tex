@@ -1,0 +1,157 @@
+\maketitle
+\section{Imputation methods and Algorithms}
+
+I will provide a minimal description of the imputation algorithms.
+
+\subsection{Multiple Imputation Strategies}
+
+	Consider a dataset $\bm{Z}$ that has $p$ variables (columns) and $n$ observations (rows).
+	Assume that there are $T$ variables with missing cases in at least one row (i.e. imputation
+	target variables).
+
+\paragraph{Direct Use of Regularized Regression (DURR)}
+
+	For a target variable $\bm{z}_j$, the DURR algorithm follows these directions:
+
+	\begin{itemize}
+
+	\item Sample with replacement $n$ rows of $\bm{Z}$ and keep the current values of all columns. This yields
+		$\bm{z}_{j}^{*}$ and $\bm{Z}_{j}^{*(m)}$, the bootstrap data set considered at iteration $m$.
+
+	\item Use any regularized regression method (such as Lasso regression) to fit a linear model with
+		$\bm{z}_{j,obs}$, the observed values of $\bm{z}_j$, as outcome and $\bm{Z}_{j,obs}^{*(m)}$,
+		the values of $\bm{Z}_{j}^{*(m)}$ corresponding to the observed values of $\bm{z}_j$, as 
+		set of predictors. This produces a set of parameter estimates (regression coefficients and error variance)
+		$\hat{\bm{\theta}}_{j}^{(m)}$ that can be considered as samples from the parameters' posterior 
+		distribution conditioned on the observed part of the data.
+
+	\item Predict $\bm{z}_{j,mis}$, the missing values on target variable $j$, based on 
+		$\bm{Z}_{j,mis}^{*(m)}$, the values of and $\hat{\bm{\theta}}_{j}^{(m)}$,
+		to obtain draws from the posterior predictive distribution of the missing data.
+
+	\end{itemize}
+
+	At iteration $m$, these steps are repeated to for each $j$-th variable in the set of $T$ target 
+	variables. After convergences, $M$ different sets of imputations are kept to form 
+	$M$ differently imputed data sets. Any substantive model(s) can then be fit to each data and 
+	estimates can be pooled appropriately.
+
+\paragraph{Indirect Use of Regularized Regression (IURR)}
+	While DURR performs simultaneously model trimming and parameter estimation, another approach is to
+	use regularized regression exclusively for model trimming, and to follow it up by standard multiple 
+	imputation procedure. At iteration $m$, the IURR algorithm performs the following steps for each
+	target variable:
+
+	\begin{itemize}
+
+	\item Fit a multiple linear regression using a regularized regression method with $\bm{z}_{j,obs}$ as dependent 
+	 	variable and the corresponding current values of all the other variables ($\bm{Z}_{j,obs}^{(m)}$) as 
+		predictors. In this model, the regression coefficients that are not shrunk to 0 identify the active 
+		set of variables that will be used as predictors in the actual imputation model.
+	
+	\item Obtain Maximum Likelihood Estimates of the regression parameters and error variance in the linear
+		regression of $\bm{z}_{j,obs}$ on the active set of predictors in $\bm{Z}_{j,obs}^{(m)}$ and
+		draw a new value of these coefficients by sampling from a multivariate normal distribution
+		centered around these MLEs.
+
+		\begin{equation}
+		(\hat{\bm{\theta}}_{j}^{m}, \hat{\sigma}_{j}^{m}) \sim N(\hat{\bm{\theta}}_{MLE}^{m}, \hat{\bm{\Sigma}}_{MLE}^{m})
+		\end{equation}
+
+	\item Predict $\bm{z}_{j,mis}$, the missing values on target variable $j$, by sampling from the 
+		posterior predictive distribution based on $\bm{Z}_{j,mis}^{(m)}$,
+		and the parameters posterior draws $(\hat{\bm{\theta}}_{j}^{m}, \hat{\sigma}_{j}^{m})$
+		to obtain draws from the posterior predictive distribution of the missing data.
+
+	\end{itemize}
+
+	After convergence is reached, $M$ differently imputed data sets are kept and used for the substantive 
+	analysis.
+
+\paragraph{MICE with Bayesian lasso (blasso)}
+	A Bayesian hierarchical BLasso linear model is a regular Bayesian multiple regression with a
+	prior specification for the regression coefficients that induces some form of shrinkage toward 0 of
+	the sampled parameters values.
+
+	The Bayesian Lasso imputation algorithm is a standard Multiple Imputation MCMC sampler that uses the 
+	shrinkage priors defined by \citet{hans:2010} to compute the posterior distributions of the regression
+	coefficients. For a given target variable, parameter's values sampled from a full conditional 
+	posterior distribution are used to sample plausible values from its predictive posterior distribution.
+	The algorithm can then be summarized as an iterative repetition of the following sampling steps:
+
+	\begin{equation}
+	\begin{split}
+	\hat{\bm{\theta}}_{1}^{(m)} &\sim p(\bm{\theta}_1 | \bm{z}_{1, obs}, \bm{Z}_{1, obs}^{m-1}) \\
+	\bm{z}_{1, mis}^{(m)} &\sim p(\bm{z}_{1, mis} | \bm{Z}_{1, mis}^{m-1}, \hat{\bm{\theta}}_{1}^{(m)}) \\
+	... \\
+	\hat{\bm{\theta}}_{T}^{(m)} &\sim p(\bm{\theta}_1 | \bm{z}_{T, obs}, \bm{Z}_{T, obs}^{m-1}) \\
+	\bm{z}_{T, mis}^{(m)} &\sim p(\bm{z}_{T, mis} | \bm{Z}_{T, mis}^{m-1}, \hat{\bm{\theta}}_{T}^{(m)}) 
+	\end{split}
+	\end{equation}
+
+	where $\hat{\bm{\theta}}_{j}^{(m)}$ are draws from the posterior defined with shrinkage priors
+	at the $m$-th iteration. The superscript $(m-1)$ implies that the missing values in $\bm{Z}_{obs, j}$
+	and $\bm{Z}_{mis, j}$ are filled in with the imputations drawn at the previous iteration.
+
+\paragraph{MICE with Bayesian Ridge (bridge)}
+	As "blasso", the "bridge" imputation procedure closely follows a standard MICE algorithm for imputation of 
+	multivariate missing data \citep[p. 120, algorithm 4.3]{vanBuuren:2012}: for each target variable, at each 
+	iteration, plausible values of the imputation model parameters are drawn from their posterior distribution, 
+	and imputations are drawn from the posterior predictive distribution. 
+
+	The sampling of imputation model parameters 
+	values is done as in the standard \emph{Bayesian imputation under normal linear model algorithm} described by
+	\citep[p. 68, algorithm 3.1]{vanBuuren:2012} and implemented in the mice package with the \emph{impute.mice.norm()}
+	function. The algorithm uses a ridge penalty to avoid problems of singular matrices. By doing so, it allows to 
+	perform Bayesian Multiple Imputation even with data affected by high collinearity and/or with a higher number 
+	of columns than rows ($p > n$).
+
+\paragraph{MICE with PCA (MICE-PCA)}
+	Considering a data analysis task on a dataset $\bm{Z}$ with missing values, a set of $T$ imputation target 
+	variables can be identified. These variables are afflicted by non-response and are part of some substantive
+	model of interest, or in other words, there is a desire to obtain inferential conclusions based on their 
+	inclusion in said model.
+
+	The remaining variables in the dataset constitute a pool of possible \emph{auxiliary} variables that
+	could be used to improve the imputation procedure. In particular, one or more predictors of missingness 
+	could be among the auxiliary variables. By extracting Principal Components out of them, it is possible
+	to summarise the information contained in this set with just a few components. This allows to include in
+	a standard MICE imputation algorithm all the information contained in a large number of auxiliary variables
+	without incrementing the dimensionality of the imputation models.
+
+	Note that if missing values are present in the set of auxiliary variables, one can fill them in with a 
+	stochastic single imputation algorithm of choice as the goal of said imputation would be to simply
+	allow PCs extraction and not inferential.
+
+	The imputation procedure can be summarized as follows:
+
+	\begin{itemize}
+
+	\item Extract Principal Components from all variables in $\bm{Z}$ that are not part of set $T$
+	\item Create a new data matrix $\bm{Z}^{'}$ by combining the target variables with the first principal
+		components that explain 50\% of the variance in the auxiliary variables.
+	\item Use a standard MICE algorithm for imputation of multivariate missing data to obtain multiply
+		imputed datasets from the low dimensional $\bm{Z}^{'}$.
+	\end{itemize}
+
+	Describe your implementation of the method proposed by \citet{howardEtAl:2015} and developed in the PcAux 
+	package.
+	
+\paragraph{MICE with regression trees (MI-CART and -RANF)}
+	Describe your implementation of the methods proposed by \citet{burgetteReiter:2010, shahEtAl:2014} and 
+	implemented in the mice R package.
+
+\paragraph{MICE optimal model}
+	Describe how \citep[p. ??]{vanBuuren:2012} recommends we deal with the selection of the imputation model
+	predictors. This method follows that approach but has also some oracle property: the variables responsible
+	for missingness are always included in the imputation models.
+
+\subsection{Single data strategies}
+
+\paragraph{Single Imputation}
+	Describe missForest apporach.
+
+\paragraph{Mean Imputation and Complete Case analysis}
+	Describe imputation using the mean of observed values.
+	Describe deletion of rows with missing values.
+

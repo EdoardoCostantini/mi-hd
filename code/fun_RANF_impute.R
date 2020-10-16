@@ -13,6 +13,9 @@ impute_RANF <- function(Z, O, cond, parms, perform = TRUE){
   
   ## Body
   if(perform == TRUE){
+    
+    tryCatch({
+    
     p  <- ncol(Z) # number of variables [indexed with j]
     
     p_imp    <- sum(colMeans(O) < 1)
@@ -51,21 +54,32 @@ impute_RANF <- function(Z, O, cond, parms, perform = TRUE){
           # Select data
           y_obs <- z_j_obs  <- Zm[O[, J] == TRUE, J]
           y_mis <- zm_mj    <- Zm[O[, J] == FALSE, J] # useless
-          X_obs <- Wm_j_obs <- as.matrix(Zm[O[, J] == TRUE, -J])
-            X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
-          X_mis <- Wm_mj    <- as.matrix(Zm[O[, J] == FALSE, -J])
-            X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
-          
+          # X_obs <- Wm_j_obs <- as.matrix(Zm[O[, J] == TRUE, -J])
+          #   X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
+          # X_mis <- Wm_mj    <- as.matrix(Zm[O[, J] == FALSE, -J])
+          #   X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
+            
+          X_obs <- Zm[O[, J] == TRUE, -J]
+          X_mis <- Zm[O[, J] == FALSE, -J]
+            
           # Fit random forest
-          forest <- sapply(seq_len(parms$rfntree), 
-                           FUN = function(s) onetree(X_obs,
-                                                     X_mis, 
-                                                     y_obs))
-          
+          suppressWarnings(
+            # In exp4, where ordered items w/ 4 categories need to be imputed
+            # having the item as numeric passed to the randomForest function
+            # produces a warning asking whether you are sure you want to use
+            # regression. To use a decision tree you would need to pass the
+            # y_obs argument as a factor. However, for consistency we stick
+            # to the numeric treatment and suppress the warnings that come
+            # out of it
+            forest <- sapply(seq_len(parms$rfntree), 
+                             FUN = function(s) onetree(X_obs,
+                                                       X_mis, 
+                                                       y_obs))
+          )
           # Generate imputations
           zm_j <- apply(forest, 1, 
                         FUN = function(s) sample(unlist(s), 1))
-          
+
           # Append imputation
           Zm[!O[, J], J] <- zm_j # update data
           imps[[j]][m, ] <- zm_j # save iteration imputation
@@ -83,6 +97,18 @@ impute_RANF <- function(Z, O, cond, parms, perform = TRUE){
                                 start.time, 
                                 units = "mins"))
     )
+    
+    ### END TRYCATCH EXPRESSION
+    }, error = function(e){
+      err <- paste0("Original Error: ", e)
+      print(err)
+      return(list(dats = NULL,
+                  imps = NULL,
+                  time = NULL)
+      )
+    }
+    )
+    
   } else {
     return(list(dats = NULL,
                 imps = NULL,

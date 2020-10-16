@@ -1,0 +1,94 @@
+\maketitle
+\section{Introduction}
+
+\paragraph{Frame the problem}
+
+	Today’s social and behavioral scientists are blessed with a wealth of large, high-quality and publicly available social scientific datasets such as the Longitudinal Internet Studies for the Social Sciences (LISS) Panel and the European Values Study (EVS), with initiatives being undertaken to link and extend these datasets into a full system of linked open data (LOD). Making use of the full potential of these data sets requires dealing with the crucial problem of missing data. 
+
+	The tools researchers working with these data sets need to correct for the bias introduced by nonresponses 
+require special attention. The large number of items recorded, coupled with the longitudinal nature of surveys and the necessity
+of preserving complex interactions and nonlinear relations, easily produces high-dimensional ($p>n$) imputation 
+problems that impair a straightforward application of imputation algorithms such as MICE \citep{vanBuuren:2012}.
+
+	Furthermore, when employing Multiple Imputation to deal with missing values, data handlers tend to prefer including more
+predictors in the imputation models as to reduce chances of uncongenial imputation and analysis models \citep{meng:1994}.
+High-dimensional data imputation settings represent both an obstacle and an opportunity in this sense: an 
+obstacle, as in the presence of high-dimensional data it is simply not possible to include all variables in standard parametric
+imputation models; an opportunity, because the large amount of features available has the potential to reduces the chances of 
+leaving out of the imputation models important predictors of missignenss.
+
+	Many solutions have been proposed to deal with missing values in high dimensional contexts, but most of them
+have focused on single imputations in an effort to improve the accuracy of individual imputations \citep{kimEtAl:2005, 
+stekhovenBuhlmann:2011, d'ambrosioEtAl:2012}.
+The main task of social scientists is to make inference about a general population based on a sample of observed 
+data, and single imputation is simply an inadequate missing data handling technique for such purpose: it 
+does not guarantee to find estimates that are unbiased and confidence valid \citep{rubin:1996}.
+
+\paragraph{Discuss background literature}
+	What are the most relevant works in the field
+
+\paragraph{What is the main focus? What is the reason to write this paper?}
+	Frame the social sciences focus of the project.
+
+\paragraph{These are the sections coming up.}
+	Describe in words the set up of the article (expected 40 manuscript styled pages):
+\begin{itemize}
+ \item Introduction (done)
+	Frame problem. Discuss background literature.
+	Main focus: what is the reason to write paper
+	With these sections coming up.
+
+ \item Algorithms and Imputation methods
+	- DURR
+	- IURR
+	- blasso
+	etc
+	- last one
+	Focus on minimal possible description to give reader sense of what the method is
+	without going to the source paper. (Deng et al max). Do not feel obligated to use
+	eq, prefer words: use it if it adds specificity and clarity.
+	One option can be: having extensive definition in appendix and very streamlined 
+	here. In appendix definitely all the "adaptation" that were required.
+ \item Simulation Studies
+
+  \begin{itemize}
+   \item Methods
+	Study 1 + Study 2
+   	    \item Data generation
+	    \item Missing data imposition
+	    \item Analysis models
+	    \item Criteria
+		\item procedure: summary of crossed conditions: describe sequentially 
+			what happens each replication
+   \item Results
+  \end{itemize}
+
+ \item Resampling Study (EVS)
+  \begin{itemize}
+	\item Methods
+	   \item Data preparation (giving correct documentation for the data, what it is, 
+		   why collected cleaning, with general demographics originally + went to
+		   systematic cleaning process with general purpose for the cleaning + 
+		   large western European countries, details are in the appendix if 
+		   interested)
+	   \item Missing data imposition
+	   \item Analysis models
+	   \item Criteria
+	   \item Procedure (summary with the number of observations kept and so on)
+	\item Results/Discussion
+		again divide by type. with some implication but not comparison
+  \end{itemize}
+
+ \item Discussion
+	Synthesize findings: here make parallels and comparisons.
+
+ \item Conclusions 
+	 One or two paragraphs with take home, limitations, future directions (hint at 
+	 MY future work)
+
+ \item Appendices
+ - methods details
+ - EVS quirks
+\end{itemize}
+
+

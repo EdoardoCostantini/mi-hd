@@ -2,8 +2,11 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-09-18
 
-library(ggplot2)
 rm(list=ls())
+source("./init_general.R")
+source("./exp4_init.R")
+
+library(ggplot2)
 
 # Data Prep ---------------------------------------------------------------
 
@@ -67,9 +70,12 @@ dt.f <- EVS_dt$full
   )
   euth <- dt.f$v156
   
+  # Country
+  country <- dt.f$country
+    
   # General Trust
   table(dt.f$v31)
-  trust.g <- recode_factor(dt.f$v31, "2" = 0, "1" = 1)
+  trust.g <- dt.f$v31
   
   # Confidence in Health care sys
   table(dt.f$v126) 
@@ -101,7 +107,7 @@ dt.f <- EVS_dt$full
   # Confidence in state scale (need to create scale)
   # parlianment, police, justice sys, goverment
   # Distributions are ok
-  dat.trust <- lapply(list(dt.o, dt.f), 
+  dat.trust <- lapply(list(dt.o=dt.o, dt.f=dt.f), 
          function(x) {
            x$trust.state <- rowMeans(x[, c("v121", "v120", "v127", "v131")])
            return(x)
@@ -112,7 +118,7 @@ dt.f <- EVS_dt$full
          function(x) plot(density(x$trust.state,
                                   adjust = 5,
                                   na.rm = TRUE),
-                          xlim = range(dt.f$trust.state)
+                          xlim = range(dat.trust$dt.f$trust.state)
          )
   )
   
@@ -159,8 +165,10 @@ dt.f <- EVS_dt$full
   # Religious Denomination
   denom <- dt.f$v51v52_comb
   
+# > Models ####
+  
   # Model 1
-  mod1 <- lm(euth ~  trust.g + trust.hs + trust.pr + trust.s)
+  mod1 <- lm(euth ~  trust.g + trust.hs + trust.pr + trust.s + country)
 
   round(summary(mod1)$adj.r.squared*100, 3)
   round(summary(mod1)$coefficients, 3)[, 1:2]
@@ -168,19 +176,14 @@ dt.f <- EVS_dt$full
   # Model 2
   mod2 <- lm(euth ~
                trust.g + trust.hs + trust.pr + trust.s + edu + 
-               age + sex + rel + denom)
-  
-  round(summary(mod2)$adj.r.squared*100, 3)
+               age + sex + rel + denom + country)
+  round(summary(mod2)$adj.r.squared*100, 1)
   round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
   
-  mod2.1 <- lm(euth ~
-                 trust.g + trust.hs.o + trust.pr.o + trust.s.o + edu + 
-                 age + sex + rel.o + denom)
-  
-  round(summary(mod2.1)$adj.r.squared*100, 3)
-  
-  cbind(round(summary(mod2.1)$coefficients, 3)[, 1:2],
-        round(summary(mod2)$coefficients, 3)[, 1:2])
+  mod2 <- exp4_fit_mod1(list(GS = dt.f))$GS
+  mod2
+  round(summary(mod2)$adj.r.squared*100, 1)
+  round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
 
 # Left Right Vote Gender --------------------------------------------------
   
@@ -194,8 +197,11 @@ dt.f <- EVS_dt$full
   )
   lr <- dt.f$v174_LR
   
+# Country
+  country <- dt.f$country  
+  
 # Female
-  female <- recode(dt.f$v225, "1" = 0, "0" = 1)
+  female <- relevel(dt.f$v225, ref = "male")
   
 # Employment Status  
   # employed, self-employed and inactive/unemployed.
@@ -212,10 +218,12 @@ dt.f <- EVS_dt$full
 
 # Low and order attitudes
   strongL <- match(dt.f$v145, 4:1)
-  order <- case_when(
-    dt.f$v110 %in% 1 ~ 1,
-    dt.f$v110 %in% 2:4 ~ 0
-  )
+  order <- forcats::fct_collapse(dt.f$v110,
+                               no = c("fighting rising prices", 
+                                       "more say in important government decisions", 
+                                       "protect freedom of speech"),
+                               yes = c("maintaining order in nation")
+                               )
   
 # Political Interest
   polInterest <- match(dt.f$v97, 4:1)
@@ -233,11 +241,10 @@ dt.f <- EVS_dt$full
 # Covariates
   age <- dt.f$age
   edu <- dt.f$v243_ISCED_1
-  mat <- factor(case_when(  # martial status
-    dt.f$v234 %in% c(1, 2) ~ 0, # having a partner 
-    dt.f$v234 %in% 6 ~ 1, # never had a partner
-    dt.f$v234 %in% 3:5 ~ 2, # had a partner
-  ), labels = c("partner", "never", "had"))
+  mat <- forcats::fct_collapse(dt.f$v234,
+                               partner = c("married", "registered partnership"),
+                               never = "never married and never registered partnership",
+                               had = c("divorced", "separated", "widowed"))
   
   urb <- dt.f$v276_r # dummy coded
   
@@ -249,10 +256,19 @@ dt.f <- EVS_dt$full
   
   denom <- dt.f$v51v52_comb
   
+# > Models ####
+  
   mod3 <- lm(lr ~ female + SES + NatAt + strongL + order + polInterest + 
-       polAction_r + age + edu + mat + urb + rel + denom)
+       polAction_r + age + edu + mat + urb + denom + country)
   
   summary(mod3)
-  round(summary(mod3)$adj.r.squared*100, 3)
+  round(summary(mod3)$adj.r.squared*100, 1)
   round(summary(mod3)$coefficients, 3)[, c(1:2, 4)]
+
+  mod3 <- exp4_fit_mod2(list(GS = dt.f))$GS
+  coef(mod3)
+  confint(mod3)
+  round(summary(mod3)$adj.r.squared*100, 1)
+  round(summary(mod3)$coefficients, 3)[, c(1:2, 4)]
+  
   

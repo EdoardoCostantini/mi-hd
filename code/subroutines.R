@@ -18,6 +18,11 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
   # that takes the elements of the vector specified for X
   # This creates names for the streams so that you can recover them
   
+  ## START capture output
+  sink(paste0(parms$outDir, "console/", 
+              parms$report_file_name, "_dataRep", rp, ".txt"))
+  
+  ## Set seed
   .lec.SetPackageSeed(rep(parms$seed, 6))
   if(!rp %in% .lec.GetStreams()) # if the streams do not exist yet
     .lec.CreateStream(c(1 : parms$nStreams)) # then
@@ -40,6 +45,12 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
                             )
     if(parms$exp == 1){
       for(i in 1 : nrow(conds)) {
+        
+        print(paste0("Exp: ", parms$exp, 
+                     " > Rep: ", rp, 
+                     " > Cond: ", i,
+                     " - Time: ",
+                     Sys.time()))
         
         if(debug == TRUE){
           rp_out[[i]] <- capture.output(tryCatch({
@@ -70,6 +81,12 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
     if(parms$exp == 2){
       for(i in 1 : nrow(conds)) {
         
+        print(paste0("Exp: ", parms$exp, 
+                     " > Rep: ", rp, 
+                     " > Cond: ", i,
+                     " - Time: ",
+                     Sys.time()))
+        
         if(debug == TRUE){
           rp_out[[i]] <- capture.output(tryCatch({
             withErrorTracing({runCell_lv(cond = conds[i, ],
@@ -99,6 +116,12 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
     if(parms$exp == 3){
       for(i in 1 : nrow(conds)) {
         
+        print(paste0("Exp: ", parms$exp, 
+                     " > Rep: ", rp, 
+                     " > Cond: ", i,
+                     " - Time: ",
+                     Sys.time()))
+        
         if(debug == TRUE){
           rp_out[[i]] <- capture.output(tryCatch({
             withErrorTracing({runCell_int(cond = conds[i, ],
@@ -125,8 +148,50 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
         }
       }
     }
+    if(parms$exp == 4){
+      for(i in 1 : nrow(conds)) {
+        
+        print(paste0("--- Exp: ", parms$exp, 
+                     " > Rep: ", rp, 
+                     " > Cond: ", i,
+                     " - Time: ",
+                     Sys.time(),
+                     " ---"))
+        
+        if(debug == TRUE){
+          rp_out[[i]] <- capture.output(tryCatch({
+            withErrorTracing({runCell_evs(cond = conds[i, ],
+                                          parms = parms,
+                                          rep_status = rp,
+                                          data_source = readRDS("../data/exp4_EVS2017_full.rds")$full)})
+          }, error = function(e){
+            e <<- e
+            cat("ERROR: ", e$message, "\nin ")
+            print(e$call)
+          }))
+        } else {
+          rp_out[[i]] <- tryCatch(
+            {
+              # Try running simulation for condition i, repetition rp
+              runCell_evs(cond = conds[i, ],
+                          parms = parms,
+                          rep_status = rp,
+                          data_source = readRDS("../data/exp4_EVS2017_full.rds")$full)
+            },
+            error = function(report) {
+              err <- paste0("Original Error: ", report)
+              print(err)
+              return(err)
+            }
+          )
+        }
+      }
+    }
   ## Return Function output  
   return(rp_out)
+    
+  ## END capture output
+  sink()
 }
 
 # Experiment 1 ------------------------------------------------------------
@@ -394,7 +459,8 @@ runCell_lv <- function(cond, parms, rep_status) {
   # Given 1 condition, Generates 1 dataset and performs imutations according to
   # selected methods
   ## For internals
-  # cond <- conds[1, ]
+  # set.seed(1234)
+  # cond <- conds[2, ]
   
   ## ----------------------------------------------------------------------- ##
   
@@ -469,7 +535,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   ## ----------------------------------------------------------------------- ##
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
-                                 O = as.data.frame(O),
+                                 # O = as.data.frame(O),
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
   update_report("blasso", rep_status, parms, 
@@ -490,7 +556,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   ## ----------------------------------------------------------------------- ##
   # Impute according to Howard Et Al 2015 PCA appraoch
   imp_PCA <- impute_PCA(Z = Xy_mis, O = O, cond = cond, parms = parms)
-  update_report("MICE-PCA", rep_status, parms, 
+  update_report("MICE-PCA", rep_status, parms,
                 cnd = cond,
                 perform = parms$meth_sel$MI_PCA)
   
@@ -1088,30 +1154,24 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   # Given 1 condition, Generates 1 dataset and performs imputations 
   # according to selected methods
   ## For internals
+  # set.seed(1234)
   # cond <- conds[2, ]
   # data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
   
   ## Data ------------------------------------------------------------------ ##
   # Gen one fully-obs data
-  Xy <- data_source[sample(1:nrow(data_source), 
+  Xy <- data_source[sample(1:nrow(data_source),
                            cond$n,
                            replace = TRUE), ]
   
   # Impose missing values
   Xy_mis <- imposeMiss_evs(Xy, parms, cond)
-
+  
   # Missing data
   miss_descrps <- colMeans(is.na(Xy_mis)[, parms$z_m_id])
   
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
-  
-  # Impute according to Howard Et Al 2015 PCA appraoch
-  imp_PCA <- impute_PCA(Z     = Xy_mis,
-                        O     = data.frame(!is.na(Xy_mis)),
-                        cond  = cond,
-                        DA    = FALSE,
-                        parms = parms)
   
   # Impute according to DURR method
   # Lasso
@@ -1122,83 +1182,52 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                              perform = parms$meth_sel$DURR_la,
                              parms = parms)
   
-  # v2
-  imp_DURR_SI <- impute_DURR(Z = imp_PCA$dtIN,
-                             O = data.frame(!is.na(imp_PCA$dtIN)),
-                             reg_type = "lasso",
-                             cond = cond,
-                             perform = (parms$meth_sel$DURR_SI & cond$int_da),
-                             parms = parms)
-  
   # Impute according to IURR method
   # Lasso
-  imp_IURR_la <- impute_IURR(Z = Xy_input[, col$CIDX],
-                             O = data.frame(!is.na(Xy_input[, col$CIDX])),
+  imp_IURR_la <- impute_IURR(Z = Xy_mis,
+                             O = data.frame(!is.na(Xy_mis)),
                              reg_type = "lasso",
                              cond = cond,
                              perform = parms$meth_sel$IURR_la,
                              parms = parms)
   
-  imp_IURR_SI <- impute_IURR(Z = imp_PCA$dtIN,
-                             O = data.frame(!is.na(imp_PCA$dtIN)),
-                             reg_type = "lasso",
-                             cond = cond,
-                             perform = (parms$meth_sel$IURR_SI & cond$int_da),
-                             parms = parms)
-  
   # Impute according to Hans Blasso method
-  imp_blasso <- impute_BLAS_hans(Z = Xy_input[, col$CIDX],
-                                 O = data.frame(!is.na(Xy_input[, col$CIDX])),
+  imp_blasso <- impute_BLAS_hans(Z = Xy_mis,
+                                 # O = data.frame(!is.na(Xy_mis)),
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
   
-  imp_blasso_SI <- impute_BLAS_hans(Z = imp_PCA$dtIN,
-                                    O = data.frame(!is.na(imp_PCA$dtIN)),
-                                    parms = parms,
-                                    perform = (parms$meth_sel$blasso_SI & cond$int_da))
-  
-  
   # Impute according to van Buuren Ridge
-  imp_bridge <- impute_BRIDGE(Z = Xy_input[, col$CIDX],
-                              O = data.frame(!is.na(Xy_input[, col$CIDX])),
+  imp_bridge <- impute_BRIDGE(Z = Xy_mis,
+                              O = data.frame(!is.na(Xy_mis)),
                               ridge_p = cond$ridge,
                               parms = parms,
                               perform = parms$meth_sel$bridge)
   
-  imp_bridge_SI <- impute_BRIDGE(Z = imp_PCA$dtIN,
-                                 O = data.frame(!is.na(imp_PCA$dtIN)),
-                                 ridge_p = cond$ridge,
-                                 parms = parms,
-                                 perform = (parms$meth_sel$bridge_SI & cond$int_da))
+  # Impute according to Howard Et Al 2015 PCA appraoch
+  imp_PCA <- impute_PCA(Z     = Xy_mis,
+                        O     = data.frame(!is.na(Xy_mis)),
+                        cond  = cond,
+                        DA    = FALSE,
+                        parms = parms)
   
-  # MICE-CART traditional
-  imp_CART <- impute_CART(Z = Xy_input[, col$CIDX],
-                          O = data.frame(!is.na(Xy_input[, col$CIDX])),
+  # MICE-CART
+  imp_CART <- impute_CART(Z = Xy_mis,
+                          O = data.frame(!is.na(Xy_mis)),
                           cond = cond,
                           perform = parms$meth_sel$MI_CART,
                           parms = parms)
   
-  imp_CART_SI <- impute_CART(Z = imp_PCA$dtIN,
-                             O = data.frame(!is.na(imp_PCA$dtIN)),
-                             cond = cond,
-                             perform = (parms$meth_sel$MI_CART_SI & cond$int_da),
-                             parms = parms)
-  
   # MICE-RF
-  imp_RANF <- impute_RANF(Z = Xy_input[, col$CIDX],
-                          O = data.frame(!is.na(Xy_input[, col$CIDX])),
+  imp_RANF <- impute_RANF(Z = Xy_mis,
+                          O = data.frame(!is.na(Xy_mis)),
                           cond = cond,
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
-  imp_RANF_SI <- impute_RANF(Z = imp_PCA$dtIN,
-                             O = data.frame(!is.na(imp_PCA$dtIN)),
-                             cond = cond,
-                             perform = (parms$meth_sel$MI_RF_SI & cond$int_da),
-                             parms = parms)
   
   # MICE w/ true model
-  imp_MICE_OP <- impute_MICE_OP(Z = Xy_input[, col$CIDX_MOP],
-                                O = data.frame(!is.na(Xy_input[, col$CIDX_MOP])),
+  imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
+                                O = data.frame(!is.na(Xy_mis)),
                                 cond = cond,
                                 perform = parms$meth_sel$MI_OP,
                                 parms = parms)
@@ -1206,163 +1235,178 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   # missForest
   imp_missFor <- impute_missFor(Z = Xy_mis, parms = parms)
   
-  ## Convergence ----------------------------------------------------------- ##
+  # mean imputation
+  Xy_mean <- Xy_mis
+  for (j in 1:parms$zm_n) {
+    ry <- !is.na(Xy_mean[, parms$z_m_id[j]])
+    mu_zj <- mean(Xy_mean[, parms$z_m_id[j]], na.rm = TRUE)
+    Xy_mean[!ry, parms$z_m_id[j]] <- mu_zj
+  }
+  
+## Convergence ------------------------------------------------------------- ##
   
   imp_values <- list(DURR_la    = imp_DURR_la$imps,
-                     DURR_SI    = imp_DURR_SI$imps,
                      IURR_la    = imp_IURR_la$imps,
-                     IURR_SI    = imp_IURR_SI$imps,
                      bridge     = imp_bridge$imps,
-                     bridge_SI  = imp_bridge_SI$imps,
                      blasso     = imp_blasso$imps,
-                     blasso_SI  = imp_blasso_SI$imps,
                      MI_PCA     = imp_PCA$mids,
                      MI_CART    = imp_CART$imps,
-                     MI_CART_SI = imp_CART_SI$imps,
                      MI_RF      = imp_RANF$imps,
-                     MI_RF_SI   = imp_RANF_SI$imps,
-                     MI_OP      = imp_MICE_OP$mids) # I need this for convergence
-  
-  ## Analyse --------------------------------------------------------------- ##
+                     MI_OP      = imp_MICE_OP$mids) 
+
+## Analyse ----------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
   
-  # Analysis model
-  # generate Saturated Model formula
-  SAT_mod <- SAT_mod_write(c("y", parms$z_m_id))
+  # Linear Models
+  # Data
+  mi_data <- list(DURR_la    = imp_DURR_la$dats,
+                  IURR_la    = imp_IURR_la$dats,
+                  bridge     = imp_bridge$dats,
+                  blasso     = imp_blasso$dats,
+                  MI_PCA     = imp_PCA$dats,
+                  MI_CART    = imp_CART$dats,
+                  MI_RF      = imp_RANF$dats,
+                  MI_OP      = imp_MICE_OP$dats)
   
-  # Fit sem model
-  sem_fits <- lapply(list(DURR_la    = imp_DURR_la$dats,
-                          DURR_SI    = imp_DURR_SI$dats,
-                          IURR_la    = imp_IURR_la$dats,
-                          IURR_SI    = imp_IURR_SI$dats,
-                          bridge     = imp_bridge$dats,
-                          bridge_SI  = imp_bridge_SI$dats,
-                          blasso     = imp_blasso$dats,
-                          blasso_SI  = imp_blasso_SI$dats,
-                          MI_PCA     = imp_PCA$dats,
-                          MI_CART    = imp_CART$dats,
-                          MI_CART_SI = imp_CART_SI$dats,
-                          MI_RF      = imp_RANF$dats,
-                          MI_RF_SI   = imp_RANF_SI$dats,
-                          MI_OP      = imp_MICE_OP$dats),
-                     fit_sem, model = SAT_mod)
-  sem_sndt <- fit_sem(list(missFor = imp_missFor$dats, 
-                           GS      = Xy, 
-                           CC      = Xy_mis),
-                      model = SAT_mod)
+  si_data <- list(missFor = imp_missFor$dats,
+                  mean    = Xy_mean,
+                  CC      = na.omit(Xy_mis),
+                  GS      = Xy)                    
   
-  # Linear Model
-  # For every imputated dataset in each method, check that the
-  # interaction term z1z2 exists. This will happen with data augementation
-  # strategy. If it's not there, just create the interaction term as the
-  # product of z1 and z2 as imptued in each dataset. This allows you to
-  # have only one formula for the inclusion of the interaction term
-  # (i.e. no distinction between + z1.z2 and + z1*z2)
+## Fit --------------------------------------------------------------------- ##
   
-  # Process data
-  lm_MIin <- lapply(list(DURR_la    = imp_DURR_la$dats,
-                         DURR_SI    = imp_DURR_SI$dats,
-                         IURR_la    = imp_IURR_la$dats,
-                         IURR_SI    = imp_IURR_SI$dats,
-                         bridge     = imp_bridge$dats,
-                         bridge_SI  = imp_bridge_SI$dats,
-                         blasso     = imp_blasso$dats,
-                         blasso_SI  = imp_blasso_SI$dats,
-                         MI_PCA     = imp_PCA$dats,
-                         MI_CART    = imp_CART$dats,
-                         MI_CART_SI = imp_CART_SI$dats,
-                         MI_RF      = imp_RANF$dats,
-                         MI_RF_SI   = imp_RANF_SI$dats,
-                         MI_OP      = imp_MICE_OP$dats), 
-                    function(x) lapply(x, 
-                                       add_int_term, 
-                                       parms = parms)
-  )
-  lm_SDin <- lapply(list(missFor = imp_missFor$dats,
-                         GS = Xy,
-                         CC = Xy_mis), 
-                    add_int_term, 
-                    parms = parms
-  )
+  # model 1
+  m1_mi <- lapply(mi_data, exp4_fit_mod1)
+  m1_sn <- exp4_fit_mod1(si_data)
   
-  # Fit models
-  lm_fits <- lapply(lm_MIin, fit_lm_models, mod = col$lm_mod)
-  lm_sndt <- fit_lm_models(lm_SDin, mod = col$lm_mod)
+  # Model 2
+  m2_mi <- lapply(mi_data, exp4_fit_mod2)
+  m2_sn <- exp4_fit_mod2(si_data)
   
-  ## Pooling --------------------------------------------------------------- ##
-  # For each imp method, pool estimates across the m datasets
+## Pool MI paramters ------------------------------------------------------- ##
   
-  # SEM
-  sem_pool_MI_EST <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
-                            sem_pool_EST_f)
-  sem_pool_MI_CI  <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
-                            sem_pool_CI_f)
-  sem_fmi <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
-                    .fmi_compute)
+  # --------- #
+  ## MODEL 1 ##
+  # --------- #
   
-  # Select parameters that involve vairables with missing values
-  indx_EST <- unique(c(sapply(parms$z_m_id, 
-                              grep, 
-                              x = rownames(sem_pool_MI_EST) ) ) )
-  index_CI <- unique(c(sapply(parms$z_m_id, 
-                              grep, 
-                              x = rownames(sem_pool_MI_CI) ) ) )
+  # EST
+  m1_est <- lapply(m1_mi[lapply(m1_mi, length) != 0], 
+                   lm_pool_EST_f)
+  m1_est.mi <- sapply(m1_est, function(x) x[[parms$m1_par]])
+  m1_est.sn <- sapply(m1_sn, function(x) coef(x)[[parms$m1_par]])
+  m1_est <- c(m1_est.mi, m1_est.sn)
   
-  # Append single imputations, and GS and CC results
-  sem_gather_EST <- cbind(sem_pool_MI_EST,
-                          sem_EST(sem_sndt))[sort(indx_EST), ]
+  # Fix object type
+  # if it's a vector make it a dataframe with special care
+  if(is.vector(m1_est)){ 
+    m1_est <- data.frame(t(m1_est))
+    row.names(m1_est) <- parms$m1_par
+  } else {
+    m1_est <- data.frame(m1_est)
+  }
   
-  sem_gather_CI <- cbind(sem_pool_MI_CI,
-                         sem_CI(sem_sndt))[sort(index_CI), ]
+  # Extract CIs
+  m1_ci  <- lapply(m1_mi[lapply(m1_mi, length) != 0], 
+                   lm_pool_CI_f)
   
-  # LM models
-  lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0],
-                        lm_pool_EST_f)
-  lm_pool_CI  <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
-                        lm_pool_CI_f)
-  lm_fmi      <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
-                        .fmi_compute)
+  # Arrange CIs in orderly fashion
+  m1_ci.mi  <- sapply(m1_ci, function(x){
+    indx   <- grep(parms$m1_par, names(x))
+    return(x[indx])
+  })
+  m1_ci.sn  <- sapply(m1_sn, function(x){
+    CI.temp <- confint(x)
+    return(CI.temp[parms$m1_par, ])
+  })
+  m1_ci <- data.frame( cbind(m1_ci.mi, m1_ci.sn) )
   
-  # append single imputations, and GS and CC results
-  lm_pool_EST <- cbind(lm_pool_est,
-                       lm_EST(lm_sndt))
+  # FMI
+  m1_fmi <- try(
+    apply(sapply(m1_mi[lapply(m1_mi, length) != 0],
+                 .fmi_compute), 2, mean, na.rm = TRUE),
+    silent = TRUE)
   
-  lm_pool_CI <- cbind(lm_pool_CI,
-                      lm_CI(lm_sndt))
+  if(class(m1_fmi) == "try-error"){
+    # If for some reason, a bridge value in the crossvalidation
+    # preprocessing procedure does not do the trick, it is
+    # automatically excluded by this if statement
+    # I ideally this should be done in the result function not here!
+    m1_fmi <- .9999999
+  }
   
-  ## Times ----------------------------------------------------------------- ##
+  # --------- #
+  ## MODEL 2 ##
+  # --------- #
+  
+  # EST
+  m2_est <- lapply(m2_mi[lapply(m2_mi, length) != 0], 
+                   lm_pool_EST_f)
+  m2_est.mi <- sapply(m2_est, function(x) x[[parms$m2_par]])
+  m2_est.sn <- sapply(m2_sn, function(x) coef(x)[[parms$m2_par]])
+  m2_est <- c(m2_est.mi, m2_est.sn)
+  
+  # CI
+  m2_ci  <- lapply(m2_mi[lapply(m2_mi, length) != 0], 
+                   lm_pool_CI_f)
+  m2_ci.mi  <- sapply(m2_ci, function(x){
+    indx   <- grep(parms$m2_par, names(x))
+    return(x[indx])
+  })
+  
+  m2_ci.sn  <- sapply(m2_sn, function(x){
+    CI.temp <- confint(x)
+    return(CI.temp[parms$m2_par, ])
+  })
+  
+  m2_ci <- data.frame( cbind(m2_ci.mi, m2_ci.sn) )
+  
+  # FMI
+  m2_fmi <- try(
+    apply(sapply(m2_mi[lapply(m2_mi, length) != 0],
+                 .fmi_compute), 2, mean, na.rm = TRUE),
+    silent = TRUE)
+
+  if(class(m2_fmi) == "try-error"){
+    m2_fmi <- .9999999
+  }
+  
+  # Fix object type
+  # if it's a vector make it a dataframe with special care
+  if(is.vector(m2_est)){ # if it's a vector make it a dataframe with special care
+    m2_est <- data.frame(t(m2_est))
+    row.names(m2_est) <- parms$m2_par
+  } else {
+    m2_est <- data.frame(m2_est)
+  }
+  
+## Times ------------------------------------------------------------------- ##
+  
   # aggregate imputation times
-  
   imp_time <- list(DURR_la    = imp_DURR_la$time,
-                   DURR_SI    = imp_DURR_SI$time,
                    IURR_la    = imp_IURR_la$time,
-                   IURR_SI    = imp_IURR_SI$time,
                    bridge     = imp_bridge$time,
-                   bridge_SI  = imp_bridge_SI$time,
                    blasso     = imp_blasso$time,
-                   blasso_SI  = imp_blasso_SI$time,
                    MI_PCA     = imp_PCA$time,
                    MI_CART    = imp_CART$time,
-                   MI_CART_SI = imp_CART_SI$time,
                    MI_RF      = imp_RANF$time,
-                   MI_RF_SI   = imp_RANF_SI$time,
                    MI_OP      = imp_MICE_OP$time)
   imp_time <- do.call(cbind, imp_time)[1,]
   
-  ## Store output ---------------------------------------------------------- ##
+## Store output ------------------------------------------------------------ ##
+  
   output <- list(cond         = cond,
                  # Datasets
                  dat_full     = Xy,
                  dat_miss     = Xy_mis,
-                 # MLE estiamtes
-                 sem_EST      = sem_gather_EST,
-                 sem_CI       = sem_gather_CI,
-                 # Linear mode
-                 lm_EST       = lm_pool_EST,
-                 lm_CI        = lm_pool_CI,
+                 # Linear model 1
+                 m1_EST       = m1_est,
+                 m1_CI        = m1_ci,
+                 # Linear model 2
+                 m2_EST       = m2_est,
+                 m2_CI        = m2_ci,
                  # Other
-                 fmi          = list(sem = sem_fmi,
-                                     lm  = lm_fmi),
+                 fmi          = list(m1 = m1_fmi,
+                                     m2 = m2_fmi),
                  miss_descrps = miss_descrps,
                  run_time_min = imp_time,
                  imp_values   = imp_values)[parms$store]

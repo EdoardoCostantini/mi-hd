@@ -1,3 +1,5 @@
+## Files
+
 # History files
 .Rhistory
 .Rapp.history
@@ -45,6 +47,17 @@ rsconnect/
 
 # swp files
 *.swp
+
+# Latex byproducts
+*.aux
+*.blg
+*.log
+*.blg
+
+## Folders
+
+# Ignore output/console folder
+/output/console
 
 # Ignore folder with notes
 /notes/data_notes

@@ -6,14 +6,16 @@
 impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
   
   # Prep data ---------------------------------------------------------------
-  # Z = Xy_mis
   # Z = Xy_input[, col$CIDX]
+  # Z = Xy_mis
   # O = as.data.frame(!is.na(Z))            # matrix index of observed values
   # ridge_p = cond$ridge
+  # cc <- 1
   
   if(perform == TRUE){
     
     tryCatch({
+      
       p  <- ncol(Z) # number of variables [indexed with J]
       
       p_imp    <- sum(colMeans(O) < 1)
@@ -45,37 +47,65 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
         })
         for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
                                                    p_imp_id[i]]
-        
+
         # Loop across Iteration
         for (m in 2:parms$iters) {
           print(paste0("bridge - Chain: ", cc, "/", parms$chains, "; Iter: ", m, "/", parms$iters))
           # Loop across variables (cycle)
           for (j in 1:p_imp) {
             J <- which(colnames(Zm) %in% p_imp_id[j])
-            zj_obs <- Zm[O[, J], J]
-            zj_mis <- Zm[!O[, J], J]
-            Z_obs <- as.matrix(Zm[O[, J], -J])
-            Z_obs <- apply(Z_obs, 2, as.numeric) # makes dicho numbers
-            Z_mis <- as.matrix(Zm[!O[, J], -J])
-            Z_mis <- apply(Z_mis, 2, as.numeric) # makes dicho numbers
+            rj <- !is.na(Z[, J])
+            zj_obs <- Zm[rj, J]
+            zj_mis <- Zm[!rj, J]
             
-            # Obtain posterior draws for all paramters of interest
-            pdraw <- .norm.draw(y       = Zm[, J], 
-                                ry      = O[, J], 
-                                x       = as.matrix(Zm[, -J]), 
-                                ls.meth = "ridge", ridge = ridge_p)
+            # PREP data for post draw
+            target   <- Zm[, p_imp_id[j]]
+            Zx       <- model.matrix(~ ., Zm[, -J])[, -1]
             
+            # Find Constants
+            const <- names(which(apply(Zx, 2, var) == 0))
+            Zx    <- Zx[, !colnames(Zx) %in% const]
+            
+            # Find Dummies that have 99% of objservations in 1 category
+            tabular <- apply(Zx, 2, table)
+            
+            # Select only dummies
+            tabular <- tabular[sapply(tabular, length) == 2]
+            
+            # Vector of dummy names to discard
+            dum.disc <- lapply(tabular, function(x) {
+              x[1] / sum(x) > .95 | x[1] / sum(x) < 1-.95
+            })
+            dum.disc <- names(which(dum.disc == TRUE))
+            Zx    <- Zx[, !colnames(Zx) %in% dum.disc]
+            
+            # Find collinear variables
+            coll.vars <- find.collinear(Zx)
+            Zx  <- Zx[, !colnames(Zx) %in% coll.vars]
+
+            # Obtain Post Draw
+            pdraw <- .norm.draw(y       = target, 
+                                ry      = rj,
+                                x       = Zx,
+                                ls.meth = "ridge", 
+                                ridge   = ridge_p)
+            
+            # Fix Z_mis to drop columns that are not relevant anymore
+            Z_mis <- Zm[!rj, -J]
+            Z_mis <- model.matrix(~ ., Z_mis)[, -1]
+            Z_mis <- Z_mis[, !colnames(Z_mis) %in% c(const, dum.disc, coll.vars)]
+
             # Obtain posterior predictive draws
-            pdraw_zj_imp <- Z_mis %*% pdraw$beta + rnorm(sum(!O[, J])) * pdraw$sigma
+            pdraw_zj_imp <- Z_mis %*% pdraw$beta + rnorm(sum(!rj)) * pdraw$sigma
             
             # Append imputation (for next iteration)
-            Zm[!O[, J], J] <- pdraw_zj_imp
+            Zm[!rj, J] <- pdraw_zj_imp
             
             # Store imputations
             Imp.out[[j]][m, ]  <- pdraw_zj_imp
           }
-          # only data from last chain will actaully be saved
-          imp_bridge_dat[[m]] <- Zm 
+          # only data from last chain will actually be saved
+          imp_bridge_dat[[m]] <- Zm
         }
         imp_bridge_val[[cc]] <- Imp.out
       }
@@ -88,7 +118,10 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
                                   start.time, 
                                   units = "mins"))
       )
+      
     }, error = function(e){
+      err <- paste0("Original Error: ", e)
+      print(err)
       return(list(dats = NULL,
                   imps = NULL,
                   time = NULL,

@@ -2,6 +2,23 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-06-22
 
+# To Fix factor levels and drop out unused ones when ready 
+# the original EVS data
+
+fix.factor <- function(v, dt_h, dt_imp){
+  if(is.factor(dt_imp[[v]])){
+    key <- data.frame(id = val_labels(dt_h[[v]]),
+                      label = names(val_labels(dt_h[[v]])),
+                      row.names = NULL)
+    v.out <- merge(dt_imp[v], key, 
+                   by.x = v, by.y = "id")[,2]
+    v.out <- droplevels(v.out)
+  } else {
+    v.out <- dt_imp[[v]]
+  }
+  return(v.out)
+}
+
 # Function to tabulate the answers of a variable by country
 tab_country <- function(dt, country, var_name){
   # dt = int.df

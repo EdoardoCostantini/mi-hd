@@ -310,18 +310,21 @@ imposeMiss_evs <- function(dat_in, parms, cond){
   # as target int parms$z_m_id
   ## Example Inputs
   # cond <- conds[1,]
-  # dat_in   <- simData_exp1(cond, parms)
+  # dat_in   <- data_source[sample(1:nrow(data_source),
+  #                                cond$n,
+  #                                replace = TRUE), ]
   
   # Body
   # Define non-response vector
   dat_out <- dat_in
-  rm_x  <- dat_in[, parms$rm_x]
+  rm_x    <- dat_in[, parms$rm_x]
   
-  # Recode trust in others 1 = low, 4 = high
-  rm_x[,1] <- match(rm_x[,1], max(rm_x[,1]):min(rm_x[,1]) )
+  # Recode percieved threat from immigrants 1 = low, 10 = high
+  # rm_x[,1] <- match(rm_x[,1], max(rm_x[,1]):min(rm_x[,1]) )
   
+  # Compute stuff
   for (i in 1:parms$zm_n) {
-    nR <- simMissingness(pm    = cond$pm,
+    nR <- simMissingness(pm    = runif(1, parms$pm[1], parms$pm[2]),
                          data  = rm_x,
                          preds = parms$rm_x,
                          type  = parms$missType,

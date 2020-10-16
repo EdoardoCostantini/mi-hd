@@ -11,13 +11,19 @@ library(mvtnorm)
 library(monomvn)
 library(glmnet)
 library(rlecuyer) # for seed in parallel
-library(blasso) # for blasso function according to Hans2010
 library(parallel)
-library(PcAux)
 library(caret) # for Elastic cv functions
 library(missForest) # for missForest imputation
 library(truncnorm) # for truncnorm sampling in probit models
 library(lavaan)
+library(FactoMineR)
+library(devtools)
+library(xtable)
+library(rstan) # for Rhat computation
+
+# Special pacakges
+library(PcAux)  # requires installation with devtools
+library(blasso) # requires installation with zipped folder
 
 # Support Functions -------------------------------------------------------
 
@@ -37,6 +43,7 @@ source("./fun_missFor_impute.R")
 source("./functions_genDt.R")
 source("./subroutines.R")
 source("./simMissingness.R")
+source("./functions_EVS.R")
 
 # Experiment Specific -----------------------------------------------------
 # source("./gen_lavaan_model.R") # generate txt file for lavaan model
