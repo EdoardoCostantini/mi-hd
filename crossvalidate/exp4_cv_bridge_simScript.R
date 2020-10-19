@@ -18,6 +18,19 @@ clusterEvalQ(cl = clus, expr = source("./init_general.R"))
 clusterEvalQ(cl = clus, expr = source("./exp4_init.R"))
 clusterEvalQ(cl = clus, expr = source("../crossvalidate/exp4_cv_bridge_init.R"))
 
+# Progress report file ----------------------------------------------------
+file.create(paste0(parms$outDir, parms$report_file_name))
+
+cat(paste0("BRIDGE CROSSVALIDATION PROGRESS REPORT",
+           "\n",
+           "Description: ", parms$description, "\n",
+           "\n", "------", "\n",
+           "Starts at: ", Sys.time(),
+           "\n", "------", "\n" ),
+    file = paste0(parms$outDir, parms$report_file_name),
+    sep = "\n",
+    append = TRUE)
+
 ## Start Time
 sim_start <- Sys.time()
 
@@ -32,6 +45,15 @@ out <- parLapply(cl = clus,
 stopCluster(clus)
 
 sim_ends <- Sys.time()
+
+cat(paste0("\n", "------", "\n",
+           "Ends at: ", Sys.time(), "\n",
+           "Run time: ",
+           round(difftime(sim_ends, sim_start, units = "hours"), 3), " h",
+           "\n", "------", "\n"),
+    file = paste0(parms$outDir, parms$report_file_name),
+    sep = "\n",
+    append = TRUE)
 
 ## Append Parms and conds to out object
 out$parms <- parms

@@ -11,8 +11,8 @@
   # Itereations, repetitions, etc
   parms$dt_rep     <- 5 # 500 replications for averaging results
   parms$chains     <- 1  # 1   number of parallel chains for convergence check
-  parms$iters      <- 10 # 60  total iterations
-  parms$burnin_imp <- 5  # 50  how many imputation iterations discarded
+  parms$iters      <- 10 # 70  total iterations
+  parms$burnin_imp <- 5  # 60  how many imputation iterations discarded
   parms$ndt        <- 5  # 10  number of imputed datasets to pool esitmaes from
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
   parms$pos_dt     <- (parms$burnin_imp+1):parms$iters # candidates
@@ -22,8 +22,8 @@
   
   # For blasso
   parms$chains_bl     <- 1  # 1 
-  parms$iters_bl      <- 10 # 60 total iterations
-  parms$burnin_imp_bl <- 5  # 50 discarded iterations
+  parms$iters_bl      <- 10 # 70 total iterations
+  parms$burnin_imp_bl <- 5  # 60 discarded iterations
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
@@ -31,7 +31,7 @@
                                              parms$thin_bl)]
   
   # For mice-like algorithms
-  parms$mice_iters <- 2 # 20
+  parms$mice_iters <- 10 # 60
   parms$mice_ndt   <- parms$ndt # mice keeps data in a different way
   
 # Data gen ----------------------------------------------------------------
@@ -81,21 +81,21 @@
 
 # Imputation methods ------------------------------------------------------
   parms$alphaCI <- .95 # confidence level for parameters CI
-  parms$meth_sel <- data.frame(DURR_la    = FALSE,
-                               IURR_la    = FALSE,
+  parms$meth_sel <- data.frame(DURR_la    = TRUE,
+                               IURR_la    = TRUE,
                                blasso     = TRUE,
-                               bridge     = FALSE,
-                               MI_PCA     = FALSE,
-                               MI_CART    = FALSE,
-                               MI_RF      = FALSE,
-                               MI_OP      = FALSE,
+                               bridge     = TRUE,
+                               MI_PCA     = TRUE,
+                               MI_CART    = TRUE,
+                               MI_RF      = TRUE,
+                               MI_OP      = TRUE,
                                missFor    = TRUE,
                                mean       = TRUE,
-                               GS         = TRUE,
-                               CC         = TRUE)
+                               CC         = TRUE,
+                               GS         = TRUE)
   
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
-    # (missFor, mean, GS, CC always last, alwyas present)
+    # (missFor, mean, CC, GS always last, alwyas present)
   
   # Location
   parms$missType <- c("high", "low", "tails")[2]
@@ -150,8 +150,8 @@
   
 # Storing prefrences ------------------------------------------------------
   # Parameters to store
-  parms$m1_par <- c("rel")
-  parms$m2_par <- c("NatAt")
+  parms$m1_par <- c("rel", "trust.s", "trust.pr") # for model 1
+  parms$m2_par <- c("NatAt", "rel", "polAction_r")# for model 2
   
   # Needs to match the location and name of the output list
   parms$store <- c(cond         = TRUE,
@@ -178,5 +178,6 @@
   conds <- expand.grid(n = n)
   
   # Add ridge specification for each condition
-  conds <- cbind(conds, ridge = c(1e-4, 1e2))
+  conds <- cbind(conds, ridge = c(1e-4, 
+                                  1e-1)) # acutal 1e2
   

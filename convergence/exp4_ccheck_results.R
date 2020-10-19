@@ -13,22 +13,7 @@ source("./init_general.R")
 # of the simualtion study. It contains an imputation run with many iterations,
 # many chians, for the most difficult condition of experiment 3.
 
-out_cnv <- readRDS("../output/exp4_conv_20201011_1602.rds") 
-  # the one showing problems for dataset 6, 7, and 8
-  out_cnv[[6]][[1]]
-  out_cnv[[7]][[1]]
-  out_cnv[[8]][[1]]
-
-out_cnv2 <- readRDS("../output/exp4_conv_20201012_1015.rds")
-  # transcript version of the exp4_conv_20201011_1602.rds
-  # to check the transcript of the error message obtained there
-  out_cnv2[[7]][[1]][-(1:17900)] # error found
-  grep("bridge", out_cnv2[[7]][[1]])
-  out_cnv2[[7]][[1]][12470:12481]
-  
 out_cnv <- readRDS("../output/exp4_conv_20201015_1555.rds")
-  # current best one: solves problems of dataset 6 and 8
-  # (tied to the mice OP apporach)
 
 # Run description
 
@@ -54,7 +39,7 @@ data.frame(
   names(mth_range) <- out_cnv$parms$method[mth_range]
 
   # Average Rhats (over data repetitions)
-  sapply(mth_range, function(m){
+  best <- sapply(mth_range, function(m){
     rowMeans(sapply(1:out_cnv$parms$dt_rep, 
                     Rhat.sim,
                     out  = out_cnv,
@@ -62,15 +47,22 @@ data.frame(
                     meth = out_cnv$parms$method[m],
                     iter_max = out_cnv$parms$iters))
   })
-
-  res_sum(out_cnv, 
-          model = "m1", 
-          condition = 1)
   
+  chosen <- sapply(mth_range, function(m){
+    rowMeans(sapply(1:out_cnv$parms$dt_rep, 
+                    Rhat.sim,
+                    out  = out_cnv,
+                    cond = 1,
+                    meth = out_cnv$parms$method[m],
+                    iter_max = 50))
+  })
+  
+  round(best - chosen, 3)
+
 # Plots -------------------------------------------------------------------
 
   # What to show
-  exp_dat     <- 10
+  exp_dat     <- 2
   iters_range <- 1:250 # which set of iterations
   y_range     <- c(1, 1)
 

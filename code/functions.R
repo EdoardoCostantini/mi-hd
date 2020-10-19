@@ -1448,11 +1448,12 @@ res_sem_time <- function(out, condition = 1){
 }
 
 res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
-  # model = "sem" # the first part of the name of a result object stored
-                   # in out 
-  # model = "lm"
-  # model = "m2"
-  # condition = 1
+  # model = "sem"
+  # model = "CFA"
+  # model = "m1"
+  # condition = 2
+  # out = output
+  # bias_sd = TRUE
   
   ## Prep ##
   est <- paste0(model, "_EST")
@@ -1461,13 +1462,14 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
 
   ## Step 2. Bias ##
   avg <- sapply(out$parms$methods, function(m){
-    # m <- out$parms$methods[4]
+    # m <- out$parms$methods[8]
     store <- NULL
     for (i in 1:out$parms$dt_rep) {
-      # i <- 1
+      # i <- 21
       succ_method <- colnames(out[[i]][[select_cond]][[est]])
-      result <- out[[i]][[select_cond]][[est]][, succ_method %in% m]
-      store <- cbind(store, as.numeric(result))
+      result <- as.matrix(out[[i]][[select_cond]][[est]])[, succ_method %in% m]
+      store <- cbind(store, result)
+      # rownames(store) <- rownames(out[[i]][[select_cond]][[est]])
     }
     c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
   })

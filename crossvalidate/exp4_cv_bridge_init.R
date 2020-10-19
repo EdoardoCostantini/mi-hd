@@ -38,8 +38,8 @@ parms$store <- c(cond         = TRUE,
 parms$dt_rep     <- 3 # 20
 parms$chains     <- 1 
 parms$iters      <- 5 # 1e2
-parms$burnin_imp <- 0 # 90
-parms$ndt        <- 5 # 10
+parms$burnin_imp <- 0 # 60
+parms$ndt        <- 5 # 50
 parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
 parms$pos_dt     <- (parms$burnin_imp+1):parms$iters
 parms$keep_dt    <- parms$pos_dt[seq(1, 
@@ -71,6 +71,6 @@ parms$description <- c("In each repetition, 1 dataset is created for each condit
   n     <- c(1e3, 3e2) # number of observations
   
   # Dataframe of conditions w/ ridge
-  ridge <- 10^seq(from = 4, to = -6, by = -1)
+  ridge <- 10^seq(from = 4, to = -8, by = -1)
   conds <- expand.grid(n = n, ridge = ridge)
   

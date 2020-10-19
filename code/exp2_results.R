@@ -51,6 +51,12 @@
                      function(x) res_sum(out, 
                                          model = "CFA", 
                                          condition = x))
+  res_sum(out, 
+          model = "CFA", 
+          condition = 1)
+  res_sum(out, 
+          model = "CFA", 
+          condition = 8)
   
   # Results?
   lapply(1:length(out[[1]]),

@@ -1247,8 +1247,8 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   
   imp_values <- list(DURR_la    = imp_DURR_la$imps,
                      IURR_la    = imp_IURR_la$imps,
-                     bridge     = imp_bridge$imps,
                      blasso     = imp_blasso$imps,
+                     bridge     = imp_bridge$imps,
                      MI_PCA     = imp_PCA$mids,
                      MI_CART    = imp_CART$imps,
                      MI_RF      = imp_RANF$imps,
@@ -1261,8 +1261,8 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   # Data
   mi_data <- list(DURR_la    = imp_DURR_la$dats,
                   IURR_la    = imp_IURR_la$dats,
-                  bridge     = imp_bridge$dats,
                   blasso     = imp_blasso$dats,
+                  bridge     = imp_bridge$dats,
                   MI_PCA     = imp_PCA$dats,
                   MI_CART    = imp_CART$dats,
                   MI_RF      = imp_RANF$dats,
@@ -1285,33 +1285,18 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   
 ## Pool MI paramters ------------------------------------------------------- ##
   
-  # --------- #
-  ## MODEL 1 ##
-  # --------- #
-  
-  # EST
+  # ALTERNATIVE #
   m1_est <- lapply(m1_mi[lapply(m1_mi, length) != 0], 
                    lm_pool_EST_f)
-  m1_est.mi <- sapply(m1_est, function(x) x[[parms$m1_par]])
-  m1_est.sn <- sapply(m1_sn, function(x) coef(x)[[parms$m1_par]])
-  m1_est <- c(m1_est.mi, m1_est.sn)
+  m1_est.mi <- sapply(m1_est, function(x) x[parms$m1_par])
+  m1_est.sn <- sapply(m1_sn, function(x) coef(x)[parms$m1_par])
+  m1_est <- data.frame(cbind(m1_est.mi, m1_est.sn))
   
-  # Fix object type
-  # if it's a vector make it a dataframe with special care
-  if(is.vector(m1_est)){ 
-    m1_est <- data.frame(t(m1_est))
-    row.names(m1_est) <- parms$m1_par
-  } else {
-    m1_est <- data.frame(m1_est)
-  }
-  
-  # Extract CIs
+  # Confint
   m1_ci  <- lapply(m1_mi[lapply(m1_mi, length) != 0], 
                    lm_pool_CI_f)
-  
-  # Arrange CIs in orderly fashion
   m1_ci.mi  <- sapply(m1_ci, function(x){
-    indx   <- grep(parms$m1_par, names(x))
+    indx    <- c(do.call(rbind, lapply(parms$m1_par, grep, names(x))))
     return(x[indx])
   })
   m1_ci.sn  <- sapply(m1_sn, function(x){
@@ -1334,30 +1319,25 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
     m1_fmi <- .9999999
   }
   
-  # --------- #
-  ## MODEL 2 ##
-  # --------- #
+  # ----------- #
   
-  # EST
   m2_est <- lapply(m2_mi[lapply(m2_mi, length) != 0], 
                    lm_pool_EST_f)
-  m2_est.mi <- sapply(m2_est, function(x) x[[parms$m2_par]])
-  m2_est.sn <- sapply(m2_sn, function(x) coef(x)[[parms$m2_par]])
-  m2_est <- c(m2_est.mi, m2_est.sn)
+  m2_est.mi <- sapply(m2_est, function(x) x[parms$m2_par])
+  m2_est.sn <- sapply(m2_sn, function(x) coef(x)[parms$m2_par])
+  m2_est <- data.frame(cbind(m2_est.mi, m2_est.sn))
   
-  # CI
+  # Confint
   m2_ci  <- lapply(m2_mi[lapply(m2_mi, length) != 0], 
                    lm_pool_CI_f)
   m2_ci.mi  <- sapply(m2_ci, function(x){
-    indx   <- grep(parms$m2_par, names(x))
+    indx    <- c(do.call(rbind, lapply(parms$m2_par, grep, names(x))))
     return(x[indx])
   })
-  
   m2_ci.sn  <- sapply(m2_sn, function(x){
     CI.temp <- confint(x)
     return(CI.temp[parms$m2_par, ])
   })
-  
   m2_ci <- data.frame( cbind(m2_ci.mi, m2_ci.sn) )
   
   # FMI
@@ -1365,27 +1345,18 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
     apply(sapply(m2_mi[lapply(m2_mi, length) != 0],
                  .fmi_compute), 2, mean, na.rm = TRUE),
     silent = TRUE)
-
+  
   if(class(m2_fmi) == "try-error"){
     m2_fmi <- .9999999
   }
-  
-  # Fix object type
-  # if it's a vector make it a dataframe with special care
-  if(is.vector(m2_est)){ # if it's a vector make it a dataframe with special care
-    m2_est <- data.frame(t(m2_est))
-    row.names(m2_est) <- parms$m2_par
-  } else {
-    m2_est <- data.frame(m2_est)
-  }
-  
+
 ## Times ------------------------------------------------------------------- ##
   
   # aggregate imputation times
   imp_time <- list(DURR_la    = imp_DURR_la$time,
                    IURR_la    = imp_IURR_la$time,
-                   bridge     = imp_bridge$time,
                    blasso     = imp_blasso$time,
+                   bridge     = imp_bridge$time,
                    MI_PCA     = imp_PCA$time,
                    MI_CART    = imp_CART$time,
                    MI_RF      = imp_RANF$time,

@@ -41,12 +41,7 @@ round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
   # get dataset
   set.seed(20200805)
   data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
-  
-  # Create storing objects
-  reps   <- 1e3
-  m1_est <- m2_est <- data.frame(MEAN = NA, CC = NA, GS = NA)
-  m1_ci  <- m2_ci <- list()
-  
+
   # Consider correlation between target variables and all predictors
   mm <- model.matrix(~., data_source)
   cormm <- cor(mm)[, parms$z_m_id]
@@ -84,53 +79,29 @@ round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
   source("./init_general.R")
   source("./exp4_init.R")
   
-  # Twick paramters
+  # Tweak paramters
   cond <- conds[1, ]
-  # parms$pm <- c(.4, .5) # higher leads to higher bias in CC
+  parms$m1_par <- c("rel", "trust.s", "trust.pr")
+  parms$m2_par <- c("rel", "NatAt", "polAction_r")
   
   # Create storing objects
   reps <- 1e3
-  m1_est <- m2_est <- data.frame(MEAN = NA, CC = NA, GS = NA)
-  m1_ci <- m2_ci <- list()
+  output <- vector("list", reps)
+  # m1_est <- m2_est <- data.frame(MEAN = NA, CC = NA, GS = NA)
+  # m1_est <- list()
+  # m2_est <- data.frame(MEAN = NA, CC = NA, GS = NA)
+  # m1_ci <- m2_ci <- list()
   set.seed(20200805)
   data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
   
-  # Consider correlation between target variables and rm predictors
-  round(cor(data_source[, c(parms$z_m_id,
-                            "age",
-                            "v243_ISCED_1",
-                            "v5", # importance of politics
-                            "v97", # interest in politics: low more non response
-                            "v38", # fatalism / high more nonresponse
-                            "v35" # trust people meet for the first time
-                            )]), 1)[ , parms$z_m_id]
-  
-  mm <- model.matrix(~., data_source)
-  cormm <- cor(mm)[, parms$z_m_id]
-  
-  store <- NULL
-  for (i in 1:6) {
-    store[[i]] <- names(which(abs(cormm[, i]) >= .1))
-  }
-  
-  v_presence <- NULL
-  for (v in 1:ncol(mm)) {
-    pat <- paste0("\\<", colnames(mm)[v], "\\>")
-    v_presence[[v]] <- grep(pat, store)  
-    
-  }
-  
-  possible <- colnames(mm)[which(sapply(v_presence, length) == 6)]
-  cormm[possible, ]
-  # After looking at this, I'm sure I will use v35
-  
   # True Values
-  b.true <- c(m1 = lm_EST(exp4_fit_mod1(list(GS = data_source)))[parms$m1_par,],
-              m2 = lm_EST(exp4_fit_mod2(list(GS = data_source)))[parms$m2_par,])
-
+  b.true <- list(m1 = lm_EST(exp4_fit_mod1(list(GS = data_source)))[parms$m1_par,],
+                 m2 = lm_EST(exp4_fit_mod2(list(GS = data_source)))[parms$m2_par,])
+  
   # Perform analysis
   pb <- txtProgressBar(min = 0, max = reps, style = 3)
   for (r in 1:reps) {
+    output[[r]] <- list(cond1 = list(), cond2 = list())
     # Gen one fully-obs data
     Xy <- data_source[sample(1:nrow(data_source), 
                              cond$n,
@@ -155,58 +126,46 @@ round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
   # Fit 
     # Model 1
     m1_sn <- exp4_fit_mod1(si_data)
-    m1_est[r, ] <- lm_EST(m1_sn)[parms$m1_par, ]
-    indx <- grep(parms$m1_par, rownames(lm_CI(m1_sn)))
-    m1_ci[[r]] <- data.frame(lm_CI(m1_sn))[indx, ]
-    
     # Model 2
     m2_sn <- exp4_fit_mod2(si_data)
-    m2_est[r, ] <- lm_EST(m2_sn)[parms$m2_par, ]
-    indx <- grep(parms$m2_par, rownames(lm_CI(m2_sn)))
-    m2_ci[[r]] <- data.frame(lm_CI(m2_sn))[indx, ]
     
+  # Extraction indeces
+    m1_EST_indx <- parms$m1_par
+    m1_CI_indx <- c(do.call(rbind, lapply(m1_EST_indx, grep,
+                                          rownames(lm_CI(m1_sn)))))
+    m2_EST_indx <- parms$m2_par
+    m2_CI_indx <- c(do.call(rbind, lapply(m2_EST_indx, grep,
+                                          rownames(lm_CI(m2_sn)))))
+    
+  # Store Output
+    output[[r]][[1]] <- list(# Model 1
+      m1_EST       = lm_EST(m1_sn)[m1_EST_indx, ],
+      m1_CI        = lm_CI(m1_sn)[m1_CI_indx, ],
+      # Model 2
+      m2_EST       = lm_EST(m2_sn)[m2_EST_indx, ],
+      m2_CI        = lm_CI(m2_sn)[m2_CI_indx, ])
+
     # Monitor progress
     setTxtProgressBar(pb, r)
   }
   
-  # Effect of missingness on analysis
-  # MCMC Estimates
-  MCMC_est <- t(data.frame(m1 = round( colMeans(m1_est), 3),
-                           m2 = round( colMeans(m2_est), 3)))
-  MCMC_est
+  output
+  output$parms$methods <- colnames(output[[1]]$cond1$m1_EST)
+  output$parms$dt_rep  <- reps
+  output$parms$exp     <- 4
   
-  # Bias
-  bias_per <- round((MCMC_est[, 1:2] - MCMC_est[, 3])/MCMC_est[, 3]*1e2, 1)
-  bias_per
-  bias_per <- round((MCMC_est - b.true)/b.true*1e2, 1)
-  bias_per
+  # Obtain results
+  m1_res <- res_sum(output, 
+                    model = "m1", 
+                    condition = 1)
+  cbind(bt = round(b.true$m1, 3), m1_res$bias_per)
+  m1_res$ci_cov
   
-  # Confidence Intervals Coverage
-  psd_tr_vec <- MCMC_est[, "GS"]
-  m1_cr <- m2_cr <- NULL
-  for (i in 1:reps) {
-    # Mod 1
-    mod_est <- m1_est[i, ]
-    cond_CI <- m1_ci[[i]]
-    ci_hig  <- cond_CI[1, ]
-    ci_low  <- cond_CI[2, ]
-    
-    m1_cr <- rbind(m1_cr, 
-                   abs(ci_low) < abs(b.true[1]) & 
-                     abs(b.true[1]) < abs(ci_hig))
-    
-    # Mod 2
-    mod_est <- m2_est[i, ]
-    cond_CI <- m2_ci[[i]]
-    ci_hig  <- cond_CI[1, ]
-    ci_low  <- cond_CI[2, ]
-    
-    m2_cr <- rbind(m2_cr, 
-                   abs(ci_low) < abs(b.true[2]) & 
-                     abs(b.true[2]) < abs(ci_hig))
-  }
-  
-  t(sapply(list(m1 = m1_cr, m2 = m2_cr), colMeans))
+  m2_res <- res_sum(output, 
+                    model = "m2", 
+                    condition = 1)
+  cbind(bt = round(b.true$m2, 3), m2_res$bias_per)
+  m2_res$ci_cov
   
 # Optimal Model imputation ------------------------------------------------
 
