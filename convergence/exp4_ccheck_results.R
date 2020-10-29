@@ -39,31 +39,21 @@ data.frame(
   names(mth_range) <- out_cnv$parms$method[mth_range]
 
   # Average Rhats (over data repetitions)
-  best <- sapply(mth_range, function(m){
+  Rhats <- sapply(mth_range, function(m){
     rowMeans(sapply(1:out_cnv$parms$dt_rep, 
                     Rhat.sim,
                     out  = out_cnv,
                     cond = 1,
                     meth = out_cnv$parms$method[m],
-                    iter_max = out_cnv$parms$iters))
+                    iter_max = out_cnv$parms$iters,
+                    iter_burn = 50))
   })
-  
-  chosen <- sapply(mth_range, function(m){
-    rowMeans(sapply(1:out_cnv$parms$dt_rep, 
-                    Rhat.sim,
-                    out  = out_cnv,
-                    cond = 1,
-                    meth = out_cnv$parms$method[m],
-                    iter_max = 50))
-  })
-  
-  round(best - chosen, 3)
 
 # Plots -------------------------------------------------------------------
 
   # What to show
-  exp_dat     <- 2
-  iters_range <- 1:250 # which set of iterations
+  exp_dat     <- 10
+  iters_range <- 1:50 # which set of iterations
   y_range     <- c(1, 1)
 
   # Print ALL

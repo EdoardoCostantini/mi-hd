@@ -170,3 +170,4 @@
   
   conds <- expand.grid(p, latent, pm)
     colnames(conds) <- c("p", "latent", "pm")
+    

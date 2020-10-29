@@ -1285,20 +1285,16 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   
 ## Pool MI paramters ------------------------------------------------------- ##
   
-  # ALTERNATIVE #
-  m1_est <- lapply(m1_mi[lapply(m1_mi, length) != 0], 
+  # Model 1
+  # Est
+  m1_est.mi <- sapply(m1_mi[lapply(m1_mi, length) != 0], 
                    lm_pool_EST_f)
-  m1_est.mi <- sapply(m1_est, function(x) x[parms$m1_par])
   m1_est.sn <- sapply(m1_sn, function(x) coef(x)[parms$m1_par])
   m1_est <- data.frame(cbind(m1_est.mi, m1_est.sn))
   
   # Confint
-  m1_ci  <- lapply(m1_mi[lapply(m1_mi, length) != 0], 
+  m1_ci.mi  <- sapply(m1_mi[lapply(m1_mi, length) != 0], 
                    lm_pool_CI_f)
-  m1_ci.mi  <- sapply(m1_ci, function(x){
-    indx    <- c(do.call(rbind, lapply(parms$m1_par, grep, names(x))))
-    return(x[indx])
-  })
   m1_ci.sn  <- sapply(m1_sn, function(x){
     CI.temp <- confint(x)
     return(CI.temp[parms$m1_par, ])
@@ -1319,21 +1315,16 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
     m1_fmi <- .9999999
   }
   
-  # ----------- #
-  
-  m2_est <- lapply(m2_mi[lapply(m2_mi, length) != 0], 
-                   lm_pool_EST_f)
-  m2_est.mi <- sapply(m2_est, function(x) x[parms$m2_par])
+  # Model 2
+  # Est
+  m2_est.mi <- sapply(m2_mi[lapply(m2_mi, length) != 0], 
+                      lm_pool_EST_f)
   m2_est.sn <- sapply(m2_sn, function(x) coef(x)[parms$m2_par])
   m2_est <- data.frame(cbind(m2_est.mi, m2_est.sn))
   
   # Confint
-  m2_ci  <- lapply(m2_mi[lapply(m2_mi, length) != 0], 
-                   lm_pool_CI_f)
-  m2_ci.mi  <- sapply(m2_ci, function(x){
-    indx    <- c(do.call(rbind, lapply(parms$m2_par, grep, names(x))))
-    return(x[indx])
-  })
+  m2_ci.mi  <- sapply(m2_mi[lapply(m2_mi, length) != 0], 
+                      lm_pool_CI_f)
   m2_ci.sn  <- sapply(m2_sn, function(x){
     CI.temp <- confint(x)
     return(CI.temp[parms$m2_par, ])
@@ -1347,6 +1338,10 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
     silent = TRUE)
   
   if(class(m2_fmi) == "try-error"){
+    # If for some reason, a bridge value in the crossvalidation
+    # preprocessing procedure does not do the trick, it is
+    # automatically excluded by this if statement
+    # I ideally this should be done in the result function not here!
     m2_fmi <- .9999999
   }
 

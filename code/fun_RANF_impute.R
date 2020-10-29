@@ -54,11 +54,6 @@ impute_RANF <- function(Z, O, cond, parms, perform = TRUE){
           # Select data
           y_obs <- z_j_obs  <- Zm[O[, J] == TRUE, J]
           y_mis <- zm_mj    <- Zm[O[, J] == FALSE, J] # useless
-          # X_obs <- Wm_j_obs <- as.matrix(Zm[O[, J] == TRUE, -J])
-          #   X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
-          # X_mis <- Wm_mj    <- as.matrix(Zm[O[, J] == FALSE, -J])
-          #   X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
-            
           X_obs <- Zm[O[, J] == TRUE, -J]
           X_mis <- Zm[O[, J] == FALSE, -J]
             
@@ -77,9 +72,15 @@ impute_RANF <- function(Z, O, cond, parms, perform = TRUE){
                                                        y_obs))
           )
           # Generate imputations
-          zm_j <- apply(forest, 1, 
+          zm_j <- apply(forest, 
+                        1, 
+                        # Each observation with a missing value has its own pool
+                        # of donors, which was found by fitting 10 different single
+                        # trees. Possible donors from all different trees are
+                        # used to make up a larger pool of donors from which to sample
+                        # 1 imputed value
                         FUN = function(s) sample(unlist(s), 1))
-
+mice.impute.rf
           # Append imputation
           Zm[!O[, J], J] <- zm_j # update data
           imps[[j]][m, ] <- zm_j # save iteration imputation

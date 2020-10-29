@@ -4,19 +4,19 @@
 ### Created:  2020-10-05
 
   rm(list = ls())
-  library(xtable)
+  # library(xtable)
   source("./init_general.R")
   
   # Result selection
-  filename <- "exp4_simOut_20201013_1846" # a full run with an issue at data 2
-  filename <- "exp4_simOut_20201015_1227" # a full run with few data repetitions
-  filename <- "exp4_simOut_20201015_1553"
-  filename <- "exp4_simOut_20201016_2341" # current one
+  filename <- "exp4_simOut_20201016_2341" # old
+  filename <- "exp4_simOut_20201019_1344" # current one
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))
   
   # Describe run
+  length(out) - 2
+  out$parms$seed
   out$parms$missType
   out$parms$b_int
   out$parms$iters
@@ -31,6 +31,7 @@
   out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
   colnames(out_time) <- names(out[[1]])
   t(out_time)
+  # The warnings are failed convergence methods
   
   # Catch wierd runs
   # Time
@@ -45,12 +46,8 @@
   }
   which(catch != 8)
   length(which(catch != 8))
-  
-  out[[21]][[select_cond]]$run_time_min
-  out[[91]][[select_cond]]$run_time_min
-  out[[105]][[select_cond]]$run_time_min
-  out[[429]][[select_cond]]$run_time_min
-  out[[428]][[select_cond]]$run_time_min
+
+  lapply(which(catch != 8), function(x) out[[x]][[select_cond]]$run_time_min)
   
 # Estaimtes Analysis ------------------------------------------------------
   
@@ -58,11 +55,16 @@
   m1_res <- lapply(1:length(out[[1]]),
                      function(x) res_sum(out, 
                                          model = "m1", 
-                                         condition = x))
-  
+                                         condition = x,
+                                         bias_sd = TRUE))
+  m1_res[[2]]$bias_sd
+  par_interest <- c("rel", "trust.s")
   # Show results for a given condition
-  m1_bias <- lapply(1:length(out[[1]]),
-                    function(x) m1_res[[x]]$bias_per)
+  m1_bias_per <- lapply(1:length(out[[1]]),
+                        function(x) m1_res[[x]]$bias_per)
+  m1_bias_esd <- lapply(1:length(out[[1]]),
+                        function(x) round(m1_res[[x]]$bias_sd, 1))
+  # CI
   m1_ci <- lapply(1:length(out[[1]]),
                   function(x) m1_res[[x]]$ci_cov)
   
@@ -75,17 +77,20 @@
   m2_res <- lapply(1:length(out[[1]]),
                    function(x) res_sum(out, 
                                        model = "m2", 
-                                       condition = x))
+                                       condition = x,
+                                       bias_sd = TRUE))
   # Show results for a given condition
-  m2_bias <- lapply(1:length(out[[1]]),
-                    function(x) m2_res[[x]]$bias_per)
+  m2_bias_per <- lapply(1:length(out[[1]]),
+                        function(x) m2_res[[x]]$bias_per)
+  m2_bias_sd <- lapply(1:length(out[[1]]),
+                       function(x) round(m2_res[[x]]$bias_sd, 1))
   m2_ci <- lapply(1:length(out[[1]]),
                   function(x) m2_res[[x]]$ci_cov)
   
   # Available results
   m2_res[[1]]$validReps
   m2_res[[2]]$validReps
-
+  
 # Save Results ------------------------------------------------------------
   output <- lapply(list(m1 = m1_res,
                         m2 = m2_res), 

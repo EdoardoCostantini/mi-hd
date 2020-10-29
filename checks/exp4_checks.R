@@ -19,12 +19,14 @@ cbind(est = coefficients(mod1), confint(mod1))
 
 round(summary(mod1)$adj.r.squared*100, 1)
 round(summary(mod1)$coefficients, 3)[, c(1:2, 4)]
+nrow(summary(mod1)$coefficients)
 
 mod2 <- exp4_fit_mod2(list(GS = dt.f))$GS
 cbind(est = coefficients(mod2), confint(mod2))
 
 round(summary(mod2)$adj.r.squared*100, 1)
 round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
+nrow(summary(mod2)$coefficients)
 
 # Identify Variables for MAR ----------------------------------------------
 # Criteria:
@@ -227,3 +229,178 @@ round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
   imp_MITR_mids$loggedEvents[1:5]
   plot(imp_MITR_mids)
   
+
+# Include all predictors --------------------------------------------------
+# The proble of including all predictors
+  rm(list=ls())
+  source("./init_general.R")
+  source("./exp4_init.R")
+  
+  ## Define inputs --------------------------------------------------------- ##
+  
+  set.seed(1234)
+  cond <- conds[1, ]
+  data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
+  
+  ## Data ------------------------------------------------------------------ ##
+  # Gen one fully-obs data
+  Xy <- data_source[sample(1:nrow(data_source), 
+                           cond$n,
+                           replace = TRUE), ]
+  
+  # Impose missing values
+  Xy_mis <- imposeMiss_evs(Xy, parms, cond)
+  
+  # Missing data
+  miss_descrps <- colMeans(is.na(Xy_mis)[, parms$z_m_id])
+  
+  ## Impute ---------------------------------------------------------------- ##
+  
+  # Impute with "Optimal model"
+  imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
+                                O = data.frame(!is.na(Xy_mis)),
+                                cond = cond,
+                                perform = parms$meth_sel$MI_OP,
+                                parms = parms)
+  plot(imp_MICE_OP$mids)
+  
+  # Inside this happens:
+  Z = Xy_mis
+  O = data.frame(!is.na(Z))
+  Z[, parms$z_m_id]
+  cond = cond
+  perform = parms$meth_sel$MI_OP
+  parms = parms
+  
+  # Define predictor matrix for MI TRUE with best active set
+  
+  # Include all predictors
+  dim(Z)
+  predMat <- make.predictorMatrix(Z)
+  dim(predMat)
+
+  # Impute
+  pdraw <- .norm.draw(y       = target, 
+                      ry      = rj,
+                      x       = Zx,
+                      ls.meth = "ridge", 
+                      ridge   = 1)
+  estimice
+  pdraw <- .norm.draw(y       = target, 
+                      ry      = rj,
+                      x       = Zx,
+                      ls.meth = "non-ridge method", 
+                      ridge   = ridge_p)
+  
+  imp_MITR_mids <- mice::mice(Z, 
+                              predictorMatrix = predMat,
+                              m = parms$mice_ndt,
+                              maxit = parms$mice_iters,
+                              ridge = 1,
+                              method = "pmm")
+  imp_MITR_mids$loggedEvents[1:5]
+  plot(imp_MITR_mids)
+
+# Manually
+  
+  p  <- ncol(Z) # number of variables [indexed with J]
+  
+  p_imp    <- sum(colMeans(O) < 1)
+  p_imp_id <- names(which(colMeans(O) < 1))
+  nr       <- colSums(!O[, colMeans(O) < 1])
+  
+  # To store imputed values and check convergence
+  imp_bridge_val <- vector("list", parms$chains)
+  names(imp_bridge_val) <- seq(1:parms$chains)
+  
+  # Time performance
+  start.time <- Sys.time()  
+
+  # To store multiply imputed datasets (in from the last chain)
+  imp_bridge_dat <- vector("list", parms$iters)
+  names(imp_bridge_dat) <- seq(1:parms$iters)
+  
+  Zm <- init_dt_i(Z, missing_type(Z)) # initialize data for each chain
+  imp_bridge_dat$`1` <- Zm
+  # Empty storing objects for MCMC samples
+  
+  # Imputed scores
+  Imp.out <- lapply(p_imp_id, function(x) {
+    matrix(data = NA, nrow = parms$iters, ncol = nr[x],
+           dimnames = list(NULL, rownames(Zm[!O[, x],]) ))
+  })
+  for (i in 1:p_imp) Imp.out[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
+                                             p_imp_id[i]]
+  
+  for (m in 2:parms$iters) {
+    # Loop across variables (cycle)
+    for (j in 1:p_imp) {
+      j <- 1
+      J <- which(colnames(Zm) %in% p_imp_id[j])
+      rj <- !is.na(Z[, J])
+      zj_obs <- Zm[rj, J]
+      zj_mis <- Zm[!rj, J]
+      
+      # PREP data for post draw
+      target   <- Zm[, p_imp_id[j]]
+      Zx       <- model.matrix(~ ., Zm[, -J])[, -1]
+      
+      # Find Constants
+      const <- names(which(apply(Zx, 2, var) == 0))
+      Zx    <- Zx[, !colnames(Zx) %in% const]
+      
+      # Find Dummies that have 99% of objservations in 1 category
+      tabular <- apply(Zx, 2, table)
+      
+      # Select only dummies
+      tabular <- tabular[sapply(tabular, length) == 2]
+      
+      # Vector of dummy names to discard
+      dum.disc <- lapply(tabular, function(x) {
+        x[1] / sum(x) > .95 | x[1] / sum(x) < 1-.95
+      })
+      dum.disc <- names(which(dum.disc == TRUE))
+      Zx    <- Zx[, !colnames(Zx) %in% dum.disc]
+      
+      # Find collinear variables
+      coll.vars <- find.collinear(Zx)
+      Zx  <- Zx[, !colnames(Zx) %in% coll.vars]
+      
+      # Obtain Post Draw
+      pdraw <- .norm.draw(y       = target, 
+                          ry      = rj,
+                          x       = Zx,
+                          ls.meth = "ridge", 
+                          ridge   = 0)
+      
+      p <- estimice(Zx[rj, ], target[rj])
+      x = Zx[rj, 1:50]
+      y = target[rj]
+      ridge = 0
+      xtx <- crossprod(x)
+      pen <- ridge * diag(xtx)
+      if (length(pen) == 1) 
+        pen <- matrix(pen)
+      v <- solve(xtx + diag(pen))
+      c <- t(y) %*% x %*% v
+      r <- y - x %*% t(c)
+      return(list(c = t(c), r = r, v = v, df = df, ls.meth = ls.meth))
+      
+      # Fix Z_mis to drop columns that are not relevant anymore
+      Z_mis <- Zm[!rj, -J]
+      Z_mis <- model.matrix(~ ., Z_mis)[, -1]
+      Z_mis <- Z_mis[, !colnames(Z_mis) %in% c(const, dum.disc, coll.vars)]
+      
+      # Obtain posterior predictive draws
+      pdraw_zj_imp <- Z_mis %*% pdraw$beta + rnorm(sum(!rj)) * pdraw$sigma
+      
+      # Append imputation (for next iteration)
+      Zm[!rj, J] <- pdraw_zj_imp
+      
+      # Store imputations
+      Imp.out[[j]][m, ]  <- pdraw_zj_imp
+    }
+    # only data from last chain will actually be saved
+    imp_bridge_dat[[m]] <- Zm
+  }
+  imp_bridge_val[[cc]] <- Imp.out

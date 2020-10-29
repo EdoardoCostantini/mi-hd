@@ -153,6 +153,10 @@
   parms$m1_par <- c("rel", "trust.s", "trust.pr") # for model 1
   parms$m2_par <- c("NatAt", "rel", "polAction_r")# for model 2
   
+  # Alternative definition
+  parms$m1_par <- 1:14
+  parms$m2_par <- 1:14
+  
   # Needs to match the location and name of the output list
   parms$store <- c(cond         = TRUE,
                    dat_full     = FALSE,
@@ -179,5 +183,5 @@
   
   # Add ridge specification for each condition
   conds <- cbind(conds, ridge = c(1e-4, 
-                                  1e-1)) # acutal 1e2
+                                  1e-1))
   

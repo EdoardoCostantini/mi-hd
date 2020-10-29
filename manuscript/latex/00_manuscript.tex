@@ -10,6 +10,7 @@
 \usepackage{graphicx} 			% to resize tables
 \usepackage[round]{natbib} % for better apalike citation style
 \usepackage{multirow} % for multirow tables
+\usepackage[pdfpagemode=FullScreen,bookmarks=true]{hyperref} % for outlines
 
 % For tables you are creating them in R using knitr::kable and kableExtra
 % In the vignette for kableExtra it is advised to use all the following
@@ -28,11 +29,21 @@
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
 
-\title{Imputation for High Dimensional Data\\ \Large A comprehensive review}
-\author{Edoardo Costantini \& Kyle M. Lang}
-\date{July 2020}
+\title{High Dimensional Imputation for the Social Sciences\\ \Large A Review of State-of-the-Art Methods}
+\author{Edoardo Costantini}
 
 \begin{document}
+
+% Outline
+
+\begin{center}
+\textbf{OUTLINE OF PAPER 1}
+
+\textbf{High Dimensional Imputation for the Social Sciences: A Review of State-of-the-Art Methods}
+
+\end{center}
+
+\input{06_appendix1.tex}
 
 % Introduction
 
@@ -63,10 +74,16 @@
 % Bibliography
 \bibliographystyle{apalike}
 
+%\bibliography{
+%	../../../stats-refs/raw/missingData/bibtex/papers,
+%	../../../stats-refs/raw/missingData/bibtex/books,
+%	../../../stats-refs/raw/bayesStats/bibtex/papers,	
+%	}
+
 \bibliography{
-	../../../stats-refs/raw/missingData/bibtex/papers,
-	../../../stats-refs/raw/missingData/bibtex/books,
-	../../../stats-refs/raw/bayesStats/bibtex/papers,	
+	../../../statsLib/missingData/bibtex/papers,
+	../../../statsLib/missingData/bibtex/books,
+	../../../statsLib/bayesStats/bibtex/papers	
 	}
 
 % terminal compile strategy:

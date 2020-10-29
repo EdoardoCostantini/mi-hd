@@ -1117,17 +1117,16 @@ lm_pool_EST_f <- function(fits){
   # it returns the pooled estiamtes of the regression coefs
   ## For internals
   # fits <- lm_fits[[2]]
+  # fits <- m1_mi$blasso
   
   # Extract estiamtes from the fitted models
-  summa_models <- lapply(X = fits,
-                         FUN = function(x) summary(x))
-  coefs <- t(sapply(X = summa_models,
-                    FUN = function(x) coef(x)[, "Estimate"]))
+  coefs <- t(sapply(X = fits,
+                    FUN = function(x) coef(x)))
   
+  # Take mean
   Q_bar <- colMeans(coefs)
   
   return(Q_bar)
-  
 }
 
 lm_pool_CI_f <- function(fits){
@@ -1137,23 +1136,22 @@ lm_pool_CI_f <- function(fits){
   
   ## Example internals
   # fits <- lm_fits[[1]]
-  # fits <- m1_mi$DURR_la
+  # fits <- m2_mi$blasso
   
-  # Do we have fits for a given imputation method?
+  ## Number of multiple imputation
   m <- length(fits)
-  summa_models <- lapply(X = fits,
-                         FUN = function(x) summary(x))
-  ## Coef estimates ##
-  coefs <- t(sapply(X = summa_models,
-                    FUN = function(x) coef(x)[, "Estimate"]))
+  
+  ## Estiamtes
+  coefs <- t(sapply(X = fits,
+                    FUN = function(x) coef(x)))
   Q_bar <- colMeans(coefs)
   
   ## Variances
+  summa_models <- lapply(X = fits,
+                         FUN = function(x) summary(x))
   all_vcov <- lapply(X = summa_models,
                      FUN = function(x) vcov(x))
-  
-  U_bar <- na.omit(diag(Reduce('+', all_vcov) / m))
-  # to exclude coefficeints for constant dummyes 
+  U_bar <- diag(Reduce('+', all_vcov) / m)
   
   B <- diag(1 / (m-1) * (t(coefs) - Q_bar) %*% t(t(coefs) - Q_bar))
   
@@ -1162,10 +1160,10 @@ lm_pool_CI_f <- function(fits){
   ## Degrees of freedom
   nu <- .miDf(length(fits), b = B, t = T, summa_models[[1]]$df[2])
   
-  ## CI computation
   t_nu <- qt(1 - (1-parms$alphaCI)/2, 
              df = nu)
   
+  ## CI computation
   CI <- c(lwr = Q_bar - t_nu * sqrt(T), 
           upr = Q_bar + t_nu * sqrt(T))
   
@@ -1173,13 +1171,37 @@ lm_pool_CI_f <- function(fits){
 }
 
 onetree <- function(xobs, xmis, yobs, s) {
-  ## Ripped off mice package mice.impute.rf. Fits one free for the 
+  ## Ripped off mice package mice.impute.rf. Fits one tree for the 
   ## random forest. Used in your own random forest version
+  ## based on Doove et al 2014 Algorithm A.1
+  
+  ## For internals:
+  # yobs = y_obs
+  # xobs = X_obs
+  # xmis = X_mis
+  # s = 1
+  
+  ## Body
   fit <- randomForest::randomForest(x = xobs, y = yobs,
                                     ntree = 1)
+    # Takes 1 bootsrap sample, fits 1 tree with random feature selection,
+    # provides 1 set of donors.
+    # 1 of k repetitions of steps 2a and 2b in algorithm A.1 Doove et al 2014.
+    # Each single tree takes 1 bootstrap sample and then goes through
+    # partitioning with random sampling of the features. Using this
+    # "onetree" function 10 times, you end up with 10 different bootsrapped
+    # datasets on which a single tree is fit. The pooling of donors 
+    # identified is what makes this a random forest in the end.
+  
+  # Leaf position of observed part of y (yobs)
   leafnr <- predict(object = fit, newdata = xobs, nodes = TRUE)
+  
+  # Leaf position of missing part of y (ymis)
   nodes <- predict(object = fit, newdata = xmis, nodes = TRUE)
+  
+  # Define donors (pool of yobs for a ymis that falls in 1 leaf)
   donor <- lapply(nodes, function(s) yobs[leafnr == s])
+  
   return(donor)
 }
 
@@ -1405,7 +1427,7 @@ mean_traceplot <- function(out,
 }
  
 # Rhat convergence checks 
-Rhat.sim <- function(out, cond = 1, meth, dat, iter_max = NULL){
+Rhat.sim <- function(out, cond = 1, meth, dat, iter_max = NULL, iter_burn){
   ## Description
   # Given the simulation output with multiple chains, a condition number, 
   # an imputation method name, and a data repetition indicator, it gives 
@@ -1418,7 +1440,8 @@ Rhat.sim <- function(out, cond = 1, meth, dat, iter_max = NULL){
   # cond = 1  # some condition
   # meth = out_cnv$parms$method[[1]]
   # dat  = 1
-  # iter_max = NULL
+  # iter_max = 250
+  # iter_burn = 50
   
   ## Body
   # Check if iter_max is given
@@ -1426,10 +1449,18 @@ Rhat.sim <- function(out, cond = 1, meth, dat, iter_max = NULL){
     
   # Get the Rhat
   Rhat.sim.out <- sapply(1:out$parms$zm_n, function(v){
+    # Extract mean imptued value per variable per iteration
     sims <- sapply(1:out$parms$chains, function(j) {
-      rowMeans(out[[dat]][[cond]]$imp_values[[meth]][[j]][[v]][1:iter_max, ])
+      rowMeans(out[[dat]][[cond]]$imp_values[[meth]][[j]][[v]][(iter_burn+1):iter_max, ])
     })
-    Rhat(sims)
+    
+    # Split chains in half
+    half_indx <- 1:floor(nrow(sims)/2)
+    split_sims <- cbind(sims[half_indx, ],
+                        sims[-half_indx, ])
+    
+    # Compute Split-Rhat
+    Rhat(split_sims)
   })
   names(Rhat.sim.out) <- out$parms$z_m_id
   return(Rhat.sim.out)
@@ -1451,7 +1482,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   # model = "sem"
   # model = "CFA"
   # model = "m1"
-  # condition = 2
+  # condition = 1
   # out = output
   # bias_sd = TRUE
   
@@ -1462,16 +1493,22 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
 
   ## Step 2. Bias ##
   avg <- sapply(out$parms$methods, function(m){
-    # m <- out$parms$methods[8]
+    # m <- out$parms$methods[2]
     store <- NULL
+    count <- 0
     for (i in 1:out$parms$dt_rep) {
-      # i <- 21
+      # i <- 3
       succ_method <- colnames(out[[i]][[select_cond]][[est]])
       result <- as.matrix(out[[i]][[select_cond]][[est]])[, succ_method %in% m]
+      if(any(is.na(result))) {
+        count <- count+1
+        next
+      }
       store <- cbind(store, result)
       # rownames(store) <- rownames(out[[i]][[select_cond]][[est]])
     }
     c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
+    # rowSums(!is.na(store))
   })
   
   # Store Objects
@@ -1500,19 +1537,18 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   
   # Bias as percentage of true value
   bias_per <- cbind(ref = round(psd_tr_vec, 3),
-                    round(
-                      bias/psd_tr_vec*100, 
-                      0)
-  )
+                    bias / psd_tr_vec * 100)
   
   meths <- out$parms$methods[-which(out$parms$methods == "GS")]
   # Bias Mean Standardized
   if(bias_sd == TRUE){
-    
-    means_indx <- grep("~1", rownames(avg))
-    
+    # 
+    # means_indx <- grep("~1", rownames(avg))
+    # means_indx <- rownames(avg)
+    # 
+    # Empirical Standard error
     sd_emp <- sapply(out$parms$methods, function(m){
-      # m <- out$parms$methods[9]
+      # m <- out$parms$methods[1]
       store <- NULL
       for (i in 1:out$parms$dt_rep) {
         succ_method <- colnames(out[[i]][[select_cond]][[est]])
@@ -1521,15 +1557,13 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
                                                       succ_method %in% m]
         )
       }
-      return( apply(t(store)[, means_indx], 2, sd) )
+      return( apply(t(store), 2, sd, na.rm = TRUE) )
     })
     
-    bias_sd <- round(
-      (avg[means_indx, ] - psd_tr_vec[means_indx]) / sd_emp,
-      3)
+    bias_sd_out <- (avg - psd_tr_vec) / sd_emp
     
   } else {
-    bias_sd <- NULL
+    bias_sd_out <- NULL
   }
   
   ## Step 3. CI Coverange ##
@@ -1566,13 +1600,30 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     # certain methods
   rownames(CIC) <- rownames(bias)
   
+  ## Step 4 - Euclidean distances
+  # MCMC estimates
+  ed_est <- sapply(avg, function(avg_col){
+    # avg_col <- avg[[1]]
+    dist(rbind(avg_col, psd_tr_vec), method = "euclidean")
+  } 
+  )
+  
+  # Confidence intervals
+  ed_ci <- sapply(CIC, function(CIC_col){
+    # avg_col <- avg[[1]]
+    dist(rbind(CIC_col, rep(.95, nrow(CIC))), method = "euclidean")
+  } 
+  )
+  
   # Output
   results <- list(cond      = select_cond,
                   MCMC_est  = round(cbind(ref=psd_tr_vec, avg), 3),
                   bias_raw  = round(cbind(ref=psd_tr_vec, bias), 3),
                   bias_per  = bias_per,
-                  bias_sd   = bias_sd,
+                  bias_sd   = bias_sd_out,
                   ci_cov    = round(CIC*100, 1),
+                  ed_est    = data.frame(t(ed_est)),
+                  ed_ci     = data.frame(t(ed_ci)),
                   validReps = validReps)
   return(results)
 }
@@ -1728,6 +1779,8 @@ res_lm_sum <- function(out, condition = 1){
     }
     rowMeans(store, na.rm = TRUE) # MCMC statistics 
   })
+  
+  
   
   # Output
   results <- list(cond = select_cond,

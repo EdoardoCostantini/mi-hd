@@ -76,7 +76,7 @@ imposeMiss <- function(dat_in, parms, cond){
 # Experiment 2 - Latent Structure -----------------------------------------
 
 simData_lv <- function(parms, cond){
-  # cond <-  conds[4,]
+  # cond <-  conds[5,]
   n_it_tot <- parms$n_it * cond$lv
   
   # Structural parameters of the measurement model
@@ -129,7 +129,7 @@ simData_lv <- function(parms, cond){
   }
   
   # Sample Scores
-# (5) latent variable and items errors centered around 0
+# (5) scores on latent variable and items errors centered around 0
   scs_lv    <- rmvnorm(parms$n, rep(0, cond$lv), Phi)
     colnames(scs_lv) <- paste0("lv", 1:ncol(scs_lv))
   scs_delta <- rmvnorm(parms$n, rep(0, n_it_tot), Theta)

@@ -7,20 +7,21 @@ source("./init_general.R")
 source("./exp4_init.R")
 
 ## Create a cluster object:
-clus <- makeCluster(5)
+clus <- makeCluster(5) # 30 on blade
 
 ## Two different ways to source a script on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
 clusterEvalQ(cl = clus, expr = source("./exp4_init.R"))
 
-## Data directory for storage
-
 # Progress report file ----------------------------------------------------
 file.create(paste0(parms$outDir, parms$report_file_name))
 
 cat(paste0("SIMULATION PROGRESS REPORT",
+           ## Description
            "\n",
-           "Description: ", parms$description, "\n",
+           "Description: ", parms$description, 
+           "\n",
+           ## Time
            "\n", "------", "\n",
            "Starts at: ", Sys.time(),
            "\n", "------", "\n" ),

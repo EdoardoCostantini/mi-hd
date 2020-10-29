@@ -45,7 +45,7 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
       imp_CART_dat$`1` <- Zm
       for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
                                               p_imp_id[i]]
-      
+      mice.impute.cart
       for (m in 2:parms$iters) {
         print(paste0("CART - Chain: ", cc, "/", parms$chains, 
                      "; Iter: ", m, "/", parms$iters))
@@ -54,11 +54,6 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
           # Select data
           y_obs <- z_j_obs  <- Zm[O[, J] == TRUE, J]
           y_mis <- zm_mj    <- Zm[O[, J] == FALSE, J] # useless
-          # X_obs <- Wm_j_obs <- as.matrix(Zm[O[, J] == TRUE, -J])
-          #   X_obs <- apply(X_obs, 2, as.numeric) # makes dicho numbers
-          # X_mis <- Wm_mj    <- as.matrix(Zm[O[, J] == FALSE, -J])
-          #   X_mis <- apply(X_mis, 2, as.numeric) # makes dicho numbers
-
           X_obs <- Zm[O[, J] == TRUE, -J]
           X_mis <- Zm[O[, J] == FALSE, -J]
             
@@ -68,13 +63,15 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
                               method = "anova", 
                               control = rpart::rpart.control(minbucket = round(20/3), 
                                                                                cp = .01))
-          # Generate imputations
+          # Determine leaf position of observed values
           leafnr <- floor(as.numeric(row.names(fit$frame[fit$where, 
                                                          ])))
-          
+          # Create donors pool
           fit$frame$yval <- as.numeric(row.names(fit$frame))
           nodes <- predict(object = fit, newdata = as.data.frame(X_mis))
           donor <- lapply(nodes, function(s) y_obs[leafnr == s])
+          
+          # Sample from donors pool
           zm_j <- vapply(seq_along(donor), 
                          function(s) sample(donor[[s]], 
                                             1), 
