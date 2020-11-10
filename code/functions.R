@@ -448,7 +448,8 @@ exp4_fit_mod1 <- function(multi_dt){
 
                        # Fit mode
                        mod <- lm(euth ~
-                                   trust.g + trust.hs + trust.pr + trust.s +
+                                   # trust.g + 
+                                   trust.hs + trust.pr + trust.s +
                                    edu + sex + age + rel + denom + country)
                        return(mod)
                      }
@@ -1478,11 +1479,113 @@ res_sem_time <- function(out, condition = 1){
   return( round(colMeans(res_time), 3) )
 }
 
+# ####### #
+# Euclidean Distance overall
+res_ed_overall <- function(out, condition){
+# condition = 1
+# out = output
+  ## Prep ##
+  
+  store_avg <- list()
+  store_CIC <- list()
+  
+  for (mod in 1:2) {
+    # mod <- 1
+    model <- c("m1", "m2")[mod]
+    est <- paste0(model, "_EST")
+    ci  <- paste0(model, "_CI")
+    select_cond <- names(out[[1]])[condition]
+    
+    ## Step 2. Bias ##
+    avg <- sapply(out$parms$methods, function(m){
+      # m <- out$parms$methods[2]
+      store <- NULL
+      count <- 0
+      for (i in 1:out$parms$dt_rep) {
+        # i <- 3
+        succ_method <- colnames(out[[i]][[select_cond]][[est]])
+        result <- as.matrix(out[[i]][[select_cond]][[est]])[, succ_method %in% m]
+        if(any(is.na(result))) {
+          count <- count+1
+          next
+        }
+        store <- cbind(store, result)
+        # rownames(store) <- rownames(out[[i]][[select_cond]][[est]])
+      }
+      c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
+      # rowSums(!is.na(store))
+    })
+    
+    # Store Objects
+    avg <- data.frame(avg[, colSums(is.nan(avg)) == 0])
+    # get rid of NaNs that come up in exp3 for conditions that are not using 
+    # certain methods
+    validReps  <- avg["rep", ] # number of successes
+    avg <- avg[-which(rownames(avg) == "rep"), ]
+    store_avg[[mod]] <- avg
+    # store_psd[[mod]] <- avg[, "GS"] # pseudo true values
+    
+    # storing threshold
+    str_thrs <- nrow(out[[1]][[select_cond]][[ci]])/2
+    
+    # Confidence Interval Coverage
+    CIC <- sapply(out$parms$methods, function(m){
+      # m <- out$parms$methods[1]
+      store <- NULL
+      for (i in 1:out$parms$dt_rep) {
+        succ_method <- colnames(out[[i]][[select_cond]][[est]])
+        col_indx <- succ_method %in% m
+        cond_est <- out[[i]][[select_cond]][[est]]
+        cond_CI  <- out[[i]][[select_cond]][[ci]]
+        ci_low   <- cond_CI[1:str_thrs, ]
+        ci_hig   <- cond_CI[-(1:str_thrs), ]
+        
+        store <- cbind(store, 
+                       ci_low[, col_indx] < avg[, "GS"] &
+                         avg[, "GS"] < ci_hig[, col_indx]
+        )
+      }
+      rowMeans(store, na.rm = TRUE) # MCMC statistics 
+    })
+    
+    if(is.vector(CIC)){ # if it's a vector make it a dataframe with special care
+      CIC_nan <- data.frame(t(is.nan(CIC)))
+      CIC <- data.frame(t(CIC[colSums(CIC_nan) == 0]))
+    } else {
+      CIC <- CIC[, colSums(is.nan(CIC)) == 0] 
+      CIC <- data.frame(CIC)
+    }
+    store_CIC[[mod]] <- CIC
+  }
+
+  parms_allMCMC <- do.call(rbind, store_avg)
+  parms_psdTrue <- parms_allMCMC[, "GS"]
+  
+  parms_allCIC <- do.call(rbind, store_CIC)
+  
+  # Bias
+  ed_est <- sapply(parms_allMCMC, function(avg_col){
+    dist(rbind(avg_col, parms_psdTrue), method = "euclidean")
+  } 
+  )
+  
+  # Confidence intervals
+  ed_ci <- sapply(parms_allCIC, function(CIC_col){
+    # avg_col <- avg[[1]]
+    dist(rbind(CIC_col, rep(.95, nrow(parms_allCIC))), method = "euclidean")
+  } 
+  )
+  return(list(ed_est = data.frame(t(ed_est)),
+              ed_ci = data.frame(t(ed_ci)))
+  )
+}
+# ####### #
+
 res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   # model = "sem"
   # model = "CFA"
-  # model = "m1"
-  # condition = 1
+  # model = "m2"
+  # condition = 2
   # out = output
   # bias_sd = TRUE
   
@@ -1601,7 +1704,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   rownames(CIC) <- rownames(bias)
   
   ## Step 4 - Euclidean distances
-  # MCMC estimates
+  # MCMC estimates (per model)
   ed_est <- sapply(avg, function(avg_col){
     # avg_col <- avg[[1]]
     dist(rbind(avg_col, psd_tr_vec), method = "euclidean")
@@ -1615,6 +1718,26 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   } 
   )
   
+  ## Step 5 - Confidence interval width
+  # Confidence Interval Coverage
+  CIW <- sapply(out$parms$methods, function(m){
+    store <- NULL
+    for (i in 1:out$parms$dt_rep) {
+      succ_method <- colnames(out[[i]][[select_cond]][[est]])
+      col_indx <- succ_method %in% m
+      cond_est <- out[[i]][[select_cond]][[est]]
+      cond_CI  <- out[[i]][[select_cond]][[ci]]
+      ci_low   <- cond_CI[1:str_thrs, ]
+      ci_hig   <- cond_CI[-(1:str_thrs), ]
+      
+      store <- cbind(store, (ci_hig[, col_indx] - ci_low[, col_indx]))
+    }
+    rowMeans(store, na.rm = TRUE) # MCMC statistics 
+  })
+  CIW <- CIW[, colSums(is.nan(CIW)) == 0] 
+  CIW <- data.frame(CIW)
+  rownames(CIW) <- rownames(bias)
+  
   # Output
   results <- list(cond      = select_cond,
                   MCMC_est  = round(cbind(ref=psd_tr_vec, avg), 3),
@@ -1624,6 +1747,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
                   ci_cov    = round(CIC*100, 1),
                   ed_est    = data.frame(t(ed_est)),
                   ed_ci     = data.frame(t(ed_ci)),
+                  CIW       = CIW,
                   validReps = validReps)
   return(results)
 }
