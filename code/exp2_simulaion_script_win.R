@@ -7,7 +7,7 @@ source("./init_general.R")
 source("./exp2_init.R")
 
 ## Create a cluster object:
-clus <- makeCluster(10)
+clus <- makeCluster(5)
 
 ## Two different ways to source a script on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
@@ -53,9 +53,10 @@ cat(paste0("\n", "------", "\n",
     sep = "\n",
     append = TRUE)
 
-# Attach parm object
+# Attach Extrac Infor Objects
 out$parms <- parms
 out$conds <- conds
+out$session_info <- session_info()
 
 # Save output -------------------------------------------------------------
 
@@ -63,3 +64,4 @@ saveRDS(out,
         paste0(parms$outDir,
                parms$results_file_name)
 )
+

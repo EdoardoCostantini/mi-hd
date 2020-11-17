@@ -4,11 +4,13 @@
 ### Created:  2020-05-19
 
   rm(list = ls())
-  library(xtable)
   source("./init_general.R")
   
   # Result selection
-  filename <- "exp2_simOut_20200819_1743"
+  filename <- "exp2_simOut_20200819_1743" # last good one
+  filename <- "exp2_simOut_20201116_1652" # short run with scaslde items
+  filename <- "exp2_simOut_20201116_1743" # short run with scaslde items
+  filename <- "exp2_simOut_20201117_1125" # short run with scaslde items
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))

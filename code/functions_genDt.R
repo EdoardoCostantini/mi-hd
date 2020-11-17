@@ -76,7 +76,8 @@ imposeMiss <- function(dat_in, parms, cond){
 # Experiment 2 - Latent Structure -----------------------------------------
 
 simData_lv <- function(parms, cond){
-  # cond <-  conds[5,]
+  # cond <-  conds[1,]
+  # parms$n <- 1e4
   n_it_tot <- parms$n_it * cond$lv
   
   # Structural parameters of the measurement model
@@ -94,14 +95,11 @@ simData_lv <- function(parms, cond){
   diag(Phi) <- 1
   # Make symmetric
   Phi[upper.tri(Phi)] <- t(Phi)[upper.tri(Phi)]
-  
-  # Observed Items Covariance matrix
-# (2) uncorrelated observation errors
-  Theta <- diag(n_it_tot)
-  # NOTE: This is palceholder object for now, filled it later
+  # Make it covariance instead of correlation matrix (depending of lv_var)
+  Phi <- Phi * sqrt(parms$lv_var) * sqrt(parms$lv_var)
   
   # Factor loadings (random factor)
-# (3) Sample from unif .7 .8, all different
+# (2) Sample from unif .7 .8, all different
   if(cond$fl == "none"){
     lambda <- rep(0, n_it_tot)
   } else {
@@ -111,9 +109,15 @@ simData_lv <- function(parms, cond){
       lambda <- runif(n_it_tot, .5, .6)
     }
   }
-
+  
+  # Observed Items Covariance matrix
+# (3) uncorrelated observation errors
+  # For decisions reagrding the paramter values look into your 
+  # PhD_diary notes
+  Theta <- diag(n_it_tot)
   for (i in 1:length(lambda)) {
-    Theta[i, i] <- 1 - lambda[i]^2 * 1
+    # Theta[i, i] <- 1 - lambda[i]^2 * 1
+    Theta[i, i] <- parms$item_var - lambda[i]^2 * Phi[1,1]
   }
   
 # (4) Items Factor Complexity = 1 (see Bollen1989 p234
@@ -134,14 +138,16 @@ simData_lv <- function(parms, cond){
     colnames(scs_lv) <- paste0("lv", 1:ncol(scs_lv))
   scs_delta <- rmvnorm(parms$n, rep(0, n_it_tot), Theta)
     colnames(scs_delta) <- paste0("d_z", 1:ncol(scs_delta))
-  
+    
   # Compute Observed Scores
 # (6) items
   x <- matrix(nrow = parms$n, ncol = n_it_tot)
   for(i in 1:parms$n){
-    x[i, ] <- t(Lambda %*% scs_lv[i, ] + scs_delta[i, ])
+    # x[i, ] <- t(Lambda %*% scs_lv[i, ] + scs_delta[i, ])
+    x[i, ] <- t(parms$item_mean + Lambda %*% scs_lv[i, ] + scs_delta[i, ])
   }
   colnames(x) <- paste0("z", seq(1:n_it_tot))
+  
   # Function output
   return( list(dat    = as.data.frame(x),
                Phi    = Phi,

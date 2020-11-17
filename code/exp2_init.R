@@ -9,7 +9,7 @@
   parms$exp <- 2 # second experiment - latent structure
 
 # Itereations, repetitions, etc
-  parms$dt_rep     <- 2 # 500 replications for averaging results (200 goal)
+  parms$dt_rep     <- 5 # 1e3 replications for averaging results (200 goal)
   parms$chains     <- 1 # 1   number of parallel chains for convergence check
   parms$iters      <- 5 # 75
   parms$burnin_imp <- 0 # 50  how many imputation iterations should be discarded
@@ -43,8 +43,10 @@
   parms$n <- 200 # number of cases for data generation
   
 # "True" values
-  parms$item_mean <- 5
-  parms$item_var  <- 5
+  parms$lv_mean   <- 0
+  parms$lv_var    <- 1
+  parms$item_mean <- 5 # Mean not zero so that bias in percent makes more sense
+  parms$item_var  <- 1
   
 # Latent Structure
   parms$n_it    <- 5 # number of measured items
@@ -90,20 +92,18 @@
   parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic
-  parms$meth_sel <- data.frame(DURR_la = TRUE,
-                               DURR_el = FALSE,
-                               IURR_la = TRUE,
-                               IURR_el = FALSE,
-                               bridge  = TRUE,
-                               blasso  = TRUE,
-                               MI_PCA  = TRUE,
-                               MI_CART = TRUE,
-                               MI_RF   = TRUE,
-                               MI_OP   = TRUE,
-                               missFor = TRUE,
-                               GS      = TRUE,
-                               CC      = TRUE
-                               )
+  parms$meth_sel <- data.frame(DURR_la    = TRUE,
+                               IURR_la    = TRUE,
+                               blasso     = TRUE,
+                               bridge     = TRUE,
+                               MI_PCA     = TRUE,
+                               MI_CART    = TRUE,
+                               MI_RF      = TRUE,
+                               MI_OP      = TRUE,
+                               missFor    = TRUE,
+                               mean       = TRUE,
+                               CC         = TRUE,
+                               GS         = TRUE)
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
     # (GS, CC always last, alwyas present)
 
@@ -145,7 +145,6 @@
         Imputation methods are used on that condition-specific dataset.
         Results are therefore given per dataset in condition")
 
-
 # Storing prefrences ------------------------------------------------------
   # Needs to match the location and name of the output list
   parms$store <- c(cond     = TRUE,
@@ -166,16 +165,25 @@
   
 # Conditions --------------------------------------------------------------
 
+  # Define Experimental Factor Values
   lv    <- c(10, 100)       # number of latent variables
   pm    <- c(.1, .3)        # proportion of missings level
   fl    <- c("high", "low") # factor loadings level
   ridge <- rep(c(1e-1, 1e-7), 4) # 1 valude found w/ corssvalidation
   
+  # Make Conditions
   conds <- expand.grid(lv, pm, fl,
                        stringsAsFactors = FALSE)
+  
+  # Append Ridge Parameter
   conds <- cbind(conds, ridge)
-    colnames(conds) <- c("lv", "pm", "fl", "ridge")
+  
+  # Select Conditions for run
+  conds <- conds[1:(nrow(conds) - 0), ]
+  
+  # Give Meaningful names to Columns
+  colnames(conds) <- c("lv", "pm", "fl", "ridge")
 
-    conds[, c("fl", "pm", "lv")]
-    
+  # Print a latex table    
   xtable::xtable(conds[, c("fl", "pm", "lv")])
+  

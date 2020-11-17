@@ -43,6 +43,9 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
                                                       collapse = "_")
                                    )
                             )
+    
+# Experiment 1 ------------------------------------------------------------
+
     if(parms$exp == 1){
       for(i in 1 : nrow(conds)) {
         
@@ -78,6 +81,9 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
         }
       }
     }
+
+# Experiment 2 ------------------------------------------------------------
+    
     if(parms$exp == 2){
       for(i in 1 : nrow(conds)) {
         
@@ -148,6 +154,9 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
         }
       }
     }
+    
+# Experiment 4 ------------------------------------------------------------
+    
     if(parms$exp == 4){
       for(i in 1 : nrow(conds)) {
         
@@ -201,7 +210,7 @@ runCell <- function(cond, parms, rep_status) {
   # Given 1 condition, Generates 1 dataset and performs imutations according to
   # selected methods
   ## For internals
-  # source("./init.R")
+  # source("./exp1_init.R")
   # cond <- conds[3, ]
   
   ## Data ------------------------------------------------------------------ ##
@@ -229,21 +238,6 @@ runCell <- function(cond, parms, rep_status) {
                              perform = parms$meth_sel$DURR_la,
                              parms = parms)
 
-  update_report("DURR lasso", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$DURR_la)
-  
-    # Elastic Net
-  imp_DURR_el <- impute_DURR(Z = Xy_mis,
-                             O = as.data.frame(O),
-                             reg_type = "el",
-                             cond = cond,
-                             perform = parms$meth_sel$DURR_el,
-                             parms = parms)
-  update_report("DURR elastic net", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$DURR_el)
-
   # Impute according to IURR method
     # Lasso
   imp_IURR_la <- impute_IURR(Z = Xy_mis,
@@ -252,87 +246,56 @@ runCell <- function(cond, parms, rep_status) {
                              cond = cond,
                              perform = parms$meth_sel$IURR_la,
                              parms = parms)
-  update_report("IURR lasso", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$IURR_la)
-  
-    # Elastic Net
-  imp_IURR_el <- impute_IURR(Z = Xy_mis,
-                             O = as.data.frame(O),
-                             reg_type = "el",
-                             cond = cond,
-                             perform = parms$meth_sel$IURR_el,
-                             parms = parms)
-  update_report("IURR elastic net", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$IURR_el)
 
   # Impute according to Hans Blasso method
-  imp_blasso <- impute_BLAS_hans(Z = Xy_mis, 
-                                 O = as.data.frame(O),
+  imp_blasso <- impute_BLAS_hans(Z = Xy_mis,
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
-  update_report("blasso", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$blasso)
-  
+
   # Impute according to van Buuren Ridge
   imp_bridge <- impute_BRIDGE(Z = Xy_mis, 
                               O = as.data.frame(O),
                               ridge_p = parms$ridge,
                               parms = parms,
                               perform = parms$meth_sel$bridge)
-  update_report("bridge", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$bridge)
 
   # Impute according to Howard Et Al 2015 PCA appraoch
   imp_PCA <- impute_PCA(Z = Xy_mis, O = O, cond = cond, parms = parms)
-  update_report("MICE-PCA", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$MI_PCA)
-  
+
   # MICE-CART traditional
   imp_CART <- impute_CART(Z = Xy_mis,
                           O = as.data.frame(O),
                           perform = parms$meth_sel$MI_CART,
                           parms = parms)
   
-  update_report("MICE-CART", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$MI_CART)
-  
   # MICE-RF
   imp_RANF <- impute_RANF(Z = Xy_mis,
                           O = as.data.frame(O),
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
-  
-  update_report("Random Forest", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$MI_RF)
-  
+
   # MICE w/ true model
   imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
                                 O = O,
                                 cond = cond,
                                 perform = parms$meth_sel$MI_OP,
                                 parms = parms)
-  update_report("MICE-TR", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$MI_OP)
-  
+
   # missForest
   imp_missFor <- impute_missFor(Z = Xy_mis, parms = parms)
-  # missForest_out <- capture.output(impute_missFor(Z = Xy_mis, parms = parms))
-  # missFprest_outdt <- capture.output(imp_missFor$dats)
+  
+  # mean imputation
+  Xy_mean <- Xy_mis
+  for (j in 1:parms$zm_n) {
+    ry <- !is.na(Xy_mean[, parms$z_m_id[j]])
+    mu_zj <- mean(Xy_mean[, parms$z_m_id[j]], na.rm = TRUE)
+    Xy_mean[!ry, parms$z_m_id[j]] <- mu_zj
+  }
   
   ## Convergence ----------------------------------------------------------- ##
   
   imp_values <- list(DURR_la = imp_DURR_la$imps,
-                     DURR_el = imp_DURR_el$imps,
                      IURR_la = imp_IURR_la$imps,
-                     IURR_el = imp_IURR_el$imps,
                      bridge  = imp_bridge$imps,
                      blasso  = imp_blasso$imps,
                      MI_PCA  = imp_PCA$mids,
@@ -348,9 +311,7 @@ runCell <- function(cond, parms, rep_status) {
   # Multiple imputed dataset
   
   sem_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
-                          DURR_el = imp_DURR_el$dats,
                           IURR_la = imp_IURR_la$dats,
-                          IURR_el = imp_IURR_el$dats,
                           bridge  = imp_bridge$dats,
                           blasso  = imp_blasso$dats,
                           MI_PCA  = imp_PCA$dats,
@@ -361,8 +322,9 @@ runCell <- function(cond, parms, rep_status) {
   
   # Single dataset
   sem_sndt <- lapply(list(missFor = imp_missFor$dats,          
-                          GS      = Xy,                        
-                          CC      = Xy_mis[rowSums(!O) == 0, ]), 
+                          mean    = Xy_mean,
+                          CC      = Xy_mis[rowSums(!O) == 0, ],
+                          GS      = Xy), 
                      sem, model = parms$lav_model, likelihood = "wishart")
   
   ## LM model
@@ -370,9 +332,7 @@ runCell <- function(cond, parms, rep_status) {
   # Multiple datasets
   
   lm_fits <- lapply(list(DURR_la = imp_DURR_la$dats,
-                         DURR_el = imp_DURR_el$dats,
                          IURR_la = imp_IURR_la$dats,
-                         IURR_el = imp_IURR_el$dats,
                          bridge  = imp_bridge$dats,
                          blasso  = imp_blasso$dats,
                          MI_PCA  = imp_PCA$dats,
@@ -383,9 +343,10 @@ runCell <- function(cond, parms, rep_status) {
   
   # Single dataset
   
-  lm_sndt <- fit_lm_models(list(missFor = imp_missFor$dats, 
-                                GS      = Xy, 
-                                CC      = Xy_mis[rowSums(!O) == 0, ]),
+  lm_sndt <- fit_lm_models(list(missFor = imp_missFor$dats,          
+                                mean    = Xy_mean,
+                                CC      = Xy_mis[rowSums(!O) == 0, ],
+                                GS      = Xy),
                            mod = parms$lm_model)
   
   ## Pooling --------------------------------------------------------------- ##
@@ -425,9 +386,7 @@ runCell <- function(cond, parms, rep_status) {
   # aggregate imputation times
   
   imp_time <- list(DURR_la = imp_DURR_la$time,
-                   DURR_el = imp_DURR_el$time,
                    IURR_la = imp_IURR_la$time,
-                   IURR_el = imp_IURR_el$time,
                    bridge  = imp_bridge$time,
                    blasso  = imp_blasso$time,
                    MI_PCA  = imp_PCA$time,
@@ -492,22 +451,7 @@ runCell_lv <- function(cond, parms, rep_status) {
                              cond = cond,
                              perform = parms$meth_sel$DURR_la,
                              parms = parms)
-  
-  update_report("DURR lasso", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$DURR_la)
-  
-  # Elastic Net
-  imp_DURR_el <- impute_DURR(Z = Xy_mis,
-                             O = as.data.frame(O),
-                             reg_type = "el",
-                             cond = cond,
-                             perform = parms$meth_sel$DURR_el,
-                             parms = parms)
-  update_report("DURR elastic net", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$DURR_el)
-  
+
   ## ----------------------------------------------------------------------- ##
   # Impute according to IURR method
   # Lasso
@@ -517,20 +461,6 @@ runCell_lv <- function(cond, parms, rep_status) {
                              cond = cond,
                              perform = parms$meth_sel$IURR_la,
                              parms = parms)
-  update_report("IURR lasso", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$IURR_la)
-  
-  # Elastic Net
-  imp_IURR_el <- impute_IURR(Z = Xy_mis,
-                             O = as.data.frame(O),
-                             reg_type = "el",
-                             cond = cond,
-                             perform = parms$meth_sel$IURR_el,
-                             parms = parms)
-  update_report("IURR elastic net", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$IURR_el)
   
   ## ----------------------------------------------------------------------- ##
   # Impute according to Hans Blasso method
@@ -538,10 +468,7 @@ runCell_lv <- function(cond, parms, rep_status) {
                                  # O = as.data.frame(O),
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
-  update_report("blasso", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$blasso)
-  
+
   ## ----------------------------------------------------------------------- ##
   # Impute according to van Buuren Ridge
   imp_bridge <- impute_BRIDGE(Z = Xy_mis, 
@@ -549,17 +476,11 @@ runCell_lv <- function(cond, parms, rep_status) {
                               ridge_p = cond$ridge,
                               parms = parms,
                               perform = parms$meth_sel$bridge)
-  update_report("bridge", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$bridge)
-  
+
   ## ----------------------------------------------------------------------- ##
   # Impute according to Howard Et Al 2015 PCA appraoch
   imp_PCA <- impute_PCA(Z = Xy_mis, O = O, cond = cond, parms = parms)
-  update_report("MICE-PCA", rep_status, parms,
-                cnd = cond,
-                perform = parms$meth_sel$MI_PCA)
-  
+
   ## ----------------------------------------------------------------------- ##
   # MICE-CART traditional
   imp_CART <- impute_CART(Z = Xy_mis,
@@ -567,11 +488,7 @@ runCell_lv <- function(cond, parms, rep_status) {
                           cond = cond,
                           perform = parms$meth_sel$MI_CART,
                           parms = parms)
-  
-  update_report("MICE-CART", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$MI_CART)
-  
+
   ## ----------------------------------------------------------------------- ##
   # MICE-RF
   imp_RANF <- impute_RANF(Z = Xy_mis,
@@ -579,11 +496,7 @@ runCell_lv <- function(cond, parms, rep_status) {
                           cond = cond,
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
-  
-  update_report("Random Forest", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$MI_RF)
-  
+
   ## ----------------------------------------------------------------------- ##
   # MICE w/ true model
   imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
@@ -591,14 +504,18 @@ runCell_lv <- function(cond, parms, rep_status) {
                                 cond = cond,
                                 perform = parms$meth_sel$MI_OP,
                                 parms = parms)
-  update_report("MICE-TR", rep_status, parms, 
-                cnd = cond,
-                perform = parms$meth_sel$MI_OP)
-  
+  ## ----------------------------------------------------------------------- ##
   # missForest
   imp_missFor <- impute_missFor(Z = Xy_mis, parms = parms)
-  # missForest_out <- capture.output(impute_missFor(Z = Xy_mis, parms = parms))
-  # missFprest_outdt <- capture.output(imp_missFor$dats)
+  
+  ## ----------------------------------------------------------------------- ##
+  # mean imputation
+  Xy_mean <- Xy_mis
+  for (j in 1:parms$zm_n) {
+    ry <- !is.na(Xy_mean[, parms$z_m_id[j]])
+    mu_zj <- mean(Xy_mean[, parms$z_m_id[j]], na.rm = TRUE)
+    Xy_mean[!ry, parms$z_m_id[j]] <- mu_zj
+  }
   
   ## ----------------------------------------------------------------------- ##
   
@@ -607,9 +524,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   # ------------------- #
   
   imp_values <- list(DURR_la = imp_DURR_la$imps,
-                     DURR_el = imp_DURR_el$imps,
                      IURR_la = imp_IURR_la$imps,
-                     IURR_el = imp_IURR_el$imps,
                      bridge  = imp_bridge$imps,
                      blasso  = imp_blasso$imps,
                      MI_PCA  = imp_PCA$mids,
@@ -626,15 +541,14 @@ runCell_lv <- function(cond, parms, rep_status) {
   # For each imp method, analyse all datasets based on model defined in init.R
   
   ## Create Scored data (needed to define analysis model)
-  SC_dt_sn <- lapply(list(missFor = imp_missFor$dats,
-                          GS = Xy,
-                          CC = Xy[rowSums(!O) == 0, ]),
+  SC_dt_sn <- lapply(list(missFor = imp_missFor$dats,          
+                          mean    = Xy_mean,
+                          CC      = Xy_mis[rowSums(!O) == 0, ],
+                          GS      = Xy),
                      scorify, cond = cond, parms = parms)
   
   SC_dt_mi <-  lapply(list(DURR_la = imp_DURR_la$dats,
-                           DURR_el = imp_DURR_el$dats,
                            IURR_la = imp_IURR_la$dats,
-                           IURR_el = imp_IURR_el$dats,
                            bridge  = imp_bridge$dats,
                            blasso  = imp_blasso$dats,
                            MI_PCA  = imp_PCA$dats,
@@ -660,9 +574,7 @@ runCell_lv <- function(cond, parms, rep_status) {
     
   # Fit models
   semR_fit_mi <- lapply(list(DURR_la = imp_DURR_la$dats,
-                             DURR_el = imp_DURR_el$dats,
                              IURR_la = imp_IURR_la$dats,
-                             IURR_el = imp_IURR_el$dats,
                              bridge  = imp_bridge$dats,
                              blasso  = imp_blasso$dats,
                              MI_PCA  = imp_PCA$dats,
@@ -672,9 +584,10 @@ runCell_lv <- function(cond, parms, rep_status) {
                         fit_sem, model = SAT_mod_raw)
   
   semR_fit_sn <- fit_sem(list(missFor = imp_missFor$dats,          
-                                 GS      = Xy,                        
-                                 CC      = Xy_mis),
-                            model = SAT_mod_raw)
+                              mean    = Xy_mean,
+                              CC      = Xy_mis[rowSums(!O) == 0, ],
+                              GS      = Xy),
+                         model = SAT_mod_raw)
   
   # Pool paramters
   semR_est <- sapply(semR_fit_mi[lapply(semR_fit_mi, length) != 0], 
@@ -699,9 +612,7 @@ runCell_lv <- function(cond, parms, rep_status) {
     
   # Fit models
   CFA_fit_mi <- lapply(list(DURR_la = imp_DURR_la$dats,
-                            DURR_el = imp_DURR_el$dats,
                             IURR_la = imp_IURR_la$dats,
-                            IURR_el = imp_IURR_el$dats,
                             bridge  = imp_bridge$dats,
                             blasso  = imp_blasso$dats,
                             MI_PCA  = imp_PCA$dats,
@@ -710,8 +621,9 @@ runCell_lv <- function(cond, parms, rep_status) {
                             MI_OP   = imp_MICE_OP$dats), 
                        fit_sem, model = CFA_mod_raw, std.lv = TRUE)
   CFA_fit_sn <- fit_sem(list(missFor = imp_missFor$dats,          
-                             GS      = Xy,                        
-                             CC      = Xy_mis),
+                             mean    = Xy_mean,
+                             CC      = Xy_mis[rowSums(!O) == 0, ],
+                             GS      = Xy),
                         model = CFA_mod_raw,
                         std.lv = TRUE)
 
@@ -792,9 +704,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   # aggregate imputation times
   
   imp_time <- list(DURR_la = imp_DURR_la$time,
-                   DURR_el = imp_DURR_el$time,
                    IURR_la = imp_IURR_la$time,
-                   IURR_el = imp_IURR_el$time,
                    bridge  = imp_bridge$time,
                    blasso  = imp_blasso$time,
                    MI_PCA  = imp_PCA$time,
@@ -1193,7 +1103,6 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis,
-                                 # O = data.frame(!is.na(Xy_mis)),
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
   

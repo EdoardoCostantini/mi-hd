@@ -46,9 +46,10 @@ stopCluster(clus)
 
 sim_ends <- Sys.time()
 
-## Add Important run info
+# Attach Info Objects
 out$parms <- parms
 out$conds <- conds
+out$session_info <- session_info()
 
 ## Close report file
 cat(paste0("\n", "------", "\n",
@@ -61,6 +62,7 @@ cat(paste0("\n", "------", "\n",
     append = TRUE)
 
 # Save output -------------------------------------------------------------
+
 saveRDS(out,
         paste0(parms$outDir,
                parms$results_file_name)

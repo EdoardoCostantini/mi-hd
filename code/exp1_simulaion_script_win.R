@@ -7,20 +7,21 @@ source("./init_general.R")
 source("./exp1_init.R")
 
 ## Create a cluster object:
-clus <- makeCluster(10)
+clus <- makeCluster(5)
 
 ## Two different ways to source a script on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
 clusterEvalQ(cl = clus, expr = source("./exp1_init.R"))
 
-## Data directory for storage
-
 # Progress report file ----------------------------------------------------
 file.create(paste0(parms$outDir, parms$report_file_name))
 
 cat(paste0("SIMULATION PROGRESS REPORT",
+           ## Description
            "\n",
-           "Description: ", parms$description, "\n",
+           "Description: ", parms$description, 
+           "\n",
+           ## Time
            "\n", "------", "\n",
            "Starts at: ", Sys.time(),
            "\n", "------", "\n" ),
@@ -37,13 +38,20 @@ out <- parLapply(cl = clus,
                  X = 1 : parms$dt_rep,
                  fun = doRep, 
                  conds = conds, 
-                 parms = parms)
+                 parms = parms,
+                 debug = FALSE)
 
 ## Kill the cluster:
 stopCluster(clus)
 
 sim_ends <- Sys.time()
 
+# Attach Info Objects
+out$parms <- parms
+out$conds <- conds
+out$session_info <- session_info()
+
+## Close report file
 cat(paste0("\n", "------", "\n",
            "Ends at: ", Sys.time(), "\n",
            "Run time: ",
@@ -52,9 +60,6 @@ cat(paste0("\n", "------", "\n",
     file = paste0(parms$outDir, parms$report_file_name),
     sep = "\n",
     append = TRUE)
-
-# Attach parm object
-out$parms <- parms
 
 # Save output -------------------------------------------------------------
 

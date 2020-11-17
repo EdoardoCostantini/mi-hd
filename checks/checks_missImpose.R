@@ -31,7 +31,7 @@ round(colMeans(pm_store), 1) == cond$pm
 
   rm(list=ls())
   source("./init_general.R")
-  source("./exp2_init.R")
+  source("./exp1_init.R")
   
   ## gen data according to condition ##
   cond <- conds[1, ]

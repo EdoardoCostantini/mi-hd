@@ -9,7 +9,7 @@
   parms$exp <- 1 # which experiment is been run
 
 # Itereations, repetitions, etc
-  parms$dt_rep     <- 5 # 500 replications for averaging results (200 goal)
+  parms$dt_rep     <- 5 # 1e3 replications for averaging results (200 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
   parms$iters      <- 5 # 50
   parms$burnin_imp <- 0 # 20 how many imputation iterations should be discarded
@@ -92,20 +92,19 @@
   
   
 # Generic
-  parms$meth_sel <- data.frame(DURR_la = TRUE,
-                               DURR_el = FALSE,
-                               IURR_la = TRUE,
-                               IURR_el = FALSE,
-                               bridge  = TRUE,
-                               blasso  = TRUE,
-                               MI_PCA  = TRUE,
-                               MI_CART = TRUE,
-                               MI_RF   = TRUE,
-                               MI_OP   = TRUE,
-                               missFor = TRUE,
-                               GS      = TRUE,
-                               CC      = TRUE
-                               )
+  parms$meth_sel <- data.frame(DURR_la    = TRUE,
+                               IURR_la    = TRUE,
+                               blasso     = TRUE,
+                               bridge     = TRUE,
+                               MI_PCA     = TRUE,
+                               MI_CART    = TRUE,
+                               MI_RF      = TRUE,
+                               MI_OP      = TRUE,
+                               missFor    = TRUE,
+                               mean       = TRUE,
+                               CC         = TRUE,
+                               GS         = TRUE)
+  
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
     # (GS, CC always last, alwyas present)
 

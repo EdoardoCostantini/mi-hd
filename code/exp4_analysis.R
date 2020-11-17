@@ -125,7 +125,7 @@
     # plot_cond = "(empty)"
     # meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
     #                  "MI_PCA",
-    #                  "MI_CART", "MI_RF", "missFor", "mean", "CC")
+    #                  "MI_CART", "MI_RF", "missFor", "CC")
     
     # Process inputs
     # var_name <- rownames(dt)
@@ -773,5 +773,4 @@
   pf <- grid.arrange(p)
 
   ggsave(file = "../output/graphs/exp4_time.pdf", pf)
-
 

@@ -28,6 +28,9 @@
 \usepackage{threeparttablex}
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
+\usepackage{color, colortbl} 		% for coloring rows of table
+	\definecolor{Gray}{gray}{0.9}
+
 
 \title{High Dimensional Imputation for the Social Sciences\\ \Large A Review of State-of-the-Art Methods}
 \author{Edoardo Costantini}
@@ -74,24 +77,23 @@
 % Bibliography
 \bibliographystyle{apalike}
 
-%\bibliography{
-%	../../../stats-refs/raw/missingData/bibtex/papers,
-%	../../../stats-refs/raw/missingData/bibtex/books,
-%	../../../stats-refs/raw/bayesStats/bibtex/papers,	
-%	}
-
 \bibliography{
 	../../../statsLib/missingData/bibtex/papers,
 	../../../statsLib/missingData/bibtex/books,
-	../../../statsLib/bayesStats/bibtex/papers	
+	../../../statsLib/bayesStats/bibtex/papers,
+	../../../statsLib/programming/bibtex/papers
 	}
 
-% terminal compile strategy:
+% Compile strategy 1:
 % 0. Go to folder containing 00_manuscript.tex
 % 1. pdflatex 00_manuscript.tex
 % 2. bibtex   00_manuscript
 % 3. pdflatex 00_manuscript.tex
 % 4. pdflatex 00_manuscript.tex
 % Source: https://www.latex-tutorial.com/tutorials/bibtex/
+
+% Compile Strategy 2:
+% run shell script statsLib_pdflatex.sh located in source folder
+% type " ./statsLib_pdflatex.sh 00_manuscript " and return in Terminal
 
 \end{document}

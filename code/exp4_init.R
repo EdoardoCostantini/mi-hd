@@ -154,7 +154,7 @@
   parms$m2_par <- c("NatAt", "rel", "polAction_r")# for model 2
   
   # Alternative definition
-  parms$m1_par <- 1:14
+  parms$m1_par <- 1:13
   parms$m2_par <- 1:14
   
   # Needs to match the location and name of the output list

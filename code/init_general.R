@@ -5,25 +5,47 @@
 
 # Packages ----------------------------------------------------------------
 
-library(tidyverse)
-library(CVTuningCov) # for AR1 function
-library(mvtnorm)
-library(monomvn)
-library(glmnet)
-library(rlecuyer) # for seed in parallel
-library(parallel)
-library(caret) # for Elastic cv functions
-library(missForest) # for missForest imputation
-library(truncnorm) # for truncnorm sampling in probit models
-library(lavaan)
-library(FactoMineR)
-library(devtools)
-library(xtable)
-library(rstan) # for Rhat computation
+pack_list <- c("tidyverse",
+               "CVTuningCov",
+               "mvtnorm",
+               "monomvn",
+               "glmnet",
+               "rlecuyer",
+               "parallel",
+               "caret", 
+               "missForest",
+               "truncnorm",
+               "lavaan",
+               "FactoMineR",
+               "devtools",
+               "xtable",
+               "rstan",
+               "gridExtra",
+               "xtable",
+               "PcAux",
+               "blasso")
 
-# Special pacakges
-library(PcAux)  # requires installation with devtools
-library(blasso) # requires installation with zipped folder
+lapply(pack_list, library, character.only = TRUE)
+
+# library(tidyverse)
+# library(CVTuningCov) # for AR1 function
+# library(mvtnorm)
+# library(monomvn)
+# library(glmnet)
+# library(rlecuyer) # for seed in parallel
+# library(parallel)
+# library(caret) # for Elastic cv functions
+# library(missForest) # for missForest imputation
+# library(truncnorm) # for truncnorm sampling in probit models
+# library(lavaan)
+# library(FactoMineR)
+# library(devtools)
+# library(xtable)
+# library(rstan) # for Rhat computation
+# 
+# # Special pacakges
+# library(PcAux)  # requires installation with devtools
+# library(blasso) # requires installation with zipped folder
 
 # Support Functions -------------------------------------------------------
 

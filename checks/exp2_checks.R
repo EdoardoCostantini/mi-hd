@@ -20,18 +20,26 @@
 
 # > items -----------------------------------------------------------------
 
-# On average they have mean = 0, sd = 1
+# On average they have mean = parms$item_mean, sd = sqrt( parms$item_var )
   
   set.seed(20200727)
+  
+  reps <- 5e2
   store <- matrix(0, nrow = parms$n_it*conds[1,]$lv, ncol = 2)
-  for (i in 1:5e3) {
+  
+  for (i in 1:reps) {
     X <- simData_lv(parms, conds[1,])
     store <- store + data.frame(mu = colMeans(X$dat), 
                                 var = apply(X$dat, 2, var))
   }
-  round(store/5e3, 3)
+  
+  colMeans(round(store/reps, 3))
 
+  data.frame(True = c(mean = parms$item_mean, var = parms$item_var),
+             MCMC = round(colMeans(store/reps), 3))
+  
 # On average what is the correlation btw lv, and btw items
+  
   cond <- data.frame(lv = 10, pm = .1, fl = "high")
   # a) lv correlated as in phi for all fl (dah!)
   # b) fl = "none", items rho 0
@@ -40,16 +48,36 @@
   
   set.seed(20200727)
   store <- matrix(0, nrow = parms$n_it*conds[1,]$lv, ncol = 2)
-  sv_lvcor <- matrix(0, nrow = cond$lv, ncol = cond$lv)
-  sv_itcor <- matrix(0, nrow = 10, ncol = 10)
+  sv_lvcov <- matrix(0, nrow = cond$lv, ncol = cond$lv)
+  sv_itcov <- matrix(0, nrow = 10, ncol = 10)
   reps <- 1e3
   for (i in 1:reps) {
     simData_out <- simData_lv(parms, cond)
-    sv_lvcor <- sv_lvcor + round(cor(simData_out$scores_lv),3)
-    sv_itcor <- sv_itcor + round(cor(simData_out$dat[, 1:10]),3)
+    sv_lvcov <- sv_lvcov + round(cov(simData_out$scores_lv),3)
+    sv_itcov <- sv_itcov + round(cov(simData_out$dat[, 1:10]),3)
   }
-  round(sv_lvcor/reps, 3)
-  round(sv_itcor/reps, 3)
+  
+  # Generate some data to extract model implied parm values
+  Xy <- simData_lv(parms, cond)
+  
+  # Latent Variables
+  MCMC_lvcov <- round(sv_lvcov/reps, 3)
+  round(MCMC_lvcov - Xy$Phi, 3) # should all be close to 0
+  
+  # Items
+  # MCMC estimate
+  MCMC_itcov <- round(sv_itcov/reps, 3)
+
+  # Molde IMPlied values
+  IMP_it1_var  <- Xy$Lambda[1, 1]^2 * Xy$Phi[1,1] + Xy$Theta[1,1]
+    MCMC_itcov[1, 1] - IMP_it1_var # should be zero or close
+  IMP_it12_cov <- Xy$Lambda[1, 1]^2 * Xy$Phi[1,1] + Xy$Theta[1, 2]
+    MCMC_itcov[1, 2] - IMP_it12_cov # should be zero or close
+  IMP_it16_cov <- Xy$Lambda[1, 1]^2 * Xy$Phi[1,2] + Xy$Theta[1, 6]
+  
+  # Should be similar values for each parameter
+  data.frame(implied = c(IMP_it1_var, IMP_it12_cov, IMP_it16_cov),
+             MCMC    = MCMC_itcov[1, c(1, 2, 6)])
 
 # Low dimensional MAR imputation works ------------------------------------
 # Run the following to see how:
@@ -86,7 +114,7 @@
     lines(density(Xy_mis[, i], na.rm = TRUE), col = "blue", lty = 2,  lwd = .5)
   }
   
-  # Plot MI of that vairable on the last dataset
+  # Plot MI of that variable on the last dataset
   MI <- mice(data = Xy_mis[, 1:20], m = 10, maxit = 10,
              method = "norm")
   MI_dt <- complete(MI, "all")
@@ -95,7 +123,43 @@
                                   col = "yellow")
   )
   
-# CFA estiamtes: unbiased -------------------------------------------------
+
+# CFA: Model Fits Well ----------------------------------------------------
+# you could make it on average but I'm already convinced
+  
+  rm(list=ls())
+  source("./init_general.R")
+  source("./exp2_init.R")
+  
+  # Gen data
+  set.seed(20200805)
+  # parms$n <- 1e3 # asimp
+  cond <- data.frame(lv = 10, pm = .1, fl = "high")
+  
+  Xy <- simData_lv(parms, cond)
+  items <- colnames(Xy$dat)
+  CFA_model <- CFA_mod_wirte(Xy$dat, 3, parms)
+  
+  # Example CFA fit
+  fit   <- cfa(CFA_model, data = Xy$dat, std.lv = TRUE)
+  summary(fit, fit.measures = TRUE, standardized = TRUE)
+  # CFI (Comparative fit index): Measures whether the model fits the data 
+  #   better than a more restricted baseline model. Higher is better, 
+  #   with okay fit > .9.
+  # TLI (Tucker-Lewis index): Similar to CFI, but it penalizes overly complex
+  #   models (making it more conservative than CFI). Higher is better, 
+  #   with okay fit > .9.
+  # RMSEA (Root mean square error of approximation): The “error of approximation”
+  #   refers to residuals. Instead of comparing to a baseline model, it measures 
+  #   how closely the model reproduces data patterns. If the p-value is greater 
+  #   than alpha, then it is typical to report that the model has “close fit” 
+  #   according to the RMSEA.
+  
+  CFA_par <- parameterEstimates(fit, 
+                                se = F, zstat = F, pvalue = F, ci = F)
+  CFA_par[1:10, ]
+  
+# CFA: unbiased estiamtes -------------------------------------------------
 
   rm(list=ls())
   source("./init_general.R")
@@ -103,24 +167,27 @@
   
   # Gen data
   set.seed(20200805)
-  
   cond <- data.frame(lv = 10, pm = .1, fl = "high")
+  # items <- colnames(Xy$dat)
   
+  # Create CFA model text
   Xy <- simData_lv(parms, cond)
-  items <- colnames(Xy$dat)
   CFA_model <- CFA_mod_wirte(Xy$dat, 3, parms)
   
-  reps <- 1e3
+  # Storing Objects
+  reps <- 500
   sv_fl <- matrix(nrow = reps, ncol = 15) # factor loadings
   sv_ev <- matrix(nrow = reps, ncol = 15) # error variances (items)
   sv_lc <- matrix(nrow = reps, ncol = 3) # latent variable covariances
   
+  options(warn=2) # make warnings errors
+  
   for(r in 1:reps){
+    print(r)
     Xy <- simData_lv(parms, cond)
     # Define CFA model
     # Fit models
     fit   <- cfa(CFA_model, data = Xy$dat, std.lv = TRUE)
-    
     # Compare
     CFA_par <- parameterEstimates(fit, 
                                   se = F, zstat = F, pvalue = F, ci = F)
@@ -133,12 +200,51 @@
     sv_ev[r,] <- CFA_par[16:30, "est"] - diag(Xy$Theta)[1:15]
     
     # latent variables covarainces
-    sv_lc[r,] <- CFA_par[34:36, "est"] - Xy$Phi[2, 1]
+    sv_lc[r,] <- CFA_par[34:36, "est"] - (Xy$Phi[2, 1])
   }
+  
+  options(warn=1) # revert warnings to warnings
+  
+  # Bias in percent should be close to 0)
+  colMeans(sv_fl)
+  colMeans(sv_ev)
+  colMeans(sv_lc)
+  
+# CFA: Model Implied Values -----------------------------------------------
+# Chech that everythin adds up
+  
+  # Model implied values of var(delta)
+  set.seed(1234)
+  parms$n <- 1e4
+  Xy <- simData_lv(parms, cond)
+  
+  # Define CFA model
+  # Fit models
+  fit   <- cfa(CFA_model, data = Xy$dat, std.lv = TRUE)
+  CFA_par <- parameterEstimates(fit)[1:4]
+  
+  # > Sample Covariance Matrix of data (S) ####
+  ( S <- cov(scale(Xy$dat))[1:5, 1:5] )
+  
+  # Model Implied Covariance matrix of data (Sigma)
+  ( Sigma <- (Xy$Lambda %*% Xy$Phi %*% t(Xy$Lambda) + Xy$Theta)[1:5, 1:5] )
+  
+  # Difference
+  round( S - Sigma , 3)
+  
+  # > Error variances (ev) ####
+  MCMC_ev <- CFA_par[16:30, "est"]
+  IMP_ev <- sapply(Xy$dat, var)[1:15] - Xy$Lambda[Xy$Lambda != 0][1:15]^2
+  
+  round(
+    data.frame(MCMC = MCMC_ev,
+               implied = IMP_ev,
+               diff = MCMC_ev - IMP_ev),
+    3)
   
 # Scaling issues ----------------------------------------------------------
 
-  # Define some CFA mode to test
+  # Define some CFA model to test
   CFA_model <- '
       # Measurement Model
       lv1 =~ z1 + z2 + z3 + z4 + z5
@@ -149,15 +255,14 @@
   X <- simData_lv(parms, conds[1,])
   
   # Scaled data
-  Xs <- X$dat * sqrt(5) + 5
-  
   Xs <- sapply(X$dat, function(x){
     x * sqrt(5)/sd(x) + 5
   })
-  colMeans(X$dat)
-  apply(X$dat, 2, var)
-  colMeans(Xs)
-  apply(Xs, 2, var)
+  
+  data.frame(mu = colMeans(X$dat),
+             var = apply(X$dat, 2, var),
+             mu_s = colMeans(Xs),
+             var_s = apply(Xs, 2, var))
   
   # Fit models
   fit   <- cfa(CFA_model, data = X$dat, std.lv = TRUE)
@@ -182,7 +287,7 @@
   
   # Compare
   round(X$Lambda, 3)[1,1] / round(X$Lambda, 3)[2,1]
-  parameterEstimates(fit)$est[1] /parameterEstimates(fit)$est[2]
+  parameterEstimates(fit)$est[1] / parameterEstimates(fit)$est[2]
   parameterEstimates(fit_s, standardized = TRUE)$est[1] / parameterEstimates(fit_s, standardized = TRUE)$est[2]
   
 # Effects of missingness imposition on estiamtes --------------------------

@@ -1583,6 +1583,7 @@ res_ed_overall <- function(out, condition){
 
 res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   # model = "sem"
+  # model = "semR"
   # model = "CFA"
   # model = "m2"
   # condition = 2
@@ -1613,7 +1614,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     c(rowMeans(store, na.rm = TRUE), rep = ncol(store)) # MCMC statistics 
     # rowSums(!is.na(store))
   })
-  
+
   # Store Objects
   avg <- data.frame(avg[, colSums(is.nan(avg)) == 0])
     # get rid of NaNs that come up in exp3 for conditions that are not using 
@@ -1622,7 +1623,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   avg        <- avg[-which(rownames(avg) == "rep"), ]
   psd_tr_vec <- avg[, "GS"] # pseudo true values
   
-  if(out$parms$exp == 1 & nchar(rownames(avg)[1]) < 1){
+  if(out$parms$exp == 1 & model == "sem"){
     # Fixes a problem of old results from privous runs of eperiment 1
     # in the future I will delte these part as exp 1 results wiil be
     # uniform with rest
@@ -1744,7 +1745,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
                   bias_raw  = round(cbind(ref=psd_tr_vec, bias), 3),
                   bias_per  = bias_per,
                   bias_sd   = bias_sd_out,
-                  ci_cov    = round(CIC*100, 1),
+                  ci_cov    = round(CIC*100, 3),
                   ed_est    = data.frame(t(ed_est)),
                   ed_ci     = data.frame(t(ed_ci)),
                   CIW       = CIW,
