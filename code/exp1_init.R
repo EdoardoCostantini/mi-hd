@@ -11,9 +11,9 @@
 # Itereations, repetitions, etc
   parms$dt_rep     <- 5 # 1e3 replications for averaging results (200 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
-  parms$iters      <- 5 # 50
-  parms$burnin_imp <- 0 # 20 how many imputation iterations should be discarded
-  parms$ndt        <- 5 # 10 number of imputed datasets to pool esitmaes from (10)
+  parms$iters      <- 5 # 70
+  parms$burnin_imp <- 0 # 50 how many imputation iterations should be discarded
+  parms$ndt        <- 5 # 10 number of imputed datasets to pool estimates from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
@@ -24,8 +24,8 @@
 
   # For blasso
   parms$chains_bl     <- 1 # number of parallel chains for convergence check
-  parms$iters_bl      <- 5 # 50
-  parms$burnin_imp_bl <- 0 # 20 how many imputation iterations should be discarded
+  parms$iters_bl      <- 5 # 70
+  parms$burnin_imp_bl <- 0 # 50 how many imputation iterations should be discarded
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 

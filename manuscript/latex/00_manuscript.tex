@@ -3,18 +3,14 @@
 
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath} 				% for matrixes
-\usepackage{bm} 					% for bold math
-\usepackage[flushleft]{threeparttable} 	% for table notes
-\usepackage{pdflscape} 				% for tables in landscape mode
-\usepackage{graphicx}				% to resize tables
-\usepackage[round]{natbib} 			% for better apalike citation style
-\usepackage{multirow} 				% for multirow tables
-\usepackage[pdfpagemode=FullScreen,bookmarks=true]{hyperref} % for outlines
-
-% For tables you are creating them in R using knitr::kable and kableExtra
-% In the vignette for kableExtra it is advised to use all the following
-% latex packages.
+\usepackage{amsmath} 						% for matrixes
+\usepackage{bm} 						% for bold math
+\usepackage[flushleft]{threeparttable} 				% for table notes
+\usepackage{pdflscape} 						% for tables in landscape mode
+\usepackage{graphicx}						% to resize tables
+\usepackage[round]{natbib} 					% for better apalike citation style
+\usepackage{multirow} 						% for multirow tables
+\usepackage[pdfpagemode=FullScreen,bookmarks=true]{hyperref}	% for outlines
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -28,8 +24,11 @@
 \usepackage{threeparttablex}
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
-\usepackage{color, colortbl} 		% for coloring rows of table
+\usepackage{color, colortbl} 					% for coloring rows of table
 	\definecolor{Gray}{gray}{0.9}
+
+\usepackage{placeins} 						% to limit push-to-end of figures
+\usepackage{afterpage} 						% for smart placement of figures
 
 
 \title{High Dimensional Imputation for the Social Sciences\\ \Large A Review of State-of-the-Art Methods}
@@ -81,7 +80,8 @@
 	../../../statsLib/missingData/bibtex/papers,
 	../../../statsLib/missingData/bibtex/books,
 	../../../statsLib/bayesStats/bibtex/papers,
-	../../../statsLib/programming/bibtex/papers
+	../../../statsLib/programming/bibtex/papers,
+	../../../statsLib/data/bibtex/surveys
 	}
 
 % Compile strategy 1:

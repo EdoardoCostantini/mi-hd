@@ -11,9 +11,9 @@
   # Read results from a run of simulation study
   # exp2_res <- readRDS("../output/exp2_simOut_20200812_1449_res.rds") # way out
   
-  filename <- "exp2_simOut_20200819_1743" # last good one
   filename <- "exp2_simOut_20201116_1743" # short run with scaslde items
   filename <- "exp2_simOut_20201117_1125" # short run with scaslde items
+  filename <- "exp2_simOut_20200819_1743" # last good one
   
   out <- readRDS(paste0("../output/", filename, ".rds"))
   exp2_res <- readRDS(paste0("../output/", filename, "_res.rds"))
@@ -434,9 +434,17 @@
 
 
 # Plots -------------------------------------------------------------------
-
-# > SEMRaw Bias -----------------------------------------------------------
   
+  res$conds
+  cond_names <- paste0(letters[1:nrow(res$conds)], ") ",
+                       "Condition ", 1:nrow(res$conds), ": ",
+                       "fl = ",  res$conds$fl, "; ",
+                       "lv = ",  res$conds$lv, "; ",
+                       "pm = ",  res$conds$pm)
+  data.frame(res$conds, cond_names)
+  
+# > SEMRaw Bias -----------------------------------------------------------
+
   # Example 1 Data
   dt = lapply(1:length(res$semR),
               function(x) data.frame( res$semR[[x]]$bias_per))[[4]]
@@ -451,25 +459,31 @@
                                "missFor", "CC"))
   )
 
-  # Full Results
+## CONDITION 1 to 4 ##
+  
+  # Show Results for 1 set of factor loadings
+  # Raw Bias
   bias_plots_mean <- lapply(1:4, function(p){
     plot_gg(dt = lapply(1:length(res$semR),
-                        function(x) data.frame( res$semR[[x]]$bias_per))[[p]],
+                        function(x) data.frame( res$semR[[x]]$bias_sd))[[p]],
             parm_range = 1:10,
-            type = "bias",
+            type = "bias_sd",
+            plot_name = cond_names[p],
+            y_axLab = TRUE,
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
                                  "MI_CART", "MI_RF", 
                                  "missFor", "CC"))
     )
-  } )  
-  
+  } ) 
   bias_plots_var <- lapply(1:4, function(p){
     plot_gg(dt = lapply(1:length(res$semR),
                         function(x) data.frame( res$semR[[x]]$bias_per))[[p]],
             parm_range = 11:20,
             type = "bias",
+            plot_name = cond_names[p],
+            y_axLab = TRUE,
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -482,6 +496,8 @@
                         function(x) data.frame( res$semR[[x]]$bias_per))[[p]],
             parm_range = -(1:20),
             type = "bias",
+            plot_name = cond_names[p],
+            y_axLab = TRUE,
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -503,26 +519,35 @@
   pf <- grid.arrange(p1, p2, p3, ncol = 3)
   pf
   
-# SEM Raw Bias Raw -------------------------------------------------------
-  # Full Results
-  bias_plots_mean <- lapply(1:4, function(p){
-    plot_gg(dt = lapply(1:length(res$semR),
-                        function(x) data.frame( res$semR[[x]]$bias_raw))[[1]],
-            parm_range = 1:10,
-            type = "bias_raw",
-            meth_compare = rev(c("DURR_la", "IURR_la", 
-                                 "blasso", "bridge",
-                                 "MI_PCA",
-                                 "MI_CART", "MI_RF", 
-                                 "missFor", "CC"))
-    )
-  } )  
+  ggsave(file  = "~/Desktop/exp2_semR_bias_14.pdf", 
+         width = 8.25, height = 11.75,
+         arrangeGrob(p1, p2, p3, ncol = 3))
   
-  bias_plots_var <- lapply(1:4, function(p){
+## CONDITION 5 to 8 ##
+  
+  # Show Results for 1 set of factor loadings
+  # Raw Bias
+  bias_plots_mean <- lapply(5:8, function(p){
     plot_gg(dt = lapply(1:length(res$semR),
-                        function(x) data.frame( res$semR[[x]]$bias_raw))[[1]],
+                        function(x) data.frame( res$semR[[x]]$bias_sd))[[p]],
+            parm_range = 1:10,
+            type = "bias_sd",
+            plot_name = cond_names[p],
+            y_axLab = TRUE,
+            meth_compare = rev(c("DURR_la", "IURR_la", 
+                                 "blasso", "bridge",
+                                 "MI_PCA",
+                                 "MI_CART", "MI_RF", 
+                                 "missFor", "CC"))
+    )
+  } ) 
+  bias_plots_var <- lapply(5:8, function(p){
+    plot_gg(dt = lapply(1:length(res$semR),
+                        function(x) data.frame( res$semR[[x]]$bias_per))[[p]],
             parm_range = 11:20,
-            type = "bias_raw",
+            type = "bias",
+            plot_name = cond_names[p],
+            y_axLab = TRUE,
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -530,11 +555,13 @@
                                  "missFor", "CC"))
     )
   } )  
-  bias_plots_cov <- lapply(1:4, function(p){
+  bias_plots_cov <- lapply(5:8, function(p){
     plot_gg(dt = lapply(1:length(res$semR),
-                        function(x) data.frame( res$semR[[x]]$bias_raw))[[1]],
+                        function(x) data.frame( res$semR[[x]]$bias_per))[[p]],
             parm_range = -(1:20),
-            type = "bias_raw",
+            type = "bias",
+            plot_name = cond_names[p],
+            y_axLab = TRUE,
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -556,12 +583,20 @@
   pf <- grid.arrange(p1, p2, p3, ncol = 3)
   pf
   
-###
-  bias_plots_var <- lapply(1:8, function(p){
+  ggsave(file  = "~/Desktop/exp2_semR_bias_58.pdf", 
+         width = 8.25, height = 11.75,
+         arrangeGrob(p1, p2, p3, ncol = 3))
+  
+## > CI (Grid distinguishing condition and measure) #####
+  
+## CONDITION 1:4 ##
+  
+  ci_plots_mean <- lapply(1:4, function(p){
     plot_gg(dt = lapply(1:length(res$semR),
-                        function(x) data.frame( res$semR[[x]]$bias_per))[[p]],
-            parm_range = 11:20,
-            type = "bias",
+                        function(x) data.frame( res$semR[[x]]$ci_cov))[[p]],
+            parm_range = 1:10,
+            type = "ci",
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -569,37 +604,220 @@
                                  "missFor", "CC"))
     )
   } )  
-  bias_plots_cov <- lapply(1:8, function(p){
+  ci_plots_var <- lapply(1:4, function(p){
     plot_gg(dt = lapply(1:length(res$semR),
-                        function(x) data.frame( res$semR[[x]]$bias_per))[[p]],
-            parm_range = -(1:20),
-            type = "bias",
+                        function(x) data.frame( res$semR[[x]]$ci_cov))[[p]],
+            parm_range = 11:20,
+            type = "ci",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
                                  "MI_CART", "MI_RF", 
                                  "missFor", "CC"))
     )
-  } )
+  } )  
+  ci_plots_cov <- lapply(1:4, function(p){
+    plot_gg(dt = lapply(1:length(res$semR),
+                        function(x) data.frame( res$semR[[x]]$ci_cov))[[p]],
+            parm_range = -(1:20),
+            type = "ci",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
+            meth_compare = rev(c("DURR_la", "IURR_la", 
+                                 "blasso", "bridge",
+                                 "MI_PCA",
+                                 "MI_CART", "MI_RF", 
+                                 "missFor", "CC"))
+    )
+  } )  
   
   # Display Plots
-  p2 <- arrangeGrob(grobs = bias_plots_var,
+  p1 <- arrangeGrob(grobs = ci_plots_mean,
+                    top = "Mean", 
+                    ncol = 1)
+  p2 <- arrangeGrob(grobs = ci_plots_var,
                     top = "Variances",
                     ncol = 1)
-  p3 <- arrangeGrob(grobs = bias_plots_cov,
+  p3 <- arrangeGrob(grobs = ci_plots_cov,
                     top = "Covariances",
                     ncol = 1)
-  pf <- grid.arrange(p2, p3, ncol = 2)
+  pf <- grid.arrange(p1, p2, p3, ncol = 3)
   pf
   
-  grid.arrange(p2, p3, ncol = 2)
+  ggsave(file  = "~/Desktop/exp2_semR_ci_14.pdf", 
+         width = 8.25, height = 11.75,
+         arrangeGrob(p1, p2, p3, ncol = 3))
   
-  #>  CFA ####
+## CONDITIONS 5:8 ##
+  
+  ci_plots_mean <- lapply(5:8, function(p){
+    plot_gg(dt = lapply(1:length(res$semR),
+                        function(x) data.frame( res$semR[[x]]$ci_cov))[[p]],
+            parm_range = 1:10,
+            type = "ci",
+            plot_name = cond_names[p],
+            meth_compare = rev(c("DURR_la", "IURR_la", 
+                                 "blasso", "bridge",
+                                 "MI_PCA",
+                                 "MI_CART", "MI_RF", 
+                                 "missFor", "CC"))
+    )
+  } )  
+  ci_plots_var <- lapply(5:8, function(p){
+    plot_gg(dt = lapply(1:length(res$semR),
+                        function(x) data.frame( res$semR[[x]]$ci_cov))[[p]],
+            parm_range = 11:20,
+            type = "ci",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
+            meth_compare = rev(c("DURR_la", "IURR_la", 
+                                 "blasso", "bridge",
+                                 "MI_PCA",
+                                 "MI_CART", "MI_RF", 
+                                 "missFor", "CC"))
+    )
+  } )  
+  ci_plots_cov <- lapply(5:8, function(p){
+    plot_gg(dt = lapply(1:length(res$semR),
+                        function(x) data.frame( res$semR[[x]]$ci_cov))[[p]],
+            parm_range = -(1:20),
+            type = "ci",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
+            meth_compare = rev(c("DURR_la", "IURR_la", 
+                                 "blasso", "bridge",
+                                 "MI_PCA",
+                                 "MI_CART", "MI_RF", 
+                                 "missFor", "CC"))
+    )
+  } )  
+  
+  # Display Plots
+  p1 <- arrangeGrob(grobs = ci_plots_mean,
+                    top = "Mean", 
+                    ncol = 1)
+  p2 <- arrangeGrob(grobs = ci_plots_var,
+                    top = "Variances",
+                    ncol = 1)
+  p3 <- arrangeGrob(grobs = ci_plots_cov,
+                    top = "Covariances",
+                    ncol = 1)
+  pf <- grid.arrange(p1, p2, p3, ncol = 3)
+  pf
+
+  ggsave(file  = "~/Desktop/exp2_semR_ci_58.pdf", 
+         width = 8.25, height = 11.75,
+         arrangeGrob(p1, p2, p3, ncol = 3))
+  
+  # TOTAL JUNK
+  # other arrange
+  require(gtable)
+  
+  g1 <- ggplotGrob(ci_plots_mean[[1]])
+  g2 <- ggplotGrob(ci_plots_mean[[2]])
+  ## add dummy column for missing strips
+  g2 <- gtable_add_cols(g2, unit(0,"mm"))
+  ## merge, basing widths on g1
+  g <- gtable:::rbind_gtable(g1, g2, "first")
+  ## add spacing
+  g <- gtable_add_rows(g, unit(1,"cm"), pos=nrow(g1))
+  grid.newpage()
+  grid.draw(g)
+  
+  # ggarrange
+  prova1 <- lapply(ci_plots_mean, 
+                   set_panel_size, 
+                   width  = unit(6, "cm"),
+                   height = unit(2.5, "cm"))
+  p1 <- arrangeGrob(grobs = prova1,
+                    top = "Means", 
+                    ncol = 1)
+  prova2 <- lapply(ci_plots_var, 
+                   set_panel_size, 
+                   width  = unit(6, "cm"),
+                   height = unit(2.5, "cm"))
+  p2 <- arrangeGrob(grobs = prova2,
+                    top = "Variances", 
+                    ncol = 1)
+  prova3 <- lapply(ci_plots_cov, 
+                   set_panel_size, 
+                   width  = unit(6, "cm"),
+                   height = unit(2.5, "cm"))
+  p3 <- arrangeGrob(grobs = prova3,
+                    top = "Covariances", 
+                    ncol = 1)
+  grid.arrange(p1, p2, p3, ncol = 3)
+  
+  ggarrange(p1, p2, p3, 
+            widths = c(2.5, 2.5), 
+            heights = c(2.5, 2.5))
+  
+  ggsave(file  = "~/Desktop/exp2_semR_ci.pdf", 
+         width = 21, height = 29.7, # A4 page
+         units = "cm",
+         arrangeGrob(p1, p2, p3, ncol = 3,
+                     widths = c(1, 1, 1)))
+  
+  gtabe
+  p <- ggplot()
+  ggarrange(p, p, p, 
+            widths = c(2.5, 2.5), 
+            heights = c(2.5, 2.5))
+  ggarrange(p, p, p)
+  
+  # row_names <- paste0("cond ", 1:nrow(out$conds))
+  # 
+  # ci_plots_mean[1:8] <- lapply(1:8, function(i) {
+  #   arrangeGrob(ci_plots_mean[[i]],
+  #               left = row_names[i])}
+  #   )
+  
+  p1 <- arrangeGrob(grobs = ci_plots_mean,
+                    top = "Mean", 
+                    ncol = 1)
+  p2 <- arrangeGrob(grobs = ci_plots_var,
+                    top = "Variances",
+                    ncol = 1)
+  p3 <- arrangeGrob(grobs = ci_plots_cov,
+                    top = "Covariances",
+                    ncol = 1)
+  pf <- grid.arrange(p1, p2, p3, ncol = 3)
+  pf
+  
+  ggsave(file  = "~/Desktop/exp2_semR_ci.pdf", 
+         width = 8.25, height = 11.75,
+         arrangeGrob(p1, p2, p3, ncol = 3))
+  
+  # Create list of plots
+  set.seed(0)
+  pl = lapply(1:9, function(i) {
+    p = ggplot(data.frame(x=1:10,y=rnorm(10)),aes(x, y)) + 
+      geom_line()
+  })
+  
+  # Create row and column titles
+  col.titles = paste("C_Title", 1:3)
+  row.titles = paste("R_Title", 4:6)
+  
+  # Add row titles
+  pl[1:3] = lapply(1:3, function(i) arrangeGrob(pl[[i]], 
+                                                left = row.titles[i]))
+  
+  # Add column titles and lay out plots
+  grid.arrange(grobs=lapply(c(1,4,7), function(i) {
+    arrangeGrob(grobs=pl[i:(i+2)], top=col.titles[i/3 + 1], ncol=1)
+  }), ncol=3)
+
+    
+#>  CFA ####
   bias_plots_Lambda <- lapply(1:8, function(p){
     plot_gg(dt = lapply(1:length(res$CFA),
                         function(x) data.frame( res$CFA[[x]]$bias_per))[[p]],
             parm_range = 1:6,
             type = "bias",
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -610,13 +828,13 @@
   
   # Display Plots
   p1 <- arrangeGrob(grobs = bias_plots_Lambda,
-                    top = "Factor Loadings Bias", 
+                    layout_matrix = matrix(c(1:8), ncol = 2),
                     ncol = 2)
   pf <- grid.arrange(p1, ncol = 1)
-  pf
+  pf 
   ggsave(file  = "~/Desktop/exp2_CFA_lambda_BPR.pdf", 
          width = 8.25, height = 11.75,
-         arrangeGrob(p1, p2, p3, ncol = 3))
+         arrangeGrob(p1, ncol = 1))
   
   #> LM ####
   bias_plots_Lambda <- lapply(1:8, function(p){
@@ -639,7 +857,7 @@
   pf <- grid.arrange(p1, ncol = 1)
   pf
   ggsave(file  = "~/Desktop/exp2_CFA_lambda_BPR.pdf", 
-         width = 8.25, height = 11.75,
-         arrangeGrob(p1, p2, p3, ncol = 3))
+         width = 8.25/1.5, height = 11.75/2,
+         arrangeGrob(p1, ncol = 1))
   
   

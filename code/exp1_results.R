@@ -15,7 +15,7 @@
   # "exp1_simOut_20200801_1620"
   filename <- c("sim_res_20200710_1019",
                 "exp1_simOut_20200731_1735", # <- CURRENT
-                "exp1_simOut_20200801_1620")[2]
+                "exp1_simOut_20200801_1620")[3]
   # Result 1 is the one used for first submission to EAM
   # Result 2 and 3 corrected for MNAR issue. They are equivalent, but
   # second file has more repetitions (500 vs 750)
@@ -55,16 +55,17 @@
          function(x) lm_res[[x]]$bias_per)
 
 # Save Results ------------------------------------------------------------
-  
+
   output <- lapply(list(sem   = sem_res,
-                        lm    = lm_res,
-                        parms = out$parms), 
+                        lm    = lm_res), 
                    function(x){
                      names(x) <- paste0("cond", seq_along(out[[1]]))
                      return(x)
                    }
   )
-  
+  output$parms <- out$parms
+  output$conds <- conds
+    
   saveRDS(
     output, 
     paste0("../output/", filename, "_res.rds") 

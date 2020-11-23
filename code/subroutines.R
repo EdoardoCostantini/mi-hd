@@ -196,11 +196,13 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
         }
       }
     }
-  ## Return Function output  
-  return(rp_out)
     
   ## END capture output
   sink()
+  
+  ## Return Function output  
+  return(rp_out)
+    
 }
 
 # Experiment 1 ------------------------------------------------------------

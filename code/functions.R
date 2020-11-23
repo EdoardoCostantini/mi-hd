@@ -944,7 +944,7 @@ fit_sat_model <- function(multi_dt){
     models <- lapply(X = multi_dt,
                      FUN = function(x) {
                        tryCatch({
-                         # Obtain MLE estiamtes
+                         # Obtain MLE estimates
                          sem(parms$lav_model, 
                              data = x, 
                              likelihood = "wishart")},
@@ -1994,4 +1994,162 @@ bridge_cv <- function(out, mods = NULL){
                                  col_indx],
                        ridge = ridge_s)
   return(output)
+}
+
+# Plot function for experiment 1 and 2
+
+plot_gg <- function(dt,
+                    type = "bias", 
+                    plot_cond = "(empty)",
+                    plot_name = NULL,
+                    parm_range = 1:2,
+                    y_axLab = TRUE,
+                    meth_compare) {
+  ## Function inputs
+  ## Generic
+  # y_axLab = TRUE # say I want the labes
+  # parm_range = 11:20
+  # type = "bias"
+  # plot_name = "Untitled"
+  # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
+  #                      "MI_PCA",
+  #                      "MI_CART", "MI_RF", "missFor", "CC"))
+  # # Bias
+  # dt = lapply(1:length(res$sem),
+  #             function(x) data.frame( res$sem[[x]]$bias_per))[[4]]
+  # dt = lapply(1:length(res$semR),
+  #             function(x) data.frame( res$semR[[x]]$bias_per))[[4]]
+  # dt = lapply(1:length(res$semR),
+  #             function(x) data.frame( res$semR[[x]]$bias_sd))[[4]]
+  # dt = lapply(1:length(res$semR),
+  #             function(x) data.frame( res$semR[[x]]$bias_raw))[[4]]
+  ## CIR
+  # dt = lapply(1:length(res$sem),
+  #            function(x) res$sem[[x]]$ci_cov)[[1]]
+  
+  ## Prep data for plot
+  # Select range of interest
+  dt_edit <- dt[parm_range, ]
+  
+  # Order Methods
+  dt_edit <- dt_edit[, meth_compare]
+  
+  # Make names more pretty
+  colnames(dt_edit) <- sub("_la", "", colnames(dt_edit))
+  colnames(dt_edit) <- sub("_", "-", colnames(dt_edit))
+  
+  # Shape for ggplot
+  dt_edit[nrow(dt_edit)+1,] <- 0  # add blank row to improve visualization
+  dt_edit <- dt_edit %>% gather()
+  dt_edit$id <- 1:nrow(dt_edit)  # add an 
+  
+  # Ticks 
+  if(type == "bias"){
+    plot_xlim   <- c(-20, 20)
+    plot_xbreaks <- c(-20, -10, 0, 10, 20)
+    plot_xlabels <- c("-20", "-10", "0", "10", "20")
+    
+    step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
+    plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
+    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
+    if(y_axLab == TRUE){
+      plot_ylabels <- as.character(unique(dt_edit$key))
+    } else {
+      plot_ylabels <- rep("", length(plot_ybreaks))
+    }
+    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
+    plot_hlines <- c(-10, 10)
+  }
+  
+  if(type == "bias_raw"){
+    maxB <- max( abs(dt_edit$value) )
+    plot_xbreaks <- c(-maxB, -maxB/2, 
+                      0, 
+                      maxB/2, maxB)
+    plot_xlim   <- c(plot_xbreaks[1], plot_xbreaks[5])
+    plot_xlabels <- as.character(plot_xbreaks)
+    
+    step_size    <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
+    plot_steps   <- seq(0, nrow(dt_edit), by = step_size)
+    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
+    if(y_axLab == TRUE){
+      plot_ylabels <- as.character(unique(dt_edit$key))
+    } else {
+      plot_ylabels <- rep("", length(plot_ybreaks))
+    }
+    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
+    plot_hlines <- c(plot_xbreaks[2], plot_xbreaks[4])
+  }
+  
+  if(type == "bias_sd"){
+    plot_xlim   <- c(-1, 1)
+    plot_xbreaks <- c(-1, -.4, 0, .4, 1)
+    plot_xlabels <- c("-1", "-.4", "0", ".4", "1")
+    
+    step_size    <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
+    plot_steps   <- seq(0, nrow(dt_edit), by = step_size)
+    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
+    if(y_axLab == TRUE){
+      plot_ylabels <- as.character(unique(dt_edit$key))
+    } else {
+      plot_ylabels <- rep("", length(plot_ybreaks))
+    }
+    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
+    plot_hlines <- c(-.4, .4)
+  }
+  
+  if(type == "ci"){
+    dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)] <- 
+      95 - dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)]
+    
+    plot_limits <- c(-5, 15)
+    
+    plot_xlim   <- c(-5, 15)
+    plot_xbreaks <- c(-5, -2.5, 0, 2.5, 5, 15)
+    plot_xlabels <- rev(c(".8", ".9", ".925", ".95", ".975", "1"))
+    
+    step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
+    plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
+    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
+    if(y_axLab == TRUE){
+      plot_ylabels <- as.character(unique(dt_edit$key))
+    } else {
+      plot_ylabels <- rep("", length(plot_ybreaks))
+    }
+    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
+    plot_hlines <- c(-2.5, 2.5)
+  }
+  
+  # Plot
+  p <- ggplot(dt_edit, aes(x = value, y = id)) +
+    # Theme (goes first)
+    jtools::theme_apa() +
+    
+    # Title and axis labels
+    labs(title = plot_name,
+         x     = element_blank(), 
+         y     = element_blank()) +
+    theme(plot.title = element_text(size = 7.5),
+          axis.title = element_blank(),
+          axis.text  = element_text(size = 7.5),
+          plot.margin = unit(c(.05,.05,.05,.05), "cm")) +
+    
+    # Content
+    geom_segment(aes(xend = 0, 
+                     yend = id),
+                 color = "gray") + 
+    
+    # Tweaks
+    scale_y_continuous(breaks = plot_ybreaks,
+                       labels = plot_ylabels) +
+    scale_x_continuous(breaks = plot_xbreaks,
+                       labels = plot_xlabels) +
+    geom_vline(xintercept = plot_hlines,
+               linetype = "dashed", color = "black") +
+    geom_hline(yintercept = plot_vlines,
+               size = .25, 
+               color = "black") +
+    coord_cartesian(xlim = plot_xlim)
+  p
+  return(p)
 }

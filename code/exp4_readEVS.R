@@ -27,6 +27,7 @@
   # int.df$country <- factor(int.df[, "country"],
   #                          levels = val_labels(int.df[, "country"]),
   #                          labels = names(val_labels(int.df[, "country"])))
+  length(val_labels(int.df$country))
 
 # Decisions ---------------------------------------------------------------
   
@@ -38,7 +39,7 @@
   int.df <- int.df %>%
     filter(mm_select_sample %in% subsample) %>%
     filter(country %in% countries)
-  
+  colnames(int.df)
   # Variables Selection
   id  <- "id_cocas"
   ord <- paste0("v", c(1:8, 32:39, 46:50, 53:54, 63:70, 72:84,

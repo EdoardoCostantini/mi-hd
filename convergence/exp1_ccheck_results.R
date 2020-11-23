@@ -17,9 +17,9 @@ source("./init_general.R")
 out_cnv <- readRDS("../output/exp1_conv_20200731_1652.rds")
 
 # What to show
-exp_dat <- 10 # which data replication (10 possibilities)
 iters_range <- 1:250 # which set of iterations
 y_range <- c(3, 6)
+exp_dat <- 3 # which data replication (10 possibilities)
 
 # Run description
 data.frame( Chians = c(all = out_cnv$parms$chains, MICE = out_cnv$parms$mice_ndt),

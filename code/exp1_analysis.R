@@ -13,6 +13,7 @@
   res <- exp1_res <- readRDS("../output/exp1_simOut_20200731_1735_res.rds")
   res <- exp1_res <- readRDS("../output/exp1_simOut_20200801_1620_res.rds")
   # They are equivalent, but second file has more repetitions (500 vs 750)
+  # res <- output
   
 # Bias --------------------------------------------------------------------
 
@@ -194,136 +195,14 @@
   
 
 # Plots -------------------------------------------------------------------
-
-  plot_gg <- function(dt,
-                      type = "bias", 
-                      plot_cond = "(empty)",
-                      plot_name = NULL,
-                      parm_range = 1:2,
-                      y_axLab = TRUE,
-                      meth_compare) {
-    ## Function inputs
-    ## Generic
-    # y_axLab = TRUE # say I want the labes
-    # parm_range = 1:6
-    # type = "ci"
-    # plot_name = "Untitled"
-    # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
-    #                      "MI_PCA",
-    #                      "MI_CART", "MI_RF", "missFor", "CC"))
-    ## Bias
-    # dt = lapply(1:length(res$sem),
-    #             function(x) data.frame( res$sem[[x]]$bias_per))[[4]]
-    ## CIR
-    # dt = lapply(1:length(res$sem),
-    #            function(x) res$sem[[x]]$ci_cov)[[1]]
-    
-    ## Prep data for plot
-    # Select range of interest
-    dt_edit <- dt[parm_range, ]
-    
-    # Order Methods
-    dt_edit <- dt_edit[, meth_compare]
-    
-    # Make names more pretty
-    colnames(dt_edit) <- sub("_la", "", colnames(dt_edit))
-    colnames(dt_edit) <- sub("_", "-", colnames(dt_edit))
-    
-    # Shape for ggplot
-    dt_edit[nrow(dt_edit)+1,] <- 0  # add blank row to improve visualization
-    dt_edit <- dt_edit %>% gather()
-    dt_edit$id <- 1:nrow(dt_edit)  # add an 
-    
-    # Ticks 
-    if(type == "bias"){
-      plot_xlim   <- c(-20, 20)
-      plot_xbreaks <- c(-20, -10, 0, 10, 20)
-      plot_xlabels <- rev(c("-20", "-10", "0", "10", "20"))
-      
-      step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-      plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
-      plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-      if(y_axLab == TRUE){
-        plot_ylabels <- as.character(unique(dt_edit$key))
-      } else {
-        plot_ylabels <- NULL
-      }
-      plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-      plot_hlines <- c(-10, 10)
-    }
-    
-    if(type == "bias_raw"){
-      plot_xlim   <- c(-1, 1)
-      plot_xbreaks <- c(-1, -.5, 0, .5, 1)
-      plot_xlabels <- rev(c("-1", "-.5", "0", ".5", "1"))
-      
-      step_size    <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-      plot_steps   <- seq(0, nrow(dt_edit), by = step_size)
-      plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-      if(y_axLab == TRUE){
-        plot_ylabels <- as.character(unique(dt_edit$key))
-      } else {
-        plot_ylabels <- NULL
-      }
-      plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-      plot_hlines <- c(-.5, .5)
-    }
-    
-    if(type == "ci"){
-      dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)] <- 
-        95 - dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)]
-      
-      plot_limits <- c(-5, 15)
-      
-      plot_xlim   <- c(-5, 15)
-      plot_xbreaks <- c(-5, -2.5, 0, 2.5, 5, 15)
-      plot_xlabels <- rev(c(".8", ".9", ".925", ".95", ".975", "1"))
-      
-      step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-      plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
-      plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-      if(y_axLab == TRUE){
-        plot_ylabels <- as.character(unique(dt_edit$key))
-      } else {
-        plot_ylabels <- NULL
-      }
-      plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-      plot_hlines <- c(-2.5, 2.5)
-    }
-    
-    # Plot
-    p <- ggplot(dt_edit, aes(x = value, y = id)) +
-      # Theme (goes first)
-      jtools::theme_apa() +
-      
-      # Title and axis labels
-      labs(title = plot_name,
-           x     = "", 
-           y     = "") +
-      theme(plot.title = element_text(hjust = 0.5),
-            axis.title = element_text(size = 5),
-            axis.text = element_text(size = 5)) +
-      
-      # Content
-      geom_segment(aes(xend = 0, 
-                       yend = id),
-                   color = "gray") + 
-      
-      # Tweaks
-      scale_y_continuous(breaks = plot_ybreaks,
-                         labels = plot_ylabels) +
-      scale_x_continuous(breaks = plot_xbreaks,
-                         labels = plot_xlabels) +
-      geom_vline(xintercept = plot_hlines,
-                 linetype = "dashed", color = "black") +
-      geom_hline(yintercept = plot_vlines,
-                 size = .25, 
-                 color = "black") +
-      coord_cartesian(xlim = plot_xlim)
-    p
-    return(p)
-  }
-
+  
+  res$conds
+  cond_names <- paste0(letters[1:nrow(res$conds)], ") ",
+                       "Condition ", 1:nrow(res$conds), ": ",
+                       "p = ",  res$conds$p, "; ",
+                       "pm = ",  res$conds$pm)
+  data.frame(res$conds, cond_names)
+  
   ## > Bias (Single Plot) #####
   plot_gg(dt = lapply(1:length(res$sem),
                       function(x) data.frame( res$sem[[x]]$bias_per))[[4]],
@@ -342,6 +221,8 @@
                         function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
             parm_range = 1:6,
             type = "bias",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -354,6 +235,8 @@
                         function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
             parm_range = 7:12,
             type = "bias",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -366,6 +249,8 @@
                         function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
             parm_range = -(1:12),
             type = "bias",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -386,7 +271,7 @@
                     ncol = 1)
   pf <- grid.arrange(p1, p2, p3, ncol = 3)
   pf
-  ggsave(file  = "~/Desktop/bias.pdf", 
+  ggsave(file  = "~/Desktop/exp1_bias.pdf", 
          width = 8.25, height = 11.75,
          arrangeGrob(p1, p2, p3, ncol = 3))
 
@@ -408,6 +293,8 @@
                         function(x) data.frame( res$sem[[x]]$ci_cov))[[p]],
             parm_range = 1:6,
             type = "ci",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -421,6 +308,7 @@
             parm_range = 7:12,
             type = "ci",
             y_axLab = TRUE,
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -434,6 +322,7 @@
             parm_range = -(1:12),
             type = "ci",
             y_axLab = TRUE,
+            plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -454,6 +343,8 @@
                     ncol = 1)
   pf <- grid.arrange(p1, p2, p3, ncol = 3)
   pf
-  ggsave(file  = "~/Desktop/ci.pdf", 
+  ggsave(file  = "~/Desktop/exp1_CI.pdf", 
          width = 8.25, height = 11.75,
          arrangeGrob(p1, p2, p3, ncol = 3))
+  
+  
