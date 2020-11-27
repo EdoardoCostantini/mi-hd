@@ -17,6 +17,14 @@
   
   # Read R object
   res <- readRDS(paste0("../output/", filename, "_res.rds"))
+  out <- res
+  
+  # Extract names of conditions
+  res$conds
+  cond_names <- paste0(letters[1:nrow(res$conds)], ") ",
+                       "Condition ", 1:nrow(res$conds), ": ",
+                       "n = ",  res$conds$n)
+  data.frame(res$conds, cond_names)
   
 # Summary of set up -------------------------------------------------------
   
@@ -91,8 +99,46 @@
   })
   
 
+  
+# All parameters in same plot ----------------------------------------------
+# This solution does not make things very clear. CI coverage is interesting,
+# but not particularly interesting.
+  
+  bias_plots_mean <- lapply(1:2, function(p){
+    plot_gg(dt = lapply(1:length(res$m2),
+                        function(x) data.frame( res$m2[[x]]$bias_per))[[p]],
+            parm_range = 1:13,
+            type = "bias",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
+            meth_compare = rev(c("DURR_la", "IURR_la", 
+                                 "blasso", "bridge",
+                                 "MI_PCA",
+                                 "MI_CART", "MI_RF", 
+                                 "missFor", "CC"))
+    )
+  } )
+  
+  ci_plots_mean <- lapply(1:2, function(p){
+    plot_gg(dt = lapply(1:length(res$m2),
+                        function(x) data.frame( res$m2[[x]]$ci_cov))[[p]],
+            parm_range = 1:13,
+            type = "ci",
+            y_axLab = TRUE,
+            plot_name = cond_names[p],
+            meth_compare = rev(c("DURR_la", "IURR_la", 
+                                 "blasso", "bridge",
+                                 "MI_PCA",
+                                 "MI_CART", "MI_RF", 
+                                 "missFor", "mean"))
+    )
+  } )  
+  
 # Generic Plotting function -----------------------------------------------
-  plot_gg <- function(dt, type = "ci", 
+# Cosutm plot_gg function for experiment 4
+  plot_gg <- function(dt, 
+                      dt_CIW = NULL,
+                      type = "ci", 
                       plot_cond = "(empty)",
                       plot_name = "Untitled",
                       meth_compare) {
@@ -101,26 +147,22 @@
     ## Example BIAS Condition 1 model 1 variable religiosity
     # dt = lapply(1:length(res$m2),
     #             function(x) res$m2[[x]]$bias_per["NatAt", ])[[2]]
-    ## Example bias_worst Condition 1, model 1 (estimates or ci?)
-    # dt = lapply(1:length(res$m2),
-    #            function(x) res$m2[[x]]$bias_sd)[[1]]
     ## Example CI Condition 1, model 1, variable religiosity
     # dt = lapply(1:length(res$m2),
     #            function(x) res$m2[[x]]$ci_cov["NatAt", ])[[2]]
-    ## Example CI worst Condition 1, model 1, variable religiosity
-    # dt = lapply(1:length(res$m2),
-    #            function(x) res$m2[[x]]$ci_cov["NatAt", ])[[1]]
+    # dt_CIW = lapply(1:length(res$m2),
+    #             function(x) res$m2[[x]]$CIW["NatAt", ])[[2]]
     ## Example ED Condition 1, model 1 (estimates or ci?)
     # dt = lapply(1:length(res$m2),
     #            function(x) res$m2[[x]]$ed_est)[[1]]
     # dt = lapply(1:length(res$m2),
     #            function(x) res$m2[[x]]$ed_ci)[[1]]
-    ## Example ED for condition 1 all parameters
-    # dt = res$ed_all[[1]]$ed_est
-    # dt = res$ed_all[[1]]$ed_ci
+    ## Example Confidence Interval Width
+    # dt = lapply(1:length(res$m2),
+    #             function(x) res$m2[[x]]$CIW["NatAt", ])[[2]]
     
     ## Generic inputs
-    # type = c("bias", "ci", "ed")[3]
+    # type = c("bias", "ci", "ciw", "ed")[3]
     # plot_name = "Untitled"
     # plot_cond = "(empty)"
     # meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
@@ -137,11 +179,10 @@
       
       # Keep only things you actualy want to show
       x_rev <- x_rev[, meth_compare]
-      # extra <- extra[meth_compare]
       
       # Order by size
-      # extra <- extra[order(abs(x_rev), decreasing = TRUE)]
-      x_rev <- x_rev[order(abs(x_rev), decreasing = TRUE)]
+      rank <- order(abs(x_rev), decreasing = TRUE)
+      x_rev <- x_rev[rank]
       x_rev[x_rev == 0] <- .025 
         # for display purpuses, if there are 0, 
         # substitute with small value
@@ -150,10 +191,26 @@
       names(x_rev) <- sub("_la", "", names(x_rev))
       names(x_rev) <- sub("_", "-", names(x_rev))
       
+      # Create CIW if requested
+      if(!is.null(dt_CIW) == TRUE){
+        # Keep only things you actually want to show
+        CIW_plot <- as.numeric(dt_CIW[, meth_compare])
+        
+        # Order by size
+        CIW_plot <- CIW_plot[rank]
+        CIW_plot[CIW_plot == 0] <- .025
+        
+        # Make Character vector
+        CIW_char <- paste0("(" , round(CIW_plot, 2), ")")
+      } else {
+        CIW_char <- ""
+      }
+      
       # Factorize for plot
       ggplot_input <- data.frame(method = factor(names(x_rev), 
                                                  levels = names(x_rev)), 
-                                 target = as.numeric(x_rev))
+                                 target = as.numeric(x_rev),
+                                 bar_label = CIW_char)
       
       # Limits
       plot_limits <- c(-5, 5)
@@ -163,45 +220,7 @@
       plot_hlines <- seq(1:12)
       plot_xlim   <- c(-5, 5)
     }
-    
-    if(type == "ci_worst"){
-      # Transform for graph
-      # Tranform to a difference value
-      x <- lapply(names(dt), function(j){
-        # j <- names(dt)[1]
-        max.out <- dt[which.max(abs(95-dt[[j]])), ][j]
-        data.frame(method  = names(max.out),
-                   coef    = rownames(max.out),
-                   cic     = 95 - as.numeric(max.out))
-      })
-      x <- do.call(rbind, x)
-      
-      # Keep what you want to show
-      x_rev <- x[x$method %in% meth_compare, ]
-      
-      # Order by size
-      x_rev <- x_rev[order(abs(x_rev$cic), decreasing = TRUE), ]
-      
-      # Make names prettier
-      x_rev$method <- sub("_la", "", x_rev$method)
-      x_rev$method <- sub("_", "-", x_rev$method)
-      
-      # Factorize for plot
-      ggplot_input <- data.frame(method = factor(x_rev$method, 
-                                                 levels = x_rev$method), 
-                                 target = as.numeric(x_rev$cic))
-      
-      # ggplot_input <- ggplot_input[-nrow(ggplot_input), ]
-      
-      # Limits
-      plot_limits <- c(-5, 50)
-      plot_breaks <- c(-5, -2.5, 0, 2.5, 5, 50)
-      plot_labels <- rev(c(".5", ".9", ".925", ".95", ".975", "1"))
-      plot_vlines <- c(-2.5, 2.5)
-      plot_hlines <- seq(1:12)
-      plot_xlim   <- c(-5, 50)
-    }
-    
+
     if(type == "bias"){
       # Get rid of reference value
       x_rev <- dt[, -1]
@@ -219,10 +238,9 @@
       # Factorize for plot
       ggplot_input <- data.frame(method = factor(names(x_rev), 
                                                  levels = names(x_rev)), 
-                                 target = as.numeric(x_rev))
-      
-      # ggplot_input <- ggplot_input[-nrow(ggplot_input), ]
-      
+                                 target = as.numeric(x_rev),
+                                 bar_label = "")
+
       # Limits
       plot_xlim   <- c(-.25, .25) * 100
       plot_breaks <- c(-.25, -.1, 0, .1, .25)  * 100
@@ -231,43 +249,34 @@
       plot_hlines <- seq(1:nrow(ggplot_input))
     }
     
-    if(type == "bias_worst"){
-      # Transform for graph
-      # Tranform to a difference value
-      x <- lapply(names(dt), function(j){
-        # j <- names(dt)[1]
-        max.out <- dt[which.max(abs(dt[[j]])), ][j]
-        data.frame(method  = names(max.out),
-                   coef    = rownames(max.out),
-                   bias_sd = as.numeric(max.out))
-      })
-      x <- do.call(rbind, x)
-      
+    if(type == "ciw"){
       # Keep what you want to show
-      x_rev <- x[x$method %in% meth_compare, ]
+      ref <- dt$GS
+      x_rev <- dt[, meth_compare]
       
       # Order by size
-      x_rev <- x_rev[order(abs(x_rev$bias_sd), decreasing = TRUE), ]
+      x_rev <- x_rev[order(abs(x_rev), decreasing = TRUE)]
       
       # Make names prettier
-      x_rev$method <- sub("_la", "", x_rev$method)
-      x_rev$method <- sub("_", "-", x_rev$method)
+      names(x_rev) <- sub("_la", "", names(x_rev))
+      names(x_rev) <- sub("_", "-", names(x_rev))
       
       # Factorize for plot
-      ggplot_input <- data.frame(method = factor(x_rev$method, 
-                                                 levels = x_rev$method), 
-                                 target = as.numeric(x_rev$bias_sd))
-      
-      # ggplot_input <- ggplot_input[-nrow(ggplot_input), ]
+      ggplot_input <- data.frame(method = factor(names(x_rev), 
+                                                 levels = names(x_rev)), 
+                                 target = as.numeric(x_rev),
+                                 bar_label = "")
       
       # Limits
-      plot_xlim   <- c(-2, 2)
-      plot_breaks <- c(-2, -1, 0, 1, 2)
-      plot_labels <- c("-2", "-1", "0", "1", "2")
+      ref_max <- ggplot_input[ggplot_input$method == "CC", "target"]
+      ref_min <- ggplot_input[ggplot_input$method == "missFor", "target"]
+      plot_xlim   <- c(0, (ref_max*1.5))
+      plot_breaks <- c(0, ref_min, ref_max, ref_max*1.5)
+      plot_labels <- as.character(round(plot_breaks, 2))
       plot_vlines <- NULL
       plot_hlines <- seq(1:nrow(ggplot_input))
     }
-    
+
     if(type == "ed"){
       # Keep what you want to show
       x_rev <- dt[, meth_compare]
@@ -279,32 +288,12 @@
       names(x_rev) <- sub("_la", "", names(x_rev))
       names(x_rev) <- sub("_", "-", names(x_rev))
       
-      # # Separate GS from the bunch
-      # x_rev_GS <- x_rev["GS"]
-      # x_rev <- x_rev[-which(names(x_rev)=="GS")]
-      # 
-      # # Include GS as the first in comparison
-      # x_rev <- cbind(x_rev[order(abs(x_rev), decreasing = TRUE)], 
-      #                x_rev_GS)
-      
       # Factorize for plot
       ggplot_input <- data.frame(method = factor(names(x_rev), 
                                                  levels = names(x_rev)), 
-                                 target = as.numeric(x_rev - 0))
+                                 target = as.numeric(x_rev - 0),
+                                 bar_label = "")
       
-      # # Get rid of GS if it is a bias plot (not intersting that it is 0)
-      # GS_index <- which(ggplot_input$method == "GS")
-      # if(ggplot_input[GS_index, "target"] == 0){
-      #   ggplot_input <- ggplot_input[-GS_index, ]
-      # } 
-      
-      # Limits
-      # Flexible version
-      # plot_xlim   <- c(floor(min(ggplot_input$target)), 
-      #                  ceiling(max(ggplot_input$target)))
-      # plot_breaks <- seq(floor(min(ggplot_input$target)), 
-      #                    ceiling(max(ggplot_input$target)), 
-      #                    length.out = 5)
       # Fixed Version
       plot_xlim   <- c(0, .5)
       plot_breaks <- seq(0, .5, 
@@ -326,32 +315,35 @@
       labs(title = plot_name,
            x     = "", 
            y     = "") +
-      theme(plot.title = element_text(hjust = 0.5),
-            axis.text = element_text(size = 12),
-            axis.title = element_text(size = 12)) +
+      theme(plot.title = element_text(size = 12, 
+                                      face = "plain", 
+                                      hjust = 0.5),
+            axis.text = element_text(size = 10)) +
       
       # Content
       geom_bar(stat = "identity") + 
       
       # Tweaks
+      geom_text(data = ggplot_input, 
+                aes(x = target + .3, 
+                    y = method, 
+                    label = bar_label)) + 
       scale_x_continuous(breaks = plot_breaks,
                          labels = plot_labels) +
       geom_vline(xintercept = plot_vlines, 
                  linetype = "dashed", color = "black") +
       geom_hline(yintercept = plot_hlines, 
-                 size = .25, 
-                 # linetype = "longdash", 
+                 size = .25,
                  color = "gray") +
       coord_cartesian(xlim = plot_xlim)
     p
+    
     return(p)
   }
-  
   
 # Example use of function
   res$m1[[1]]$bias_per
   res$m2[[1]]$bias_per
-  res$m2[[1]]
   
   # Bias
   plot_gg(lapply(1:length(res$m2),
@@ -375,298 +367,191 @@
   )
   
 # Variable of interest ----------------------------------------------------
+  # Which Methods do you want to plot
+  meths <- c("DURR_la", "IURR_la", 
+             "blasso", "bridge",
+             "MI_PCA",
+             "MI_CART", "MI_RF", 
+             "missFor", 
+             "mean", "CC")
   
 # > Bias ####
   rownames(res$m1[[1]]$bias_raw)
   rownames(res$m2[[1]]$bias_raw)
-  # Extract what you want to plot
-  bias_res_list <- list(lapply(1:length(res$m1),
-                               function(x) res$m1[[x]]$bias_per["rel", ]),
-                        lapply(1:length(res$m2),
-                               function(x) res$m2[[x]]$bias_per["NatAt", ]))
-  
-  # Obtain plots per different condition
-  bias_plots_c1 <- lapply(1:length(bias_res_list), function(p){
-    plot_gg(bias_res_list[[p]][[1]], 
+
+# Obtain plots per different model
+  bias_plots_m1 <- lapply(1:2, function(p){
+    plot_gg(lapply(1:length(res$m1),
+                   function(x) res$m1[[x]]$bias_per["rel", ])[[p]], 
             type = "bias",
-            plot_name = c("Low Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean", "CC")
-            )
-  } )
-  bias_plots_c2 <- lapply(1:length(bias_res_list), function(p){
-    plot_gg(bias_res_list[[p]][[2]], 
+            plot_name = cond_names[[p]],
+            meth_compare = meths) } )
+  bias_plots_m2 <- lapply(1:2, function(p){
+    plot_gg(lapply(1:length(res$m2),
+                   function(x) res$m2[[x]]$bias_per["NatAt", ])[[p]], 
             type = "bias",
-            plot_name = c("High Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean", "CC")
-    )
-  } )
+            plot_name = "",
+            meth_compare = meths) } )
   
   # Display plots
-  p1 <- arrangeGrob(grobs = list(bias_plots_c1[[1]], bias_plots_c2[[1]]),
-                    top = "Model 1: \u03B2 Religiosity", ncol = 2,
-  )
-  p2 <- arrangeGrob(grobs = list(bias_plots_c1[[2]], bias_plots_c2[[2]]),
-                    top = "Percentage Relative Bias (PRB) Nativist Attitudes' \u03B2",
-                    ncol = 2
-  )
+  p1 <- arrangeGrob(grobs = bias_plots_m1,
+                    top = "Model 1: \u03B2 Religiosity",
+                    ncol = 2)
+  p2 <- arrangeGrob(grobs = bias_plots_m2,
+                    # top = "Percentage Relative Bias (PRB) beta Nativist Attitudes",
+                    top = "Model 2: \u03B2 Nativist Attitudes",
+                    ncol = 2)
   pf <- grid.arrange(p1, p2)
-  pf <- grid.arrange(p2) # single plot
   
-  ggsave(file = "../output/graphs/exp4_imp_bias.pdf", pf, device = cairo_pdf)
-  
-  ## Wrost Bias
-  
-  # Extract what you want to plot
-  bias_res_list <- list(lapply(1:length(res$m1),
-                               function(x) res$m1[[x]]$bias_sd),
-                        lapply(1:length(res$m2),
-                               function(x) res$m2[[x]]$bias_sd))
-  
-  # Obtain plots per different condition
-  bias_plots_c1 <- lapply(1:length(bias_res_list), function(p){
-    plot_gg(bias_res_list[[p]][[1]], 
-            type = "bias_worst",
-            plot_name = c("Low Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean")
-    )
-  } )
-  bias_plots_c2 <- lapply(1:length(bias_res_list), function(p){
-    plot_gg(bias_res_list[[p]][[2]], 
-            type = "bias_worst",
-            plot_name = c("High Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean")
-    )
-  } )
-  
-  # Display plots
-  p1 <- arrangeGrob(grobs = list(bias_plots_c1[[1]], bias_plots_c2[[1]]),
-                    top = "Model 1: \u03B2 Religiosity", ncol = 2,
-  )
-  p2 <- arrangeGrob(grobs = list(bias_plots_c1[[2]], bias_plots_c2[[2]]),
-                    top = "Model 2: \u03B2 Nativist Attitudes", ncol = 2
-  )
-  pf <- grid.arrange(p1, p2)
-  ggsave(file = "../output/graphs/exp4_imp_bias_worst.pdf", pf)
+  # Save Plot
+  ggsave(pf,
+         file = "../output/graphs/exp4_imp_bias.pdf", 
+         width = 8.25, height = 5.25,
+         device = cairo_pdf)
   
 # > CI   ####
-  
-  # Extract what you want to plot
-  ci_res_list <- list(lapply(1:length(res$m1),
-                               function(x) res$m1[[x]]$ci_cov["rel", ]),
-                        lapply(1:length(res$m2),
-                               function(x) res$m2[[x]]$ci_cov["NatAt", ]))
-  
-  # Dfine plots
-  ci_plots_c1 <- lapply(1:length(ci_res_list), function(p){
-    plot_gg(dt        = ci_res_list[[p]][[1]], 
+
+  # Define plots
+  ci_plots_m1 <- lapply(1:2, function(p){
+    plot_gg(dt        = lapply(1:length(res$m1),
+                               function(x) res$m1[[x]]$ci_cov["rel", ])[[p]],
             type      = "ci",
-            plot_name = c("Low Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean")
-    ) } )
-  ci_plots_c2 <- lapply(1:length(ci_res_list), function(p){
-    plot_gg(dt        = ci_res_list[[p]][[2]], 
+            plot_name = cond_names[[p]],
+            meth_compare = meths) } )
+  
+  ci_plots_m2 <- lapply(1:2, function(p){
+    plot_gg(dt        = lapply(1:length(res$m2),
+                               function(x) res$m2[[x]]$ci_cov["NatAt", ])[[p]],
             type      = "ci",
-            plot_name = c("High Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean")
-    ) } )
+            plot_name = cond_names[[p]],
+            meth_compare = meths) } )
   
   # Combine and arrange plots
-  p1 <- arrangeGrob(grobs = list(ci_plots_c1[[1]], ci_plots_c2[[1]]),
-                     top = "Model 1: \u03B2 Religiosity", ncol = 2
-  )
-  
-  p2 <- arrangeGrob(grobs = list(ci_plots_c1[[2]], ci_plots_c2[[2]]),
-                    top = "Confidence Interval Coverage (CIC) Nativist Attitudes' \u03B2",
-                    ncol = 2
-  )
+  p1 <- arrangeGrob(grobs = ci_plots_m1,
+                    top = "Model 1: \u03B2 Religiosity", 
+                    ncol = 2)
+  p2 <- arrangeGrob(grobs = ci_plots_m2,
+                    top = "Model 2: \u03B2 Nativist Attitudes", 
+                    ncol = 2)
   pf <- grid.arrange(p1, p2)
-  pf <- grid.arrange(p2) # single plot
-  ggsave(file = "../output/graphs/exp4_imp_ci.pdf", pf, device = cairo_pdf)
   
-  ## Worst CI coverage
-  # Extract what you want to plot
-  ci_res_list <- list(lapply(1:length(res$m1),
-                             function(x) res$m1[[x]]$ci_cov),
-                      lapply(1:length(res$m2),
-                             function(x) res$m2[[x]]$ci_cov))
+   # Save Plot
+  ggsave(pf, 
+         file = "../output/graphs/exp4_imp_ci.pdf", 
+         width = 8.25, height = 5.25,
+         device = cairo_pdf)
   
-  # Dfine plots
-  ci_plots_c1 <- lapply(1:length(bias_res_list), function(p){
-    plot_gg(dt        = ci_res_list[[p]][[1]], 
-            type      = "ci_worst",
-            plot_name = c("Low Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean")
-    ) } )
-  ci_plots_c2 <- lapply(1:length(bias_res_list), function(p){
-    plot_gg(dt        = ci_res_list[[p]][[2]], 
-            type      = "ci_worst",
-            plot_name = c("High Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean")
-    ) } )
+# > CIW   ####
+  
+  # Define plots
+  ci_plots_m1 <- lapply(1:2, function(p){
+    plot_gg(dt        = lapply(1:length(res$m1),
+                               function(x) res$m1[[x]]$CIW["rel", ])[[p]],
+            type      = "ciw",
+            plot_name = cond_names[[p]],
+            meth_compare = meths) } )
+  
+  ci_plots_m2 <- lapply(1:2, function(p){
+    plot_gg(dt        = lapply(1:length(res$m2),
+                               function(x) res$m2[[x]]$CIW["NatAt", ])[[p]],
+            type      = "ciw",
+            plot_name = cond_names[[p]],
+            meth_compare = meths) } )
   
   # Combine and arrange plots
-  p1 <- arrangeGrob(grobs = list(ci_plots_c1[[1]], ci_plots_c2[[1]]),
-                    top = "Model 1: \u03B2 Religiosity", ncol = 2
-  )
-  
-  p2 <- arrangeGrob(grobs = list(ci_plots_c1[[2]], ci_plots_c2[[2]]),
-                    top = "Model 2: \u03B2 Nativist Attitudes", ncol = 2
-  )
+  p1 <- arrangeGrob(grobs = ci_plots_m1,
+                    top = "Model 1: \u03B2 Religiosity", 
+                    ncol = 2)
+  p2 <- arrangeGrob(grobs = ci_plots_m2,
+                    top = "Model 2: \u03B2 Nativist Attitudes", 
+                    ncol = 2)
   pf <- grid.arrange(p1, p2)
-  ggsave(file = "../output/graphs/exp4_imp_ci_worst.pdf", pf)
   
-  ## > CI Width ####
-  ci_res_list <- list(sapply(1:length(res$m1),
-                             function(x) res$m1[[x]]$CIW[9, ]),
-                      sapply(1:length(res$m2),
-                             function(x) res$m2[[x]]$CIW[3, ]))
+  # Save Plot
+  ggsave(pf, 
+         file = "../output/graphs/exp4_imp_ciw.pdf", 
+         width = 8.25, height = 5.25,
+         device = cairo_pdf)
   
 # Multivariate distance ---------------------------------------------------
+  meths <- c("DURR_la", "IURR_la", 
+             "blasso", "bridge",
+             "MI_PCA",
+             "MI_CART", "MI_RF", 
+             "missFor", 
+             "mean", "CC")
 # > Bias ####
-  # Per model
-  # Extract what you want to plot
-  bias_res_list <- list(lapply(1:length(res$m1),
-                               function(x) res$m1[[x]]$ed_est),
-                        lapply(1:length(res$m2),
-                               function(x) res$m2[[x]]$ed_est))
-  
   # Define plots
-  bias_plots_c1 <- lapply(1:length(bias_res_list), function(p){
-    plot_gg(dt        = bias_res_list[[p]][[1]], 
+  bias_plots_m1 <- lapply(1:2, function(p){
+    plot_gg(dt        = lapply(1:length(res$m1),
+                               function(x) res$m1[[x]]$ed_est)[[p]], 
             type      = "ed",
-            plot_name = c("Low Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean", "CC")
-    ) } )
-  bias_plots_c2 <- lapply(1:length(bias_res_list), function(p){
-    plot_gg(dt        = bias_res_list[[p]][[2]], 
+            plot_name = cond_names[[p]],
+            meth_compare = meths ) } )
+  
+  bias_plots_m2 <- lapply(1:2, function(p){
+    plot_gg(dt        = lapply(1:length(res$m2),
+                               function(x) res$m2[[x]]$ed_est)[[p]],
             type      = "ed",
-            plot_name = c("High Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean", "CC")
-    ) } )
+            plot_name = cond_names[[p]],
+            meth_compare = meths ) } )
   
   # Combine and arrange plots
-  p1 <- arrangeGrob(grobs = list(bias_plots_c1[[1]], bias_plots_c2[[1]]),
-                     top = "Model 1", ncol = 2
+  p1 <- arrangeGrob(grobs = bias_plots_m1,
+                    top = "Model 1", ncol = 2
   )
-  p2 <- arrangeGrob(grobs = list(bias_plots_c1[[2]], bias_plots_c2[[2]]),
-                     top = "Euclidean Distance between vector of true and after imputation estimates", 
+  p2 <- arrangeGrob(grobs = bias_plots_m2,
+                    top = "Model 2",
                     ncol = 2
   )
   pf <- grid.arrange(p1, p2)
-  pf <- grid.arrange(p2) # single plot
-  ggsave(file = "../output/graphs/exp4_ed_bias.pdf", pf)
+  grid.arrange(p2) # single plot
   
-  ## OVERALL ##
-  # Extract what you want to plot
-  bias_res_list <- list(res$ed_all[[1]]$ed_est,
-                        res$ed_all[[2]]$ed_est)
-  
-  # Define plots
-  bias_plots_c1 <- plot_gg(dt        = bias_res_list[[1]], 
-                           type      = "ed",
-                           plot_name = c("(a)"),
-                           meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                                            "MI_PCA",
-                                            "MI_CART", "MI_RF", "mean")
-  )
-  bias_plots_c2 <- plot_gg(dt        = bias_res_list[[2]], 
-                           type      = "ed",
-                           plot_name = c("(b)"),
-                           meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                                            "MI_PCA",
-                                            "MI_CART", "MI_RF", "mean")
-  )
-  pf <- grid.arrange(bias_plots_c1, bias_plots_c2, ncol = 2)
-  # ggsave(file = "../output/graphs/exp4_ed_bias.pdf", pf)
+  # Save Plot
+  ggsave(pf,
+         file = "../output/graphs/exp4_ed_bias.pdf", 
+         width = 8.25, height = 5.25)
   
 # > CI ####
-  # Extract what you want to plot
-  ci_res_list <- list(lapply(1:length(res$m1),
-                             function(x) res$m1[[x]]$ed_ci),
-                      lapply(1:length(res$m2),
-                             function(x) res$m2[[x]]$ed_ci))
-  
-  # Dfine plots
-  ci_plots_c1 <- lapply(1:length(ci_res_list), function(p){
-    plot_gg(dt        = ci_res_list[[p]][[1]], 
+  # Define plots
+  ci_plots_m1 <- lapply(1:2, function(p){
+    plot_gg(dt        = lapply(1:length(res$m1),
+                               function(x) res$m1[[x]]$ed_ci)[[p]], 
             type      = "ed",
-            plot_name = c("Low Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean")
+            plot_name = cond_names[[p]],
+            meth_compare = meths
     ) } )
-  ci_plots_c2 <- lapply(1:length(ci_res_list), function(p){
-    plot_gg(dt        = ci_res_list[[p]][[2]], 
+  ci_plots_m2 <- lapply(1:2, function(p){
+    plot_gg(dt        = lapply(1:length(res$m2),
+                               function(x) res$m2[[x]]$ed_ci)[[p]],
             type      = "ed",
-            plot_name = c("High Dimensional Condition"),
-            meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                             "MI_PCA",
-                             "MI_CART", "MI_RF", "mean")
+            plot_name = cond_names[[p]],
+            meth_compare = meths
     ) } )
   
   # Combine and arrange plots
-  p1 <- arrangeGrob(grobs = list(ci_plots_c1[[1]], ci_plots_c2[[1]]),
-                     top = "Model 1", ncol = 2
+  p1 <- arrangeGrob(grobs = ci_plots_m1,
+                    top = "Model 1", ncol = 2
   )
-  p2 <- arrangeGrob(grobs = list(ci_plots_c1[[2]], ci_plots_c2[[2]]),
-                     top = "Model 2", ncol = 2
+  p2 <- arrangeGrob(grobs = ci_plots_m2,
+                    top = "Model 2", ncol = 2
   )
   pf <- grid.arrange(p1, p2)
-  pf <- grid.arrange(p2) # single plot
-  ggsave(file = "../output/graphs/exp4_ed_ci.pdf", pf)
   
-  ## OVERALL ##
-  # Extract what you want to plot
-  ci_res_list <- list(res$ed_all[[1]]$ed_ci,
-                      res$ed_all[[2]]$ed_ci)
+  # Save Plot
+  ggsave(file = "../output/graphs/exp4_ed_ci.pdf", pf,
+         width = 8.25, height = 5.25)
   
-  # Define plots
-  ci_plots_c1 <- plot_gg(dt        = ci_res_list[[1]], 
-                         type      = "ed",
-                         plot_name = c("(a)"),
-                         meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                                          "MI_PCA",
-                                          "MI_CART", "MI_RF", "mean")
-  )
-  ci_plots_c2 <- plot_gg(dt        = ci_res_list[[2]], 
-                         type      = "ed",
-                         plot_name = c("(b)"),
-                         meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
-                                          "MI_PCA",
-                                          "MI_CART", "MI_RF", "mean")
-  )
-  pf <- grid.arrange(ci_plots_c1, ci_plots_c2, ncol = 2)
-  # ggsave(file = "../output/graphs/exp4_ed_bias.pdf", pf)
+# > Confidence Interval Width ####
   
+  res$m1[[1]]$CIW
   
-  ## > Confidence Interval Width ####
   ci_res_list <- list(lapply(1:length(res$m1),
                              function(x) res$m1[[x]]$CIW),
                       lapply(1:length(res$m2),
                              function(x) res$m2[[x]]$CIW))
   lapply(1:length(ci_res_list), function(i){
     t(sapply(1:length(ci_res_list[[i]]), function(j){
-      # round(colMeans(ci_res_list[[i]][[j]]), 3)
       sapply(1:ncol(ci_res_list[[i]][[j]]), function(k){
         round(dist(rbind(ci_res_list[[i]][[j]][, k],
                               ci_res_list[[i]][[j]][, "GS"]),
@@ -676,8 +561,7 @@
     }))
   })
   colnames(ci_res_list[[1]][[1]])
-  
-  
+
 # Time plot ---------------------------------------------------------------
 
   rm(list = ls())
@@ -685,12 +569,20 @@
   
   # Result selection
   filename <- "exp4_simOut_20201019_1344" # current one
+  filename <- "exp4_simOut_20201027_1610" # current one
+  
   # Read R object
-  out <- readRDS(paste0("../output/", filename, ".rds"))
+  res <- readRDS(paste0("../output/", filename, ".rds"))
+  # Extract names of conditions
+  res$conds
+  cond_names <- paste0(letters[1:nrow(res$conds)], ") ",
+                       "Condition ", 1:nrow(res$conds), ": ",
+                       "n = ",  res$conds$n)
+  data.frame(res$conds, cond_names)
   
   # Produce data for plot
-  out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
-  colnames(out_time) <- names(out[[1]])
+  out_time <- sapply(1:length(names(res[[1]])), res_sem_time, out = res)
+  colnames(out_time) <- names(res[[1]])
   t(out_time)
   
   # Function
@@ -734,8 +626,10 @@
     labs(title = plot_name,
          x     = "", 
          y     = "") +
-    theme(plot.title = element_text(hjust = 0.5),
-          axis.text = element_text(size = 12)) +
+    theme(plot.title = element_text(size = 12, 
+                                    face = "plain", 
+                                    hjust = 0.5),
+          axis.text = element_text(size = 10)) +
     
     # Content
     geom_bar(position = 'dodge', stat = "identity") + 
@@ -747,8 +641,7 @@
     geom_vline(xintercept = plot_vlines, 
                linetype = "dashed", color = "black") +
     geom_hline(yintercept = plot_hlines, 
-               size = .25, 
-               # linetype = "longdash", 
+               size = .25,
                color = "gray") +
     coord_cartesian(xlim = plot_xlim)
   
@@ -759,18 +652,21 @@
   ## Use fucntion on time data
   p <- lapply(1:ncol(out_time), function(j){
     plot_gg_time( round(out_time[, j],1),
-                  plot_name = c("Low Dimensional Condition", 
-                                "High Dimensional Condition")[j],
+                  plot_name = cond_names[j],
                   meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
                                    "MI_PCA",
                                    "MI_CART", "MI_RF")
                   )
   })
-  
-  p <- arrangeGrob(grobs = list(p[[1]], p[[2]]),
+  # Reuglar Presentation
+  p_time <- arrangeGrob(grobs = p,
                    top = "Average Imputation time (minutes) for each MI method",
                    ncol = 2)
-  pf <- grid.arrange(p)
+  # Poster presentation
+  p_time <- arrangeGrob(grobs = p,
+                        ncol = 2)
+  # Plot
+  pf <- grid.arrange(p_time)
 
-  ggsave(file = "../output/graphs/exp4_time.pdf", pf)
-
+  ggsave(file = "../output/graphs/exp4_time.pdf", pf,
+         width = 8.25, height = 5.25/2)

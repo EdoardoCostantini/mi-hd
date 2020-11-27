@@ -59,6 +59,7 @@ dt.f <- EVS_dt$full
   )
 
 # Euthanasia --------------------------------------------------------------
+# Inspired by Koneke 2014 (model 2)
   # Euthanasia
   table(dt.f$v156)
   lapply(list(dt.o, dt.f), 
@@ -186,6 +187,7 @@ dt.f <- EVS_dt$full
   round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
 
 # Left Right Vote Gender --------------------------------------------------
+# Inspired by ImmerzeelEtAl2016
   
 # Left / Right voting
   table(dt.f$v174_LR)

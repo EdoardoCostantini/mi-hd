@@ -5,7 +5,7 @@
 # Functions ---------------------------------------------------------------
 
 ## Run one replication of the simulation:
-doRep <- function(rp, conds, parms, debug = FALSE) {
+doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
   ## For internals
   # rp = 1
   # debug = FALSE
@@ -19,8 +19,10 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
   # This creates names for the streams so that you can recover them
   
   ## START capture output
-  sink(paste0(parms$outDir, "console/", 
-              parms$report_file_name, "_dataRep", rp, ".txt"))
+  if(verbose == TRUE){
+    sink(paste0(parms$outDir, "console/", 
+                parms$report_file_name, "_dataRep", rp, ".txt"))
+  }
   
   ## Set seed
   .lec.SetPackageSeed(rep(parms$seed, 6))
@@ -198,7 +200,9 @@ doRep <- function(rp, conds, parms, debug = FALSE) {
     }
     
   ## END capture output
-  sink()
+  if(verbose == TRUE){
+    sink()
+  }
   
   ## Return Function output  
   return(rp_out)
@@ -410,6 +414,8 @@ runCell <- function(cond, parms, rep_status) {
                  miss_descrps = miss_descrps,
                  run_time_min = imp_time,
                  imp_values   = imp_values)[parms$store]
+  
+  ## Return Output of function
   return(output)
 }
 

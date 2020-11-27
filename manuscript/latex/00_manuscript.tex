@@ -30,6 +30,9 @@
 \usepackage{placeins} 						% to limit push-to-end of figures
 \usepackage{afterpage} 						% for smart placement of figures
 
+% Paths
+\newcommand{\pathFIG}{../../output/graphs}
+\newcommand{\pathBIB}{../../../statsLib}
 
 \title{High Dimensional Imputation for the Social Sciences\\ \Large A Review of State-of-the-Art Methods}
 \author{Edoardo Costantini}
@@ -77,11 +80,12 @@
 \bibliographystyle{apalike}
 
 \bibliography{
-	../../../statsLib/missingData/bibtex/papers,
-	../../../statsLib/missingData/bibtex/books,
-	../../../statsLib/bayesStats/bibtex/papers,
-	../../../statsLib/programming/bibtex/papers,
-	../../../statsLib/data/bibtex/surveys
+	\pathBIB/missingData/bibtex/papers,
+	\pathBIB/missingData/bibtex/books,
+	\pathBIB/bayesStats/bibtex/papers,
+	\pathBIB/programming/bibtex/papers,
+	\pathBIB/survey/bibtex/data,
+	\pathBIB/survey/bibtex/studies
 	}
 
 % Compile strategy 1:

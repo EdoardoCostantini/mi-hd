@@ -38,7 +38,7 @@
   
   # fix parms that need to be fixed
   out$parms$dt_rep <- length(out) - 2
-  
+
 # Check presence
   out[[1]]
   names(out[[1]])
@@ -123,6 +123,8 @@
                      return(x)
                    }
   )
+  output$parms <- out$parms
+  output$conds <- out$conds
   
   saveRDS(
     output, 

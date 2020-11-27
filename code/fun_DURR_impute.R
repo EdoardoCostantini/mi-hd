@@ -49,7 +49,7 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
           # Monitor progres
           print(paste0("DURR - Chain: ", cc, "/", parms$chains, 
                        "; Iter: ", m, "/", parms$iters))
-          pb <- txtProgressBar(min = 0, max = p_imp, style = 3)
+          # pb <- txtProgressBar(min = 0, max = p_imp, style = 3)
           
           for (j in 1:p_imp) {
             J <- which(colnames(Zm) %in% p_imp_id[j])
@@ -103,9 +103,9 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
             imps[[j]][m, ] <- zm_j # save iteration imputation thing
             
             # Monitor Progress
-            setTxtProgressBar(pb, j)
+            # setTxtProgressBar(pb, j)
         }
-          close(pb)
+          # close(pb)
           imp_DURR_dat[[m]] <- Zm
         }  
         imp_DURR_val[[cc]] <- imps

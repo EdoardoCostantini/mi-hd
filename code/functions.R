@@ -462,7 +462,7 @@ exp4_fit_mod2 <- function(multi_dt){
   ## Description:
   # Given a list of complete datasets it fits a linear model
   # to obtain standardized regression coefficients (all vairables 
-  # are centered and standardized)
+  # are centered and standardized) (ImmerzeelEtAl2016)
   ## Example internals
   # multi_dt <- imp_DURR_la$dats
   # multi_dt <- si_data
@@ -2008,7 +2008,7 @@ plot_gg <- function(dt,
   ## Function inputs
   ## Generic
   # y_axLab = TRUE # say I want the labes
-  # parm_range = 11:20
+  # parm_range = 2:13
   # type = "bias"
   # plot_name = "Untitled"
   # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
@@ -2026,6 +2026,9 @@ plot_gg <- function(dt,
   ## CIR
   # dt = lapply(1:length(res$sem),
   #            function(x) res$sem[[x]]$ci_cov)[[1]]
+  ## CIW
+  # dt = lapply(1:length(res$m2),
+  #             function(x) data.frame( res$m2[[x]]$CIW))[[1]]
   
   ## Prep data for plot
   # Select range of interest
@@ -2097,7 +2100,7 @@ plot_gg <- function(dt,
     plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
     plot_hlines <- c(-.4, .4)
   }
-  
+
   if(type == "ci"){
     dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)] <- 
       95 - dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)]
@@ -2118,6 +2121,25 @@ plot_gg <- function(dt,
     }
     plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
     plot_hlines <- c(-2.5, 2.5)
+  }
+  
+  if(type == "ciw"){
+    plot_limits <- c(0, max(dt_edit$value))
+    
+    plot_xlim   <- c(0, max(dt_edit$value))
+    plot_xbreaks <- round(c(0, mean(dt_edit$value),  max(dt_edit$value) ), 1)
+    plot_xlabels <- rev(as.character(plot_xbreaks))
+    
+    step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
+    plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
+    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
+    if(y_axLab == TRUE){
+      plot_ylabels <- as.character(unique(dt_edit$key))
+    } else {
+      plot_ylabels <- rep("", length(plot_ybreaks))
+    }
+    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
+    plot_hlines <- plot_xbreaks[2]
   }
   
   # Plot

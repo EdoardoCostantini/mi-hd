@@ -52,7 +52,7 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
         for (m in 2:parms$iters) {
           print(paste0("IURR - Chain: ", cc, "/", parms$chains, 
                        "; Iter: ", m, "/", parms$iters))
-          pb <- txtProgressBar(min = 0, max = p_imp, style = 3)
+          # pb <- txtProgressBar(min = 0, max = p_imp, style = 3)
           
           for (j in 1:p_imp) {
             J <- which(colnames(Zm) %in% p_imp_id[j])
@@ -112,7 +112,7 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
             imps[[j]][m, ] <- zm_j # save iteration imputation
             
             # Monitor Progress
-            setTxtProgressBar(pb, j)
+            # setTxtProgressBar(pb, j)
           }
           imp_IURR_dat[[m]] <- Zm
         }
