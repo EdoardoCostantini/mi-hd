@@ -22,6 +22,7 @@ pack_list <- c("tidyverse",
                "rstan",
                "gridExtra",
                "grid",
+               "plyr", # for round_any
                "xtable",
                "PcAux",
                "blasso")

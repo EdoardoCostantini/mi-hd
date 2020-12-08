@@ -7,13 +7,13 @@
 
   rm(list = ls())
   source("./init_general.R")
-  library(gridExtra)
 
 # Read results from a run of simulation study
   # Result selection
   filename <- "exp4_simOut_20201016_2341" # old
   filename <- "exp4_simOut_20201019_1344" # current one
   filename <- "exp4_simOut_20201027_1610" # combined results from more runs
+  filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
   
   # Read R object
   res <- readRDS(paste0("../output/", filename, "_res.rds"))
@@ -98,8 +98,6 @@
       coord_cartesian(xlim = c(-5, 5))
   })
   
-
-  
 # All parameters in same plot ----------------------------------------------
 # This solution does not make things very clear. CI coverage is interesting,
 # but not particularly interesting.
@@ -135,16 +133,25 @@
   } )  
   
 # Generic Plotting function -----------------------------------------------
-# Cosutm plot_gg function for experiment 4
+# Custom plot_gg function for experiment 4
   plot_gg <- function(dt, 
                       dt_CIW = NULL,
+                      dt_reps = 500,
+                      ci_lvl = .95,
                       type = "ci", 
                       plot_cond = "(empty)",
                       plot_name = "Untitled",
-                      meth_compare) {
+                      bar_col = "#595959",
+                      meth_compare,
+                      meth_sort = FALSE) {
     
     # Function Inputs
-    ## Example BIAS Condition 1 model 1 variable religiosity
+    ## New Input
+    # dt = list(lapply(1:length(res$m1),
+    #                  function(x) res$m1[[x]]$bias_per["rel", ]),
+    #           lapply(1:length(res$m2),
+    #                  function(x) res$m2[[x]]$bias_per["NatAt", ]))
+    # ## Example BIAS Condition 1 model 1 variable religiosity
     # dt = lapply(1:length(res$m2),
     #             function(x) res$m2[[x]]$bias_per["NatAt", ])[[2]]
     ## Example CI Condition 1, model 1, variable religiosity
@@ -152,6 +159,11 @@
     #            function(x) res$m2[[x]]$ci_cov["NatAt", ])[[2]]
     # dt_CIW = lapply(1:length(res$m2),
     #             function(x) res$m2[[x]]$CIW["NatAt", ])[[2]]
+    ## Example CIW with CI ED overlay
+    # dt = data.frame(t(colMeans(lapply(1:length(res$m1),
+    #                                   function(x) res$m1[[x]]$CIW)[[1]])))
+    # dt_CIW = lapply(1:length(res$m2),
+    #                 function(x) res$m2[[x]]$ed_ci)[[1]]
     ## Example ED Condition 1, model 1 (estimates or ci?)
     # dt = lapply(1:length(res$m2),
     #            function(x) res$m2[[x]]$ed_est)[[1]]
@@ -160,32 +172,39 @@
     ## Example Confidence Interval Width
     # dt = lapply(1:length(res$m2),
     #             function(x) res$m2[[x]]$CIW["NatAt", ])[[2]]
-    
+
     ## Generic inputs
+    # dt_reps = 500
+    # ci_lvl = .95
     # type = c("bias", "ci", "ciw", "ed")[3]
+    # dt_CIW = NULL
     # plot_name = "Untitled"
     # plot_cond = "(empty)"
     # meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
     #                  "MI_PCA",
     #                  "MI_CART", "MI_RF", "missFor", "CC")
-    
-    # Process inputs
-    # var_name <- rownames(dt)
+    # meth_sort = FALSE
+    # bar_col = "#595959"
     
     if(type == "ci"){
       # Transform for graph
       # Tranform to a difference value
-      x_rev <- 95 - dt
+      x_rev <- dt - 95
       
       # Keep only things you actualy want to show
       x_rev <- x_rev[, meth_compare]
       
       # Order by size
-      rank <- order(abs(x_rev), decreasing = TRUE)
-      x_rev <- x_rev[rank]
+      # Order by size
+      if(meth_sort == TRUE){
+        x_rev <- x_rev[order(abs(x_rev), decreasing = TRUE)]
+      } else {
+        x_rev <- rev(x_rev)
+      }
+      
+      # For display purpuses, if there are 0, 
+      # substitute with small value
       x_rev[x_rev == 0] <- .025 
-        # for display purpuses, if there are 0, 
-        # substitute with small value
       
       # Make names prettier
       names(x_rev) <- sub("_la", "", names(x_rev))
@@ -214,11 +233,16 @@
       
       # Limits
       plot_limits <- c(-5, 5)
-      plot_breaks <- c(-5, -2.5, 0, 2.5, 5)
-      plot_labels <- rev(c(".9", ".925", ".95", ".975", "1"))
-      plot_vlines <- c(-2.5, 2.5)
-      plot_hlines <- seq(1:12)
       plot_xlim   <- c(-5, 5)
+      # plot_breaks <- c(-5, -2.5, 0, 2.5, 5)
+      # plot_labels <- c(".9", ".925", ".95", ".975", "1")
+        SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps)
+        low_thr <- ((.95-SEp*2)-.95)*100
+        hig_thr <- ((.95+SEp*2)-.95)*100
+      plot_breaks <- c(-5, low_thr, 0, hig_thr, 5)
+      plot_labels <- as.character(round((plot_breaks+95)/100, 2))
+      plot_vlines <- c(-5, low_thr, hig_thr)
+      plot_hlines <- seq(1:12)
     }
 
     if(type == "bias"){
@@ -229,7 +253,11 @@
       x_rev <- x_rev[, meth_compare]
       
       # Order by size
-      x_rev <- x_rev[order(abs(x_rev), decreasing = TRUE)]
+      if(meth_sort == TRUE){
+        x_rev <- x_rev[order(abs(x_rev), decreasing = TRUE)]
+      } else {
+        x_rev <- rev(x_rev)
+      }
       
       # Make names prettier
       names(x_rev) <- sub("_la", "", names(x_rev))
@@ -255,7 +283,11 @@
       x_rev <- dt[, meth_compare]
       
       # Order by size
-      x_rev <- x_rev[order(abs(x_rev), decreasing = TRUE)]
+      if(meth_sort == TRUE){
+        x_rev <- x_rev[order(abs(x_rev), decreasing = TRUE)]
+      } else {
+        x_rev <- rev(x_rev)
+      }
       
       # Make names prettier
       names(x_rev) <- sub("_la", "", names(x_rev))
@@ -273,7 +305,7 @@
       plot_xlim   <- c(0, (ref_max*1.5))
       plot_breaks <- c(0, ref_min, ref_max, ref_max*1.5)
       plot_labels <- as.character(round(plot_breaks, 2))
-      plot_vlines <- NULL
+      plot_vlines <- ref
       plot_hlines <- seq(1:nrow(ggplot_input))
     }
 
@@ -282,7 +314,11 @@
       x_rev <- dt[, meth_compare]
       
       # Transform for graph
-      x_rev <- sort(x_rev, decreasing = TRUE)
+      if(meth_sort == TRUE){
+        x_rev <- sort(x_rev, decreasing = TRUE)
+      } else {
+        x_rev <- rev(x_rev)
+      }
       
       # Make names prettier
       names(x_rev) <- sub("_la", "", names(x_rev))
@@ -295,12 +331,21 @@
                                  bar_label = "")
       
       # Fixed Version
-      plot_xlim   <- c(0, .5)
-      plot_breaks <- seq(0, .5, 
-                         length.out = 5)
-      
+      plot_xlim   <- c(0, round_any(max(x_rev[, colnames(x_rev) != "bridge"]),  
+                                    0.1, 
+                                    f = ceiling)
+                       )
+      plot_breaks <- round_any(seq(plot_xlim[1], plot_xlim[2], 
+                                   length.out = 3), 0.1, f = ceiling)
+      plot_breaks <- round(seq(plot_xlim[1], plot_xlim[2], length.out = 3), 
+                           1)
       plot_labels <- as.character(plot_breaks)
-      plot_vlines <- NULL
+      # plot_vlines <- NULL
+      if("GS" %in% names(x_rev)) {
+        plot_vlines <- x_rev$GS
+      } else {
+        plot_vlines <- NULL
+      }
       plot_hlines <- NULL
     }
     
@@ -321,7 +366,8 @@
             axis.text = element_text(size = 10)) +
       
       # Content
-      geom_bar(stat = "identity") + 
+      geom_bar(stat = "identity",
+               fill = bar_col) + 
       
       # Tweaks
       geom_text(data = ggplot_input, 
@@ -367,6 +413,8 @@
   )
   
 # Variable of interest ----------------------------------------------------
+  
+# > Bias ####
   # Which Methods do you want to plot
   meths <- c("DURR_la", "IURR_la", 
              "blasso", "bridge",
@@ -374,10 +422,6 @@
              "MI_CART", "MI_RF", 
              "missFor", 
              "mean", "CC")
-  
-# > Bias ####
-  rownames(res$m1[[1]]$bias_raw)
-  rownames(res$m2[[1]]$bias_raw)
 
 # Obtain plots per different model
   bias_plots_m1 <- lapply(1:2, function(p){
@@ -406,11 +450,18 @@
   # Save Plot
   ggsave(pf,
          file = "../output/graphs/exp4_imp_bias.pdf", 
-         width = 8.25, height = 5.25,
+         width = 8.25/3*2, height = 11.75/4*2,
          device = cairo_pdf)
   
 # > CI   ####
-
+  # Which Methods do you want to plot
+  meths <- c("DURR_la", "IURR_la", 
+             "blasso", "bridge",
+             "MI_PCA",
+             "MI_CART", "MI_RF", 
+             "missFor", 
+             "mean", "CC", "GS")
+  
   # Define plots
   ci_plots_m1 <- lapply(1:2, function(p){
     plot_gg(dt        = lapply(1:length(res$m1),
@@ -423,7 +474,7 @@
     plot_gg(dt        = lapply(1:length(res$m2),
                                function(x) res$m2[[x]]$ci_cov["NatAt", ])[[p]],
             type      = "ci",
-            plot_name = cond_names[[p]],
+            plot_name = "",
             meth_compare = meths) } )
   
   # Combine and arrange plots
@@ -438,24 +489,30 @@
    # Save Plot
   ggsave(pf, 
          file = "../output/graphs/exp4_imp_ci.pdf", 
-         width = 8.25, height = 5.25,
+         width = 8.25/3*2, height = 11.75/4*2,
          device = cairo_pdf)
   
 # > CIW   ####
   
   # Define plots
   ci_plots_m1 <- lapply(1:2, function(p){
-    plot_gg(dt        = lapply(1:length(res$m1),
-                               function(x) res$m1[[x]]$CIW["rel", ])[[p]],
+    plot_gg(
+            # dt        = lapply(1:length(res$m1),
+            #                    function(x) res$m1[[x]]$CIW["rel", ])[[p]],
+            dt        = data.frame(t(colMeans(lapply(1:length(res$m1),
+                                                     function(x) res$m1[[x]]$CIW)[[p]]))),
             type      = "ciw",
             plot_name = cond_names[[p]],
             meth_compare = meths) } )
   
   ci_plots_m2 <- lapply(1:2, function(p){
-    plot_gg(dt        = lapply(1:length(res$m2),
-                               function(x) res$m2[[x]]$CIW["NatAt", ])[[p]],
+    plot_gg(
+            # dt        = lapply(1:length(res$m2),
+            #                    function(x) res$m2[[x]]$CIW["NatAt", ])[[p]],
+            dt        = data.frame(t(colMeans(lapply(1:length(res$m2),
+                                                     function(x) res$m2[[x]]$CIW)[[p]]))),
             type      = "ciw",
-            plot_name = cond_names[[p]],
+            plot_name = "",
             meth_compare = meths) } )
   
   # Combine and arrange plots
@@ -470,7 +527,7 @@
   # Save Plot
   ggsave(pf, 
          file = "../output/graphs/exp4_imp_ciw.pdf", 
-         width = 8.25, height = 5.25,
+         width = 8.25/3*2, height = 11.75/4*2,
          device = cairo_pdf)
   
 # Multivariate distance ---------------------------------------------------
@@ -493,7 +550,7 @@
     plot_gg(dt        = lapply(1:length(res$m2),
                                function(x) res$m2[[x]]$ed_est)[[p]],
             type      = "ed",
-            plot_name = cond_names[[p]],
+            plot_name = "",
             meth_compare = meths ) } )
   
   # Combine and arrange plots
@@ -505,14 +562,20 @@
                     ncol = 2
   )
   pf <- grid.arrange(p1, p2)
-  grid.arrange(p2) # single plot
+  # grid.arrange(p2) # single plot
   
   # Save Plot
   ggsave(pf,
          file = "../output/graphs/exp4_ed_bias.pdf", 
-         width = 8.25, height = 5.25)
+         width = 8.25/3*2, height = 11.75/4*2)
   
 # > CI ####
+  meths <- c("DURR_la", "IURR_la", 
+             "blasso", "bridge",
+             "MI_PCA",
+             "MI_CART", "MI_RF", 
+             "missFor", 
+             "mean", "CC", "GS")
   # Define plots
   ci_plots_m1 <- lapply(1:2, function(p){
     plot_gg(dt        = lapply(1:length(res$m1),
@@ -525,7 +588,7 @@
     plot_gg(dt        = lapply(1:length(res$m2),
                                function(x) res$m2[[x]]$ed_ci)[[p]],
             type      = "ed",
-            plot_name = cond_names[[p]],
+            plot_name = "",
             meth_compare = meths
     ) } )
   
@@ -540,27 +603,7 @@
   
   # Save Plot
   ggsave(file = "../output/graphs/exp4_ed_ci.pdf", pf,
-         width = 8.25, height = 5.25)
-  
-# > Confidence Interval Width ####
-  
-  res$m1[[1]]$CIW
-  
-  ci_res_list <- list(lapply(1:length(res$m1),
-                             function(x) res$m1[[x]]$CIW),
-                      lapply(1:length(res$m2),
-                             function(x) res$m2[[x]]$CIW))
-  lapply(1:length(ci_res_list), function(i){
-    t(sapply(1:length(ci_res_list[[i]]), function(j){
-      sapply(1:ncol(ci_res_list[[i]][[j]]), function(k){
-        round(dist(rbind(ci_res_list[[i]][[j]][, k],
-                              ci_res_list[[i]][[j]][, "GS"]),
-                   method = "euclidean"), 
-              3)
-      })
-    }))
-  })
-  colnames(ci_res_list[[1]][[1]])
+         width = 8.25/3*2, height = 11.75/4*2)
 
 # Time plot ---------------------------------------------------------------
 
@@ -570,6 +613,7 @@
   # Result selection
   filename <- "exp4_simOut_20201019_1344" # current one
   filename <- "exp4_simOut_20201027_1610" # current one
+  filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
   
   # Read R object
   res <- readRDS(paste0("../output/", filename, ".rds"))
@@ -669,4 +713,4 @@
   pf <- grid.arrange(p_time)
 
   ggsave(file = "../output/graphs/exp4_time.pdf", pf,
-         width = 8.25, height = 5.25/2)
+         width = 8.25/3*2, height = 11.75/4*1,)

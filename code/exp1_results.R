@@ -14,14 +14,18 @@
   
   # "exp1_simOut_20200801_1620"
   filename <- c("sim_res_20200710_1019",
-                "exp1_simOut_20200731_1735", # <- CURRENT
-                "exp1_simOut_20200801_1620")[3]
+                "exp1_simOut_20200731_1735", 
+                "exp1_simOut_20200801_1620",
+                "exp1_simOut_20201130_1006")[4]# <- CURRENT
   # Result 1 is the one used for first submission to EAM
   # Result 2 and 3 corrected for MNAR issue. They are equivalent, but
   # second file has more repetitions (500 vs 750)
+  # Result 4 is the run with 1e3 iterations directly. Most Up-to-date 
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))
+  out$parms
+  out$session_info
 
 # Time Analyses -----------------------------------------------------------
 
@@ -31,7 +35,7 @@
   
 # Univariate Analyses -----------------------------------------------------
   
-## MLE estiamtes (saturated sem model) ##
+## MLE estimates (saturated sem model) ##
   
   # Extract results per conditions
   sem_res <- lapply(1:length(out[[1]]),

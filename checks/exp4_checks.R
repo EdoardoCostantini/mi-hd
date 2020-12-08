@@ -28,6 +28,57 @@ round(summary(mod2)$adj.r.squared*100, 1)
 round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
 nrow(summary(mod2)$coefficients)
 
+# CIR Full data -----------------------------------------------------------
+
+  rm(list=ls())
+  source("./init_general.R")
+  source("./exp4_init.R")
+
+# Select 1 condition
+  cond <- conds[2, ]
+  
+# get dataset
+  set.seed(20200805)
+  data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
+  reps <- 1e3
+  m1_CI <- matrix(0, ncol = 2, nrow = 13)
+  m2_CI <- matrix(0, ncol = 2, nrow = 14)
+
+# Store results
+  mpars <- cov_o <- list(m1 = matrix(NA, nrow = reps, ncol = 13),
+                         m2 = matrix(NA, nrow = reps, ncol = 14))
+  CI <- NULL
+# Perform check
+for (r in 1:reps) {
+  # Gen one fully-obs data
+  Xy <- data_source[sample(1:nrow(data_source),
+                           cond$n,
+                           replace = TRUE), ]
+  # Fit model 1 and 2
+  si_data <- list(GS = Xy)
+  
+  ## Fit --------------------------------------------------------------------- ##
+  # model 1
+  m1_sn <- exp4_fit_mod1(si_data)
+    mpars[[1]][r,]  <- lapply(m1_sn, coef)$GS
+  m2_sn <- exp4_fit_mod2(si_data)
+    mpars[[2]][r,]  <- lapply(m2_sn, coef)$GS
+  
+  # Get Confidence intervals
+  CI[[r]] <- lapply(c(m1 = m1_sn, m2 = m2_sn), confint)
+}
+  
+  # Obtain CIR results
+  mpar_true <- lapply(mpars, colMeans)
+  for (r in 1:reps) {
+    cov_o[[1]][r, ] <- CI[[r]]$m1.GS[, 1] < mpar_true$m1 & mpar_true$m1 < CI[[r]]$m1.GS[, 2]
+    cov_o[[2]][r, ] <- CI[[r]]$m2.GS[, 1] < mpar_true$m2 & mpar_true$m2 < CI[[r]]$m2.GS[, 2]
+  }
+  colnames(cov_o[[1]]) <- names(lapply(m1_sn, coef)$GS)
+  colnames(cov_o[[2]]) <- names(lapply(m2_sn, coef)$GS)
+  
+  lapply(cov_o, colMeans)$m1["rel"]
+
 # Identify Variables for MAR ----------------------------------------------
 # Criteria:
 # a) correlated with the target of missing variables

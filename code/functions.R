@@ -1585,7 +1585,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   # model = "sem"
   # model = "semR"
   # model = "CFA"
-  # model = "m2"
+  # model = "m1"
   # condition = 2
   # out = output
   # bias_sd = TRUE
@@ -1646,10 +1646,6 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   meths <- out$parms$methods[-which(out$parms$methods == "GS")]
   # Bias Mean Standardized
   if(bias_sd == TRUE){
-    # 
-    # means_indx <- grep("~1", rownames(avg))
-    # means_indx <- rownames(avg)
-    # 
     # Empirical Standard error
     sd_emp <- sapply(out$parms$methods, function(m){
       # m <- out$parms$methods[1]
@@ -1670,7 +1666,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     bias_sd_out <- NULL
   }
   
-  ## Step 3. CI Coverange ##
+  ## Step 3. CI Coverage ##
   # storing threshold
   str_thrs <- nrow(out[[1]][[select_cond]][[ci]])/2
   
@@ -1682,12 +1678,10 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
       col_indx <- succ_method %in% m
       cond_est <- out[[i]][[select_cond]][[est]]
       cond_CI  <- out[[i]][[select_cond]][[ci]]
-      ci_low   <- cond_CI[1:str_thrs, ]
-      ci_hig   <- cond_CI[-(1:str_thrs), ]
-      
+      ci_low   <- cond_CI[1:str_thrs, col_indx]
+      ci_hig   <- cond_CI[-(1:str_thrs), col_indx]
       store <- cbind(store, 
-                     ci_low[, col_indx] < psd_tr_vec &
-                       psd_tr_vec < ci_hig[, col_indx]
+                     ci_low < psd_tr_vec & psd_tr_vec < ci_hig
       )
     }
     rowMeans(store, na.rm = TRUE) # MCMC statistics 
@@ -1999,7 +1993,10 @@ bridge_cv <- function(out, mods = NULL){
 # Plot function for experiment 1 and 2
 
 plot_gg <- function(dt,
-                    type = "bias", 
+                    dt_reps = 500,
+                    ci_lvl = .95,
+                    type = "bias",
+                    axis.name.x = "Axis Name Here",
                     plot_cond = "(empty)",
                     plot_name = NULL,
                     parm_range = 1:2,
@@ -2007,8 +2004,10 @@ plot_gg <- function(dt,
                     meth_compare) {
   ## Function inputs
   ## Generic
+  # ci_lvl = .95 # confidence interval level
+  # dt_reps = 500 # MCMC repetitions
   # y_axLab = TRUE # say I want the labes
-  # parm_range = 2:13
+  # parm_range = 1:6
   # type = "bias"
   # plot_name = "Untitled"
   # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
@@ -2024,8 +2023,8 @@ plot_gg <- function(dt,
   # dt = lapply(1:length(res$semR),
   #             function(x) data.frame( res$semR[[x]]$bias_raw))[[4]]
   ## CIR
-  # dt = lapply(1:length(res$sem),
-  #            function(x) res$sem[[x]]$ci_cov)[[1]]
+  # dt = lapply(1:length(res$semR),
+  #            function(x) res$semR[[x]]$ci_cov)[[1]]
   ## CIW
   # dt = lapply(1:length(res$m2),
   #             function(x) data.frame( res$m2[[x]]$CIW))[[1]]
@@ -2103,13 +2102,15 @@ plot_gg <- function(dt,
 
   if(type == "ci"){
     dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)] <- 
-      95 - dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)]
-    
-    plot_limits <- c(-5, 15)
-    
-    plot_xlim   <- c(-5, 15)
-    plot_xbreaks <- c(-5, -2.5, 0, 2.5, 5, 15)
-    plot_xlabels <- rev(c(".8", ".9", ".925", ".95", ".975", "1"))
+      dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)] - 95
+
+    plot_limits <- c(-15, 5)
+    SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps)
+    low_thr <- ((.95-SEp*2)-.95)*100
+    hig_thr <- ((.95+SEp*2)-.95)*100
+    plot_xlim   <- c(-15, 5)
+    plot_xbreaks <- c(-15, -5, low_thr, 0, hig_thr, 5)
+    plot_xlabels <- as.character(round((plot_xbreaks+95)/100, 2))
     
     step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
     plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
@@ -2120,7 +2121,7 @@ plot_gg <- function(dt,
       plot_ylabels <- rep("", length(plot_ybreaks))
     }
     plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-    plot_hlines <- c(-2.5, 2.5)
+    plot_hlines <- c(-5, low_thr, hig_thr)
   }
   
   if(type == "ciw"){
@@ -2149,17 +2150,21 @@ plot_gg <- function(dt,
     
     # Title and axis labels
     labs(title = plot_name,
-         x     = element_blank(), 
+         x     = axis.name.x, 
          y     = element_blank()) +
-    theme(plot.title = element_text(size = 7.5),
-          axis.title = element_blank(),
-          axis.text  = element_text(size = 7.5),
-          plot.margin = unit(c(.05,.05,.05,.05), "cm")) +
+    theme(plot.title   = element_text(size = 6.5, 
+                                      face = "plain", 
+                                      hjust = 0.5),
+          axis.title.x = element_text(size = 6.5,
+                                      face = "plain"),
+          axis.text.x  = element_text(size = 5),
+          axis.text.y  = element_text(size = 5),
+          plot.margin  = unit(c(.05,.0,.0,.0), "cm")) +
     
     # Content
     geom_segment(aes(xend = 0, 
                      yend = id),
-                 color = "gray") + 
+                 color = "darkgray") + 
     
     # Tweaks
     scale_y_continuous(breaks = plot_ybreaks,
@@ -2175,3 +2180,600 @@ plot_gg <- function(dt,
   p
   return(p)
 }
+
+### FACET VERSION
+
+plot_fg <- function(dt,
+                    type = "bias",
+                    parPlot,
+                    dt_reps = 500,
+                    ci_lvl = .95,
+                    axis.name.x = NULL,
+                    plot_cond = "(empty)",
+                    plot_name = NULL,
+                    y_axLab = TRUE,
+                    meth_compare) {
+  ## Function inputs
+  ## Generic
+  # type = "bias"
+  # axis.name.x = NULL #"Axis Name Here"
+  # plot_name = NULL #"Untitled"
+  # ci_lvl = .95 # confidence interval level
+  # dt_reps = 500 # MCMC repetitions
+  # y_axLab = TRUE # say I want the labels
+  # parPlot <- list(means = 1:6,
+  #                 variances = 7:12,
+  #                 covariances = 13:27)
+  # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
+  #                      "MI_PCA",
+  #                      "MI_CART", "MI_RF", "missFor", "CC"))
+  ## EXP 1
+  # dt = lapply(1:length(res$sem),
+  #             function(x) data.frame( res$sem[[x]]$bias_per))
+  # dt = lapply(1:length(res$sem),
+  #             function(x) data.frame( res$sem[[x]]$ci_cov))
+  ## EXP 2
+  # dt = lapply(1:length(res$semR),
+  #             function(x) data.frame( res$semR[[x]]$bias_per))[1:4]
+  # dt = lapply(1:length(res$semR),
+  #             function(x) data.frame( res$semR[[x]]$bias_sd))[1:4]
+  # dt = lapply(1:length(res$semR),
+  #             function(x) data.frame( res$semR[[x]]$ci_cov))[1:4]
+  # dt = lapply(1:length(res$CFA),
+  #             function(x) data.frame( res$CFA[[x]]$bias_per))[1:4]
+  # parPlot <- list(fl = 1:10,
+  #                 other = 11:16)
+  # means = 1:10
+  # varis = 11:16
+  # covas = 21:65
+  
+  ## Prep data for plot
+  
+  dt_preEdit <- lapply(parPlot, function(x){
+    lapply(dt, function(d){
+      d[x, meth_compare]
+    })
+  })
+  
+  # Select Parms and methods of interest
+  # dt_means <- lapply(dt, function(x){
+  #   x[means, meth_compare]
+  # })
+  # 
+  # dt_vars <- lapply(dt, function(x){
+  #   x[varis, meth_compare]
+  # })
+  # 
+  # dt_cova <- lapply(dt, function(x){
+  #   x[covas, meth_compare]
+  # })
+
+  dt_edit <- Reduce(c, dt_preEdit)
+  # dt_edit <- c(dt_means, dt_vars, dt_cova) # regular order
+  # dt_edit <- c(rbind(dt_means, dt_vars, dt_cova)) # flipped order
+  
+  # Make names prettier
+  dt_edit <- lapply(dt_edit, function(x){
+    colnames(x) <- sub("_la", "", colnames(x))
+    colnames(x) <- sub("_", "-", colnames(x))
+    return(x)
+  })
+  
+  # Add Blank Row to improve readability
+  dt_edit <- lapply(dt_edit, function(x){
+    x[nrow(x)+1,] <- 0  # add blank row to improve visualization  
+    return(x)
+  })
+  
+  # Count contents
+  n <- lapply(dt_edit, nrow)
+  
+  # Shape for ggplot
+  dt_edit <- lapply(dt_edit, gather)
+  dt_edit <- lapply(dt_edit, function(x){
+    x$id <- 1:nrow(x)
+    return(x)
+  })
+  n_facet <- length(dt_edit)
+  
+  # Combine for facet
+  dt_edit <- do.call(rbind, dt_edit)
+  
+  plot_step <- length(dt)
+  gpf1 <- seq(0, length(dt)*length(parPlot), by = plot_step)
+  
+  # Grid Plot Factor 1
+  conds_list <- lapply(gpf1[-1], function(x){
+    rep(1:length(dt), each = n[[x]]*length(meth_compare))
+  })
+  conds <- do.call(c, conds_list)
+  
+  # Grid Plot Factor 2
+  
+  parT <- lapply(1:length(parPlot), function(x){
+    parT_index <- (sapply(parPlot, length)+1)*length(dt)*length(meth_compare)
+    rep(x, parT_index[x])
+  })
+  parT <- Reduce(c, parT)
+  
+  # Final Data prep
+  dt_edit <- cbind(dt_edit, 
+                   conds = paste0("Condition ", conds),
+                   parT = factor(parT, labels = names(parPlot)))
+  
+  # Define Step Size for all parameters sets
+  step_size <- vector("list", 3)
+  plot_steps <- vector("list", 3)
+  plot_ybreaks <- vector("list", 3)
+  plot_hlines <- vector("list", 3)
+  for(i in 1:length(dt_preEdit)){
+    ref_data <- dt_preEdit[[i]][[1]]
+    step_size[[i]]   <- (
+      nrow(ref_data) + # number of parameters
+      1 # account for additional empty row
+    ) / 2 # place label in the middle
+    plot_steps[[i]] <- seq(0, 
+                        (nrow(ref_data)+1) *  # number of parameters + empty row
+                        ncol(ref_data), # number of methods
+                        by = step_size[[i]])
+    plot_ybreaks[[i]] <- plot_steps[[i]][c(FALSE, TRUE)]    # position label skip
+    plot_hlines[[i]] <- plot_steps[[i]][c(TRUE, FALSE)]  
+  }
+  
+  # Methods labels
+  plot_ylabels <- as.character(unique(dt_edit$key)) # unique for everyone
+  
+  # Ticks 
+  if(type == "bias"){
+    # Plot Limits
+    plot_xlim   <- c(-20, 20)
+    
+    # X axis
+    plot_xbreaks <- c(-20, -10, 0, 10, 20)
+    plot_xlabels <- c("-20", "-10", "0", "10", "20")
+    plot_vlines <- c(-10, 10)
+  }
+  if(type == "ci"){
+    # Redefine values as differences from target
+    dt_edit$value[dt_edit$value != 0] <- dt_edit$value[dt_edit$value != 0] - 95
+    
+    # Plot Limits (reference: 0 = .95)
+    plot_xlim   <- c(-15, 5)
+    
+    # SE for threshold 
+    SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps)
+    low_thr <- ((.95-SEp*2)-.95)*100
+    hig_thr <- ((.95+SEp*2)-.95)*100
+    
+    # X axis
+    plot_xbreaks <- c(-15, -5, low_thr, 0, hig_thr, 5)
+    plot_xlabels <- gsub("0", "", as.character(round((plot_xbreaks+95)/100, 2)))
+    plot_vlines <- c(-5, low_thr, hig_thr)
+  }
+  
+  if(type == "ciw"){
+    plot_limits <- c(0, max(dt_edit$value))
+    
+    plot_xlim   <- c(0, max(dt_edit$value))
+    plot_xbreaks <- round(c(0, mean(dt_edit$value),  max(dt_edit$value) ), 1)
+    plot_xlabels <- rev(as.character(plot_xbreaks))
+    
+    step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
+    plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
+    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
+    if(y_axLab == TRUE){
+      plot_ylabels <- as.character(unique(dt_edit$key))
+    } else {
+      plot_ylabels <- rep("", length(plot_ybreaks))
+    }
+    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
+    plot_hlines <- plot_xbreaks[2]
+  }
+  
+  if(type == "bias_raw"){
+    maxB <- max( abs(dt_edit$value) )
+    plot_xbreaks <- c(-maxB, -maxB/2, 
+                      0, 
+                      maxB/2, maxB)
+    plot_xlim   <- c(plot_xbreaks[1], plot_xbreaks[5])
+    plot_xlabels <- as.character(plot_xbreaks)
+    
+    step_size    <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
+    plot_steps   <- seq(0, nrow(dt_edit), by = step_size)
+    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
+    if(y_axLab == TRUE){
+      plot_ylabels <- as.character(unique(dt_edit$key))
+    } else {
+      plot_ylabels <- rep("", length(plot_ybreaks))
+    }
+    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
+    plot_hlines <- c(plot_xbreaks[2], plot_xbreaks[4])
+  }
+  
+  if(type == "bias_sd"){
+    # Plot Limits
+    plot_xlim   <- c(-1, 1)
+    
+    # X axis
+    plot_xbreaks <- c(-1, -.4, 0, .4, 1)
+    plot_xlabels <- c("-1", "-.4", "0", ".4", "1")
+    plot_vlines <- c(-.4, .4)
+  }
+  
+  # Plot
+  p <- ggplot(dt_edit, aes(x = value, y = id)) +
+    # Title and axis labels
+    labs(title = plot_name,
+         x     = axis.name.x, 
+         y     = element_blank()) +
+    theme(plot.title   = element_text(size = 6.5, 
+                                      face = "plain", 
+                                      hjust = .5,
+                                      vjust = .5),
+          axis.title.x = element_text(size = 5,
+                                      face = "plain"),
+          axis.text.x  = element_text(size = 5),
+          axis.text.y  = element_text(size = 5),
+          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
+          # Background
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          # Facet Related
+          strip.text = element_text(size = 5,
+                                    face = "plain",
+                                    margin = unit(c(.10, .10, .10, .10), "cm")) 
+          ) +
+    
+    # Plot Content
+    geom_segment(aes(xend = 0, 
+                     yend = id),
+                 color = "darkgray") + 
+    # X Axis
+    scale_x_continuous(breaks = plot_xbreaks,
+                       labels = plot_xlabels) +
+    
+    geom_vline(xintercept = plot_vlines,
+               linetype = "dashed", color = "black") +
+    coord_cartesian(xlim = plot_xlim)
+    # facet_wrap(conds ~ group, nrow = 4) +
+    # facet_grid(rows = vars(parT),
+    #            cols = vars(conds))
+    # Add Facet and y lines
+    if(length(parPlot) == 1){
+      p <- p + 
+        facet_grid_custom(rows = vars(parT),
+                          cols = vars(conds),
+                          scales = "free", scale_overrides = list(
+                            scale_override(1, scale_y_continuous(breaks = plot_ybreaks[[1]],
+                                                                 labels = plot_ylabels))
+                          )) +   
+        # Horizontal lines (method separation)
+        geom_hline(data = data.frame(yint = plot_hlines[[1]], parT = levels(dt_edit$parT)[[1]]),
+                   aes(yintercept = yint), size = .25, color = "black")
+    }
+    if(length(parPlot) == 2){
+      p <- p + 
+        facet_grid_custom(rows = vars(parT),
+                          cols = vars(conds),
+                          scales = "free", scale_overrides = list(
+                            scale_override(1, scale_y_continuous(breaks = plot_ybreaks[[1]],
+                                                                 labels = plot_ylabels)),
+                            scale_override(2, scale_y_continuous(breaks = plot_ybreaks[[2]],
+                                                                 labels = plot_ylabels))
+                          )) +   
+        # Horizontal lines (method separation)
+        geom_hline(data = data.frame(yint = plot_hlines[[1]], parT = levels(dt_edit$parT)[[1]]),
+                   aes(yintercept = yint), size = .25, color = "black") +
+        geom_hline(data = data.frame(yint = plot_hlines[[2]], parT = levels(dt_edit$parT)[[2]]),
+                   aes(yintercept = yint), size = .25, color = "black")
+    }
+    if(length(parPlot) == 3){
+      p <- p + 
+      facet_grid_custom(rows = vars(parT),
+                        cols = vars(conds),
+                        scales = "free", scale_overrides = list(
+                          scale_override(1, scale_y_continuous(breaks = plot_ybreaks[[1]],
+                                                               labels = plot_ylabels)),
+                          scale_override(2, scale_y_continuous(breaks = plot_ybreaks[[2]],
+                                                               labels = plot_ylabels)),
+                          scale_override(3, scale_y_continuous(breaks = plot_ybreaks[[3]],
+                                                               labels = plot_ylabels))
+                        )) +   
+        # Horizontal lines (method separation)
+        geom_hline(data = data.frame(yint = plot_hlines[[1]], parT = levels(dt_edit$parT)[[1]]),
+                   aes(yintercept = yint), size = .25, color = "black") +
+        geom_hline(data = data.frame(yint = plot_hlines[[2]], parT = levels(dt_edit$parT)[[2]]),
+                   aes(yintercept = yint), size = .25, color = "black") +
+        geom_hline(data = data.frame(yint = plot_hlines[[3]], parT = levels(dt_edit$parT)[[3]]),
+                   aes(yintercept = yint), size = .25, color = "black")
+    }
+  
+    # p + 
+    # 
+    #   facet_grid_custom(rows = vars(parT),
+    #                     cols = vars(conds),
+    #                     scales = "free", scale_overrides = list(
+    #                       scale_override(1, scale_y_continuous(breaks = plot_ybreaks[[1]],
+    #                                                            labels = plot_ylabels)),
+    #                       scale_override(2, scale_y_continuous(breaks = plot_ybreaks[[2]],
+    #                                                            labels = plot_ylabels)),
+    #                       scale_override(3, scale_y_continuous(breaks = plot_ybreaks[[3]],
+    #                                                            labels = plot_ylabels))
+    #                     )) +   
+    #   # Horizontal lines (method separation)
+    #   geom_hline(data = data.frame(yint = plot_hlines_1, parT = "means"),
+    #              aes(yintercept = yint), size = .25, color = "black") +
+    #   geom_hline(data = data.frame(yint = plot_hlines_1, parT = "variances"),
+    #              aes(yintercept = yint), size = .25, color = "black") +
+    #   geom_hline(data = data.frame(yint = plot_hlines_3, parT = "covariances"),
+    #              aes(yintercept = yint), size = .25, color = "black")
+    # p
+    # 
+    # # Override Y axis for the different plots
+    # facet_wrap_custom( ~ group,
+    #                    dir = "v",
+    #                    scales = "free_y",
+    #                    nrow = 4, 
+    #                    scale_overrides = list(
+    #   scale_override(1, scale_y_continuous(breaks = plot_ybreaks_1,
+    #                                        labels = plot_ylabels)),
+    #   scale_override(2, scale_y_continuous(breaks = plot_ybreaks_1,
+    #                                        labels = plot_ylabels)),
+    #   scale_override(3, scale_y_continuous(breaks = plot_ybreaks_1,
+    #                                        labels = plot_ylabels)),
+    #   scale_override(4, scale_y_continuous(breaks = plot_ybreaks_1,
+    #                                         labels = plot_ylabels)),
+    #   # Override Variances
+    #   scale_override(5, scale_y_continuous(breaks = plot_ybreaks_1,
+    #                                        labels = rep("", length(plot_ybreaks_1)))),
+    #   scale_override(6, scale_y_continuous(breaks = plot_ybreaks_1,
+    #                                        labels = rep("", length(plot_ybreaks_1)))),
+    #   scale_override(7, scale_y_continuous(breaks = plot_ybreaks_1,
+    #                                        labels = rep("", length(plot_ybreaks_1)))),
+    #   scale_override(8, scale_y_continuous(breaks = plot_ybreaks_1,
+    #                                         labels = rep("", length(plot_ybreaks_1)))),
+    #   # Override Covariances
+    #   scale_override(9, scale_y_continuous(breaks = plot_ybreaks_3,
+    #                                        labels = rep("", length(plot_ybreaks_3)))),
+    #   scale_override(10, scale_y_continuous(breaks = plot_ybreaks_3,
+    #                                        labels = rep("", length(plot_ybreaks_3)))),
+    #   scale_override(11, scale_y_continuous(breaks = plot_ybreaks_3,
+    #                                        labels = rep("", length(plot_ybreaks_3)))),
+    #   scale_override(12, scale_y_continuous(breaks = plot_ybreaks_3,
+    #                                         labels = rep("", length(plot_ybreaks_3))))
+    # )) +
+    # 
+    # # X Axis
+    # scale_x_continuous(breaks = plot_xbreaks,
+    #                    labels = plot_xlabels) +
+    # 
+    # geom_vline(xintercept = plot_vlines,
+    #            linetype = "dashed", color = "black") +
+    # coord_cartesian(xlim = plot_xlim) + 
+    # 
+    # # Horizontal Lines
+    # # Column 1
+    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 1),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 2),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 3),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 4),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # # Column 2
+    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 5),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 6),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 7),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 8),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # # Column 3
+    # geom_hline(data = data.frame(yint = plot_hlines_3, group = 9),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_3, group = 10),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_3, group = 11),
+    #            aes(yintercept = yint), size = .25, color = "black") +
+    # geom_hline(data = data.frame(yint = plot_hlines_3, group = 12),
+    #            aes(yintercept = yint), size = .25, color = "black")
+  # Visualize Plot
+  p
+  return(p)
+}
+
+# ggsave(file  = "~/Desktop/exp1_bias.pdf",
+#        width = 15, height = 15/4*3,
+#        units = "cm",
+#        p)
+# 
+# mydata = data.frame(q = seq(.25, .65, by=.05), response = rnorm(9))
+# ggplot(mydata, aes(y=response,x=q)) +
+#   geom_line(aes(y=response))  +
+#   scale_x_continuous(breaks=seq(.25, .65, .05), 
+#                      labels=sub("^(-?)0.", "\\1.", 
+#                                 sprintf("%.2f", seq(.25, .65, .05)))
+#                      )
+
+# ggplot facet_warp modify ------------------------------------------------
+# source: https://fishandwhistle.net/post/2018/modifying-facet-scales-in-ggplot2/
+
+# Inner function
+scale_override <- function(which, scale) {
+  if(!is.numeric(which) || (length(which) != 1) || (which %% 1 != 0)) {
+    stop("which must be an integer of length 1")
+  }
+  
+  if(is.null(scale$aesthetics) || !any(c("x", "y") %in% scale$aesthetics)) {
+    stop("scale must be an x or y position scale")
+  }
+  
+  structure(list(which = which, scale = scale), class = "scale_override")
+}
+
+## FacetWrap Version ##
+
+CustomFacetWrap <- ggproto(
+  "CustomFacetWrap", FacetWrap,
+  init_scales = function(self, layout, x_scale = NULL, y_scale = NULL, params) {
+    # make the initial x, y scales list
+    scales <- ggproto_parent(FacetWrap, self)$init_scales(layout, x_scale, y_scale, params)
+    
+    if(is.null(params$scale_overrides)) return(scales)
+    
+    max_scale_x <- length(scales$x)
+    max_scale_y <- length(scales$y)
+    
+    # ... do some modification of the scales$x and scales$y here based on params$scale_overrides
+    for(scale_override in params$scale_overrides) {
+      which <- scale_override$which
+      scale <- scale_override$scale
+      
+      if("x" %in% scale$aesthetics) {
+        if(!is.null(scales$x)) {
+          if(which < 0 || which > max_scale_x) stop("Invalid index of x scale: ", which)
+          scales$x[[which]] <- scale$clone()
+        }
+      } else if("y" %in% scale$aesthetics) {
+        if(!is.null(scales$y)) {
+          if(which < 0 || which > max_scale_y) stop("Invalid index of y scale: ", which)
+          scales$y[[which]] <- scale$clone()
+        }
+      } else {
+        stop("Invalid scale")
+      }
+    }
+    
+    # return scales
+    scales
+  }
+)
+
+facet_wrap_custom <- function(..., scale_overrides = NULL) {
+  # take advantage of the sanitizing that happens in facet_wrap
+  facet_super <- facet_wrap(...)
+  
+  # sanitize scale overrides
+  if(inherits(scale_overrides, "scale_override")) {
+    scale_overrides <- list(scale_overrides)
+  } else if(!is.list(scale_overrides) || 
+            !all(vapply(scale_overrides, inherits, "scale_override", FUN.VALUE = logical(1)))) {
+    stop("scale_overrides must be a scale_override object or a list of scale_override objects")
+  }
+  
+  facet_super$params$scale_overrides <- scale_overrides
+  
+  ggproto(NULL, CustomFacetWrap,
+          shrink = facet_super$shrink,
+          params = facet_super$params
+  )
+}
+
+# EXAMPLE USE
+# set.seed(123)
+# test_large_values_data <- 1:9 %>%
+#   set_names() %>%
+#   map_dfr(~data.frame(
+#     x_variable = runif(1, 100, 20000) + runif(10, -100, 100),
+#     y_variable = runif(10, 0, 1)
+#   ), .id = "facet_name")
+# 
+# p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
+#   geom_point() +
+#   facet_wrap(~facet_name, scales = "free", ncol = 4)
+# 
+# p_annoying_x_scale +
+#   facet_wrap_custom(~facet_name, scales = "free", ncol = 4, scale_overrides = list(
+#     scale_override(1, scale_x_continuous(breaks = c(5750, 5900))),
+#     scale_override(6, scale_x_continuous(breaks = c(17800, 17900)))
+#   ))
+
+## Grid Version ##
+
+CustomFacetGrid <- ggproto(
+  "CustomFacetGrid", FacetGrid,
+  init_scales = function(self, layout, x_scale = NULL, y_scale = NULL, params) {
+    # make the initial x, y scales list
+    scales <- ggproto_parent(FacetGrid, self)$init_scales(layout, x_scale, y_scale, params)
+    
+    if(is.null(params$scale_overrides)) return(scales)
+    
+    max_scale_x <- length(scales$x)
+    max_scale_y <- length(scales$y)
+    
+    # ... do some modification of the scales$x and scales$y here based on params$scale_overrides
+    for(scale_override in params$scale_overrides) {
+      which <- scale_override$which
+      scale <- scale_override$scale
+      
+      if("x" %in% scale$aesthetics) {
+        if(!is.null(scales$x)) {
+          if(which < 0 || which > max_scale_x) stop("Invalid index of x scale: ", which)
+          scales$x[[which]] <- scale$clone()
+        }
+      } else if("y" %in% scale$aesthetics) {
+        if(!is.null(scales$y)) {
+          if(which < 0 || which > max_scale_y) stop("Invalid index of y scale: ", which)
+          scales$y[[which]] <- scale$clone()
+        }
+      } else {
+        stop("Invalid scale")
+      }
+    }
+    
+    # return scales
+    scales
+  }
+)
+
+facet_grid_custom <- function(..., scale_overrides = NULL) {
+  # take advantage of the sanitizing that happens in facet_wrap
+  facet_super <- facet_grid(...)
+  
+  # sanitize scale overrides
+  if(inherits(scale_overrides, "scale_override")) {
+    scale_overrides <- list(scale_overrides)
+  } else if(!is.list(scale_overrides) || 
+            !all(vapply(scale_overrides, inherits, "scale_override", FUN.VALUE = logical(1)))) {
+    stop("scale_overrides must be a scale_override object or a list of scale_override objects")
+  }
+  
+  facet_super$params$scale_overrides <- scale_overrides
+  
+  ggproto(NULL, CustomFacetGrid,
+          shrink = facet_super$shrink,
+          params = facet_super$params
+  )
+}
+
+# EXAMPLE USE
+# p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
+#   geom_point() +
+#   facet_grid(cols = vars(facet_name), scales = "free")
+# 
+# p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
+#   geom_point() +
+#   facet_grid_custom(cols = vars(facet_name), scales = "free", scale_overrides = list(
+#     scale_override(1, scale_x_continuous(breaks = c(5750, 5900))),
+#     scale_override(6, scale_x_continuous(breaks = c(17800, 17900)))
+#   ))
+# Add a distinction
+# head(test_large_values_data)
+# dim(test_large_values_data)
+# test_large_values_data$group <- 1:3
+# 
+# p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
+#   geom_point() +
+#   facet_grid(rows = vars(group),
+#              cols = vars(facet_name), 
+#              scales = "free")
+# p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
+#   geom_point() +
+#   facet_grid_custom(rows = vars(group), 
+#                     cols = vars(facet_name), 
+#                     scales = "free", scale_overrides = list(
+#     scale_override(1, scale_x_continuous(breaks = c(5750, 5900))),
+#     scale_override(6, scale_x_continuous(breaks = c(17800, 17900)))
+#   ))

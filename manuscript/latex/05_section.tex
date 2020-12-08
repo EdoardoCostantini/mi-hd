@@ -1,5 +1,50 @@
-\maketitle
 \section{Discussion}
 
-	Make parallels and comparisons between methods. Try to portray the general pattern that 
-	comes out of the combined results from the three studies.
+In what follows, the results obtained with the simulation and the resampling studies are discussed to provide
+an overall picture of how the methods compare to each other.
+
+\paragraph{IURR and DURR effective but time consuming}
+	Overall, DURR and especially IURR showed great performances in all experiments according to all performance measures.
+	However, using them requires a lot more imputation time than other well performing methods.
+	For example, while both IURR and MI-PCA have weaknesses, overall, they showed similar performances for most parameters 
+	and performance measures.
+	However, MI-PCA obtained these results in a fraction of the time taken by IURR.
+
+\paragraph{MI-PCA struggle with item variances}
+	The bias for the item variances that afflicted MI-PCA in the multivariate-normal set up appears to be related to 
+	the strength of the latent structure: when the latent structure is absent (experiment 1) or weak (experiment 2, 
+	conditions 5 to 8, factor loadings between .5 and .6) item variances are biased, especially in the high-dimensional
+	conditions; 
+	when the latent structure is prominent (experiment 2, conditions 1 to 4), the variances are estimates with 
+	negligible bias, even in the high-dimensional conditions.
+
+	In general, MI-PCA tended to over-estimate (positive bias) the item variances while it was the only method
+	with acceptable bias for the covariances.
+	In other words, it seems that MI-PCA includes a lot of uncertainty regarding the imputed values, but it recovers 
+	correctly the relationships between variables.
+
+\paragraph{MI-PCA IURR trade off}
+	Looking at the results from the simulations, it seems that the two most promising methods, IURR and MI-PCA, 
+	show different weaknesses and strengths in terms of bias.
+	The two simulations studies, showed that, in the high dimensional condition, MI-PCA struggles with correctly 
+	recovering item variances but returns very lowly biased item covariances, while IURR shows exactly the opposite 
+	behaviour.
+
+	The resampling study showed that slightly more biased estimates of the parameters in model 1 and 2 are produced 
+	using MI-PCA rather than IURR, while coverage rates and confidence interval widths did not substantively differ.
+	This difference did not show when looking at the focal regression coefficients, where MI-PCA performed as well 
+	as IURR, if not better.
+	
+	Overall, the simulation studies seemed to suggest that MI-PCA could recover more accurately the relationships
+	between variables (less biased covariances) than IURR, while in the resampling study this conclusion was not
+	supported to the same extent: when looking at bias and coverage rates for $\beta_{1,1}$ and $\beta_{1,2}$, MI-PCA 
+	performed equally well or better than DURR and IURR, while looking at the overall measures of bias and coverages
+	IURR and DURR outperformed MI-PCA.
+
+\paragraph{Data Type Flexibility}
+	Both IURR/DURR and MI-PCA allow for any type of data imputation with close to no effort.
+	IURR and DURR have already been discussed for categorical data imputation, and MI-PCA can be performed
+	with any standard imputation model for categorical data.
+	The use of Bayesian Lasso however as yet to be developed for multi-categorical imputation target 
+	variables.
+

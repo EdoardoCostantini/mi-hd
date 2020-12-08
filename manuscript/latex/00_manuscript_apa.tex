@@ -1,73 +1,49 @@
 % SUGGESTION TO COMPILE IN TERMINAL:
-% 1 pdflatex, 1 bibtex latex, 1 pdflatex, 1 pdflatex
 
-\documentclass[11pt]{article}
+\documentclass[a4paper,man]{apa6}
 
-%% Packages
-% For page size
-\usepackage[a4paper]{geometry}
- \geometry{
-	total={15cm,25.2cm},
-	hmargin={3cm, 3cm}, % left, right
-	vmargin={2cm,2.5cm} % top, bottom
- }
+% Preamble
 
-% Specific needs
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[colorinlistoftodos]{todonotes}
 \usepackage{amsmath} 						% for matrixes
 \usepackage{bm} 						% for bold math
-\usepackage{color, colortbl} 					% for coloring rows of table
-	\definecolor{Gray}{gray}{0.9}
-\usepackage{placeins} 						% to limit push-to-end of figures
-\usepackage[round]{natbib} 					% for better apalike citation style
-\usepackage{multirow} 						% for multirow tables
-\usepackage{graphicx}						% to resize tables
-\usepackage{url}            % simple URL typesetting
-
-% Misc (not sure I need)
-\usepackage[utf8]{inputenc} % allow utf-8 input
-\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
-\usepackage{hyperref}       % hyperlinks
-\usepackage{booktabs}       % professional-quality tables
-\usepackage{amsfonts}       % blackboard math symbols
-\usepackage{nicefrac}       % compact symbols for 1/2, etc.
-\usepackage{microtype}      % microtypography
-\usepackage{lipsum}
-\usepackage{makecell}
 \usepackage[flushleft]{threeparttable} 				% for table notes
 \usepackage{pdflscape} 						% for tables in landscape mode
+\usepackage{graphicx}						% to resize tables
+\usepackage[round]{natbib} 					% for better apalike citation style
+\usepackage{multirow} 						% for multirow tables
+\usepackage[pdfpagemode=FullScreen,bookmarks=true]{hyperref}	% for outlines
+\usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
 \usepackage{multirow}
 \usepackage{wrapfig}
 \usepackage{float}
 \usepackage{colortbl}
+\usepackage{pdflscape}
 \usepackage{tabu}
 \usepackage{threeparttable}
 \usepackage{threeparttablex}
 \usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{color, colortbl} 					% for coloring rows of table
+	\definecolor{Gray}{gray}{0.9}
+
+\usepackage{placeins} 						% to limit push-to-end of figures
+\usepackage{afterpage} 						% for smart placement of figures
 
 % Paths
 \newcommand{\pathFIG}{../../output/graphs}
 \newcommand{\pathBIB}{../../../statsLib}
 
 \title{High Dimensional Imputation for the Social Sciences\\ \Large A Review of State-of-the-Art Methods}
+\shorttitle{High Dimensional Imputation for the Social Sciences}
 \author{Edoardo Costantini}
+\affiliation{Tilburg University}
 
 \begin{document}
-
-% Outline
-
-\begin{center}
-\textbf{OUTLINE OF PAPER 1}
-
-\textbf{High Dimensional Imputation for the Social Sciences: A Review of State-of-the-Art Methods}
-
-\end{center}
-
-\input{06_appendix1.tex}
-
-\pagebreak
-
 \maketitle
 
 % Introduction
@@ -105,8 +81,7 @@
 	\pathBIB/bayesStats/bibtex/papers,
 	\pathBIB/programming/bibtex/papers,
 	\pathBIB/survey/bibtex/data,
-	\pathBIB/survey/bibtex/studies,
-	\pathBIB/statsLearn/bibtex/papers
+	\pathBIB/survey/bibtex/studies
 	}
 
 % Compile strategy 1:

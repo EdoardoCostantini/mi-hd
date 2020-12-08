@@ -39,7 +39,8 @@ out <- parLapply(cl = clus,
                  fun = doRep, 
                  conds = conds, 
                  parms = parms,
-                 debug = FALSE)
+                 debug = FALSE,
+                 verbose = FALSE)
 
 ## Kill the cluster:
 stopCluster(clus)

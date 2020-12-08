@@ -12,8 +12,9 @@
   # Checks
   res <- exp1_res <- readRDS("../output/exp1_simOut_20200731_1735_res.rds")
   res <- exp1_res <- readRDS("../output/exp1_simOut_20200801_1620_res.rds")
-  # They are equivalent, but second file has more repetitions (500 vs 750)
-  # res <- output
+  # 1 and 2 are equivalent, but second file has more repetitions (500 vs 750)
+  res <- exp1_res <- readRDS("../output/exp1_simOut_20201130_1006_res.rds")
+  # 3 is the most up to date with 1e3 reps
   
 # Bias --------------------------------------------------------------------
 
@@ -50,7 +51,7 @@
                       pm.3 = sum_exp1_sem$cond4$ci_cov), # pm .3
                  colMeans), 0))
   
-# Multivairate Distance Analysis ------------------------------------------
+# Multivariate Distance Analysis ------------------------------------------
 
   # Sem model estimates 
   # All parameters
@@ -216,13 +217,15 @@
   )
   
   ## > Bias (Grid distinguishing condition and measure) #####
+  axis.name.x <- c(rep("", 3), "Means")
   bias_plots_mean <- lapply(1:4, function(p){
     plot_gg(dt = lapply(1:length(res$sem),
                         function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
             parm_range = 1:6,
             type = "bias",
+            axis.name.x = axis.name.x[p],
             y_axLab = TRUE,
-            plot_name = cond_names[p],
+            plot_name = "",
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -230,11 +233,13 @@
                                  "missFor", "CC"))
     )
   } )  
+  axis.name.x <- c(rep("", 3), "Variances")
   bias_plots_var <- lapply(1:4, function(p){
     plot_gg(dt = lapply(1:length(res$sem),
                         function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
             parm_range = 7:12,
             type = "bias",
+            axis.name.x = axis.name.x[p],
             y_axLab = TRUE,
             plot_name = cond_names[p],
             meth_compare = rev(c("DURR_la", "IURR_la", 
@@ -243,14 +248,16 @@
                                  "MI_CART", "MI_RF", 
                                  "missFor", "CC"))
     )
-  } )  
+  } )
+  axis.name.x <- c(rep("", 3), "Covariances")
   bias_plots_cov <- lapply(1:4, function(p){
     plot_gg(dt = lapply(1:length(res$sem),
                         function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
             parm_range = -(1:12),
             type = "bias",
+            axis.name.x = axis.name.x[p],
             y_axLab = TRUE,
-            plot_name = cond_names[p],
+            plot_name = "",
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -260,25 +267,46 @@
   } )  
   
   # Display Plots
-  p1 <- arrangeGrob(grobs = bias_plots_mean,
-                    top = "Mean", 
-                    ncol = 1)
-  p2 <- arrangeGrob(grobs = bias_plots_var,
-                    top = "Variances",
-                    ncol = 1)
-  p3 <- arrangeGrob(grobs = bias_plots_cov,
-                    top = "Covariances",
-                    ncol = 1)
+  p1 <- arrangeGrob(grobs = bias_plots_mean, ncol = 1)
+  p2 <- arrangeGrob(grobs = bias_plots_var, ncol = 1)
+  p3 <- arrangeGrob(grobs = bias_plots_cov, ncol = 1)
   pf <- grid.arrange(p1, p2, p3, ncol = 3)
   pf
   ggsave(file  = "~/Desktop/exp1_bias.pdf", 
-         width = 8.25, height = 11.75,
+         width = 15, height = 15/3*4,
+         units = "cm",
          arrangeGrob(p1, p2, p3, ncol = 3))
 
+  ## > Bias (Facet grid) #####
+  meth_compare = rev(c("DURR_la", "IURR_la", 
+                       "blasso", "bridge",
+                       "MI_PCA",
+                       "MI_CART", "MI_RF", 
+                       "missFor", "CC"))
+  pf <- plot_fg(dt = lapply(1:length(res$sem),
+                            function(x) data.frame( res$sem[[x]]$bias_per)),
+                parPlot = list(means = 1:6,
+                               variances = 7:12,
+                               covariances = 13:27),
+                dt_reps = 500,
+                ci_lvl = .95,
+                type = "bias",
+                axis.name.x = NULL,
+                plot_cond = NULL,
+                plot_name = NULL,
+                y_axLab = TRUE,
+                meth_compare)
+  
+  ggsave(file  = "~/Desktop/exp1_bias.pdf",
+         width = 15, height = 15/4*3,
+         units = "cm",
+         pf)
+  
   ## > CI (Single Plot) #####
   plot_gg(dt = lapply(1:length(res$sem),
                       function(x) data.frame( res$sem[[x]]$ci_cov))[[1]],
           parm_range = 1:6,
+          dt_reps = 1e3,
           type = "ci",
           meth_compare = rev(c("DURR_la", "IURR_la", 
                                "blasso", "bridge",
@@ -292,9 +320,10 @@
     plot_gg(dt = lapply(1:length(res$sem),
                         function(x) data.frame( res$sem[[x]]$ci_cov))[[p]],
             parm_range = 1:6,
+            dt_reps = 1e3,
             type = "ci",
             y_axLab = TRUE,
-            plot_name = cond_names[p],
+            plot_name = "",
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -306,6 +335,7 @@
     plot_gg(dt = lapply(1:length(res$sem),
                         function(x) data.frame( res$sem[[x]]$ci_cov))[[p]],
             parm_range = 7:12,
+            dt_reps = 1e3,
             type = "ci",
             y_axLab = TRUE,
             plot_name = cond_names[p],
@@ -319,10 +349,11 @@
   ci_plots_cov <- lapply(1:4, function(p){
     plot_gg(dt = lapply(1:length(res$sem),
                         function(x) data.frame( res$sem[[x]]$ci_cov))[[p]],
-            parm_range = -(1:12),
+            parm_range = 13:27,
+            dt_reps = 1e3,
             type = "ci",
             y_axLab = TRUE,
-            plot_name = cond_names[p],
+            plot_name = "",
             meth_compare = rev(c("DURR_la", "IURR_la", 
                                  "blasso", "bridge",
                                  "MI_PCA",
@@ -347,4 +378,27 @@
          width = 8.25, height = 11.75,
          arrangeGrob(p1, p2, p3, ncol = 3))
   
+  ## > CI (Facet grid) #####
+  meth_compare = rev(c("DURR_la", "IURR_la", 
+                       "blasso", "bridge",
+                       "MI_PCA",
+                       "MI_CART", "MI_RF", 
+                       "missFor", "CC"))
+  pf <- plot_fg(dt = lapply(1:length(res$sem),
+                            function(x) data.frame( res$sem[[x]]$ci_cov)),
+                type = "ci",
+                parPlot = list(means = 1:6,
+                               variances = 7:12,
+                               covariances = 13:27),
+                dt_reps = 500,
+                ci_lvl = .95,
+                axis.name.x = NULL,
+                plot_cond = NULL,
+                plot_name = NULL,
+                y_axLab = TRUE,
+                meth_compare)
   
+  ggsave(file  = "~/Desktop/exp1_CI.pdf",
+         width = 15, height = 15/4*3,
+         units = "cm",
+         pf)
