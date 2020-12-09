@@ -16,6 +16,10 @@
   res <- exp1_res <- readRDS("../output/exp1_simOut_20201130_1006_res.rds")
   # 3 is the most up to date with 1e3 reps
   
+  # Plot Sizes Decisions
+  sp_width <- 3.75
+  sp_height <- 3
+  
 # Bias --------------------------------------------------------------------
 
   # Result 1 - Easy round, all good except CART and RF
@@ -283,6 +287,7 @@
                        "MI_PCA",
                        "MI_CART", "MI_RF", 
                        "missFor", "CC"))
+  
   pf <- plot_fg(dt = lapply(1:length(res$sem),
                             function(x) data.frame( res$sem[[x]]$bias_per)),
                 parPlot = list(means = 1:6,
@@ -296,9 +301,9 @@
                 plot_name = NULL,
                 y_axLab = TRUE,
                 meth_compare)
-  
+
   ggsave(file  = "~/Desktop/exp1_bias.pdf",
-         width = 15, height = 15/4*3,
+         width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)
   
@@ -399,6 +404,7 @@
                 meth_compare)
   
   ggsave(file  = "~/Desktop/exp1_CI.pdf",
-         width = 15, height = 15/4*3,
+         width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)
+  

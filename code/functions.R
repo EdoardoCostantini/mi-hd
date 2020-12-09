@@ -1991,198 +1991,6 @@ bridge_cv <- function(out, mods = NULL){
 }
 
 # Plot function for experiment 1 and 2
-
-plot_gg <- function(dt,
-                    dt_reps = 500,
-                    ci_lvl = .95,
-                    type = "bias",
-                    axis.name.x = "Axis Name Here",
-                    plot_cond = "(empty)",
-                    plot_name = NULL,
-                    parm_range = 1:2,
-                    y_axLab = TRUE,
-                    meth_compare) {
-  ## Function inputs
-  ## Generic
-  # ci_lvl = .95 # confidence interval level
-  # dt_reps = 500 # MCMC repetitions
-  # y_axLab = TRUE # say I want the labes
-  # parm_range = 1:6
-  # type = "bias"
-  # plot_name = "Untitled"
-  # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
-  #                      "MI_PCA",
-  #                      "MI_CART", "MI_RF", "missFor", "CC"))
-  # # Bias
-  # dt = lapply(1:length(res$sem),
-  #             function(x) data.frame( res$sem[[x]]$bias_per))[[4]]
-  # dt = lapply(1:length(res$semR),
-  #             function(x) data.frame( res$semR[[x]]$bias_per))[[4]]
-  # dt = lapply(1:length(res$semR),
-  #             function(x) data.frame( res$semR[[x]]$bias_sd))[[4]]
-  # dt = lapply(1:length(res$semR),
-  #             function(x) data.frame( res$semR[[x]]$bias_raw))[[4]]
-  ## CIR
-  # dt = lapply(1:length(res$semR),
-  #            function(x) res$semR[[x]]$ci_cov)[[1]]
-  ## CIW
-  # dt = lapply(1:length(res$m2),
-  #             function(x) data.frame( res$m2[[x]]$CIW))[[1]]
-  
-  ## Prep data for plot
-  # Select range of interest
-  dt_edit <- dt[parm_range, ]
-  
-  # Order Methods
-  dt_edit <- dt_edit[, meth_compare]
-  
-  # Make names more pretty
-  colnames(dt_edit) <- sub("_la", "", colnames(dt_edit))
-  colnames(dt_edit) <- sub("_", "-", colnames(dt_edit))
-  
-  # Shape for ggplot
-  dt_edit[nrow(dt_edit)+1,] <- 0  # add blank row to improve visualization
-  dt_edit <- dt_edit %>% gather()
-  dt_edit$id <- 1:nrow(dt_edit)  # add an 
-  
-  # Ticks 
-  if(type == "bias"){
-    plot_xlim   <- c(-20, 20)
-    plot_xbreaks <- c(-20, -10, 0, 10, 20)
-    plot_xlabels <- c("-20", "-10", "0", "10", "20")
-    
-    step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-    plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
-    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-    if(y_axLab == TRUE){
-      plot_ylabels <- as.character(unique(dt_edit$key))
-    } else {
-      plot_ylabels <- rep("", length(plot_ybreaks))
-    }
-    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-    plot_hlines <- c(-10, 10)
-  }
-  
-  if(type == "bias_raw"){
-    maxB <- max( abs(dt_edit$value) )
-    plot_xbreaks <- c(-maxB, -maxB/2, 
-                      0, 
-                      maxB/2, maxB)
-    plot_xlim   <- c(plot_xbreaks[1], plot_xbreaks[5])
-    plot_xlabels <- as.character(plot_xbreaks)
-    
-    step_size    <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-    plot_steps   <- seq(0, nrow(dt_edit), by = step_size)
-    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-    if(y_axLab == TRUE){
-      plot_ylabels <- as.character(unique(dt_edit$key))
-    } else {
-      plot_ylabels <- rep("", length(plot_ybreaks))
-    }
-    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-    plot_hlines <- c(plot_xbreaks[2], plot_xbreaks[4])
-  }
-  
-  if(type == "bias_sd"){
-    plot_xlim   <- c(-1, 1)
-    plot_xbreaks <- c(-1, -.4, 0, .4, 1)
-    plot_xlabels <- c("-1", "-.4", "0", ".4", "1")
-    
-    step_size    <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-    plot_steps   <- seq(0, nrow(dt_edit), by = step_size)
-    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-    if(y_axLab == TRUE){
-      plot_ylabels <- as.character(unique(dt_edit$key))
-    } else {
-      plot_ylabels <- rep("", length(plot_ybreaks))
-    }
-    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-    plot_hlines <- c(-.4, .4)
-  }
-
-  if(type == "ci"){
-    dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)] <- 
-      dt_edit$value[c(rep(TRUE, length(parm_range)), FALSE)] - 95
-
-    plot_limits <- c(-15, 5)
-    SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps)
-    low_thr <- ((.95-SEp*2)-.95)*100
-    hig_thr <- ((.95+SEp*2)-.95)*100
-    plot_xlim   <- c(-15, 5)
-    plot_xbreaks <- c(-15, -5, low_thr, 0, hig_thr, 5)
-    plot_xlabels <- as.character(round((plot_xbreaks+95)/100, 2))
-    
-    step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-    plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
-    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-    if(y_axLab == TRUE){
-      plot_ylabels <- as.character(unique(dt_edit$key))
-    } else {
-      plot_ylabels <- rep("", length(plot_ybreaks))
-    }
-    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-    plot_hlines <- c(-5, low_thr, hig_thr)
-  }
-  
-  if(type == "ciw"){
-    plot_limits <- c(0, max(dt_edit$value))
-    
-    plot_xlim   <- c(0, max(dt_edit$value))
-    plot_xbreaks <- round(c(0, mean(dt_edit$value),  max(dt_edit$value) ), 1)
-    plot_xlabels <- rev(as.character(plot_xbreaks))
-    
-    step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-    plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
-    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-    if(y_axLab == TRUE){
-      plot_ylabels <- as.character(unique(dt_edit$key))
-    } else {
-      plot_ylabels <- rep("", length(plot_ybreaks))
-    }
-    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-    plot_hlines <- plot_xbreaks[2]
-  }
-  
-  # Plot
-  p <- ggplot(dt_edit, aes(x = value, y = id)) +
-    # Theme (goes first)
-    jtools::theme_apa() +
-    
-    # Title and axis labels
-    labs(title = plot_name,
-         x     = axis.name.x, 
-         y     = element_blank()) +
-    theme(plot.title   = element_text(size = 6.5, 
-                                      face = "plain", 
-                                      hjust = 0.5),
-          axis.title.x = element_text(size = 6.5,
-                                      face = "plain"),
-          axis.text.x  = element_text(size = 5),
-          axis.text.y  = element_text(size = 5),
-          plot.margin  = unit(c(.05,.0,.0,.0), "cm")) +
-    
-    # Content
-    geom_segment(aes(xend = 0, 
-                     yend = id),
-                 color = "darkgray") + 
-    
-    # Tweaks
-    scale_y_continuous(breaks = plot_ybreaks,
-                       labels = plot_ylabels) +
-    scale_x_continuous(breaks = plot_xbreaks,
-                       labels = plot_xlabels) +
-    geom_vline(xintercept = plot_hlines,
-               linetype = "dashed", color = "black") +
-    geom_hline(yintercept = plot_vlines,
-               size = .25, 
-               color = "black") +
-    coord_cartesian(xlim = plot_xlim)
-  p
-  return(p)
-}
-
-### FACET VERSION
-
 plot_fg <- function(dt,
                     type = "bias",
                     parPlot,
@@ -2234,19 +2042,6 @@ plot_fg <- function(dt,
       d[x, meth_compare]
     })
   })
-  
-  # Select Parms and methods of interest
-  # dt_means <- lapply(dt, function(x){
-  #   x[means, meth_compare]
-  # })
-  # 
-  # dt_vars <- lapply(dt, function(x){
-  #   x[varis, meth_compare]
-  # })
-  # 
-  # dt_cova <- lapply(dt, function(x){
-  #   x[covas, meth_compare]
-  # })
 
   dt_edit <- Reduce(c, dt_preEdit)
   # dt_edit <- c(dt_means, dt_vars, dt_cova) # regular order
@@ -2419,7 +2214,7 @@ plot_fg <- function(dt,
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
           # Facet Related
-          strip.text = element_text(size = 5,
+          strip.text = element_text(size = 8,
                                     face = "plain",
                                     margin = unit(c(.10, .10, .10, .10), "cm")) 
           ) +
@@ -2433,7 +2228,9 @@ plot_fg <- function(dt,
                        labels = plot_xlabels) +
     
     geom_vline(xintercept = plot_vlines,
-               linetype = "dashed", color = "black") +
+               size = .375,
+               linetype = "dashed", 
+               color = "black") +
     coord_cartesian(xlim = plot_xlim)
     # facet_wrap(conds ~ group, nrow = 4) +
     # facet_grid(rows = vars(parT),
@@ -2487,98 +2284,7 @@ plot_fg <- function(dt,
         geom_hline(data = data.frame(yint = plot_hlines[[3]], parT = levels(dt_edit$parT)[[3]]),
                    aes(yintercept = yint), size = .25, color = "black")
     }
-  
-    # p + 
-    # 
-    #   facet_grid_custom(rows = vars(parT),
-    #                     cols = vars(conds),
-    #                     scales = "free", scale_overrides = list(
-    #                       scale_override(1, scale_y_continuous(breaks = plot_ybreaks[[1]],
-    #                                                            labels = plot_ylabels)),
-    #                       scale_override(2, scale_y_continuous(breaks = plot_ybreaks[[2]],
-    #                                                            labels = plot_ylabels)),
-    #                       scale_override(3, scale_y_continuous(breaks = plot_ybreaks[[3]],
-    #                                                            labels = plot_ylabels))
-    #                     )) +   
-    #   # Horizontal lines (method separation)
-    #   geom_hline(data = data.frame(yint = plot_hlines_1, parT = "means"),
-    #              aes(yintercept = yint), size = .25, color = "black") +
-    #   geom_hline(data = data.frame(yint = plot_hlines_1, parT = "variances"),
-    #              aes(yintercept = yint), size = .25, color = "black") +
-    #   geom_hline(data = data.frame(yint = plot_hlines_3, parT = "covariances"),
-    #              aes(yintercept = yint), size = .25, color = "black")
-    # p
-    # 
-    # # Override Y axis for the different plots
-    # facet_wrap_custom( ~ group,
-    #                    dir = "v",
-    #                    scales = "free_y",
-    #                    nrow = 4, 
-    #                    scale_overrides = list(
-    #   scale_override(1, scale_y_continuous(breaks = plot_ybreaks_1,
-    #                                        labels = plot_ylabels)),
-    #   scale_override(2, scale_y_continuous(breaks = plot_ybreaks_1,
-    #                                        labels = plot_ylabels)),
-    #   scale_override(3, scale_y_continuous(breaks = plot_ybreaks_1,
-    #                                        labels = plot_ylabels)),
-    #   scale_override(4, scale_y_continuous(breaks = plot_ybreaks_1,
-    #                                         labels = plot_ylabels)),
-    #   # Override Variances
-    #   scale_override(5, scale_y_continuous(breaks = plot_ybreaks_1,
-    #                                        labels = rep("", length(plot_ybreaks_1)))),
-    #   scale_override(6, scale_y_continuous(breaks = plot_ybreaks_1,
-    #                                        labels = rep("", length(plot_ybreaks_1)))),
-    #   scale_override(7, scale_y_continuous(breaks = plot_ybreaks_1,
-    #                                        labels = rep("", length(plot_ybreaks_1)))),
-    #   scale_override(8, scale_y_continuous(breaks = plot_ybreaks_1,
-    #                                         labels = rep("", length(plot_ybreaks_1)))),
-    #   # Override Covariances
-    #   scale_override(9, scale_y_continuous(breaks = plot_ybreaks_3,
-    #                                        labels = rep("", length(plot_ybreaks_3)))),
-    #   scale_override(10, scale_y_continuous(breaks = plot_ybreaks_3,
-    #                                        labels = rep("", length(plot_ybreaks_3)))),
-    #   scale_override(11, scale_y_continuous(breaks = plot_ybreaks_3,
-    #                                        labels = rep("", length(plot_ybreaks_3)))),
-    #   scale_override(12, scale_y_continuous(breaks = plot_ybreaks_3,
-    #                                         labels = rep("", length(plot_ybreaks_3))))
-    # )) +
-    # 
-    # # X Axis
-    # scale_x_continuous(breaks = plot_xbreaks,
-    #                    labels = plot_xlabels) +
-    # 
-    # geom_vline(xintercept = plot_vlines,
-    #            linetype = "dashed", color = "black") +
-    # coord_cartesian(xlim = plot_xlim) + 
-    # 
-    # # Horizontal Lines
-    # # Column 1
-    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 1),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 2),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 3),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 4),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # # Column 2
-    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 5),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 6),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 7),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_1, group = 8),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # # Column 3
-    # geom_hline(data = data.frame(yint = plot_hlines_3, group = 9),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_3, group = 10),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_3, group = 11),
-    #            aes(yintercept = yint), size = .25, color = "black") +
-    # geom_hline(data = data.frame(yint = plot_hlines_3, group = 12),
-    #            aes(yintercept = yint), size = .25, color = "black")
+
   # Visualize Plot
   p
   return(p)
@@ -2596,6 +2302,275 @@ plot_fg <- function(dt,
 #                      labels=sub("^(-?)0.", "\\1.", 
 #                                 sprintf("%.2f", seq(.25, .65, .05)))
 #                      )
+
+# Custom plot_gg function for experiment 4
+plot_exp4 <- function(dt, 
+                      dt_CIW = NULL,
+                      dt_reps = 500,
+                      ci_lvl = .95,
+                      type = "ci", 
+                      plot_cond = NULL,
+                      plot_name = NULL,
+                      bar_col = "#595959",
+                      meth_compare,
+                      meth_sort = FALSE) {
+  
+  # Function Inputs
+  ## New Input
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) res$m1[[x]]$bias_per["rel", ]),
+  #           lapply(1:length(res$m2),
+  #                  function(x) res$m2[[x]]$bias_per["NatAt", ]))
+  # # CI Par interest
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) res$m1[[x]]$ci_cov["rel", ]),
+  #           lapply(1:length(res$m2),
+  #                  function(x) res$m2[[x]]$ci_cov["NatAt", ]))
+  # # Mean CIW
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) data.frame(t(colMeans(res$m1[[x]]$CIW)))),
+  #           lapply(1:length(res$m2),
+  #                  function(x) data.frame(t(colMeans(res$m2[[x]]$CIW)))))
+  # # ED
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) res$m1[[x]]$ed_est),
+  #           lapply(1:length(res$m2),
+  #                  function(x) res$m2[[x]]$ed_est))
+  # # CIED
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) res$m1[[x]]$ed_ci),
+  #           lapply(1:length(res$m2),
+  #                  function(x) res$m2[[x]]$ed_ci))
+  ## Generic inputs
+  # dt_reps = 500
+  # ci_lvl = .95
+  # type = c("bias", "ci", "ciw", "ed")[3]
+  # dt_CIW = NULL
+  # plot_name = "Untitled"
+  # plot_cond = "(empty)"
+  # meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
+  #                  "MI_PCA",
+  #                  "MI_CART", "MI_RF", "missFor", "CC")
+  # meth_sort = FALSE
+  # bar_col = "#595959"
+  
+  # Gather data within list
+  dt_edit <- lapply(Reduce(c, dt), gather)
+  
+  # Clean methods
+  dt_edit <- lapply(dt_edit, function(x){
+    # select methods to keep
+    x <- x[x$key %in% meth_compare, ] 
+    # Make names prettier
+    x$key <- sub("_la", "", x$key)
+    x$key <- sub("_", "-", x$key)
+    # fix order of methods
+    x$key <- factor(x$key, levels = rev(x$key))
+    return(x)
+  })
+  
+  # Add Condition tag
+  dt_edit <- lapply(1:4, function(x){
+    if(x<3){
+      dt_edit[[x]]$cond <- paste0("Condition ", x)
+    } else {
+      dt_edit[[x]]$cond <- paste0("Condition ", x-2)
+    }
+    return(dt_edit[[x]])
+  })
+  
+  # Add model tag
+  dt_edit <- lapply(1:4, function(x){
+    if(x<3){
+      dt_edit[[x]]$model <- "Model 1"
+    } else {
+      dt_edit[[x]]$model <- "Model 2"
+    }
+    return(dt_edit[[x]])
+  })
+  
+  # Gather data for plot
+  dt_edit <- Reduce(rbind, dt_edit)
+  
+  # Summary specific
+  if(type == "bias"){
+    plot_xlim   <- c(-.20, .20) * 100
+    plot_breaks <- c(-.20, -.1, 0, .1, .20)  * 100
+    plot_labels <- c("-20", "-10", "0", "10", "20")
+    plot_vlines <- c(-.1, .1)  * 100
+    plot_hlines <- 1:length(meth_compare)
+  }
+  
+  if(type == "ci"){
+    dt_edit$value <- dt_edit$value - 95    # Transform to a difference value
+    plot_xlim   <- c(-5, 5)                # Plot Limits (reference: 0 = .95)
+    SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps) # SE for threshold 
+    low_thr <- ((.95-SEp*2)-.95)*100
+    hig_thr <- ((.95+SEp*2)-.95)*100
+    plot_breaks <-  c(-5, low_thr, 0, hig_thr, 5)
+    plot_labels <- gsub("0", "", as.character(round((plot_breaks+95)/100, 2)))
+    plot_hlines <- 1:length(meth_compare)
+    plot_vlines <- c(-5, low_thr, hig_thr)
+  }
+  
+  if(type == "ed"){
+    plot_xlim   <- c(0, round_any(max(dt_edit[dt_edit$key != "bridge", "value"]),  
+                                  0.1, 
+                                  f = ceiling)
+    )
+    plot_breaks <- round_any(seq(plot_xlim[1], plot_xlim[2], 
+                                 length.out = 3), 0.1, f = ceiling)
+    plot_breaks <- round(seq(plot_xlim[1], plot_xlim[2], length.out = 3), 
+                         1)
+    plot_labels <- gsub("0.", ".", plot_breaks)
+    if("GS" %in% dt_edit$key) {
+      plot_vlines <- dt_edit[dt_edit$key=="GS", "value"]
+    } else {
+      plot_vlines <- NULL
+    }
+    plot_hlines <- NULL
+  }
+  
+  if(type == "ciw"){
+    ref_max <- max(dt_edit[dt_edit$key == "CC", "value"])
+    ref_min <- min(dt_edit[dt_edit$key == "missFor", "value"])
+    plot_xlim   <- c(0, (ref_max*1.5))
+    plot_breaks <- c(0, ref_min, ref_max, ref_max*1.5)
+    plot_labels <- as.character(round(plot_breaks, 2))
+    plot_hlines <- 1:length(meth_compare)
+    plot_vlines <- NULL
+  }
+  
+  
+  # Plot
+  p <- ggplot(dt_edit, aes(x = value, y = key)) +
+    # Content
+    geom_bar(stat = "identity",
+             fill = bar_col) +
+    # Faceting
+    facet_grid(rows = vars(model),
+               cols = vars(cond),
+               scales = "free") +
+    # Cosmetic
+    labs(title = element_blank(),
+         x     = element_blank(), 
+         y     = element_blank()) + 
+    theme(axis.text.x  = element_text(size = 5),
+          axis.text.y  = element_text(size = 5),
+          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
+          # Background
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          # Facet Related
+          strip.text = element_text(size = 8,
+                                    face = "plain",
+                                    margin = unit(c(.10, .10, .10, .10), "cm")) 
+    ) + 
+    # X Axis
+    scale_x_continuous(breaks = plot_breaks,
+                       labels = plot_labels) +
+    geom_vline(xintercept = plot_vlines,
+               size = .375,
+               linetype = "dashed", 
+               color = "black") +
+    coord_cartesian(xlim = plot_xlim) + 
+    # Horizontal lines
+    geom_hline(yintercept = plot_hlines, 
+               size = .25,
+               color = "gray")
+  p
+  return(p)
+}
+
+plot_time <- function(dt, 
+                      plot_cond = NULL,
+                      plot_name = NULL,
+                      bar_col = "#595959",
+                      meth_compare,
+                      meth_sort = FALSE) {
+  
+  # Function Inputs
+  ## New Input
+  # out_time <- sapply(1:length(names(res[[1]])), res_sem_time, out = res)
+  # colnames(out_time) <- names(res[[1]])
+  # dt = t(out_time)
+  ## Generic inputs
+  # dt_reps = 500
+  # ci_lvl = .95
+  # type = c("bias", "ci", "ciw", "ed")[3]
+  # dt_CIW = NULL
+  # plot_name = "Untitled"
+  # plot_cond = "(empty)"
+  # meth_compare = c("DURR_la", "IURR_la", "blasso", "bridge",
+  #                  "MI_PCA",
+  #                  "MI_CART", "MI_RF", "missFor", "CC")
+  # meth_sort = FALSE
+  # bar_col = "#595959"
+  
+  # Gather data within list
+  dt_edit <- gather(as.data.frame(dt))
+  
+  # Clean methods
+  # select methods to keep
+  dt_edit <- dt_edit[dt_edit$key %in% meth_compare, ] 
+  # Make names prettier
+  dt_edit$key <- sub("_la", "", dt_edit$key)
+  dt_edit$key <- sub("_", "-", dt_edit$key)
+  # fix order of methods
+  dt_edit$key <- factor(dt_edit$key, levels = rev(unique(dt_edit$key)))
+  
+  # Add Condition tag
+  n_conds <- nrow(dt)
+  dt_edit$cond <- paste0("Condition ", 
+                         rep(1:n_conds, 
+                             nrow(dt_edit)/n_conds))
+  # Plot limits
+  plot_xlim   <- c(0, 90)
+  plot_breaks <- c(0, 30, 60, 90)
+  plot_labels <- c("", "30min", "1h", "1h 30min")
+  plot_vlines <- c(30, 60)
+  plot_hlines <- NULL
+  
+  # Plot
+  p <- ggplot(dt_edit, aes(x = value, y = key)) +
+    # Content
+    geom_bar(stat = "identity") + 
+    geom_text(aes(label = value), 
+              hjust = -.2,
+              size = 2) + 
+
+    # Faceting
+    facet_grid(cols = vars(cond),
+               scales = "free") +
+    # Cosmetic
+    labs(title = element_blank(),
+         x     = element_blank(), 
+         y     = element_blank()) + 
+    theme(axis.text.x  = element_text(size = 5),
+          axis.text.y  = element_text(size = 5),
+          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
+          # Background
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          # Facet Related
+          strip.text = element_text(size = 8,
+                                    face = "plain",
+                                    margin = unit(c(.10, .10, .10, .10), "cm")) 
+    ) + 
+    # X Axis
+    scale_x_continuous(breaks = plot_breaks,
+                       labels = plot_labels) +
+    geom_vline(xintercept = plot_vlines,
+               size = .375,
+               linetype = "dashed", color = "black") +
+    coord_cartesian(xlim = plot_xlim) + 
+    # Horizontal lines
+    geom_hline(yintercept = plot_hlines, 
+               size = .25,
+               color = "gray")
+  p
+  return(p)
+}
 
 # ggplot facet_warp modify ------------------------------------------------
 # source: https://fishandwhistle.net/post/2018/modifying-facet-scales-in-ggplot2/

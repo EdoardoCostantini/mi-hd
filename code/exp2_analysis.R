@@ -20,6 +20,10 @@
   exp2_res <- readRDS(paste0("../output/", filename, "_res.rds"))
   res <- exp2_res
   
+  # Plot Sizes Decisions
+  sp_width <- 3.75
+  sp_height <- 3
+  
 # Bias --------------------------------------------------------------------
   
 # Recap of set up  
@@ -512,12 +516,28 @@
          arrangeGrob(p1, p2, p3, ncol = 3))
   
 # > Bias (Facet grid) -----------------------------------------------------
-
-  pf <- plot_fg(dt = lapply(1:length(res$semR),
+  
+  # Means
+  pt.1 <- plot_fg(dt = lapply(1:length(res$semR),
+                            function(x) data.frame( res$semR[[x]]$bias_sd))[1:4],
+                type = "bias_sd",
+                parPlot = list(means = 1:10),
+                dt_reps = 500,
+                ci_lvl = .95,
+                axis.name.x = NULL,
+                plot_cond = NULL,
+                plot_name = NULL,
+                y_axLab = TRUE,
+                meth_compare = rev(c("DURR_la", "IURR_la", 
+                                     "blasso", "bridge",
+                                     "MI_PCA",
+                                     "MI_CART", "MI_RF", 
+                                     "missFor", "CC")))
+  # Var Cova
+  pt.2 <- plot_fg(dt = lapply(1:length(res$semR),
                             function(x) data.frame( res$semR[[x]]$bias_per))[1:4],
                 type = "bias",
-                parPlot = list(means = 1:10,
-                               variances = 11:20,
+                parPlot = list(variances = 11:20,
                                covariances = 21:65),
                 dt_reps = 500,
                 ci_lvl = .95,
@@ -531,26 +551,16 @@
                                      "MI_CART", "MI_RF", 
                                      "missFor", "CC")))
   
-  pf <- plot_fg(dt = lapply(1:length(res$semR),
-                            function(x) data.frame( res$semR[[x]]$bias_sd))[1:4],
-                type = "bias_sd",
-                parPlot = list(means = 1:10,
-                               variances = 11:20,
-                               covariances = 21:65),
-                dt_reps = 500,
-                ci_lvl = .95,
-                axis.name.x = NULL,
-                plot_cond = NULL,
-                plot_name = NULL,
-                y_axLab = TRUE,
-                meth_compare = rev(c("DURR_la", "IURR_la", 
-                                     "blasso", "bridge",
-                                     "MI_PCA",
-                                     "MI_CART", "MI_RF", 
-                                     "missFor", "CC")))
+  pf <- cowplot::ggdraw() +
+    cowplot::draw_plot(pt.1, 
+                       x = 0, y = .66666666, 
+                       width = 1, height = .33333333) +
+    cowplot::draw_plot(pt.2, 
+                       x = 0, y = 0, 
+                       width = 1, height = .66666666)
   pf
   ggsave(file  = "~/Desktop/exp2_semR_bias_sd_14.pdf",
-         width = 15, height = 15/4*3,
+         width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)
   
@@ -640,7 +650,7 @@
                                      "missFor", "CC")))
   pf
   ggsave(file  = "~/Desktop/exp2_semR_ci_14.pdf",
-         width = 15, height = 15/4*3,
+         width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)
   
@@ -670,7 +680,7 @@
          arrangeGrob(p1, ncol = 1))
   
   ## > CFA (Facet grid) #####
-  pf <- plot_fg(dt = lapply(1:length(res$CFA),
+  pt.1 <- plot_fg(dt = lapply(1:length(res$CFA),
                             function(x) data.frame( res$CFA[[x]]$bias_per))[1:4],
                 type = "bias",
                 parPlot = list(Loadings = 1:10),
@@ -685,13 +695,8 @@
                                      "MI_PCA",
                                      "MI_CART", "MI_RF", 
                                      "missFor", "CC")))
-  pf
-  ggsave(file  = "~/Desktop/exp2_CFA_lambda_BPR_14.pdf",
-         width = 15, height = 15/4*3/3,
-         units = "cm",
-         pf)
   
-  pf <- plot_fg(dt = lapply(1:length(res$CFA),
+  pt.2 <- plot_fg(dt = lapply(1:length(res$CFA),
                             function(x) data.frame( res$CFA[[x]]$bias_per))[5:8],
                 type = "bias",
                 parPlot = list(Loadings = 1:10),
@@ -706,9 +711,20 @@
                                      "MI_PCA",
                                      "MI_CART", "MI_RF", 
                                      "missFor", "CC")))
-  pf
-  ggsave(file  = "~/Desktop/exp2_CFA_lambda_BPR_58.pdf",
-         width = 15, height = 15/4*3/3,
+  pf <- cowplot::ggdraw() +
+    cowplot::draw_plot(pt.1, 
+                       x = 0, y = .5, 
+                       width = 1, height = .5) +
+    cowplot::draw_plot(pt.2, 
+                       x = 0, y = 0, 
+                       width = 1, height = .5) +
+    cowplot::draw_plot_label(label = c("(A)", "(B)"), 
+                             x = c(0, 0), 
+                             y = c(1, .5), 
+                             size = 5,
+                             fontface = "bold")
+  ggsave(file  = "~/Desktop/exp2_CFA_lambda_BPR.pdf",
+         width = sp_width*4, height = sp_height*2,
          units = "cm",
          pf)
   
