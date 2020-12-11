@@ -5,7 +5,7 @@ of the methods on multivariate normal data in both high and low dimensional cond
 assess the performance of the methods in the presence of a latent structure, in order to reflect the fundamental
 structure of social survey data.
 
-\subsection{Procedure}
+\subsection{Simulation Study Procedure}
 	
 	To assess the statistical validity of the different imputation methods we have repeated the following steps
 	1000 times ($R = 1000$) for each experiment:
@@ -25,11 +25,6 @@ structure of social survey data.
 			analysis.
 	\end{enumerate}
 
-	The $R$ estimates obtained with the Gold Standard approach are averaged and considered as "true" reference
-	values of the parameters in the analysis models.
-	The $R$ estimates obtained with all other methods are used to obtain performance measures for each imputation 
-	method (see below).
-
 	The code to Run the simulation was written in the R statistical programming language (version 4.0.3). 
 	All experiments were run using a 2.6 GHz Intel Xeon(R) Gold 6126 processor, 523780 MB of Memory. The
 	operating system was Windows Server 2012 R2.
@@ -38,6 +33,8 @@ structure of social survey data.
 	was implemented using the R package 'parallel' and to ensure replicability of the findings seeds were
 	set using the method by \cite{lecuyer:2002} implemented in the R package 'rlecuyer'.
 	Code to run the studies can be found at [INSERT GITHUB LINK].
+
+	In the following, each step in the simulation procedure is described in details for both experiments.
 
 %\subsection{Methods: two simulation studies}
 
@@ -51,6 +48,7 @@ structure of social survey data.
 	the first five variables were highly correlated among themselves ($\rho = .6$); 
 	variables 6 to 10 were slightly correlated with variables in block 1 and among themselves ($\rho = .3$), 
 	and all the remaining $p-10$ variables were uncorrelated.
+	Items were rescaled to have mean of 5.
 
 	\paragraph{Experiment 2}
 	The observed data $\bm{X}_{n \times p}$ was created based on a Confirmatory Factor Analysis model.
@@ -123,7 +121,7 @@ structure of social survey data.
 
 \subsubsection{Step 3: Imputation}
 	
-	Imputations are performed according to the 10 methods described in section 2.
+	Missing values are dealt with according to all the methods described in section 2.
 
 \subsubsection{Step 4: Analysis}
 	
@@ -132,18 +130,90 @@ structure of social survey data.
 	variances, and covariances of the six variables with missing values.
 
 	\paragraph{Experiment 2}
-	The same saturated model is fitted to the data with a latent structure to obtain means, variances, 
-	and covariances on the observed items.
+	The same saturated model is fitted to estimate the means, variances, and covariances of the 
+	\emph{observed} items.
 	Furthermore, an oracle Confirmatory Factor Analysis was also chosen to see how the factor scores 
 	are recovered after imputation.
 
+\subsection{Conditions}
+	
+	The simulation procedure just outlined was repeated with different experimental set ups. 
+	Table \ref{table:condSum} summarizes these conditions.
+
+	\paragraph{Experiment 1}
+	Two experimental factors were considered: $p$, the number of columns in the dataset, which 
+	are all fed to the imputation algorithms, and $pm$, the target proportion of \emph{per} variable missing cases.
+	The sample size $n$ was set to 200 in all conditions.
+
+	\paragraph{Experiment 2}
+	The dimensionality of the data was controlled based on the number of latent variables $l$.
+	Two values were used for this factor: 10 and 100. 
+	In all conditions, 5 items were generated as measures for each latent variable, making conditions with $l = 10$ 
+	low dimensional conditions, with 50 total predictors and a constant sample size of 200 observations, and 
+	conditions with $l = 100$ high dimensional ones, with data matrices of dimensionality $200 \times 500$.
+	The proportion of missing values was defined again as a fixed experimental factor with two levels: .1 or .3.
+
+	In experiment 2, we have also defined the latent structure factor loadings $\lambda_{ij}$ as a 2-level random experimental factor.
+	The data generation step used factor loadings drawn from a uniform distribution defined between either .5 and .6, or 
+	or .9 and .97.
+
+\begin{table}[h]
+   \begin{center}
+        \begin{tabular}{ c c c c c c }
+		% Column names
+		\textbf{condition} & \textbf{n} & \textbf{p} & \textbf{l} & \textbf{pm} & \textbf{$\lambda$ range} \\ 
+		\hline
+
+		% Group name
+		\rowcolor{Gray}
+ 		\multicolumn{6}{c}{Experiment 1} \\
+		\hline
+
+		% Row 1
+		1 & 200 & 50  & - & .1 & - \\
+		2 & 200 & 500 & - & .1 & - \\
+		3 & 200 & 50  & - & .3 & - \\
+		4 & 200 & 500 & - & .3 & - \\
+
+		\hline
+
+		& & & & & \\ 
+
+		% Group Name
+		\rowcolor{Gray}
+ 		\multicolumn{6}{c}{Experiment 2} \\
+		\hline
+
+		1 & 200 & 50 &  10 &  0.1 & [.9, .97] \\
+		2 & 200 & 500 & 100 & 0.1 & [.9, .97] \\
+		3 & 200 & 50 &  10 &  0.3 & [.9, .97] \\
+		4 & 200 & 500 & 100 & 0.3 & [.9, .97] \\
+		5 & 200 & 50 &  10 &  0.1 & [.5, .6]  \\
+		6 & 200 & 500 & 100 & 0.1 & [.5, .6]  \\
+		7 & 200 & 50 &  10 &  0.3 & [.5, .6]  \\
+		8 & 200 & 500 & 100 & 0.3 & [.5, .6]  \\
+
+		\hline
+        \end{tabular}
+    \end{center}
+\caption{Summary of conditions for experiment 1 and 2} \label{table:condSum}
+\end{table}
+
+\FloatBarrier % stops table:condSum leaving its own section
+
 \subsection{Comparison Criteria} \label{criteria}
-	To compare the performance of the different imputation methods, several outcome measures were considered.
+
+	After running the simulation procedure $R$ times, the $R$ Gold Standard estimates obtained by saving the item means, 
+	variances and covariances, computed on the fully observed data, are averaged to define the true parameters values 
+	in each condition.
+	The $R$ estimates obtained by estimating the parameters of interest, after treating the missing values with all other 
+	methods, are used to compute the methods performance measures.
+	In what follows, we describe the outcome measures that were considered.
 
 	\paragraph{Bias}
 
-	First, we used Percent Relative Bias ($PRB$) and Standardized Bias ($SB$) to quantify the bias introduced by the imputation
-	procedure.
+	First, we used Percent Relative Bias ($PRB$) and Standardized Bias ($SB$) to quantify the bias introduced by 
+	the imputation procedures:
 
 	\begin{equation} \label{eqn:prb}
 		PRB = \frac{\bar{\hat{\theta}} - \theta}{\theta} \times 100
@@ -153,9 +223,18 @@ structure of social survey data.
 		SB =  \frac{\bar{\hat{\theta}} - \theta}{SD_{\hat{\theta}}}
 	\end{equation}
 	
-	where $\theta$ represents the reference value (the "true" value) of the focal parameter, 
-	$\bar{\hat{\theta}}$ represents its estimate under a given imputation method averaged over 
-	the MCMC replications, 
+	$\theta$ is the "true" value) of the focal parameter (e.g. mean of item 1, variance of item 2) and it is 
+	computed as 
+	$\frac{ \sum_{r=1}^{R} \hat{\theta}_{r}^{GS} }{R}$
+	, with
+	$\hat{\theta}_{r}^{GS}$ 
+	being the Gold Standard parameter estimate for the \emph{r}-th repetition. 
+	$\bar{\hat{\theta}}$ represents the focal parameter estimate under a given imputation method, averaged over 
+	the MCMC replications, computed as
+	$\frac{ \sum_{r=1}^{R} \hat{\theta}_{r}^{m} }{R}$,
+	with
+	$\hat{\theta}_{r}^{m}$ being the estimate obtained after using the \emph{m} imputation approach in the 
+	\emph{r}-th repetition.
 	$SD_{\hat{\theta}}$ represents the empirical standard deviation of $\theta$.
 
 	\paragraph{Confidence Intervals Coverage}
@@ -196,104 +275,41 @@ structure of social survey data.
 	informative.
 	In general, for the same confidence interval coverage, imputation methods that have smaller CIW are
 	considered more efficient.
-	Single imputation methods will tend to provide narrower CIs compared to Gold Standard, while proper 
+	Single imputation methods will tend to provide narrower CIs compared to Gold Standard estimates, while proper 
 	multiple imputations will tend to provide wider CIs, reflecting the greater uncertainty regarding a 
 	parameter value due to presence of missing values.
 
 	\paragraph{Euclidean Distance}
 	Both bias and CIC are computed for individual parameter estimates. 
-	When many parameters are involved in the analysis model these measures become cumbersome to compare.
+	When many parameters are involved in the analysis model these measures become cumbersome to compare for every 
+	parameter.
 	Hence, we have also used multivariate measures to assess the overall statistical validity of the analysis 
 	models of interest after imputation.
 
-	A multi-parameter measure of bias is computed as the Euclidean Distance between the $t$-dimensional vector of
-	true model parameters values $\bm{\theta}$ and the vector of MCMC-average after-imputation estimates 
-	$\bar{\hat{\bm{\theta}}}$:
+	For a given \emph{m} imputation approach, a multi-parameter measure of bias is computed as the Euclidean 
+	Distance between the $t$-dimensional vector of true model parameters values $\bm{\theta}$ and the vector 
+	of MCMC-average after-imputation estimates 
+	$\bar{\hat{\bm{\theta}}}^{m}$:
 
 	\begin{equation} \label{eqn:ed}
-		d_{bias}(\bm{\theta},\bar{\hat{\bm{\theta}}}) =  
-			\sqrt{ \sum_{i=1}^{t} (\bm{\theta}_i - \hat{\bm{\theta}}_i)^2 }
+		d^{m}_{bias}(\bm{\theta},\bar{\hat{\bm{\theta}}}) =  
+			\sqrt{ \sum_{i=1}^{t} (\theta_i - \hat{\theta}_i)^2 }
 	\end{equation}
 	
-	$\bar{\hat{\bm{\theta}}}$ is computed as $\frac{ \sum_{r=1}^{R} \hat{\bm{\theta}}_r }{R}$,
-	where $\hat{\bm{\theta}}_r$ is the vector of the model parameters estimates in the \emph{r}-th repetition.
+	where $\hat{\theta}_i$ is an element of the \emph{t}-dimensional $\bar{\hat{\bm{\theta}}}$, itself computed as 
+	$\frac{ \sum_{r=1}^{R} \hat{\bm{\theta}}_r }{R}$, with $\hat{\bm{\theta}}_r$ the vector of the model parameters 
+	estimates in the \emph{r}-th repetition.
 
 	A multi-parameter measure of Confidence Interval Coverage is computed as Euclidean Distance between a 
 	$t$-dimensional vector ($\bm{CIC}^{n}$) of nominal coverage values (.95) and the vector of MCMC actual
 	coverages for all model parameters $\bm{CIC}^{a}$:
 
 	\begin{equation} \label{eqn:ed}
-		d_{CIC}(\bm{CIC}^{n}, \bm{CIC}^{a}) =  
-			\sqrt{ \sum_{i=1}^{t} (\bm{CIC}^{n}_i - \bm{CIC}^{a}_i)^2 }
+		d^{m}_{CIC}(\bm{CIC}^{n}, \bm{CIC}^{a}) =  
+			\sqrt{ \sum_{i=1}^{t} (CIC^{n}_i - CIC^{a}_i)^2 }
 	\end{equation}
 	
-	$\bm{CIC}^{a}_i$ is computed as in equation \ref{eqn:cic}.
-
-\subsection{Conditions}
-	
-	Data generation and missing data imposition was defined by design factors specific to each experiment.
-	The procedure outlined above was run for each of the conditions in table \ref{table:condSum}.
-
-	\paragraph{Experiment 1}
-	Two experimental factors were considered: $p$, the number of columns in the dataset, which 
-	are all fed to the imputation algorithms, and $pm$, the target proportion of \emph{per} variable missing cases.
-	The sample size $n$ was set to 200 in all conditions.
-
-	\paragraph{Experiment 2}
-	The dimensionality of the data was controlled based on the number of latent variables $l$.
-	Two values were used for this factor: 10 and 100. 
-	In all conditions, 5 items were generated as measures for each latent variable, making conditions with $l = 10$ 
-	low dimensional conditions, with 50 total predictors and a constant sample size of 200 observations, and 
-	conditions with $l = 100$ high dimensional ones, with data matrices of dimensionality $200 \times 500$.
-	The proportion of missing values was defined again as a fixed experimental factor with two levels: .1 or .3.
-
-	In experiment 2, we have also defined the latent structure factor loadings $\lambda_{ij}$ as a 2-level random experimental factor.
-	The data generation step used factor loadings drawn from a uniform distribution defined between either .5 and .6, or 
-	or .9 and .97.
-
-\begin{table}[t]
-   \begin{center}
-        \begin{tabular}{ c c c c c c }
-		% Column names
-		\textbf{condition} & \textbf{n} & \textbf{p} & \textbf{l} & \textbf{pm} & \textbf{$\lambda$ range} \\ 
-		\hline
-
-		% Group name
-		\rowcolor{Gray}
- 		\multicolumn{6}{c}{Experiment 1} \\
-		\hline
-
-		% Row 1
-		1 & 200 & 50 & 0 & .1 & - \\
-		2 & 200 & 500 & 0 & .1 & - \\
-		3 & 200 & 50 & 0 & .3 & - \\
-		4 & 200 & 500 & 0 & .3 & - \\
-	\hline
-		& & & & & \\ 
-
-		% Group Name
-		\rowcolor{Gray}
- 		\multicolumn{6}{c}{Experiment 2} \\
-		\hline
-
-  1 & 200 & 50 &  10 &  0.1 & [.9, .97] \\
-  2 & 200 & 500 & 100 & 0.1 & [.9, .97] \\
-  3 & 200 & 50 &  10 &  0.3 & [.9, .97] \\
-  4 & 200 & 500 & 100 & 0.3 & [.9, .97] \\
-  5 & 200 & 50 &  10 &  0.1 & [.5, .6]  \\
-  6 & 200 & 500 & 100 & 0.1 & [.5, .6]  \\
-  7 & 200 & 50 &  10 &  0.3 & [.5, .6]  \\
-  8 & 200 & 500 & 100 & 0.3 & [.5, .6]  \\
-
-		\hline
-        \end{tabular}
-    \end{center}
-\caption{Summary of conditions for experiment 1 and 2}
-\label{table:condSum}
-\end{table}
-
-
-\FloatBarrier % stops table:condSum leaving its own section
+	${CIC}^{a}_i$ computed as in equation \ref{eqn:cic} for each of the $t$ parameters to be estimated.
 
 \subsection{Results}
 
@@ -303,15 +319,15 @@ structure of social survey data.
 	for each parameter estimate in the saturated model described above: item means, variances, and covariances for
 	the six variables with missing values.
 
-	Focusing first on the means (leftmost column), all methods achieve a bias that is smaller than the 10\% threshold 
+	Focusing first on the item means (top row), all methods achieve a bias that is smaller than the 10\% threshold 
 	for all item means, in all conditions.
 	Looking at relative performances, we can see how IURR and MI-PCA always result in the smallest
 	estimation bias. 
-	Bridge competes with these two methods in the low dimensional conditions (rows 1 and 3), but it 
+	Bridge competes with these two methods in the low dimensional conditions (1 and 3), but it 
 	does lose ground in the higher dimensional conditions (2 and 4).
 
-	Moving to the item variances (central column) we notice that IURR, Blasso, and the tree based methods are 
-	giving the lowest item variance biases across all conditions, even in the most difficult one (row 4).
+	Moving to the item variances (central row) we notice that IURR, Blasso, and the tree based methods are 
+	giving the lowest item variance biases across all conditions, even in the most challenging one (condition 4).
 	Somewhat surprisingly, directly using regularized regression within the imputation models (DURR) leads
 	to a bias larger than 10\% in the high dimensional condition with high proportion of missing values.
 	
@@ -324,8 +340,8 @@ structure of social survey data.
 	While not ideal, the latter behaviour is certainly less alarming than the former.
 }
 	
-	Finally, the third column in table \ref{fig:exp1bias} shows the estimation bias for the 15
-	covariances between items with missing values.
+	Finally, the third row in table \ref{fig:exp1bias} shows the estimation bias for the 15 covariances between 
+	the 6 items with missing values.
 	As covariances depend on two variables, recovering the correct estimates after imputation is inherently 
 	more difficult than with means and variances.
 	This explains the generally worse performances reported in the figure: MI-PCA is the only method with
@@ -335,14 +351,14 @@ structure of social survey data.
 
 	Figure \ref{fig:exp1cir} reports the Confidence Interval Coverage computed for each parameter.
 	The pattern of performances is quite similar to that described by bias with MI-PCA and IURR 
-	outperforming most other methods in most conditions.
+	outperforming most other methods in the high dimensional conditions, with coverages that are consistently
+	between the .93 and .97 Burton thresholds.
 	This suggests that MI-PCA and IURR are the imputation methods doing the best job at preserving
 	the integrity of hypothesis testing performed on the treated data.
 
-	However, there are a few exceptions and peculiarities to note: 
+	However, there are a some peculiarities to note: 
 	\begin{itemize}
-	\item MI-PCA is the only method that does not undercover means and covariances in the most challenging condition
-		(row 4);
+	\item MI-PCA is the only method that does not seriously undercover means and covariances in condition (4);
 	\item compared to all other methods, MI-PCA tends toward over- rather than under-coverage, and it 
 	does so to a lesser degree;
 	\item while the bias for item variances obtained with IURR was quite small in condition 4, the method seems 
@@ -352,19 +368,15 @@ structure of social survey data.
 
 \begin{figure}
 	\includegraphics{../../output/graphs/exp1_bias.pdf}
-\caption{Percent Relative Bias (PRB) for the means, variances, and covariances broken 
-	down by method. 
-	Each row represents a different condition. 
-	Each column is dedicated to a different parameter type.}
+\caption{Percent Relative Bias (PRB) for item means, variances, and covariances broken 
+	down by method}
 \label{fig:exp1bias}
 \end{figure}
 
 \begin{figure}
 	\includegraphics{../../output/graphs/exp1_CI.pdf}
-\caption{Confidence Interval Coverage (CIR) for the means, variances, and covariances broken 
-	down by method. 
-	Each row represents a different condition. 
-	Each column is dedicated to a different parameter type.}
+\caption{Confidence Interval Coverage (CIC) for item means, variances, and covariances broken 
+	down by method.}
 \label{fig:exp1cir}
 \end{figure}
 	
@@ -377,7 +389,7 @@ structure of social survey data.
 	Results form the first experiments held mostly constant in experiment 2, indicating that the presence and 
 	strength of a latent structure does not perturb the methods' relative performances.
 
-	Figure \ref{fig:exp2bias} reports the bias of the Saturated Model parameter estimates for the first
+	Figure \ref{fig:exp2bias} reports the bias of the saturated model parameter estimates for the first
 	four conditions of experiment 2 (high factor loadings). 
 	For both item variances and covariances PRB is reported, while for the item means we reported the SB. 
 	Items were generated around a mean of 0 making the computation of PRB for this parameter meaningless.
@@ -392,14 +404,14 @@ structure of social survey data.
 	set up disappears when the latent structure is strong (factor loadings larger than .9).
 
 	Figure \ref{fig:exp2cir} shows results for the confidence interval coverage in experiment 2.
-	When factor loadings are high, conditions 1 to 4, we see that all multiple imputation
-	methods lead to acceptable coverage for means and variances, in the conditions with low proportion 
-	of missing values, no matter the dimensionality of the data.
-	For both item means and variances, confidence intervals coverage is approximately within .93 and .97 
-	for al methods. 
-	As the proportion of missing values increases we see a general deterioration in CIR performances, with IURR
-	and MI-PCA still showing the most contained deviations from the target value.
-	MI-PCA tends to include the true parameter values more than it should (over-coverage), 
+	When factor loadings are high, we see that all multiple imputation methods lead to acceptable coverage 
+	for means and variances, in the conditions with low proportion of missing values, no matter the 
+	dimensionality of the data: in condition 1 and 3, for both item means and variances, confidence 
+	intervals coverage is approximately within .93 and .97 for all methods.
+
+	As the proportion of missing values increases we see a general deterioration in CIC performances, 
+	with IURR and MI-PCA still showing the most contained deviations from the target value.
+	Again, MI-PCA tends to include the true parameter values more than it should (over-coverage), 
 	while most other methods show sings of under-coverage.
 
 	Given the large positive biases obtained by all methods for the covariances of the observed items,
@@ -407,21 +419,20 @@ structure of social survey data.
 	conditions in experiment 2. 
 	MI-PCA is again the only exception providing acceptable coverage for all covariances.
 
-	The same pattern can be seen in the conditions with lower factor loadings (reported in appendix). 
-	However, in condition 8, the MI-PCA approach also leads to extreme under-coverage of variances 
-	(as do most other methods) and it tends again to over-estimate the item variances (PRBs > 20\%).
+	The same patterns can be seen in the conditions with lower factor loadings (see figures \ref{fig:exp2bias58} 
+	and \ref{fig:exp2bias58} reported in appendix).
+	However, in condition 8, the MI-PCA approach tends again to over-estimate the item variances (PRBs > 20\%)
+	and it also leads to extreme under-coverage of this parameters.
 
 \begin{figure}
 	\includegraphics{../../output/graphs/exp2_semR_bias_sd_14.pdf}
-\caption{Bias estimation for the means (SB), variances and covariances (PRB) for condition 1 to 4.
-	Each column is dedicated to a different parameter type.}
+\caption{Bias estimation for the means (SB), variances and covariances (PRB) for condition 1 to 4.}
 \label{fig:exp2bias}
 \end{figure}
 
 \begin{figure}
 	\includegraphics{../../output/graphs/exp2_semR_ci_14.pdf}
-\caption{Confidence Interval Coverage (CIC) for the means, variances, and covariances for condition 1 to 4.
-	Each column is dedicated to a different parameter type.}
+\caption{Confidence Interval Coverage (CIC) for the means, variances, and covariances for condition 1 to 4.}
 \label{fig:exp2cir}
 \end{figure}
 
@@ -429,10 +440,10 @@ structure of social survey data.
 
 \paragraph{Confirmatory Factor Analysis}
 
-	Figures \ref{fig:exp2fl14} and \ref{fig:exp2fl58} show the PRB values for all the factor loadings estimated by
+	Figures \ref{fig:exp2fl14} shows the PRB values for all the factor loadings estimated by
 	the Confirmatory Factor Analysis described above. 
-	Most MI-Methods are able to provide acceptably biased estimates for these parameters in 
-	all conditions except the ones with a large proportion of missing values and high 
+	Most MI-Methods are able to provide acceptably low biased estimates for these parameters in 
+	all conditions except the ones with both large proportion of missing values and high 
 	dimensional input data matrix (condition 4).
 
 	IURR and MI-PCA are again the two top performers giving virtually unbiased estimates
@@ -442,7 +453,8 @@ structure of social survey data.
 
 \begin{figure}[h]
 	\includegraphics{../../output/graphs/exp2_CFA_lambda_BPR.pdf}
-\caption{Percent Relative Bias (PRB) for the factor loadings conditions 1 to 4.}
+	\caption{Percent Relative Bias (PRB) for the factor loadings conditions 1 to 4 (panel A) 
+		and conditions 5 to 8 (panel B).}
 \label{fig:exp2fl14}
 \end{figure}
 

@@ -7,26 +7,26 @@
 
 Consider a dataset $\bm{Z}$ of dimensionality $n \times p$, with $n$ observations (rows) and 
 $p$ variables (columns). 
-Assume there are $T < p$ variables with missing cases in at least one row that are also part of the substantive
-model of interest. 
+Assume there are $T < p$ variables with missing cases in at least one, and that they are also part 
+of some substantive model of scientific interest. 
 An imputation procedure targeting these $T$ variables could be used to allow fitting a substantive 
 model (e.g. some linear or logistic regression) without discarding data units (rows).
 The $p - T$ variables in the dataset constitute a pool of possible \emph{auxiliary} variables that
 could be used to improve the imputation procedure.
 
-Most of the methods described in this section iteratively impute each target variable with imputation models
-that use as predictors the other target variables and the information contained in the auxiliary data. 
-%At iteration $m$, each target variables $z_{j}$, with $j$ in ${1, ..., T}$, is imputed.
+Most of the methods described in this section iteratively impute each target variable with imputation 
+models that use as predictors the other variables afflicted by missing values and the information 
+contained in the auxiliary data. 
 
 \subsection{Multiple Imputation Strategies}
 
 \subsubsection{MICE with Bayesian Ridge (bridge)}
 	The \emph{bridge} imputation procedure closely follows a standard iterative MICE algorithm for imputation of 
-	multivariate missing data \citep[p. 120, algorithm 4.3]{vanBuuren:2012}: at iteration $m$, for each target 
-	variable plausible values of the imputation model parameters are drawn from their posterior distribution, 
-	and imputations are drawn from the posterior predictive distribution. 
+	multivariate missing data \citep[p. 120, algorithm 4.3]{vanBuuren:2012}.
+	At iteration $m$, for each target variable, plausible values of the imputation model parameters are drawn from 
+	its posterior distribution, and imputations are drawn from the posterior predictive distribution.
 
-	After initialization of the missing values, at each $m$-th iteration, performs the following sampling steps
+	After initialization of the missing values, at each $m$-th iteration, the following sampling steps are performed 
 	for each target variable:
 
 	\begin{align}
@@ -36,26 +36,23 @@ that use as predictors the other target variables and the information contained 
 
 	where $\hat{\bm{\theta}}_{j}^{(m)}$ and $z_{j, mis}^{(m)}$ are draws from the parameters posterior distribution 
 	\eqref{eq_pd} and posterior predictive distribution \eqref{eq_ppd}, respectively, for the $j$-th target variable 
-	at the $m$-th iteration. The superscript $((m))$ implies that the missing values in $\bm{Z}_{obs, j}^{m}$
-	and $\bm{Z}_{mis, j}^{m}$ are different at every iteration as they are filled in with the previous iteration 
+	at the $m$-th iteration. The superscript $(m)$ implies that the missing values in $\bm{Z}_{obs, j}^{(m)}$
+	and $\bm{Z}_{mis, j}^{(m)}$ are different at every iteration as they are filled in with the previous iteration 
 	draws.
 
 	The sampling of each $\hat{\bm{\theta}}_{j}^{(m)}$ and $z_{j, mis}^{(m)}$ is done as in the standard 
 	\emph{Bayesian imputation under normal linear model algorithm} described by 
 	\citep[p. 68, algorithm 3.1]{vanBuuren:2012} and implemented as in the \emph{impute.mice.norm()} 
 	function of the \emph{mice} R package.
-	The algorithm uses a ridge penalty to avoid problems of singular matrices.
-	When the sample covariance matrix is singular, it is not invertible, an operation that
-	is key to the sampling of parameters in \eqref{eq_pd} \citep{schafer:1997}.
+	The algorithm uses a ridge penalty to avoid problems with the inversion of singular observed data matrix that
+	can afflict the sampling in \eqref{eq_pd}.
 	By adding a biasing ridge penalty, singularity is circumvented and the sampling scheme described above is 
-	possible even on data affected by high collinearity and/or with a higher number of columns than rows
-	($p > n$).
+	possible even on data that is sparse or afflicted by high collinearity.
 
 \subsubsection{MICE with Bayesian lasso (blasso)}
-	A Bayesian hierarchical BLasso linear model is a regular Bayesian multiple regression with a
-	prior specification for the regression coefficients that induces some form of shrinkage toward 0 of
-	the sampled parameters values \citep{parkCasella:2008, hans:2009} effectively performing a form of 
-	Bayesian model selection.
+	A Bayesian Lasso linear model is a regular Bayesian multiple regression with a prior specification for the 
+	regression coefficients that induces some form of shrinkage toward 0 of the sampled parameters values 
+	\citep{parkCasella:2008, hans:2009} effectively performing a form of Bayesian model selection.
 
 	The Bayesian Lasso imputation algorithm (blasso) used here is a standard Multiple Imputation MCMC sampler 
 	that uses the shrinkage priors defined by \citet{hans:2010} to compute the posterior distributions of the 
@@ -65,7 +62,7 @@ that use as predictors the other target variables and the information contained 
 	For a detailed description of the algorithm for Bayesian Lasso Multiple Imputation (blasso) in a univariate
 	missing data context we recommend reading \cite{zhaoLong:2016}.
 	The R code to perform blasso imputation is heavily based on the Bayesian Lasso R Package \emph{blasso} 
-	developed by \citet{hans:2010}.
+	developed by \citet{hans:2010} and can be found on the author's GitHub page [LINK].
 
 \subsubsection{Direct Use of Regularized Regression (DURR)}
 
@@ -150,7 +147,7 @@ that use as predictors the other target variables and the information contained 
 	Note that if missing values are present in the set of auxiliary variables, one can fill them in with a 
 	stochastic single imputation algorithm of choice as the goal of said imputation would be to simply
 	allow PCs extraction and not inferential. This method is inspired by \cite{howardEtAl:2015} and the
-	\emph{PcAux} package that implements and developed its ideas.
+	\emph{PcAux} R-package that implements and developed its ideas.
 	
 \subsubsection{MICE with regression trees (MI-CART and -RANF)}
 	A variety of Multiple Imputation methods using regression and classification trees have been proposed
@@ -206,12 +203,13 @@ that use as predictors the other target variables and the information contained 
 	\end{enumerate}
 
 	Following these criteria is one of the most recommended strategies to deal with a large number of 
-	possible imputation model predictors \citep[p. 168]{vanBuuren:2012}.
+	possible predictors for the imputation models \citep[p. 168]{vanBuuren:2012}.
 	In this sense, it represents an \emph{ideal} strategy that could be used to deal with high-dimensional data,
 	in the absence of alternatives.
 	In practice, researchers can never be sure requirement 2 is fulfilled, as there is no way to know exactly 
 	which variables are responsible for missingness. The MI-OP approach used here remains \emph{ideal} 
-	in the sense that it is not applicable in practice, but it does offer an interesting benchmark case.
+	in the sense that it is not applicable in practice, but it does offer an interesting benchmark for 
+	comparison.
 	
 \subsection{Single data strategies}
 

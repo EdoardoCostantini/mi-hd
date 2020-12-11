@@ -8,27 +8,29 @@ shaping individual and societal outcomes.
 Large social scientific datasets, such as the European Values Study (EVS), Longitudinal Internet Studies for the 
 Social Sciences (LISS Panel), are easily available and initiatives have been undertaken to link and extend these 
 datasets into a full systems of linked open data (LOD).
-There are many ways linked data can be advantageous \citep{jutteEtAl:2011}, from linking survey/administrative data with
-case-control studies to investigate the effects of socio-economic factors in shaping health outcomes
-\citep{kozyrskyjEtAl:2009} [NEEDS BETTER CITATION]; to life-course and trans-generational studies [NEEDS CITATION]
+Furthermore, there are many ways linking different sources of data can be advantageous \citep{jutteEtAl:2011}, from 
+linking survey/administrative data with case-control studies to investigate the effects of socio-economic factors in 
+shaping health outcomes \citep{kozyrskyjEtAl:2009} [NEEDS BETTER CITATION]; to life-course and trans-generational studies 
+monitoring social, psychological and medical features [NEEDS CITATION]
 
 Making use of the full potential of these data sets requires dealing with the crucial problem of multivariate
 missing data.
-Missing data can occur on these types of data because of traditional reasons (e.g. attrition and unwillingness
+Missing data can occur on these types of data because of traditional reasons (e.g. attrition, unwillingness
 to answer sensitive questions), because of errors in the linkage, or because some individuals do not interact
-with a specific service recorded in the considered administrative data \citep{harronEtAl:2017}.
+with a specific service/activity recorded in the considered data \citep{harronEtAl:2017}.
 
-The tools researchers working large social surveys and linked data need to correct for the bias introduced by nonresponses 
+The tools researchers working large social surveys and linked data need to correct for the bias introduced by non-responses 
 require special attention.
 In general, when performing Multiple Imputation (MI) \citep{rubin:1987}, one of the most widespread principled method to deal 
 with missing cases, data handlers tend to prefer including more, rather than less, predictors in their imputation models.
-This reduces the chances of uncongenial imputation and analysis models \citep{meng:1994} and of leaving out important 
-predictors of missingness, fundamental to meet the MAR assumption, a basic requirement for proper imputations.
+This practice increases the dimensionality of the imputation models but reduces the chances of specifying uncongenial imputation and 
+analysis models \citep{meng:1994} and of leaving out important predictors of missingness, which is important to meet the MAR 
+assumption, a basic requirement for proper imputations.
 On top of this standard source of dimensionality, the large number of items included in survey and linked data, coupled 
 with their longitudinal nature, and the necessity of preserving complex interactions and nonlinear relations, easily 
 produces high-dimensional ($p>n$) imputation problems.
 
-When data is sparse ($n$ not substantially larger than $p$) or afflicted by high collinearity (correlation among 
+When data is sparse ($n$ is \emph{not} substantially larger than $p$) or afflicted by high collinearity (correlation among 
 certain variables is so high that some of their linear combinations have no variance) the data covariance matrix
 is singular. 
 Singular matrices are not invertible, an operation that is fundamental in the estimation of imputation models in 
@@ -56,7 +58,7 @@ by specific algorithms using either shrinkage or dimensionality reduction method
 Furthermore, other methods, that could potentially suit well the purpose, are the use of dimensionality reduction
 within the imputation models \citep{howardEtAl:2015}, or the use of non-parametric prediction trees 
 \citep{burgetteReiter:2010, dooveEtAl:2014}.
-However, most of these have been either proposed or exclusively tested for low-dimensional imputation 
+However, most of these have been either proposed or tested exclusively in low-dimensional imputation 
 settings.
 
 \paragraph{(Focus/Reason to write paper)}
@@ -64,9 +66,13 @@ With this article we set out to provide a comparison of these state-of-the-art i
 high-dimensional scenarios. 
 We compare imputation methods based on their ability to allow inferential statements that are as valid as 
 if they were made on a dataset without missing data.
-Hence, in assessing the methods performances, the primary focus of this article is the statistical validity
-\citep{rubin:1996} of the substantive analysis performed on data treated for its missing values.
+Hence, in assessing the methods performances, the primary focus of this article is the \emph{statistical validity}
+\citep{rubin:1996} of the substantive analysis performed on data treated with different high-dimensional 
+MI procedures.
 The comparison is developed both through simulation studies and a real survey data application.
+
+The end goal is to provide recommendations for applied researchers in how do deal with missing values in
+a principled and achievable manner when faced with large social surveys and linked data.
 
 \paragraph{(Content Summary)}
 This paper is organized as follows. 

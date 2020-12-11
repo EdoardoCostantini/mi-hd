@@ -1601,7 +1601,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     store <- NULL
     count <- 0
     for (i in 1:out$parms$dt_rep) {
-      # i <- 3
+      # i <- 1
       succ_method <- colnames(out[[i]][[select_cond]][[est]])
       result <- as.matrix(out[[i]][[select_cond]][[est]])[, succ_method %in% m]
       if(any(is.na(result))) {
@@ -2359,13 +2359,15 @@ plot_exp4 <- function(dt,
   
   # Clean methods
   dt_edit <- lapply(dt_edit, function(x){
+    # Make methods rownames for ordering reasons
+    rownames(x) <- x$key
     # select methods to keep
-    x <- x[x$key %in% meth_compare, ] 
+    x <- x[meth_compare, ] 
     # Make names prettier
     x$key <- sub("_la", "", x$key)
     x$key <- sub("_", "-", x$key)
     # fix order of methods
-    x$key <- factor(x$key, levels = rev(x$key))
+    x$key <- factor(x$key, levels = x$key)
     return(x)
   })
   
@@ -2423,11 +2425,11 @@ plot_exp4 <- function(dt,
     plot_breaks <- round(seq(plot_xlim[1], plot_xlim[2], length.out = 3), 
                          1)
     plot_labels <- gsub("0.", ".", plot_breaks)
-    if("GS" %in% dt_edit$key) {
-      plot_vlines <- dt_edit[dt_edit$key=="GS", "value"]
-    } else {
+    # if("GS" %in% dt_edit$key) {
+    #   plot_vlines <- dt_edit[dt_edit$key=="GS", "value"]
+    # } else {
       plot_vlines <- NULL
-    }
+    # }
     plot_hlines <- NULL
   }
   

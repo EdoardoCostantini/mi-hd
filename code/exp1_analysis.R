@@ -286,7 +286,9 @@
                        "blasso", "bridge",
                        "MI_PCA",
                        "MI_CART", "MI_RF", 
-                       "missFor", "CC"))
+                       "missFor", 
+                       "CC",
+                       "MI_OP"))
   
   pf <- plot_fg(dt = lapply(1:length(res$sem),
                             function(x) data.frame( res$sem[[x]]$bias_per)),
@@ -301,8 +303,8 @@
                 plot_name = NULL,
                 y_axLab = TRUE,
                 meth_compare)
-
-  ggsave(file  = "~/Desktop/exp1_bias.pdf",
+  
+  ggsave(file = "../output/graphs/exp1_bias.pdf",
          width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)
@@ -388,7 +390,9 @@
                        "blasso", "bridge",
                        "MI_PCA",
                        "MI_CART", "MI_RF", 
-                       "missFor", "CC"))
+                       "missFor", 
+                       "CC",
+                       "MI_OP"))
   pf <- plot_fg(dt = lapply(1:length(res$sem),
                             function(x) data.frame( res$sem[[x]]$ci_cov)),
                 type = "ci",
@@ -402,8 +406,8 @@
                 plot_name = NULL,
                 y_axLab = TRUE,
                 meth_compare)
-  
-  ggsave(file  = "~/Desktop/exp1_CI.pdf",
+  pf
+  ggsave(file = "../output/graphs/exp1_CI.pdf",
          width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)

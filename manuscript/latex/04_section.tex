@@ -3,9 +3,12 @@
 To test the ecological validity of findings in experiment 1 and 2 we have also designed a
 resampling study based on European Values Survey data.
 Variables in the EVS data are not generated artificially from continuous normal distributions 
-but are discrete numerical items that are only treated as such by researchers.
-By using data gathered for an actual survey, we can observe whether the relative 
-performances of the imputation methods change when they are deployed for real data research.
+but are discrete numerical and categorical items following a variety of distributions.
+By using data gathered with an actual survey, we can observe whether the relative 
+performances of the imputation methods, displayed in the simulation studies, change when they are 
+deployed for real data research.
+
+\subsection{Resampling Study Procedure} \label{resProc}
 
 The resampling study follows a similar strategy to that used in the simulations. 
 To assess the statistical validity of the different imputation methods we have repeated the 
@@ -22,8 +25,8 @@ following steps 500 times ($R = 500$):
 	\item Imputations - Each method described in section 2 is used to deal with missing values
 		in $\bm{X}^{*}_{miss}$.
 	\item Analysis - Two analysis models are fitted to the differently treated data.
-		Parameters estimates are pooled across the differently imputed datasets, for the MI methods, and
-		stored along with the estimates obtained with single imputation methods and complete case 
+		Their parameters estimates are pooled across the differently imputed datasets, for the MI methods, and
+		stored along with the estimates obtained after using single imputation methods and complete case 
 		analysis.
 \end{enumerate}
 
@@ -40,9 +43,7 @@ following steps 500 times ($R = 500$):
 	was implemented using the R package 'parallel' and to ensure replicability of the findings seeds were
 	set using the method by \cite{lecuyer:2002} implemented in the R package 'rlecuyer'
 
-\subsection{Methods}
-
-\paragraph{Data preparation}
+\subsubsection{Data preparation}
 	EVS is a standardized cross-sectional survey with a representative sample of more than 60,000 
 	people, across more than 30 countries, interviewed via Web, post or face-to-face.
 	For this study we have used the third pre-release of the 2017 wave of EVS data \citep{EVS:2017}.
@@ -56,15 +57,15 @@ following steps 500 times ($R = 500$):
 
 	All originally missing values were filled in with a run of a single imputation predictive mean matching (PMM) 
 	algorithm to obtain a pseudo fully-observed dataset.
-	PMM was chosen for the task as it is an effective, flexible imputation method that maintains the 
-	distributional characteristics of the original data.
+	PMM was chosen for the task as it is a flexible imputation method that maintains the distributional 
+	characteristics of the original data.
 	Bias and uncertainty introduced by this procedure is not relevant for the present study as the data matrix
 	obtained after the single PMM run is considered as the population data.
 	
 	At the end of this data cleaning process, we ended up with a fully-observed dataset
 	of 8045 observations ($n$), across 4 countries, and 243 variables ($p$).
 
-\paragraph{Analysis models}
+\subsubsection{Analysis models}
 
 	To define plausible analysis models we have searched an EVS database, available on their website, 
 	looking for suitable analysis models to test the effectiveness of the different imputation algorithms.
@@ -99,20 +100,21 @@ following steps 500 times ($R = 500$):
 	The control variables used included the usual socio-economic background information, the same measure of
 	religiosity used in model \ref{eqn:lm1}, and some measures of political interest.
 
-	A researcher might fit this model to their data and look at $\beta_{1,2}$, the `nativist attitude' regression 
-	coefficient, value and standard error to test a theory regarding its effect on voting for right wing parties.
+	A researcher might fit this model and look at $\beta_{1,2}$, the `nativist attitude' regression 
+	coefficient, value and standard error to test a theory regarding the effect of xenophobia on voting 
+	tendencies.
 
-\paragraph{Missing data imposition}
+\subsubsection{Missing data imposition}
 
 	Missing data were imposed on 6 variables according to the same strategy described in \ref{sub_missing}.
-	The missing values target variables are $y_1$ and $y_2$, the two dependent variables in models 
-	\ref{eqn:lm1} and \ref{eqn:lm2}, and
-	religiosity ($x_{1,1}$ in model \ref{eqn:lm1}, and part of $X_{-1,2}$ in model \ref{eqn:lm2}) 
-	and the three items making up the nativist attitudes scale (focal predictor $x_{1,2}$ in the second model).
+	The variables target of missing value imposition are $y_1$ and $y_2$, the two dependent variables in models 
+	\ref{eqn:lm1} and \ref{eqn:lm2}, religiosity ($x_{1,1}$ in model \ref{eqn:lm1}, and part of $X_{-1,2}$ in 
+	model \ref{eqn:lm2}), and the three items making up the nativist attitudes scale (focal predictor $x_{1,2}$ 
+	in the second model).
 
 	The response model form is the same as in equation \ref{eqn:rm} and 3 variables were included in $\tilde{X}$: 
 	age, education, and an item measuring trust in new people. 
-	These variables plausibly influence response tendencies in participants: 
+	These aspects may plausibly influence response tendencies in participants: 
 	older people usually have higher item non-response rates than younger people;
 	lower educated people tend to have higher item non-response rates than higher educated people;
 	people with less trust in strangers are assumed to have higher item non-response tendency as they
@@ -121,7 +123,8 @@ following steps 500 times ($R = 500$):
 \paragraph{Conditions}
 	There were only two conditions for the resampling study: low and high dimensional imputation.
 	As the number of predictors in the data is fixed ($p = 243$), the dimensionality of the data is
-	changed by defining different sizes for the sample taken from the pseudo-fully observed data.
+	changed by defining different sizes for the sample taken from the pseudo-fully observed data in
+	step 1 of the procedure outlined in section \ref{resProc}.
 	We chose only two values for $n$, namely $1000$ and $300$, corresponding to the low and high 
 	dimensional condition.
 
@@ -129,31 +132,33 @@ following steps 500 times ($R = 500$):
 \subsubsection{Bias}
 
 	\paragraph{PRB}
-	Figure \ref{fig:exp4bias} reports the PRB for the regression coefficients $\beta_{1,1}$ and $\beta_{1,2}$.
+	Figure \ref{fig:exp4bias} reports the PRB for the regression coefficients $\beta_{1,1}$ and $\beta_{1,2}$, 
+	in model \ref{eqn:lm1} and \ref{eqn:lm2} (henceforth model 1 and 2), respectively.
 	Most of the MI methods result in negligible biases ($PRB < 10\%$) for both parameters in all conditions.
 	The only two exceptions are bridge and MI-RF: 
-	the former is very competitive in condition (a), the low dimensional one, but leads to extreme bias in 
-	the high dimensional condition (b) for both parameters; 
+	the former is very competitive in condition 1, the low dimensional one, but leads to extreme bias in 
+	the high dimensional condition 2 for both parameters; 
 	the latter provides the highest PRB among the MI methods across the board, and it is consistently outperformed 
 	even by Complete Case analysis.
 
 	DURR and IURR are giving inconsequential biases for both parameters in all conditions, with PRBs that are
-	often at least half in size as the ones obtain with the other methods.
+	often at least half in size as the ones obtain with the other methods, even outperforming MI-OP in the high 
+	dimensional condition for $\beta_{1,2}$
 
 	\paragraph{Euclidean Distance}
 	Figure \ref{fig:exp4biased} reports the Euclidean Distance between the vector of estimated regression 
-	coefficients for model \ref{eqn:lm1} and \ref{eqn:lm2}.
+	coefficients for model 1 and 2.
 
 	IURR and DURR yielded the vectors of parameters estimates that are closer to the vector of true values.
-	Their advantage over other methods is stark for model \ref{eqn:lm2} while it is less marked 
-	in model \ref{eqn:lm1} where MI-CART and Blasso perform equally well. 
-	Bridge performs better than DURR and IURR in the low dimensional condition, but shows the same extreme 
-	deterioration of performance in the high-dimensional condition as described for the single parameter of 
+	Their advantage over other methods is stark for model 2 while it is less marked in model 1, where MI-CART 
+	and Blasso perform equally well. 
+	For model 1, Bridge performs better than DURR and IURR in the low dimensional condition, but shows the same 
+	extreme deterioration of performance in the high-dimensional condition as described for the single parameter of 
 	interest case.
 
-	MI-PCA seems to struggle with bias for model \ref{eqn:lm1}, ranking last among the multiple imputation models for
+	MI-PCA seems to struggle with bias for model 1, ranking last among the multiple imputation models for
 	$d_{bias}(\bm{\theta},\bar{\hat{\bm{\theta}}})$.
-	In model \ref{eqn:lm2}, it grants a $d_{bias}(\bm{\theta},\bar{\hat{\bm{\theta}}})$ that is lower than that of 
+	In model 2, it grants a $d_{bias}(\bm{\theta},\bar{\hat{\bm{\theta}}})$ that is lower than that of 
 	tree-based methods, although not as low as DURR and IURR.
 
 \begin{figure}
@@ -181,12 +186,12 @@ following steps 500 times ($R = 500$):
 	Figure \ref{fig:exp4ci} reports the CIC for $\beta_{1,1}$ and $\beta_{1,2}$, the focal regression coefficients 
 	in the two models.
 
-	For model \ref{eqn:lm2}, both IURR and DURR remain fairly competitive with CIC close to nominal levels, but 
+	For $\beta_{1,2}$ in model 2, both IURR and DURR remain fairly competitive with CIC close to nominal levels, but 
 	the advantage they showed in terms of bias is not carried over to this criterion.
 	Both MI-PCA and Blasso provides CICs that are either equal or closer to nominal than the ones obtained with
 	IURR and DURR in almost all conditions.
 
-	For model \ref{eqn:lm1}, condition (b) shows interesting patterns: 
+	For $\beta_{1,1}$ in model 1, condition 2 shows interesting patterns: 
 	\begin{itemize}
 		\item all MI methods show signs of undercoverage with CIC smaller than the threshold value .93;
 		\item all MI methods perform \emph{worse} than Complete Case analysis, which covers the true value 
@@ -211,9 +216,9 @@ following steps 500 times ($R = 500$):
 	how the close to nominal coverage showed by CC in figure \ref{fig:exp4cied} is an artifice of the wider 
 	confidence intervals.
 
-	By a similar logic, we note that the less ideal behaviour of MI-PCA showed in figure \ref{fig:exp4cied} compared 
-	to IURR, is not due to wider or narrower confidence intervals.
-	The difference is more likely due to the larger bias that MI-PCA tends to produce (see figure 
+	By a similar logic, we note that the less ideal behaviour of MI-PCA showed in figure \ref{fig:exp4cied}, 
+	compared to IURR, is not due to wider or narrower confidence intervals.
+	The difference is more plausibly due to the larger bias that MI-PCA tends to produce (see figure 
 	\ref{fig:exp4biased}).
 
 \begin{figure}

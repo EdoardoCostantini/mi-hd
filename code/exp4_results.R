@@ -6,25 +6,24 @@
   rm(list = ls())
   source("./init_general.R")
   
-  # Result selection
+# Analysis single result
   filename <- "exp4_simOut_20201016_2341" # old
   filename <- "exp4_simOut_20201019_1344" # current one
   filename_ad500 <- "exp4_simOut_20201027_1610" # combined results from more runs
+  
+  # Current runs
   filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
+  filename <- "exp4_simOut_20201207_1134" # same seed as 20201204_2121, but next 500 samples
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))
-  
-  # Describe run
-  length(out) - 3
-  out$parms$seed
-  out$parms$missType
-  out$parms$b_int
-  out$parms$iters
-  
-  # or in combine a larger run in two parts
-  out_pt1 <- readRDS(paste0("../output/", filename, ".rds"))
-  out_pt2 <- readRDS(paste0("../output/", filename_ad500, ".rds"))
+
+## Join multiple results
+  filename1 <- "exp4_simOut_20201204_2121"
+  filename2 <- "exp4_simOut_20201207_1134"
+  filename <- "exp4_simOut_2020120704" # to save the output
+  out_pt1 <- readRDS(paste0("../output/", filename1, ".rds"))
+  out_pt2 <- readRDS(paste0("../output/", filename2, ".rds"))
   
   # check they were different
   out_pt1[[1]]$`cond_1000_1e-04`$m1_EST$DURR_la
@@ -34,16 +33,20 @@
   out_pt2[[400]]$`cond_1000_1e-04`$m1_EST$DURR_la
   
   # Put together
-  out <- c(out_pt1[-c(501:502)], out_pt2)
-  
-  # fix parms that need to be fixed
-  out$parms$dt_rep <- length(out) - 2
+  out <- c(out_pt1[-c(501:length(out_pt1))], 
+           out_pt2[-c(501:length(out_pt2))])
 
-# Check presence
-  out[[1]]
-  names(out[[1]])
-  out$conds
+  # fix parms that need to be fixed
+  dt_reps_true <- length(out)
+  out$parms <- out_pt1$parms
+  out$conds <- out_pt1$conds
+  out$parms$dt_rep <- dt_reps_true
   
+  
+  # append info from single runs
+  out$info <- list(out_pt1 = out_pt1[c(501:length(out_pt1))],
+                   out_pt2 = out_pt2[c(501:length(out_pt2))])
+
 # Time Analyses -----------------------------------------------------------
 
   out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)

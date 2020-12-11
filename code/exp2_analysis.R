@@ -516,10 +516,17 @@
          arrangeGrob(p1, p2, p3, ncol = 3))
   
 # > Bias (Facet grid) -----------------------------------------------------
-  
+  meth_compare = rev(c("DURR_la", "IURR_la", 
+                       "blasso", "bridge",
+                       "MI_PCA",
+                       "MI_CART", "MI_RF", 
+                       "missFor", 
+                       "CC",
+                       "MI_OP"))
+  conds_select <- 1:4
   # Means
   pt.1 <- plot_fg(dt = lapply(1:length(res$semR),
-                            function(x) data.frame( res$semR[[x]]$bias_sd))[1:4],
+                            function(x) data.frame( res$semR[[x]]$bias_sd))[conds_select],
                 type = "bias_sd",
                 parPlot = list(means = 1:10),
                 dt_reps = 500,
@@ -528,14 +535,10 @@
                 plot_cond = NULL,
                 plot_name = NULL,
                 y_axLab = TRUE,
-                meth_compare = rev(c("DURR_la", "IURR_la", 
-                                     "blasso", "bridge",
-                                     "MI_PCA",
-                                     "MI_CART", "MI_RF", 
-                                     "missFor", "CC")))
+                meth_compare = meth_compare)
   # Var Cova
   pt.2 <- plot_fg(dt = lapply(1:length(res$semR),
-                            function(x) data.frame( res$semR[[x]]$bias_per))[1:4],
+                            function(x) data.frame( res$semR[[x]]$bias_per))[conds_select],
                 type = "bias",
                 parPlot = list(variances = 11:20,
                                covariances = 21:65),
@@ -545,11 +548,7 @@
                 plot_cond = NULL,
                 plot_name = NULL,
                 y_axLab = TRUE,
-                meth_compare = rev(c("DURR_la", "IURR_la", 
-                                     "blasso", "bridge",
-                                     "MI_PCA",
-                                     "MI_CART", "MI_RF", 
-                                     "missFor", "CC")))
+                meth_compare = meth_compare)
   
   pf <- cowplot::ggdraw() +
     cowplot::draw_plot(pt.1, 
@@ -559,7 +558,10 @@
                        x = 0, y = 0, 
                        width = 1, height = .66666666)
   pf
-  ggsave(file  = "~/Desktop/exp2_semR_bias_sd_14.pdf",
+  ggsave(file = paste0("../output/graphs/",
+                       "exp2_semR_bias_sd_",
+                       paste0(range(conds_select), collapse = ""),
+                       ".pdf"),
          width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)
@@ -631,8 +633,16 @@
          arrangeGrob(p1, p2, p3, ncol = 3))
     
   ## > CI (Facet grid) #####
+  meth_compare = rev(c("DURR_la", "IURR_la", 
+                       "blasso", "bridge",
+                       "MI_PCA",
+                       "MI_CART", "MI_RF", 
+                       "missFor", 
+                       "CC",
+                       "MI_OP"))
+  conds_select <- 5:8
   pf <- plot_fg(dt = lapply(1:length(res$semR),
-                            function(x) data.frame( res$semR[[x]]$ci_cov))[1:4],
+                            function(x) data.frame( res$semR[[x]]$ci_cov))[conds_select],
                 type = "ci",
                 parPlot = list(means = 1:10,
                                variances = 11:20,
@@ -643,13 +653,12 @@
                 plot_cond = NULL,
                 plot_name = NULL,
                 y_axLab = TRUE,
-                meth_compare = rev(c("DURR_la", "IURR_la", 
-                                     "blasso", "bridge",
-                                     "MI_PCA",
-                                     "MI_CART", "MI_RF", 
-                                     "missFor", "CC")))
+                meth_compare = meth_compare)
   pf
-  ggsave(file  = "~/Desktop/exp2_semR_ci_14.pdf",
+  ggsave(file = paste0("../output/graphs/",
+                       "exp2_semR_ci_",
+                       paste0(range(conds_select), collapse = ""),
+                       ".pdf"),
          width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)
@@ -680,6 +689,14 @@
          arrangeGrob(p1, ncol = 1))
   
   ## > CFA (Facet grid) #####
+  meth_compare = rev(c("DURR_la", "IURR_la", 
+                       "blasso", "bridge",
+                       "MI_PCA",
+                       "MI_CART", "MI_RF", 
+                       "missFor", 
+                       "CC",
+                       "MI_OP"))
+  
   pt.1 <- plot_fg(dt = lapply(1:length(res$CFA),
                             function(x) data.frame( res$CFA[[x]]$bias_per))[1:4],
                 type = "bias",
@@ -690,11 +707,7 @@
                 plot_cond = NULL,
                 plot_name = NULL,
                 y_axLab = TRUE,
-                meth_compare = rev(c("DURR_la", "IURR_la", 
-                                     "blasso", "bridge",
-                                     "MI_PCA",
-                                     "MI_CART", "MI_RF", 
-                                     "missFor", "CC")))
+                meth_compare = meth_compare)
   
   pt.2 <- plot_fg(dt = lapply(1:length(res$CFA),
                             function(x) data.frame( res$CFA[[x]]$bias_per))[5:8],
@@ -706,11 +719,7 @@
                 plot_cond = NULL,
                 plot_name = NULL,
                 y_axLab = TRUE,
-                meth_compare = rev(c("DURR_la", "IURR_la", 
-                                     "blasso", "bridge",
-                                     "MI_PCA",
-                                     "MI_CART", "MI_RF", 
-                                     "missFor", "CC")))
+                meth_compare = meth_compare)
   pf <- cowplot::ggdraw() +
     cowplot::draw_plot(pt.1, 
                        x = 0, y = .5, 
@@ -723,7 +732,7 @@
                              y = c(1, .5), 
                              size = 5,
                              fontface = "bold")
-  ggsave(file  = "~/Desktop/exp2_CFA_lambda_BPR.pdf",
+  ggsave(file = "../output/graphs/exp2_CFA_lambda_BPR.pdf",
          width = sp_width*4, height = sp_height*2,
          units = "cm",
          pf)

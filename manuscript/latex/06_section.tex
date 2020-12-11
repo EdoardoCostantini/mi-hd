@@ -1,25 +1,26 @@
 \section{Conclusions}
 
 \paragraph{Recommendations / Take-home message}
-	Give recommendations / take-home message in one or two paragraphs
+	[UNFINISHED] Give recommendations / take-home message in one or two paragraphs
 
 \paragraph{Limitations and future directions}
-	Describe limitation with specific focus on what are your planned next steps
-	in this line of research.
 
 	As this work aimed at comparing current implementations of different methods, some limitations
-	to the scope of the simulation studies were imposed by the current implementation of the different
-	methods.
-	Blasso has not been formally developed for multi-categorical variables, which limited the study 
-	to work with missing values on variables that aare either continuous in nature or usually considered
+	to the scope of the simulation and resampling studies were imposed by the current state of development of 
+	the different methods.
+	For example, both IURR/DURR and MI-PCA allow imputation of data with any distribution:
+	IURR and DURR have already been discussed for categorical data imputation,
+	and MI-PCA can be performed with any standard imputation model for categorical data.
+	Blasso has not been formally developed for multi-categorical imputation target variables yet, which limited 
+	the study to work with missing values on variables that are either continuous in nature or usually considered
 	as such in practice.
-	Furthermore, the interesting inclusion of interactions dn squared terms in the imputation models was
-	not explored as their inclusion in the current MI-PCA approach is not developed to the same extent as 
-	in the other methods.
+	Furthermore, the interesting inclusion of interactions and squared terms in the imputation models was
+	not explored as their inclusion as not been developed to the same extent across the different methods 
 	
-	The resampling study compared results only for a handful of analysis models making its results difficult
-	to generalize.
+	[UNFINISHED] The resampling study compared results only for two analysis models and showed some variation in
+	which methods were top performer.
 
+\iffalse 
 	Some promising methods were excluded because their current implementation did not allow to meet
 	the goals of this study.
 	For example, BART is currently implemented to impute the covariates for a given analysis model.
@@ -30,3 +31,4 @@
 	be run is considered by the authors of this paper as an undesirable feature: in general, for imputation
 	of social surveys there is a preference for imputation models that can be suggested independently of
 	the type and formulation of the analysis model.
+\fi

@@ -13,7 +13,11 @@
   filename <- "exp4_simOut_20201016_2341" # old
   filename <- "exp4_simOut_20201019_1344" # current one
   filename <- "exp4_simOut_20201027_1610" # combined results from more runs
+  
+  # Current runs
   filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
+  filename <- "exp4_simOut_20201207_1134" # same seed as 20201204_2121, but next 500 samples
+  filename <- "exp4_simOut_2020120704" # joined 20201204_2121 and 20201207_1134
   
   # Read R object
   res <- readRDS(paste0("../output/", filename, "_res.rds"))
@@ -140,12 +144,13 @@
 
   # > Bias (Facet) ####
   # Which Methods do you want to plot
-  meths <- c("DURR_la", "IURR_la", 
-             "blasso", "bridge",
-             "MI_PCA",
-             "MI_CART", "MI_RF", 
-             "missFor", 
-             "mean", "CC")
+  meths = rev(c("DURR_la", "IURR_la", 
+                "blasso", "bridge",
+                "MI_PCA",
+                "MI_CART", "MI_RF", 
+                "missFor", 
+                "CC",
+                "MI_OP"))
   pf <- plot_exp4(dt = list(lapply(1:length(res$m1),
                                    function(x) res$m1[[x]]$bias_per["rel", ]),
                             lapply(1:length(res$m2),
@@ -201,12 +206,14 @@
   
   # > CI (Facet) ####
   # Which Methods do you want to plot
-  meths <- c("DURR_la", "IURR_la", 
-             "blasso", "bridge",
-             "MI_PCA",
-             "MI_CART", "MI_RF", 
-             "missFor", 
-             "mean", "CC", "GS")
+  meths = rev(c("DURR_la", "IURR_la", 
+                "blasso", "bridge",
+                "MI_PCA",
+                "MI_CART", "MI_RF", 
+                "missFor", 
+                "CC",
+                "MI_OP",
+                "GS"))
   
   pf <- plot_exp4(dt = list(lapply(1:length(res$m1),
                              function(x) res$m1[[x]]$ci_cov["rel", ]),
@@ -220,6 +227,7 @@
             bar_col = "#595959",
             meth_compare = meths,
             meth_sort = FALSE)
+  pf
   ggsave(pf, 
          file = "../output/graphs/exp4_imp_ci.pdf", 
          width = sp_width*2, height = sp_height*2,
@@ -268,12 +276,14 @@
 
   # > CIW (Facet) ####
   # Which Methods do you want to plot
-  meths <- c("DURR_la", "IURR_la", 
-             "blasso", "bridge",
-             "MI_PCA",
-             "MI_CART", "MI_RF", 
-             "missFor", 
-             "mean", "CC", "GS")
+  meths = rev(c("DURR_la", "IURR_la", 
+                "blasso", "bridge",
+                "MI_PCA",
+                "MI_CART", "MI_RF", 
+                "missFor", 
+                "CC",
+                "MI_OP",
+                "GS"))
   
   pf <- plot_exp4(dt = list(lapply(1:length(res$m1),
                              function(x) data.frame(t(colMeans(res$m1[[x]]$CIW)))),
@@ -334,12 +344,13 @@
   
   # > ED BIAS (Facet) ####
   # Which Methods do you want to plot
-  meths <- c("DURR_la", "IURR_la", 
-             "blasso", "bridge",
-             "MI_PCA",
-             "MI_CART", "MI_RF", 
-             "missFor", 
-             "mean", "CC")
+  meths = rev(c("DURR_la", "IURR_la", 
+                "blasso", "bridge",
+                "MI_PCA",
+                "MI_CART", "MI_RF", 
+                "missFor", 
+                "CC",
+                "MI_OP"))
   
   pf <- plot_exp4(dt = list(lapply(1:length(res$m1),
                              function(x) res$m1[[x]]$ed_est),
@@ -399,12 +410,14 @@
 
 # > ED CI (Facet) ####
   # Which Methods do you want to plot
-  meths <- c("DURR_la", "IURR_la", 
-             "blasso", "bridge",
-             "MI_PCA",
-             "MI_CART", "MI_RF", 
-             "missFor", 
-             "mean", "CC", "GS")
+  meths = rev(c("DURR_la", "IURR_la", 
+                "blasso", "bridge",
+                "MI_PCA",
+                "MI_CART", "MI_RF", 
+                "missFor", 
+                "CC",
+                "MI_OP",
+                "GS"))
   
   pf <- plot_exp4(dt = list(lapply(1:length(res$m1),
                              function(x) res$m1[[x]]$ed_ci),
@@ -420,7 +433,8 @@
             meth_sort = FALSE)
   
   # Save Plot
-  ggsave(file = "../output/graphs/exp4_ed_ci.pdf", pf,
+  ggsave(file = "../output/graphs/exp4_ed_ci.pdf", 
+         pf,
          width = sp_width*2, height = sp_height*2,
          units = "cm")
   
