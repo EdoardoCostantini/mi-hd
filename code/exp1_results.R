@@ -68,7 +68,7 @@
                    }
   )
   output$parms <- out$parms
-  output$conds <- conds
+  output$conds <- out$conds
     
   saveRDS(
     output, 
