@@ -7,7 +7,7 @@ rm(list = ls())
 source("./init_general.R")
 
 # Load data
-out <- readRDS("../output/exp1_cv_bridge_2020082?_????.rds")
+out <- readRDS("../output/exp1_cv_bridge_20201214_1802.rds")
 
 # Obtain conditions with cv ridge
 conds_bridge <- bridge_cv(out)

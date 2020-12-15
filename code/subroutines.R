@@ -259,9 +259,10 @@ runCell <- function(cond, parms, rep_status) {
                                  perform = parms$meth_sel$blasso)
 
   # Impute according to van Buuren Ridge
+  # Impute according to van Buuren Ridge
   imp_bridge <- impute_BRIDGE(Z = Xy_mis, 
                               O = as.data.frame(O),
-                              ridge_p = parms$ridge,
+                              ridge_p = cond$ridge,
                               parms = parms,
                               perform = parms$meth_sel$bridge)
 

@@ -166,7 +166,9 @@
   p   <- c(50, 500) # c(50, 500) # number of variables
   latent <- c(FALSE, TRUE)[1]
   pm <- c(.1, .3)
+  ridge <- c(1e-9, 1e-8, 1e-2, 1e-3) # values found w/ corssvalidation
   
   conds <- expand.grid(p, latent, pm)
     colnames(conds) <- c("p", "latent", "pm")
+  conds$ridge <- ridge
     

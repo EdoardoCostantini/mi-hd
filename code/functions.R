@@ -2483,6 +2483,407 @@ plot_exp4 <- function(dt,
   p
   return(p)
 }
+plot_exp4_coef <- function(dt, 
+                           dt_reps = 500,
+                           ci_lvl = .95,
+                           type = "ci", 
+                           plot_cond = NULL,
+                           plot_name = NULL,
+                           bar_col = "#595959",
+                           meth_compare,
+                           meth_sort = FALSE) {
+  
+  # Function Inputs
+  ## New Input
+  # dt = lapply(1:length(res$m1),
+  #                  function(x) res$m1[[x]]$bias_per)
+  # dt = lapply(1:length(res$m2),
+  #             function(x) res$m2[[x]]$bias_per)
+  # # CI Par interest
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) res$m1[[x]]$ci_cov["rel", ]),
+  #           lapply(1:length(res$m2),
+  #                  function(x) res$m2[[x]]$ci_cov["NatAt", ]))
+  # # Mean CIW
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) data.frame(t(colMeans(res$m1[[x]]$CIW)))),
+  #           lapply(1:length(res$m2),
+  #                  function(x) data.frame(t(colMeans(res$m2[[x]]$CIW)))))
+  # # ED
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) res$m1[[x]]$ed_est),
+  #           lapply(1:length(res$m2),
+  #                  function(x) res$m2[[x]]$ed_est))
+  # # CIED
+  # dt = list(lapply(1:length(res$m1),
+  #                  function(x) res$m1[[x]]$ed_ci),
+  #           lapply(1:length(res$m2),
+  #                  function(x) res$m2[[x]]$ed_ci))
+  ## Generic inputs
+  # dt_reps = 500
+  # ci_lvl = .95
+  # type = c("bias", "ci", "ciw", "ed")[3]
+  # dt_CIW = NULL
+  # plot_name = "Untitled"
+  # plot_cond = "(empty)"
+  # meth_compare = c("DURR_la", "IURR_la", "blasso",
+  #                  "MI_PCA", "MI_OP", "CC")
+  # meth_sort = FALSE
+  # bar_col = "#595959"
+  
+  # Put data in the correct form
+  dt_edit <- lapply(dt, function(x){
+    as.data.frame(t(abs(x[, meth_compare])))  
+  })
+  
+  # Reduce to single list
+  # dt_edit <- Reduce(c, dt_edit)
+  
+  # # Add Blank Row to improve readability
+  # dt_edit <- lapply(dt_edit, function(x){
+  #   x[nrow(x)+1,] <- -5  # add blank row to improve visualization
+  #   return(x)
+  # })
+  
+  # Get Dimensions
+  dt_dims <- lapply(dt_edit, dim)
+  
+  # Gather data within list
+  dt_edit <- lapply(dt_edit, gather)
+  
+  # Define Plotting Factors
+  dt_edit <- lapply(1:2, function(x){
+    # Conditins
+    dt_edit[[x]]$cond <- rep(c(1,2)[x], 
+        each = prod(dt_dims[[x]]))
+    # Model
+    dt_edit[[x]]$model <- rep(c(1,1)[x], 
+                             each = prod(dt_dims[[x]]))
+    # Methods
+    dt_edit[[x]]$meth <- factor(meth_compare, levels = meth_compare)
+    return(dt_edit[[x]])
+  })
+  
+  # Shape for ggplot
+  dt_edit <- lapply(dt_edit, function(x){
+    x$id <- 1:nrow(x)
+    return(x)
+  })
+  
+  # Count internal rows
+  n <- sapply(dt_edit, nrow)
+  
+  # Combine for facet
+  dt_edit <- do.call(rbind, dt_edit)
+  
+  # Plot step for labels
+  plot_step <- n[[1]]/(nrow(dt[[1]]))/2
+  plot_xbreaks <- seq(0, n[[1]], by = plot_step)[c(FALSE, TRUE)]
+  plot_xlabels <- unique(dt_edit$key)
+  plot_vlines <- seq(0, n[[1]], by = plot_step)[c(TRUE, FALSE)] + .5
+  
+  # Define Factor 1 for plot
+  n_conds <- length(dt[[1]])
+  
+  # Summary specific
+  if(type == "bias"){
+    plot_ylim   <- c(0, 50)
+    dt_edit$value[dt_edit$value > plot_ylim[2]] <- plot_ylim[2] + 1.5
+    plot_ybreaks <- c(0, 10, 20, 30, 40, 50)
+    plot_ylabels <- as.character(plot_ybreaks)
+    plot_hlines <- 10
+  }
+  
+  if(type == "ci"){
+    dt_edit$value <- dt_edit$value - 95    # Transform to a difference value
+    plot_xlim   <- c(-5, 5)                # Plot Limits (reference: 0 = .95)
+    SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps) # SE for threshold 
+    low_thr <- ((.95-SEp*2)-.95)*100
+    hig_thr <- ((.95+SEp*2)-.95)*100
+    plot_breaks <-  c(-5, low_thr, 0, hig_thr, 5)
+    plot_labels <- gsub("0", "", as.character(round((plot_breaks+95)/100, 2)))
+    plot_hlines <- 1:length(meth_compare)
+    plot_vlines <- c(-5, low_thr, hig_thr)
+  }
+  
+  if(type == "ed"){
+    plot_xlim   <- c(0, round_any(max(dt_edit[dt_edit$key != "bridge", "value"]),  
+                                  0.1, 
+                                  f = ceiling)
+    )
+    plot_breaks <- round_any(seq(plot_xlim[1], plot_xlim[2], 
+                                 length.out = 3), 0.1, f = ceiling)
+    plot_breaks <- round(seq(plot_xlim[1], plot_xlim[2], length.out = 3), 
+                         1)
+    plot_labels <- gsub("0.", ".", plot_breaks)
+    # if("GS" %in% dt_edit$key) {
+    #   plot_vlines <- dt_edit[dt_edit$key=="GS", "value"]
+    # } else {
+    plot_vlines <- NULL
+    # }
+    plot_hlines <- NULL
+  }
+  
+  if(type == "ciw"){
+    ref_max <- max(dt_edit[dt_edit$key == "CC", "value"])
+    ref_min <- min(dt_edit[dt_edit$key == "missFor", "value"])
+    plot_xlim   <- c(0, (ref_max*1.5))
+    plot_breaks <- c(0, ref_min, ref_max, ref_max*1.5)
+    plot_labels <- as.character(round(plot_breaks, 2))
+    plot_hlines <- 1:length(meth_compare)
+    plot_vlines <- NULL
+  }
+
+  # Plot
+  p <- ggplot(dt_edit, aes(x = id, y = value, group = meth)) +
+    coord_cartesian(ylim = plot_ylim) + 
+    geom_point(aes(shape = meth),
+               position = position_dodge(width=1)) + 
+    # scale_shape_manual(values=c(1:(length(meth_compare)+1))) +
+    # scale_shape_manual(values=c(1:length(meth_compare) )) +
+    # Faceting
+    facet_grid(rows = vars(model),
+               cols = vars(cond),
+               scales = "free") +
+    # X Axis
+    scale_x_continuous(breaks = plot_xbreaks,
+                       labels = plot_xlabels) +
+    geom_vline(xintercept = plot_vlines,
+               size = .375,
+               linetype = "dashed", 
+               color = "black") +
+    # Y Axis
+    scale_y_continuous(breaks = plot_ybreaks,
+                       labels = plot_ylabels) + 
+    # Horizontal lines
+    geom_hline(yintercept = plot_hlines, 
+               size = .25,
+               color = "gray") +
+    # Cosmetic
+    labs(title = element_blank(),
+         x     = element_blank(), 
+         y     = element_blank()) + 
+    theme(axis.text.x  = element_text(size = 5),
+          axis.text.y  = element_text(size = 5),
+          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
+          # Background
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          # Facet Related
+          strip.text = element_text(size = 8,
+                                    face = "plain",
+                                    margin = unit(c(.10, .10, .10, .10), "cm")) 
+    )
+  p
+  return(p)
+}
+
+plot_exp4_meth <- function(dt,
+                    type = "bias",
+                    dt_reps = 500,
+                    ci_lvl = .95,
+                    meth_compare) {
+  ## Function inputs
+  ## Generic
+  # type = "bias"
+  # ci_lvl = .95 # confidence interval level
+  # dt_reps = 500 # MCMC repetitions
+  # y_axLab = TRUE # say I want the labels
+  # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
+  #                      "MI_PCA",
+  #                      "MI_CART", "MI_RF", "missFor", "CC", "MI_OP"))
+  ## EXP 1
+  # dt = lapply(1:length(res$m1),
+  #             function(x) res$m1[[x]]$bias_per)
+  # dt = lapply(1:length(res$m1),
+  #             function(x) res$m1[[x]]$bias_raw)
+  # dt = lapply(1:length(res$m1),
+  #             function(x) res$m1[[x]]$bias_sd)
+  # dt = lapply(1:length(res$m1),
+  #             function(x) res$m1[[x]]$ci_cov)
+  # dt = lapply(1:length(res$m1),
+  #             function(x) res$m1[[x]]$CIW)
+  
+  ## Prep data for plot (take absolute value)
+  dt_preEdit <- lapply(dt, function(d){
+    abs(d[, meth_compare])
+  })
+  
+  # Sort Parms within rows
+  dt_edit <- lapply(dt_preEdit, function(x) {
+    as.data.frame(sapply(x, sort, decreasing = TRUE))
+  })
+  
+  # Make names prettier
+  dt_edit <- lapply(dt_edit, function(x){
+    colnames(x) <- sub("_la", "", colnames(x))
+    colnames(x) <- sub("_", "-", colnames(x))
+    return(x)
+  })
+  
+  # Add Blank Row to improve readability
+  dt_edit <- lapply(dt_edit, function(x){
+    x[nrow(x)+1,] <- 0  # add blank row to improve visualization  
+    return(x)
+  })
+  
+  # Count contents
+  n <- lapply(dt_edit, nrow)
+  
+  # Shape for ggplot
+  dt_edit <- lapply(dt_edit, gather)
+  dt_edit <- lapply(dt_edit, function(x){
+    x$id <- 1:nrow(x)
+    return(x)
+  })
+  n_facet <- length(dt_edit)
+  
+  # Combine for facet
+  dt_edit <- do.call(rbind, dt_edit)
+  
+  # Grid Plot Factor 1
+  conds_list <- lapply(1:2, function(x){
+    rep(1:length(dt), each = n[[x]]*length(meth_compare))
+  })
+  conds <- do.call(c, conds_list)
+
+  # Final Data prep
+  dt_edit <- cbind(dt_edit, 
+                   conds = paste0("Condition ", conds))
+  
+  # Define Step Size for all parameters sets
+  step_size   <- (
+    nrow(dt_preEdit[[1]]) + # number of parameters
+      1 # account for additional empty row
+  ) / 2 # place label in the middle
+  plot_steps <- seq(0, 
+                    (nrow(dt_preEdit[[1]])+1) *  # number of parameters + empty row
+                      ncol(dt_preEdit[[1]]), # number of methods
+                    by = step_size)
+  plot_ybreaks <- plot_steps[c(FALSE, TRUE)]    # position label skip
+  plot_hlines <- plot_steps[c(TRUE, FALSE)]  
+  
+  # Methods labels
+  plot_ylabels <- as.character(unique(dt_edit$key)) # unique for everyone
+  
+  # Ticks 
+  if(type == "bias"){
+    # Grid Plot Color based on exceeding or not PRB reference
+    excess <- ifelse(dt_edit$value >= 10, yes = "black", no = "gray")
+    dt_edit$excess <- factor(excess)
+    
+    # Plot Limits
+    plot_xlim   <- c(0, 100)
+    
+    # X axis
+    plot_xbreaks <- seq(0, 100, by = 10)
+    plot_xlabels <- as.character(plot_xbreaks)
+    plot_vlines <- c(10)
+  }
+  
+  if(type == "bias_raw"){
+    maxB <- 1 #max( abs(dt_edit$value) )
+    plot_xbreaks <- round(c(0, 1/4*maxB, maxB/2, 3/4*maxB, maxB), 1)
+    plot_xlabels <- as.character(plot_xbreaks)
+    plot_xlim   <- c(plot_xbreaks[1], plot_xbreaks[5])
+    plot_vlines <- NULL
+  }
+  
+  if(type == "bias_sd"){
+    # Grid Plot Color based on exceeding or not PRB reference
+    excess <- ifelse(dt_edit$value >= .4, yes = "black", no = "gray")
+    dt_edit$excess <- factor(excess)
+    
+    # Plot Limits
+    plot_xlim   <- c(0, 1)
+    
+    # X axis
+    plot_xbreaks <- seq(0, 1, by = .1)
+    plot_xlabels <- as.character(plot_xbreaks)
+    plot_vlines <- c(.4)
+  }
+  
+  if(type == "ci"){
+    # Redefine values as differences from target
+    dt_edit$value[dt_edit$value != 0] <- dt_edit$value[dt_edit$value != 0] - 95
+    
+    # Plot Limits (reference: 0 = .95)
+    plot_xlim   <- c(-15, 5)
+    
+    # SE for threshold 
+    SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps)
+    low_thr <- ((.95-SEp*2)-.95)*100
+    hig_thr <- ((.95+SEp*2)-.95)*100
+    
+    # Grid Plot Color based on exceeding or not PRB reference
+    excess <- ifelse(dt_edit$value >= hig_thr | dt_edit$value <= low_thr, 
+                     yes = "black", no = "gray")
+    dt_edit$excess <- factor(excess)
+    
+    # X axis
+    plot_xbreaks <- c(-15, -5, low_thr, 0, hig_thr, 5)
+    plot_xlabels <- gsub("0", "", as.character(round((plot_xbreaks+95)/100, 2)))
+    plot_vlines <- c(-5, low_thr, hig_thr)
+  }
+  
+  if(type == "ciw"){
+    plot_xlim   <- round(c(0, max(dt[[1]]$GS)*2), 0)
+    plot_xbreaks <- seq(plot_xlim[1], plot_xlim[2], by = plot_xlim[2]/4)
+    plot_xlabels <- as.character(plot_xbreaks)
+    excess <- "darkgray"
+    dt_edit$excess <- factor(excess)
+    plot_vlines <- NULL
+  }
+  
+  # Plot
+  p <- ggplot(dt_edit, aes(x = value, y = id)) +
+    # Title and axis labels
+    # labs(title = plot_name,
+    #      x     = axis.name.x, 
+    #      y     = element_blank()) +
+    theme(plot.title   = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x  = element_text(size = 5),
+          axis.text.y  = element_text(size = 5),
+          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
+          # Background
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          # Facet Related
+          strip.text = element_text(size = 8,
+                                    face = "plain",
+                                    margin = unit(c(.10, .10, .10, .10), "cm")) 
+    ) +
+    
+    # Plot Content
+    geom_segment(aes(xend = 0, 
+                     yend = id,
+                     colour = excess),
+                 size = .3) +
+    scale_colour_identity() + 
+    
+    # X Axis
+    scale_x_continuous(breaks = plot_xbreaks,
+                       labels = plot_xlabels) +
+    geom_vline(xintercept = plot_vlines,
+               size = .375,
+               linetype = "dashed", 
+               color = "black") +
+    coord_cartesian(xlim = plot_xlim) + 
+    
+    # Y axis
+    scale_y_continuous(breaks = plot_ybreaks,
+                       labels = plot_ylabels) +
+    geom_hline(yintercept = plot_hlines,
+               size = .375,
+               color = "gray") + 
+    
+    # Facet
+    facet_grid(cols = vars(conds))
+  p
+  return(p)
+}
 
 plot_time <- function(dt, 
                       plot_cond = NULL,

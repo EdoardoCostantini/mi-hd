@@ -40,7 +40,7 @@
   # Extract results per conditions
   sem_res <- lapply(1:length(out[[1]]),
                     function(x) res_sum(out, 
-                                        model = "sem", 
+                                        model = "sem",
                                         condition = x))
 
   # Show results for a given condition

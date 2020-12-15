@@ -37,7 +37,7 @@ parms$store <-  c(cond         = TRUE,
 # Itereations, repetitions, etc
 parms$dt_rep     <- 5#20
 parms$chains     <- 1 
-parms$iters      <- 5#75
+parms$iters      <- 5#70
 parms$burnin_imp <- 0#50
 parms$ndt        <- 5#10
 parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt

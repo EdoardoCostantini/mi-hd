@@ -35,6 +35,7 @@ sim_ends <- Sys.time()
 ## Append Parms and conds to out object
 out$parms <- parms
 out$conds <- conds
+out$session_info <- session_info()
 
 ## Save results
 saveRDS(out,
