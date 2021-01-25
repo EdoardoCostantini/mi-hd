@@ -12,6 +12,7 @@ dataDir <- "../output/"
 
 filename <- "exp4_cv_bridge_20201015_1558" # k btw 1e4 and 1e-6
 filename <- "exp4_cv_bridge_20201015_2037" # k btw 1e-1 and 1e-8
+filename <- "exp4_cv_bridge_20201027_1411" # k btw 500 and 1500
 
 out <- readRDS(paste0(dataDir, filename, ".rds")) 
 
@@ -21,7 +22,6 @@ range(out$conds$ridge)
 # Obtain conditions with cv ridge
 conds_bridge <- bridge_cv(out)
 conds_bridge
-
 
 # Comparisons -------------------------------------------------------------
 # Narrowing down areound condition 2 ridge penalty

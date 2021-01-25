@@ -67,11 +67,11 @@
                             lapply(1:length(res$m2),
                                    function(x) res$m2[[x]]$bias_per["NatAt", ])),
             type = "bias",
-            dt_reps = 500,
+            dt_reps = 1e3,
             ci_lvl = .95,
             plot_cond = NULL,
             plot_name = NULL,
-            bar_col = "#595959",
+            bar_col = "darkgray",
             meth_compare = meths,
             meth_sort = FALSE)
   pf
@@ -98,11 +98,11 @@
                       lapply(1:length(res$m2),
                              function(x) res$m2[[x]]$ci_cov["NatAt", ])),
             type = "ci",
-            dt_reps = 500,
+            dt_reps = 1e3,
             ci_lvl = .95,
             plot_cond = NULL,
             plot_name = NULL,
-            bar_col = "#595959",
+            bar_col = "darkgray",
             meth_compare = meths,
             meth_sort = FALSE)
   pf
@@ -141,7 +141,6 @@
          units = "cm",
          device = cairo_pdf)
   
-
 # All parameters ----------------------------------------------------------
 
   # Which Methods do you want to plot
@@ -152,28 +151,42 @@
                 "missFor", 
                 "CC",
                 "MI_OP"))
+  # Which paramters do you want to highlight in the plot?
+  par_high1 <- lapply(1:length(res$m1),
+                      function(x) res$m1[[x]]$bias_raw)
+  par_high2 <- lapply(1:length(res$m2),
+                      function(x) res$m2[[x]]$bias_raw)
+  rownames(par_high2[[1]])[par_high2[[1]]$ref < .1]
+  rownames(par_high1[[1]])[order(abs(par_high1[[1]]$ref))[1:2]]
+  rownames(par_high2[[1]])[order(abs(par_high2[[1]]$ref))[1:2]]
   
   # > Bias (Facet) ####
   pt1 <- plot_exp4_meth(dt = lapply(1:length(res$m1),
                                     function(x) res$m1[[x]]$bias_per),
                         type = "bias",
-                        dt_reps = 500,
+                        dt_reps = 1e3,
+                        focal = "rel",
+                        small.ef = "age",
                         ci_lvl = .95,
                         meth_compare = meths)
   pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
                                     function(x) res$m2[[x]]$bias_per),
                         type = "bias",
-                        dt_reps = 500,
+                        dt_reps = 1e3,
+                        focal = "NatAt",
+                        small.ef = c("countryNetherlands"),
                         ci_lvl = .95,
                         meth_compare = meths)
+  
+  # Save
   ggsave(pt1,
          file = "../output/graphs/exp4_imp_bias_allParms_m1.pdf",
-         width = sp_width*2, height = sp_height*2,
+         width = 15, height = 21,
          units = "cm",
          device = cairo_pdf)
   ggsave(pt2,
          file = "../output/graphs/exp4_imp_bias_allParms_m2.pdf",
-         width = sp_width*2, height = sp_height*2,
+         width = 15, height = 21,
          units = "cm",
          device = cairo_pdf)
 
@@ -182,22 +195,26 @@
                                     function(x) res$m1[[x]]$ci_cov),
                         type = "ci",
                         dt_reps = 1e3,
+                        focal = "rel",
+                        small.ef = c("age"),
                         ci_lvl = .95,
                         meth_compare = meths)
   pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
                                     function(x) res$m2[[x]]$ci_cov),
                         type = "ci",
                         dt_reps = 1e3,
+                        focal = "NatAt",
+                        small.ef = c("countryNetherlands"),
                         ci_lvl = .95,
                         meth_compare = meths)
   ggsave(pt1,
          file = "../output/graphs/exp4_imp_ci_allParms_m1.pdf",
-         width = sp_width*2, height = sp_height*2,
+         width = 15, height = 21,
          units = "cm",
          device = cairo_pdf)
   ggsave(pt2,
          file = "../output/graphs/exp4_imp_ci_allParms_m2.pdf",
-         width = sp_width*2, height = sp_height*2,
+         width = 15, height = 21,
          units = "cm",
          device = cairo_pdf)
   
@@ -307,6 +324,11 @@
   colnames(out_time) <- names(res[[1]])
   dt = t(out_time)
   
+  # Sanitazie names
+  colnames(dt) <- sub("_la", "", colnames(dt))
+  colnames(dt) <- sub("_", "-", colnames(dt))
+  rownames(dt) <- c("Condition 1", "Condition 2")
+  
   # Get Plot
   pf <- plot_time(dt = t(out_time), 
             plot_cond = NULL,
@@ -321,3 +343,8 @@
          file = "../output/graphs/exp4_time.pdf", 
          width = sp_width*2, height = sp_height*1,
          units = "cm")
+
+  # Table
+  xtable(round(dt, 1), type = "latex")
+  
+  

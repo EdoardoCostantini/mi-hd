@@ -212,3 +212,43 @@ hist(sort(missPat[-nrow(missPat), ncol(missPat)]/ncol(missPat)),
 ## Compute covariance coverage:
 cc <- mice::md.pairs(int.dt.fl)$rr / nrow(int.dt.fl)
 unique(cc[cc < .80 & cc != 0])
+
+
+# Matrix Design -----------------------------------------------------------
+
+rm(list=ls())
+source("./init_general.R")
+source("./exp4_init.R")
+
+# Load Data Variables
+  data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
+  # Clean Variable Names
+  EVS_vars <- gsub("_(.*)", "", colnames(data_source))
+
+# Load Variable-Block legend
+  X <- read.csv("~/Data/EVS2017/documents/ZA7500_vars_blcok_membership.csv",
+           header = TRUE)
+  class(X) # check type
+  
+  # Clean Block names
+  X$Variable <- tolower(trimws(as.character(X$Variable)))
+  
+# Obtain Variables Block Classification
+  var_class <- data.frame(Variable = X$Variable[X$Variable %in% EVS_vars],
+                          Block = X$Block[X$Variable %in% EVS_vars])
+  extra <- data.frame(Variable = EVS_vars[!EVS_vars %in% X$Variable],
+                      Block = c("Core","Core","Core","Core","Core"))
+  var_class_f <- rbind(var_class, extra)
+
+# Clean Data
+  var_class_f$Variable <- as.character(var_class_f$Variable)
+  var_class_f$Block <- droplevels(var_class_f$Block)
+  var_class_f$Block <- factor(var_class_f$Block, levels = c("Core", "A", "B", "C", "D"))
+  
+  table(var_class_f$Block)
+  
+## Data ------------------------------------------------------------------ ##
+# Gen one fully-obs data
+Xy <- data_source[sample(1:nrow(data_source),
+                         cond$n,
+                         replace = TRUE), ]

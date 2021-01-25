@@ -21,7 +21,8 @@
 \usepackage[round]{natbib} 					% for better apalike citation style
 \usepackage{multirow} 						% for multirow tables
 \usepackage{graphicx}						% to resize tables
-\usepackage{url}            % simple URL typesetting
+\usepackage{rotating}						% to rotate pictures
+\usepackage{url}            					% simple URL typesetting
 
 % Misc (not sure I need)
 \usepackage[utf8]{inputenc} % allow utf-8 input
@@ -50,8 +51,25 @@
 \newcommand{\pathFIG}{../../output/graphs}
 \newcommand{\pathBIB}{../../../statsLib}
 
+% Macros
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newenvironment{rotatepage} % used to rotate pages in the output keeping relative orientation of text
+    {\clearpage\pagebreak[4]\global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 90}}%
+    {\clearpage\pagebreak[4]\global\pdfpageattr\expandafter{\the\pdfpageattr/Rotate 0}}%
+
 \title{High Dimensional Imputation for the Social Sciences\\ \Large A Comparison of State-of-the-Art Methods}
-\author{Edoardo Costantini}
+\author{
+  Costantini, Edoardo\\
+  \small\texttt{e.costantini@tilburguniversity.edu}
+  \and
+  Lang, Kyle M.\\
+  \small\texttt{k.m.lang@tilburguniversity.edu}
+  \and  
+  Reeskens, Tim \\
+  \and  
+  Sijtsma, Klaas\\
+}
+%\author{Edoardo Costantini, Kyle M. Lang, Tim Reeskens, Klaas Sijtsma}
 
 \begin{document}
 
@@ -102,11 +120,14 @@
 \bibliography{
 	\pathBIB/missingData/bibtex/papers,
 	\pathBIB/missingData/bibtex/books,
+	\pathBIB/missingData/bibtex/software,
 	\pathBIB/bayesStats/bibtex/papers,
 	\pathBIB/programming/bibtex/papers,
 	\pathBIB/survey/bibtex/data,
 	\pathBIB/survey/bibtex/studies,
-	\pathBIB/statsLearn/bibtex/papers
+	\pathBIB/statsLearn/bibtex/books,	
+	\pathBIB/statsLearn/bibtex/papers,
+	\pathBIB/statsLearn/bibtex/software
 	}
 
 % Compile strategy 1:

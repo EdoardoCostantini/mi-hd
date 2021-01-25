@@ -135,14 +135,23 @@
   set.seed(20200805)
   # parms$n <- 1e3 # asimp
   cond <- data.frame(lv = 10, pm = .1, fl = "high")
-  
-  Xy <- simData_lv(parms, cond)
-  items <- colnames(Xy$dat)
-  CFA_model <- CFA_mod_wirte(Xy$dat, 3, parms)
-  
-  # Example CFA fit
-  fit   <- cfa(CFA_model, data = Xy$dat, std.lv = TRUE)
-  summary(fit, fit.measures = TRUE, standardized = TRUE)
+  reps <- 1e3
+  output <- data.frame(cfi = NA, tli = NA, rmsea = NA)
+  for (r in 1:reps) {
+    Xy <- simData_lv(parms, cond)
+    items <- colnames(Xy$dat)
+    CFA_model <- CFA_mod_wirte(Xy$dat, 3, parms)
+    
+    # Example CFA fit
+    fit   <- cfa(CFA_model, data = Xy$dat, std.lv = TRUE)
+    
+    # Extract Fit indices
+    fit.out <- summary(fit, fit.measures = TRUE, standardized = TRUE)
+    
+    # Store them together
+    output[r, ] <- fit.out$FIT[c("cfi", "tli", "rmsea", "rmsea.pvalue")]
+  }
+  colMeans(output)
   # CFI (Comparative fit index): Measures whether the model fits the data 
   #   better than a more restricted baseline model. Higher is better, 
   #   with okay fit > .9.
@@ -158,6 +167,50 @@
   CFA_par <- parameterEstimates(fit, 
                                 se = F, zstat = F, pvalue = F, ci = F)
   CFA_par[1:10, ]
+  
+# CFA: Factor Loadings Effects --------------------------------------------
+# What do high / low factor loadings mean for items measuring the same
+# construct? We suspect that high factor loadings mean that items are 
+# duplicates of each other, so they are very highly correlated and 
+# probably good at imputation
+
+  rm(list=ls())
+  source("./init_general.R")
+  source("./exp2_init.R")
+  
+  set.seed(20200805)
+  
+  # Set up conditions to study
+  cond_high <- data.frame(lv = 10, pm = .1, 
+                          fl = "high") # key difference!
+  cond_low <- data.frame(lv = 10, pm = .1, 
+                         fl = "low")
+  
+  # Create Storing objects
+  store_high <- list()
+  store_low <- list()
+  
+  # Repetitions
+  reps <- 1e3
+  
+  # Perform Study
+  for (r in 1:reps) {
+    # Gen data
+    Xy_high <- simData_lv(parms, cond_high)
+    Xy_low <- simData_lv(parms, cond_low)
+    
+    # Store element of interest
+    store_low[[r]] <- rbind(cor(Xy_low$dat[1:10][, 1:5]), 
+                            cor(Xy_low$dat[1:10][, 6:10]))
+    store_high[[r]] <- rbind(cor(Xy_high$dat[1:10][, 1:5]), 
+                             cor(Xy_high$dat[1:10][, 6:10]))
+  }
+  
+  # Result
+  round(Reduce('+', store_low)/reps, 3)
+  round(Reduce('+', store_high)/reps, 3)
+  # Comment: Items measuring the same construct are more highly correlated
+  #          so imputations will definetly be stronger if we use them!
   
 # CFA: unbiased estiamtes -------------------------------------------------
 

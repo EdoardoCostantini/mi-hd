@@ -99,7 +99,7 @@ simData_lv <- function(parms, cond){
   Phi <- Phi * sqrt(parms$lv_var) * sqrt(parms$lv_var)
   
   # Factor loadings (random factor)
-# (2) Sample from unif .7 .8, all different
+# (2) Sample from unif
   if(cond$fl == "none"){
     lambda <- rep(0, n_it_tot)
   } else {
@@ -343,3 +343,82 @@ imposeMiss_evs <- function(dat_in, parms, cond){
   # Result
   return( dat_out )
 }
+
+# Matrix Design Version
+  imposeMiss_evs_MD <- function(dat_in, md_pat, parms, cond){
+    ## Description
+    # Given a fully observed dataset and a param object containing the regression
+    # coefficients of the model to impose missingness, it returns a version of
+    # the original data with imposed missingness on all the variables indicated
+    # as target int parms$z_m_id
+    ## Example Inputs
+    # cond <- conds[1,]
+    # cond$n <- 2e3
+    # data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
+    # dat_in   <- data_source[sample(1:nrow(data_source),
+    #                                cond$n,
+    #                                replace = TRUE), ]
+    # md_pat <- readRDS("../data/exp4_EVS2017_md.rds")
+    
+    # Body
+    # Define non-response vector
+    dat_out <- dat_in
+    rm_x    <- dat_in[, parms$rm_x]
+    
+    # Recode percieved threat from immigrants 1 = low, 10 = high
+    # rm_x[,1] <- match(rm_x[,1], max(rm_x[,1]):min(rm_x[,1]) )
+    
+    # Compute stuff
+    for (i in 1:parms$zm_n) {
+      nR <- simMissingness(pm    = runif(1, parms$pm[1], parms$pm[2]),
+                           data  = rm_x,
+                           preds = parms$rm_x,
+                           type  = parms$missType,
+                           beta  = parms$auxWts)
+      
+      # Fill in NAs
+      dat_out[nR, parms$z_m_id[i]] <- NA
+    }
+    
+    # Impose MCARù
+    # Assign individuals to either 1 of 6 situations
+    situations <- paste0("s", 1:6)
+    MD_block <- NULL
+    for (i in 1:cond$n) {
+      MD_block[[i]] <- sample(situations, 1)
+    }
+    table(MD_block)
+    
+    # Attribute Missingness Pattern
+    missdesc <- list(s1 = c("C", "D"),
+                     s2 = c("B", "D"),
+                     s3 = c("B", "C"),
+                     s4 = c("A", "D"),
+                     s5 = c("A", "C"),
+                     s6 = c("A", "B"))
+    
+    for (i in 1:6) {
+      colIndex <- var_class_f$Block %in% missdesc[[i]]
+      dat_out[MD_block == situations[i], var_class_f$Block %in% missdesc[[i]]] <- NA
+    }
+    
+    # Order For plot
+    dat_help <- cbind(dat_out, MD_block)
+    dat_out
+    length(var_class_f$Block)
+    dim(dat_out)
+    dat_help <- dat_out[order(MD_block), order(var_class_f$Block)]
+    dat_help <- dat_help[order(dat_help$MD_block), order(var_class_f$Block)]
+    
+    # Visual Check
+    library('plot.matrix')
+
+    plot(as.matrix(!is.na(dat_help)),
+         breaks = c(TRUE, FALSE),
+         col = c('black', 'white'))
+    
+    
+    # Result
+    return( dat_out )
+  }
+

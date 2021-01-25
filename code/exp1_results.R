@@ -5,27 +5,39 @@
   rm(list = ls())
   library(xtable)
   source("./init_general.R")
-  
-  # Checks
-  # filename <- "sim_res_20200801_1620" # the 750 data reps and 100 iters run
-  # 20200715 Correct
-  # filename <- "sim_res_20200710_1019" # first submision
-  # Current Correct
-  
-  # "exp1_simOut_20200801_1620"
-  filename <- c("sim_res_20200710_1019",
-                "exp1_simOut_20200731_1735", 
-                "exp1_simOut_20200801_1620",
-                "exp1_simOut_20201130_1006")[4]# <- CURRENT
-  # Result 1 is the one used for first submission to EAM
-  # Result 2 and 3 corrected for MNAR issue. They are equivalent, but
-  # second file has more repetitions (500 vs 750)
-  # Result 4 is the run with 1e3 iterations directly. Most Up-to-date 
+
+## Single Run
+  filename <- c("exp1_simOut_20200801_1620", # 750 iterations
+                "exp1_simOut_20201130_1006")[2]# 1e3 iterations
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))
   out$parms
+  out$conds
   out$session_info
+  
+## Join multiple results
+  filename1 <- "exp1_simOut_20201215_1018"
+  filename2 <- "exp1_simOut_20201216_1645"
+  filename <- "exp1_simOut_2020121516" # to save the output
+  
+  # Read R objects
+  out_pt1 <- readRDS(paste0("../output/", filename1, ".rds"))
+  out_pt2 <- readRDS(paste0("../output/", filename2, ".rds"))
+  
+  # Put together
+  out <- c(out_pt1[-c((out_pt1$parms$dt_rep+1):length(out_pt1))], 
+           out_pt2[-c((out_pt1$parms$dt_rep+1):length(out_pt2))])
+  
+  # fix parms that need to be fixed
+  dt_reps_true <- length(out)
+  out$parms <- out_pt1$parms
+  out$conds <- out_pt1$conds
+  out$parms$dt_rep <- dt_reps_true
+  
+  # append info from single runs
+  out$info <- list(out_pt1 = out_pt1[c(501:length(out_pt1))],
+                   out_pt2 = out_pt2[c(501:length(out_pt2))])
 
 # Time Analyses -----------------------------------------------------------
 

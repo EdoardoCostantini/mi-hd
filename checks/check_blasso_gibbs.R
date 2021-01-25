@@ -8,10 +8,10 @@
 ###           equivalent to drawing from each conditional distirbtuion.
 
 rm(list=ls())
+source("./init_general.R")
 set.seed(20200617)
 
 # Get data
-
 N <- 500
 p <- 10
 
@@ -49,12 +49,20 @@ dir_blasso <- blasso::blasso.vs(y, X,
                                 beta  = B0, 
                                 beta.prior = "scaled", 
                                 sig2 = sigma20, sig2prior = c(a = .1 , b = .1),
-                                tau = tau0, tauprior=c(r = 1, s = 1), 
+                                tau = tau0, tauprior=c(r = 1, s = 1),
                                 phi = phi0, phiprior=c(g = 1, h = 1),
                                 fixsig = FALSE, fixtau = FALSE, fixphi = FALSE)
 
-
 round(colMeans(dir_blasso$beta), 3)
+
+plot(1:iters, dir_blasso$beta[, 1], type = "l",
+     main = paste0("b", 1:p)[1],
+     xlab = "iterations",
+     ylab = "")
+plot(density(dir_blasso$beta[, 1]),
+     main = paste0("b", 1:p)[1],
+     xlab = "coef values",
+     ylab = "density")
 
 par(mfrow=c(3,2))
 lapply(1:ncol(dir_blasso$beta), 

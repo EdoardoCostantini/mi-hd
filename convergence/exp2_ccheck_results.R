@@ -34,24 +34,26 @@ iters_range <- 1:250 # which set of iterations
 y_range <- c(-1, .5)
 
 # DURR_la (50-100 good for all)
-exp_dat <- 6
+exp_dat <- 2
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[1], 
                dat = exp_dat, 
                y_range = y_range, 
                iters = iters_range)
+
 # IURR_la (50-100 good for all)
 exp_dat <- 3
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[2], 
                dat = exp_dat, 
-               y_range = y_range, iters = 1:1e3)
+               y_range = y_range, iters = iters_range)
+
 # blasso (try 1000 iterations)
-exp_dat <- 5
+exp_dat <- 3
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[3], 
                dat = exp_dat, 
-               y_range = y_range, iters = 1500:2000)
+               y_range = y_range, iters = 1:2000)
 # Good after 500 for most. Some get better closer to 1e3
 # exp_dat <- 3 - z3, z5 is dificult but seems to go well after 1250 iterations
 # exp_dat <- 8 struggles with z3

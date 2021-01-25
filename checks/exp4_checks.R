@@ -28,57 +28,156 @@ round(summary(mod2)$adj.r.squared*100, 1)
 round(summary(mod2)$coefficients, 3)[, c(1:2, 4)]
 nrow(summary(mod2)$coefficients)
 
-# CIR Full data -----------------------------------------------------------
-
+# CIC Full data -----------------------------------------------------------
+  
   rm(list=ls())
   source("./init_general.R")
   source("./exp4_init.R")
 
-# Select 1 condition
-  cond <- conds[2, ]
+  # Single Run function
+  runCell <- function(rp, data_source, cond, reps = 1e3) {
+    ## Function for parallel run of real data outcomes
+    ## Example Inputs
+    # data_source = readRDS("../data/exp4_EVS2017_full.rds")$full
+    # cond = conds[2, ]
+    # reps = 1e3
+    
+    # Storing: Estimates list
+    store_pars_m1 <- NULL
+    store_pars_m2 <- NULL
+    # Storing: Confidence interval list
+    store_CI_m1 <- NULL
+    store_CI_m2 <- NULL
+    # Storing: Confidence interval Coverage
+    store_CIC_m1 <- NULL
+    store_CIC_m2 <- NULL
+    
+    # Perform check
+    for (r in 1:reps) {
+      # Status Update
+      print(paste0(Sys.time(), " - ", r/reps*100, "% done"))
+      
+      # Gen one fully-obs data
+      Xy <- data_source[sample(1:nrow(data_source),
+                               cond$n,
+                               replace = TRUE), ]
+      # Prepare for fit
+      si_data <- list(GS = Xy)
+      
+      ## Fit --------------------------------------------------------------------- ##
+      # Fit Models
+      m1_sn <- exp4_fit_mod1(si_data)
+      m2_sn <- exp4_fit_mod2(si_data)
   
-# get dataset
-  set.seed(20200805)
-  data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
-  reps <- 1e3
-  m1_CI <- matrix(0, ncol = 2, nrow = 13)
-  m2_CI <- matrix(0, ncol = 2, nrow = 14)
-
-# Store results
-  mpars <- cov_o <- list(m1 = matrix(NA, nrow = reps, ncol = 13),
-                         m2 = matrix(NA, nrow = reps, ncol = 14))
-  CI <- NULL
-# Perform check
-for (r in 1:reps) {
-  # Gen one fully-obs data
-  Xy <- data_source[sample(1:nrow(data_source),
-                           cond$n,
-                           replace = TRUE), ]
-  # Fit model 1 and 2
-  si_data <- list(GS = Xy)
-  
-  ## Fit --------------------------------------------------------------------- ##
-  # model 1
-  m1_sn <- exp4_fit_mod1(si_data)
-    mpars[[1]][r,]  <- lapply(m1_sn, coef)$GS
-  m2_sn <- exp4_fit_mod2(si_data)
-    mpars[[2]][r,]  <- lapply(m2_sn, coef)$GS
-  
-  # Get Confidence intervals
-  CI[[r]] <- lapply(c(m1 = m1_sn, m2 = m2_sn), confint)
-}
-  
-  # Obtain CIR results
-  mpar_true <- lapply(mpars, colMeans)
-  for (r in 1:reps) {
-    cov_o[[1]][r, ] <- CI[[r]]$m1.GS[, 1] < mpar_true$m1 & mpar_true$m1 < CI[[r]]$m1.GS[, 2]
-    cov_o[[2]][r, ] <- CI[[r]]$m2.GS[, 1] < mpar_true$m2 & mpar_true$m2 < CI[[r]]$m2.GS[, 2]
+      # Extract Estimates
+      store_pars_m1[[r]] <- lapply(m1_sn, coef)$GS
+      store_pars_m2[[r]] <- lapply(m2_sn, coef)$GS
+      
+      # Get Confidence intervals
+      store_CI_m1[[r]] <- confint(m1_sn$GS)
+      store_CI_m2[[r]] <- confint(m2_sn$GS)
+    }
+    
+    # Gather stored estimates and compute average (gives TRUE PARAMTER VALUES)
+    pars_m1_true <- colMeans(do.call(rbind, store_pars_m1))
+    pars_m2_true <- colMeans(do.call(rbind, store_pars_m2))
+    
+    # Single CI Coverage (Does this estimated CI cover "true" value?)
+    for (r in 1:reps) {
+      store_CIC_m1[[r]] <- store_CI_m1[[r]][, 1] < pars_m1_true & 
+                            pars_m1_true < store_CI_m1[[r]][, 2]
+      store_CIC_m2[[r]] <- store_CI_m2[[r]][, 1] < pars_m2_true & 
+                            pars_m2_true < store_CI_m2[[r]][, 2]
+    }
+    
+    # Gather Single CI Coverage
+    pars_m1_SCIC <- do.call(rbind, store_CIC_m1)
+    pars_m2_SCIC <- do.call(rbind, store_CIC_m2)
+    
+    # CI Coverage (average Single CI Coverage)
+    colMeans(pars_m1_SCIC)
+    colMeans(pars_m2_SCIC)
+    
+    # Outcome
+    return(colMeans(pars_m1_SCIC))
   }
-  colnames(cov_o[[1]]) <- names(lapply(m1_sn, coef)$GS)
-  colnames(cov_o[[2]]) <- names(lapply(m2_sn, coef)$GS)
   
-  lapply(cov_o, colMeans)$m1["rel"]
+  # Example Run of a single Check
+  data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
+  cond <- conds[2, ]
+  runCell(rp = 1, data_source = data_source, cond = cond)
+  
+  # Actual Check
+  # If I was to repeat my exp4 with 1e3 data repetitions, what is the
+  # distribution of Confidence Interval Coverages for model 1 Paramters?
+  # (takes around 30min to run)
+  start <- Sys.time()
+  out <- mclapply(X           = 1 : 1e3,
+                  FUN         = runCell,
+                  data_source = data_source,
+                  cond        = cond,
+                  mc.cores    = 12)
+  end <- Sys.time()
+  end - start
+  
+  # Save the result on you computer
+  saveRDS(out, "../checks/exp4_checks_CIC.rds")
+  
+  # Load if you want to check previous results
+  out <- readRDS("../checks/exp4_checks_CIC.rds")
+  
+  # Gather Results
+  rel_CIC <- do.call(rbind, out)[, "rel"]
+  
+  # Plot Results
+  plot(density(rel_CIC))
+  
+  # Probability of obtaining what you got or less
+  mean(rel_CIC <= .93)
+  
+  # Plot Distirbution for all paramters
+  m1_CIC <- do.call(rbind, out)
+  
+  length(out[[1]])
+  par(mfrow = c(4, 4))
+  lapply(1:ncol(m1_CIC), function(x){
+    plot(density(m1_CIC[, x]), 
+         main = colnames(m1_CIC)[x],
+         xlim = c(.9, 1))
+  })
+  
 
+# LM DVs distributions ----------------------------------------------------
+
+  data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
+  
+  # Plot just the outcome variables
+  plot(density(data_source$v156, adjust = 2))
+  plot(density(data_source$v174_LR, adjust = 2))
+  
+  # Which variables
+  select_vars <- c(y_m1 = "v156", 
+                   y_m2 = "v174_LR",
+                   nativ1 = "v185",
+                   nativ2 = "v186",
+                   nativ3 = "v187",
+                   polInt = "v97",
+                   age = "age",
+                   education = "v243_ISCED_1"
+                   )
+  # Plot grid
+  par(mfrow=c(ceiling(sqrt(length(select_vars))), 
+              ceiling(sqrt(length(select_vars)))
+  )
+  )
+  
+  # Plot
+  lapply(select_vars, function(x){
+    plot(density(data_source[, x], adjust = 2),
+         main = names(select_vars[select_vars == x]))
+  })
+  
+  
 # Identify Variables for MAR ----------------------------------------------
 # Criteria:
 # a) correlated with the target of missing variables

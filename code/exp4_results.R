@@ -7,11 +7,6 @@
   source("./init_general.R")
   
 # Analysis single result
-  filename <- "exp4_simOut_20201016_2341" # old
-  filename <- "exp4_simOut_20201019_1344" # current one
-  filename_ad500 <- "exp4_simOut_20201027_1610" # combined results from more runs
-  
-  # Current runs
   filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
   filename <- "exp4_simOut_20201207_1134" # same seed as 20201204_2121, but next 500 samples
   
@@ -46,7 +41,7 @@
   # append info from single runs
   out$info <- list(out_pt1 = out_pt1[c(501:length(out_pt1))],
                    out_pt2 = out_pt2[c(501:length(out_pt2))])
-
+  
 # Time Analyses -----------------------------------------------------------
 
   out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)

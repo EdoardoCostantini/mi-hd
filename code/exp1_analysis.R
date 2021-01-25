@@ -8,15 +8,18 @@
   rm(list = ls())
   source("./init_general.R")
 
+# Use output not saved
+  # res <- output
+  
 # Read results from a run of simulation study
-  # Checks
   res <- exp1_res <- readRDS("../output/exp1_simOut_20200731_1735_res.rds")
   res <- exp1_res <- readRDS("../output/exp1_simOut_20200801_1620_res.rds")
   # 1 and 2 are equivalent, but second file has more repetitions (500 vs 750)
-  res <- exp1_res <- readRDS("../output/exp1_simOut_20201130_1006_res.rds")
-  # 3 is the most up to date with 1e3 reps
+  res <- exp1_res <- readRDS("../output/exp1_simOut_20201130_1006_res.rds") # draft 1
+  res <- exp1_res <- readRDS("../output/exp1_simOut_2020121516_res.rds") # run with cv bridge
   
-  # Plot Sizes Decisions
+# Plot Sizes Decisions
+
   sp_width <- 3.75
   sp_height <- 3
   
@@ -207,79 +210,79 @@
                        "p = ",  res$conds$p, "; ",
                        "pm = ",  res$conds$pm)
   data.frame(res$conds, cond_names)
-  
-  ## > Bias (Single Plot) #####
-  plot_gg(dt = lapply(1:length(res$sem),
-                      function(x) data.frame( res$sem[[x]]$bias_per))[[4]],
-          parm_range = 1:6,
-          type = "bias",
-          meth_compare = rev(c("DURR_la", "IURR_la", 
-                               "blasso", "bridge",
-                               "MI_PCA",
-                               "MI_CART", "MI_RF", 
-                               "missFor", "CC"))
-  )
-  
-  ## > Bias (Grid distinguishing condition and measure) #####
-  axis.name.x <- c(rep("", 3), "Means")
-  bias_plots_mean <- lapply(1:4, function(p){
-    plot_gg(dt = lapply(1:length(res$sem),
-                        function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
-            parm_range = 1:6,
-            type = "bias",
-            axis.name.x = axis.name.x[p],
-            y_axLab = TRUE,
-            plot_name = "",
-            meth_compare = rev(c("DURR_la", "IURR_la", 
-                                 "blasso", "bridge",
-                                 "MI_PCA",
-                                 "MI_CART", "MI_RF", 
-                                 "missFor", "CC"))
-    )
-  } )  
-  axis.name.x <- c(rep("", 3), "Variances")
-  bias_plots_var <- lapply(1:4, function(p){
-    plot_gg(dt = lapply(1:length(res$sem),
-                        function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
-            parm_range = 7:12,
-            type = "bias",
-            axis.name.x = axis.name.x[p],
-            y_axLab = TRUE,
-            plot_name = cond_names[p],
-            meth_compare = rev(c("DURR_la", "IURR_la", 
-                                 "blasso", "bridge",
-                                 "MI_PCA",
-                                 "MI_CART", "MI_RF", 
-                                 "missFor", "CC"))
-    )
-  } )
-  axis.name.x <- c(rep("", 3), "Covariances")
-  bias_plots_cov <- lapply(1:4, function(p){
-    plot_gg(dt = lapply(1:length(res$sem),
-                        function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
-            parm_range = -(1:12),
-            type = "bias",
-            axis.name.x = axis.name.x[p],
-            y_axLab = TRUE,
-            plot_name = "",
-            meth_compare = rev(c("DURR_la", "IURR_la", 
-                                 "blasso", "bridge",
-                                 "MI_PCA",
-                                 "MI_CART", "MI_RF", 
-                                 "missFor", "CC"))
-    )
-  } )  
-  
-  # Display Plots
-  p1 <- arrangeGrob(grobs = bias_plots_mean, ncol = 1)
-  p2 <- arrangeGrob(grobs = bias_plots_var, ncol = 1)
-  p3 <- arrangeGrob(grobs = bias_plots_cov, ncol = 1)
-  pf <- grid.arrange(p1, p2, p3, ncol = 3)
-  pf
-  ggsave(file  = "~/Desktop/exp1_bias.pdf", 
-         width = 15, height = 15/3*4,
-         units = "cm",
-         arrangeGrob(p1, p2, p3, ncol = 3))
+  # 
+  # ## > Bias (Single Plot) #####
+  # plot_gg(dt = lapply(1:length(res$sem),
+  #                     function(x) data.frame( res$sem[[x]]$bias_per))[[4]],
+  #         parm_range = 1:6,
+  #         type = "bias",
+  #         meth_compare = rev(c("DURR_la", "IURR_la", 
+  #                              "blasso", "bridge",
+  #                              "MI_PCA",
+  #                              "MI_CART", "MI_RF", 
+  #                              "missFor", "CC"))
+  # )
+  # 
+  # ## > Bias (Grid distinguishing condition and measure) #####
+  # axis.name.x <- c(rep("", 3), "Means")
+  # bias_plots_mean <- lapply(1:4, function(p){
+  #   plot_gg(dt = lapply(1:length(res$sem),
+  #                       function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
+  #           parm_range = 1:6,
+  #           type = "bias",
+  #           axis.name.x = axis.name.x[p],
+  #           y_axLab = TRUE,
+  #           plot_name = "",
+  #           meth_compare = rev(c("DURR_la", "IURR_la", 
+  #                                "blasso", "bridge",
+  #                                "MI_PCA",
+  #                                "MI_CART", "MI_RF", 
+  #                                "missFor", "CC"))
+  #   )
+  # } )  
+  # axis.name.x <- c(rep("", 3), "Variances")
+  # bias_plots_var <- lapply(1:4, function(p){
+  #   plot_gg(dt = lapply(1:length(res$sem),
+  #                       function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
+  #           parm_range = 7:12,
+  #           type = "bias",
+  #           axis.name.x = axis.name.x[p],
+  #           y_axLab = TRUE,
+  #           plot_name = cond_names[p],
+  #           meth_compare = rev(c("DURR_la", "IURR_la", 
+  #                                "blasso", "bridge",
+  #                                "MI_PCA",
+  #                                "MI_CART", "MI_RF", 
+  #                                "missFor", "CC"))
+  #   )
+  # } )
+  # axis.name.x <- c(rep("", 3), "Covariances")
+  # bias_plots_cov <- lapply(1:4, function(p){
+  #   plot_gg(dt = lapply(1:length(res$sem),
+  #                       function(x) data.frame( res$sem[[x]]$bias_per))[[p]],
+  #           parm_range = -(1:12),
+  #           type = "bias",
+  #           axis.name.x = axis.name.x[p],
+  #           y_axLab = TRUE,
+  #           plot_name = "",
+  #           meth_compare = rev(c("DURR_la", "IURR_la", 
+  #                                "blasso", "bridge",
+  #                                "MI_PCA",
+  #                                "MI_CART", "MI_RF", 
+  #                                "missFor", "CC"))
+  #   )
+  # } )  
+  # 
+  # # Display Plots
+  # p1 <- arrangeGrob(grobs = bias_plots_mean, ncol = 1)
+  # p2 <- arrangeGrob(grobs = bias_plots_var, ncol = 1)
+  # p3 <- arrangeGrob(grobs = bias_plots_cov, ncol = 1)
+  # pf <- grid.arrange(p1, p2, p3, ncol = 3)
+  # pf
+  # ggsave(file  = "~/Desktop/exp1_bias.pdf", 
+  #        width = 15, height = 15/3*4,
+  #        units = "cm",
+  #        arrangeGrob(p1, p2, p3, ncol = 3))
 
   ## > Bias (Facet grid) #####
   meth_compare = rev(c("DURR_la", "IURR_la", 
@@ -295,7 +298,7 @@
                 parPlot = list(means = 1:6,
                                variances = 7:12,
                                covariances = 13:27),
-                dt_reps = 500,
+                dt_reps = 1e3,
                 ci_lvl = .95,
                 type = "bias",
                 axis.name.x = NULL,
@@ -303,8 +306,9 @@
                 plot_name = NULL,
                 y_axLab = TRUE,
                 meth_compare)
-  
+  pf
   ggsave(file = "../output/graphs/exp1_bias.pdf",
+         # width = gp_height, height = gp_width,
          width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)
@@ -399,7 +403,7 @@
                 parPlot = list(means = 1:6,
                                variances = 7:12,
                                covariances = 13:27),
-                dt_reps = 500,
+                dt_reps = 1e3,
                 ci_lvl = .95,
                 axis.name.x = NULL,
                 plot_cond = NULL,
@@ -408,6 +412,7 @@
                 meth_compare)
   pf
   ggsave(file = "../output/graphs/exp1_CI.pdf",
+         # width = gp_height, height = gp_width,
          width = sp_width*4, height = sp_height*3,
          units = "cm",
          pf)

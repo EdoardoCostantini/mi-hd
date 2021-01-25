@@ -53,8 +53,8 @@ data.frame(
 
   # What to show
   exp_dat     <- 10
-  iters_range <- 1:50 # which set of iterations
-  y_range     <- c(1, 1)
+  iters_range <- 1:250 # which set of iterations
+  y_range     <- c(2, 3.5)
 
   # Print ALL
   lapply(seq_along(out_cnv$parms$method[1:8]), function(x){
@@ -72,7 +72,6 @@ print(out_cnv$parms$method[1])
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[1], 
                dat = exp_dat, 
-               y_center = TRUE,
                y_range = y_range, 
                iters = iters_range)
 
@@ -90,8 +89,7 @@ iters_range_bl <- 1:250
 mean_traceplot(out_cnv,
                method   = out_cnv$parms$method[3],
                dat      = exp_dat, 
-               y_center = TRUE,
-               y_range  = y_range, iters = iters_range_bl)
+               y_range  = c(2, 3.5), iters = iters_range_bl)
 
 # bridge (50-100 good for all)
 print(out_cnv$parms$method[4])

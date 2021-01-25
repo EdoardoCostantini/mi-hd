@@ -1,34 +1,61 @@
 \section{Conclusions}
 
-\paragraph{Recommendations / Take-home message}
-	[UNFINISHED] Give recommendations / take-home message in one or two paragraphs
+	We investigated a variety of high-dimensional imputation approaches that can deal with large numbers 
+	of possible predictors in the imputation models.
+	These methods have the potential to simplify the decisions social scientists have to make when defining
+	which predictors to include in their imputation models.
+	The methods performances in terms of estimation bias and confidence interval coverage of true parameter values were 
+	compared with both synthetic and real survey data studies.
+
+	We found that \emph{bridge}, a very popular approach to deal with large sets of predictors in the imputation models,
+	is inadequate to deal with strictly high dimensional data set ups ($n < p$).
+	The use of regularized regression within the MICE framework is a powerful tool to automate decisions regarding which
+	variables to include in the imputation models, especially when used exclusively for model trimming (IURR).
+	However, the great performance of these methods comes to a large computational cost that can translates to 
+	prohibitive long imputation procedures in real data research.
+
+	Finally, the use of PCA to reduce the dimensionality of the data, as a pre-processing step followed by regular 
+	low-dimensional MICE imputation strategies, proved to be a fast and effective approach.
+	It was especially effective in preserving relationships between variables with missing values:
+	in simulation study 1 and 2, it returned negligible covariance biases when all other methods failed to.
+	However, its application on real survey data and the need for improvements to imputation accuracy suggest 
+	further research is needed.
 
 \paragraph{Limitations and future directions}
 
 	As this work aimed at comparing current implementations of different methods, some limitations
 	to the scope of the simulation and resampling studies were imposed by the current state of development of 
 	the different methods.
-	For example, both IURR/DURR and MI-PCA allow imputation of data with any distribution:
-	IURR and DURR have already been discussed for categorical data imputation,
+	For example, both IURR/DURR and MI-PCA allow imputation of any type of data:
+	IURR and DURR have been developed for categorical data imputation \citep{dengEtAl:2016},
 	and MI-PCA can be performed with any standard imputation model for categorical data.
-	Blasso has not been formally developed for multi-categorical imputation target variables yet, which limited 
-	the study to work with missing values on variables that are either continuous in nature or usually considered
-	as such in practice.
-	Furthermore, the interesting inclusion of interactions and squared terms in the imputation models was
-	not explored as their inclusion as not been developed to the same extent across the different methods 
-	
-	[UNFINISHED] The resampling study compared results only for two analysis models and showed some variation in
-	which methods were top performer.
+	However, blasso has not been formally developed for multi-categorical imputation target variables yet, 
+	which limited the study to working with missing values on variables that are either continuous in nature 
+	or usually considered as such in practice.
+	IURR, DURR and MI-PCA could have performed better had they been used in their ordered categorical data
+	implementations, but to maintain a fair comparison ground with blasso, they were implemented with the
+	assumption that the imputed variables are continuous and normally distributed.
 
-\iffalse 
-	Some promising methods were excluded because their current implementation did not allow to meet
-	the goals of this study.
-	For example, BART is currently implemented to impute the covariates for a given analysis model.
-	It assumes that the dependent variable is fully observed which is something that does not fit well
-	with the application on social surveys where the dependent variable is as likely as any other to be 
-	afflicted by missingness.
-	Furthermore, it's reliance on the definition of an analsyis model before the imputation procedure can 
-	be run is considered by the authors of this paper as an undesirable feature: in general, for imputation
-	of social surveys there is a preference for imputation models that can be suggested independently of
-	the type and formulation of the analysis model.
-\fi
+	Furthermore, in real survey data, the missing data mechanism might be non-linear, which would require
+	including interactions between auxiliary variables and polynomial terms in the imputation models,
+	and would lead to increase dimensionality even more.
+	This factor was not taken into consideration as the inclusion of interactions and squared terms in the 
+	imputation models has as not been developed to the same extent across the different methods.
+	However, all of the high-dimensional imputation methods considered have great potential to allow the 
+	specification of much more complex response mechanisms than traditional methods ones.
+
+	Both IURR and DURR could have implemented with different types of penalty formulations.
+	Along with the traditional lasso penalty, \cite{zhaoLong:2016} used elastic net penalty \citep{zouHastie:2005} 
+	and adaptive lasso \citep{zou:2006}.
+	Although no substantial performance differences between penalty specifications for IURR and DURR emerged 
+	from the joint work of \cite{zhaoLong:2016} and \cite{dengEtAl:2016}, the impact of different types of 
+	regularized regression was not explored in the present study. 
+
+	MI-PCA specification required making a decision on the number of components to extract from the auxiliary 
+	variables.
+	In this paper, the authors decided to retain the first components that explained 50\% of the 
+	total variance in the auxiliary variables, which allowed for substantial dimensionality reduction, 
+	without relying on too few components.
+	However, this decision is arbitrary and its effect on the imputation accuracy remains an interesting 
+	topic for future research, as it was not explored in this study.
+
