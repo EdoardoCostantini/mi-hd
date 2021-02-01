@@ -25,7 +25,7 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
       
       # To store imputed values and check convergence
       imp_IURR_val <- vector("list", parms$chains)
-      names(imp_IURR_val) <- seq(1:parms$chains)
+        names(imp_IURR_val) <- seq(1:parms$chains)
       
       # Time performance
       start.time <- Sys.time()
@@ -36,7 +36,7 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
         
         # To store multiply imputed datasets (per chain)
         imp_IURR_dat <- vector("list", parms$iters)
-        names(imp_IURR_dat) <- seq(1:parms$iters)
+          names(imp_IURR_dat) <- seq(1:parms$iters)
         
         # Storing imputate values for each iteration (per chain)
         imps <- lapply(p_imp_id, function(x) {
@@ -78,7 +78,7 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
                 regu.mod <- rr_est_lasso(X = X_obs, y = y_obs, 
                                          parms = parms, fam = glmfam)
               }
-              
+              coef(regu.mod)
               # Elastic net
               if(reg_type == "el"){
                 regu.mod <- rr_est_elanet(X = X_obs, y = y_obs, 

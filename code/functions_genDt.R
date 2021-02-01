@@ -187,6 +187,94 @@ imposeMiss_lv <- function(dat_in, parms, cond){
   return( dat_out )
 }
 
+# MAR + MCAR
+imposeMiss_lv_MD <- function(dat_in, parms, cond, plot = FALSE){
+  ## Description
+  # Adds Matrix Desing missingness to the MAR
+  ## Example Inputs
+  # cond <- conds[1, ]
+  # cond$lv <- 50 # experimental
+  # dat_in <- simData_lv(parms, cond)
+  # plot = TRUE
+  
+  # Body
+  # Define non-response vector
+  dat_out <- dat_in$dat
+  for (i in 1:parms$zm_n) {
+    nR <- simMissingness(pm    = cond$pm,
+                         data  = dat_in$scores_lv,
+                         preds = parms$rm_x,
+                         type  = parms$missType,
+                         beta  = parms$auxWts)
+    
+    # Fill in NAs
+    dat_out[nR, parms$z_m_id[i]] <- NA
+  }
+  
+  # Assign observations to 1 of 6 situations
+  # situations <- paste0("s", 1:6)
+  # memo <- NULL
+  # for (i in 1:nrow(dat_out)) {
+  #   memo[[i]] <- sample(situations, 1)
+  # }
+  situations <- paste0("s", 1:6)
+  memo <- rep(paste0("s", 1:6), length.out = parms$n)
+  # sort(memo)
+  # Attribute Missingness Pattern (per situation)
+  missdesc <- list(s1 = c("C", "D"),
+                   s2 = c("B", "D"),
+                   s3 = c("B", "C"),
+                   s4 = c("A", "D"),
+                   s5 = c("A", "C"),
+                   s6 = c("A", "B"))
+  
+  # Define Variable-Block match
+  block_tot <- factor(x = c("Core", "A", "B", "C", "D"), 
+                      levels = c("Core", "A", "B", "C", "D"))
+  block_siz <- ncol(dat_out)/length(block_tot)
+  block_act <- block_tot[-length(block_tot)]
+  block_mem <- rep(rep(block_act, each = 5), 2)
+  block_tar <- block_siz - table(block_mem)
+  store <- list()
+  for (m in 1:length(block_tar)) {
+    store[[m]] <- rep(names(block_tar[m]), block_tar[m])
+  }
+
+  memb <- factor(c(as.character(block_mem), unlist(store)),
+                 levels = levels(block_tot))
+
+  # Impose Matrix Design missingness
+  for (s in 1:6) {
+    colIndex <- memb %in% missdesc[[s]]
+    rowIndex <- memo == situations[s]
+    dat_out[rowIndex, colIndex] <- NA
+  }
+  
+  # Visual Check
+  if(plot == TRUE){
+    # Order columns and rows to show the EVS matrix desing plot
+    dat_help <- dat_out[order(memo), order(memb)]
+    # plot the matrix
+    plot(as.matrix(!is.na(dat_help)), # requires "plot.matrix" pack
+         border = NA,
+         breaks = c(TRUE, FALSE),
+         col = c("black", "white"),
+         main = "Missing data pattern",
+         cex.lab = 1, # text size for axis labels
+         cex.axis = .5, # text size for ticks labels
+         las = 2, # orientation of ticks
+         y = "Observation ID",
+         xlab = "Variable ID")
+  }
+  
+  # Recast in original order
+  # dat_out <- dat_out[, OG_col_order]
+
+  # Result
+  return( dat_out )
+}
+
+
 # Experiment 3: Interactions ----------------------------------------------
 
 simData_int <- function(parms, cond){
@@ -343,82 +431,3 @@ imposeMiss_evs <- function(dat_in, parms, cond){
   # Result
   return( dat_out )
 }
-
-# Matrix Design Version
-  imposeMiss_evs_MD <- function(dat_in, md_pat, parms, cond){
-    ## Description
-    # Given a fully observed dataset and a param object containing the regression
-    # coefficients of the model to impose missingness, it returns a version of
-    # the original data with imposed missingness on all the variables indicated
-    # as target int parms$z_m_id
-    ## Example Inputs
-    # cond <- conds[1,]
-    # cond$n <- 2e3
-    # data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
-    # dat_in   <- data_source[sample(1:nrow(data_source),
-    #                                cond$n,
-    #                                replace = TRUE), ]
-    # md_pat <- readRDS("../data/exp4_EVS2017_md.rds")
-    
-    # Body
-    # Define non-response vector
-    dat_out <- dat_in
-    rm_x    <- dat_in[, parms$rm_x]
-    
-    # Recode percieved threat from immigrants 1 = low, 10 = high
-    # rm_x[,1] <- match(rm_x[,1], max(rm_x[,1]):min(rm_x[,1]) )
-    
-    # Compute stuff
-    for (i in 1:parms$zm_n) {
-      nR <- simMissingness(pm    = runif(1, parms$pm[1], parms$pm[2]),
-                           data  = rm_x,
-                           preds = parms$rm_x,
-                           type  = parms$missType,
-                           beta  = parms$auxWts)
-      
-      # Fill in NAs
-      dat_out[nR, parms$z_m_id[i]] <- NA
-    }
-    
-    # Impose MCARù
-    # Assign individuals to either 1 of 6 situations
-    situations <- paste0("s", 1:6)
-    MD_block <- NULL
-    for (i in 1:cond$n) {
-      MD_block[[i]] <- sample(situations, 1)
-    }
-    table(MD_block)
-    
-    # Attribute Missingness Pattern
-    missdesc <- list(s1 = c("C", "D"),
-                     s2 = c("B", "D"),
-                     s3 = c("B", "C"),
-                     s4 = c("A", "D"),
-                     s5 = c("A", "C"),
-                     s6 = c("A", "B"))
-    
-    for (i in 1:6) {
-      colIndex <- var_class_f$Block %in% missdesc[[i]]
-      dat_out[MD_block == situations[i], var_class_f$Block %in% missdesc[[i]]] <- NA
-    }
-    
-    # Order For plot
-    dat_help <- cbind(dat_out, MD_block)
-    dat_out
-    length(var_class_f$Block)
-    dim(dat_out)
-    dat_help <- dat_out[order(MD_block), order(var_class_f$Block)]
-    dat_help <- dat_help[order(dat_help$MD_block), order(var_class_f$Block)]
-    
-    # Visual Check
-    library('plot.matrix')
-
-    plot(as.matrix(!is.na(dat_help)),
-         breaks = c(TRUE, FALSE),
-         col = c('black', 'white'))
-    
-    
-    # Result
-    return( dat_out )
-  }
-

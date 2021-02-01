@@ -23,6 +23,7 @@ pack_list <- c("tidyverse",
                "gridExtra",
                "grid",
                "plyr", # for round_any
+               "plot.matrix", # for missing data pattern plot
                "xtable",
                "PcAux",
                "blasso")

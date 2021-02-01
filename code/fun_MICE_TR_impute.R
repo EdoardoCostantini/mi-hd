@@ -35,10 +35,19 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
     p_imp_id <- which(colSums(O) != nrow(O))
     predMat <- matrix(rep(0, ncol(Z)^2), ncol = ncol(Z), 
                       dimnames = list(colnames(Z), colnames(Z)))
-    col_index <- colnames(predMat) %in% parms$S_all # flexibility interaction!
-    predMat[p_imp_id, col_index] <- 1
+    var_index <- colnames(predMat) %in% parms$S_all # flexibility interaction!
+    predMat[p_imp_id, var_index] <- 1
     
-    
+    # Other variables needing imputation
+    # Separate variables target prespecified variable selection for Imp Mods
+    target <- which(colnames(Z) %in% parms$z_m_id)
+    if(sum(is.na(Z[, -target])) > 0){
+      pMat     <- quickpred(Z, mincor = .3)
+      
+      # Define Single Imputed data as the auxiliary set
+      predMat[-target, ] <- pMat[-target, ]
+    }
+
     # Define methods
     methods <- rep("norm", ncol(Z))
     vartype <- sapply(Z, class)
@@ -57,6 +66,7 @@ impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){
                                 predictorMatrix = predMat,
                                 m = parms$mice_ndt,
                                 maxit = parms$mice_iters,
+                                printFlag       = FALSE,
                                 ridge = 1e-5,
                                 method = methods)
     end.time <- Sys.time()

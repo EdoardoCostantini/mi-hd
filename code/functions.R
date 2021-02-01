@@ -62,7 +62,7 @@ init_dt_i <- function(Z0, missVarInfo){
   ## Input examples from simulation
   # Z0 <- Z
   # Z0 <- Z_mm
-  # missVarInfo <- missing_type(Z0)
+  # missVarInfo <- missing_type(Z)
   
   # Make oredered factors as numeric
   if( (length(missVarInfo$ordeVars))!=0 ){
@@ -77,7 +77,8 @@ init_dt_i <- function(Z0, missVarInfo){
                      na.rm = TRUE) # sample means
     
     for (j in 1:length(c(missVarInfo$contVars, missVarInfo$ordeVars))) {
-      Z0 <- Z0 %>% mutate_at(vars(c(missVarInfo$contVars, missVarInfo$ordeVars)[j]),
+      Z0 <- Z0 %>% mutate_at(vars(c(missVarInfo$contVars, 
+                                    missVarInfo$ordeVars)[j]),
                              ~replace(., is.na(.), s_means[j])
       )
     }
@@ -206,10 +207,12 @@ rr_est_lasso <- function(X, y, parms, fam="gaussian"){
     # y <- Boston$medv
     # fam <- "gaussian"
   ## Internals from simualtion
+  # X = X_obs_bs
+  # y = y_obs_bs
   # X = X_obs
   # y = y_obs
   # parms = parms
-  # fam = glmfam
+  # fam = "gaussian"
   
   cv_lasso <- cv.glmnet(X, y,
                         family = fam,
@@ -1244,6 +1247,40 @@ find.collinear <- function(x, threshold = 0.999) {
   hit <- outer(seq_len(nvar), seq_len(nvar), "<") & (abs(z) >= threshold)
   out <- apply(hit, 2, any, na.rm = TRUE)
   return(varnames[out])
+}
+
+# Preprocess Single Imputation
+prep_SI <- function(dt_in, 
+                    model.var,
+                    ...){
+  ## Inputs
+  # dt_in = Xy_mis
+  # iters = 10
+  # model.var <- parms$z_m_id
+  
+  ## Body
+  pMat     <- quickpred(dt_in, mincor = .3)
+  mids_obj <- mice(dt_in,
+                   predictorMatrix = pMat,
+                   printFlag       = FALSE,
+                   method          = "pmm",
+                   ...
+                   # ridge           = cond$ridge,
+                   # m               = 1,
+                   # maxit           = 10,
+                   )
+  
+  dt_out <- complete(mids_obj)
+  
+  # Define Single Imputed data as the auxiliary set
+  target <- which(colnames(dt_in) %in% model.var)
+  dt_out[, target] <- dt_in[, target]
+  
+  # Store outputs
+  output <- list(dt_out = dt_out,
+                 mids_obj = mids_obj)
+  # Return output
+  return(output)
 }
 
 # Results -----------------------------------------------------------------

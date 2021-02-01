@@ -58,7 +58,7 @@ impute_BLAS_hans <- function(Z, parms, perform = TRUE){
       
       # To store imputed values and check convergence
       imp_blasso_val <- vector("list", parms$chains_bl)
-      names(imp_blasso_val) <- seq(1:parms$chains_bl)
+        names(imp_blasso_val) <- seq(1:parms$chains_bl)
       
       # Time performance
       start.time <- Sys.time()
@@ -69,7 +69,7 @@ impute_BLAS_hans <- function(Z, parms, perform = TRUE){
         
         # To store multiply imputed datasets (in from the last chain)
         imp_blasso_dat <- vector("list", parms$iters_bl)
-        names(imp_blasso_dat) <- seq(1:parms$iters_bl)
+          names(imp_blasso_dat) <- seq(1:parms$iters_bl)
         imp_blasso_dat$`1` <- init_dt_i(Z, missing_type(Z)) # imputations from initialization
         
         # Empty storing objects for MCMC samples

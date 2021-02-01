@@ -412,16 +412,20 @@
   X$Variable <- tolower(trimws(as.character(X$Variable)))
   
   # Obtain Variables Block Classification
-  var_class <- data.frame(Variable = X$Variable[X$Variable %in% EVS_vars],
-                          Block = X$Block[X$Variable %in% EVS_vars])
+  var_class <- filter(X, Variable %in% EVS_vars)
   extra <- data.frame(Variable = EVS_vars[!EVS_vars %in% X$Variable],
                       Block = c("Core","Core","Core","Core","Core"))
   var_class_f <- rbind(var_class, extra)
   
-  # Clean Data
-  var_class_f$Variable <- as.character(var_class_f$Variable)
-  var_class_f$Block <- droplevels(var_class_f$Block)
-  var_class_f$Block <- factor(var_class_f$Block, levels = c("Core", "A", "B", "C", "D"))
+  # Check for duplicates
+  n_occur <- data.frame(table(var_class_f$Variable))
+  n_occur[n_occur$Freq > 1,]
+  var_class_f <- var_class_f[-(which(var_class_f$Variable=="v242"))[1], ]
+    # drop after checking that it's a different formulation of same question
+  
+  # Order levels and drop unused levels
+  var_class_f$Block <- factor(var_class_f$Block, 
+                              levels = c("Core", "A", "B", "C", "D"))
   
   # Verify proportions
   table(var_class_f$Block)

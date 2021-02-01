@@ -3,13 +3,15 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
+impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE, robust = TRUE){
   
   # Prep data ---------------------------------------------------------------
   # Z = Xy_input[, col$CIDX]
   # Z = Xy_mis
+  # Z = Xy_SI
   # O = as.data.frame(!is.na(Z))            # matrix index of observed values
   # ridge_p = cond$ridge
+  # robust = FALSE
   # cc <- 1
   
   if(perform == TRUE){
@@ -62,26 +64,38 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
             target   <- Zm[, p_imp_id[j]]
             Zx       <- model.matrix(~ ., Zm[, -J])[, -1]
             
-            # Find Constants
-            const <- names(which(apply(Zx, 2, var) == 0))
-            Zx    <- Zx[, !colnames(Zx) %in% const]
-            
-            # Find Dummies that have 99% of objservations in 1 category
-            tabular <- apply(Zx, 2, table)
-            
-            # Select only dummies
-            tabular <- tabular[sapply(tabular, length) == 2]
-            
-            # Vector of dummy names to discard
-            dum.disc <- lapply(tabular, function(x) {
-              x[1] / sum(x) > .95 | x[1] / sum(x) < 1-.95
-            })
-            dum.disc <- names(which(dum.disc == TRUE))
-            Zx    <- Zx[, !colnames(Zx) %in% dum.disc]
-            
-            # Find collinear variables
-            coll.vars <- find.collinear(Zx)
-            Zx  <- Zx[, !colnames(Zx) %in% coll.vars]
+            # Clean data relative data to make it more solid
+            if(robust == TRUE){
+              # Find Constants
+              const <- names(which(apply(Zx, 2, var) == 0))
+              Zx    <- Zx[, !colnames(Zx) %in% const]
+              
+              # Find Dummies that have 99% of objservations in 1 category
+              tabular <- apply(Zx, 2, table)
+              
+              # Select only dummies
+              tabular <- tabular[sapply(tabular, length) == 2]
+              
+              # Vector of dummy names to discard
+              dum.disc <- lapply(tabular, function(x) {
+                x[1] / sum(x) > .95 | x[1] / sum(x) < 1-.95
+              })
+              dum.disc <- names(which(dum.disc == TRUE))
+              Zx    <- Zx[, !colnames(Zx) %in% dum.disc]
+              
+              # Find collinear variables
+              coll.vars <- find.collinear(Zx)
+              Zx  <- Zx[, !colnames(Zx) %in% coll.vars]
+              
+              # Fix Z_mis to drop columns that are not relevant anymore
+              Z_mis <- Zm[!rj, -J]
+              Z_mis <- model.matrix(~ ., Z_mis)[, -1]
+              Z_mis <- Z_mis[, !colnames(Z_mis) %in% c(const, dum.disc, coll.vars)]
+            } else {
+              # Define Z_mis
+              Z_mis <- Zm[!rj, -J]
+              Z_mis <- model.matrix(~ ., Z_mis)[, -1]
+            }
 
             # Obtain Post Draw
             pdraw <- .norm.draw(y       = target, 
@@ -90,11 +104,6 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE){
                                 ls.meth = "ridge", 
                                 ridge   = ridge_p)
             
-            # Fix Z_mis to drop columns that are not relevant anymore
-            Z_mis <- Zm[!rj, -J]
-            Z_mis <- model.matrix(~ ., Z_mis)[, -1]
-            Z_mis <- Z_mis[, !colnames(Z_mis) %in% c(const, dum.disc, coll.vars)]
-
             # Obtain posterior predictive draws
             pdraw_zj_imp <- Z_mis %*% pdraw$beta + rnorm(sum(!rj)) * pdraw$sigma
             

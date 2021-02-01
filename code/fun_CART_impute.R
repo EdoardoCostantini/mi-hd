@@ -45,7 +45,7 @@ impute_CART <- function(Z, O, cond, parms, perform = TRUE){
       imp_CART_dat$`1` <- Zm
       for (i in 1:p_imp) imps[[i]][1, ] <- Zm[!O[, p_imp_id[i]], 
                                               p_imp_id[i]]
-      mice.impute.cart
+
       for (m in 2:parms$iters) {
         print(paste0("CART - Chain: ", cc, "/", parms$chains, 
                      "; Iter: ", m, "/", parms$iters))

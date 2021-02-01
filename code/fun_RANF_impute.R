@@ -80,7 +80,7 @@ impute_RANF <- function(Z, O, cond, parms, perform = TRUE){
                         # used to make up a larger pool of donors from which to sample
                         # 1 imputed value
                         FUN = function(s) sample(unlist(s), 1))
-mice.impute.rf
+          
           # Append imputation
           Zm[!O[, J], J] <- zm_j # update data
           imps[[j]][m, ] <- zm_j # save iteration imputation

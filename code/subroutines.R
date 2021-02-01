@@ -9,6 +9,7 @@ doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
   ## For internals
   # rp = 1
   # debug = FALSE
+  # verbose = FALSE
   # i = 1
   
   ## For 1 repetition, performs simulation across all conditions
@@ -121,41 +122,6 @@ doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
         }
       }
     }
-    if(parms$exp == 3){
-      for(i in 1 : nrow(conds)) {
-        
-        print(paste0("Exp: ", parms$exp, 
-                     " > Rep: ", rp, 
-                     " > Cond: ", i,
-                     " - Time: ",
-                     Sys.time()))
-        
-        if(debug == TRUE){
-          rp_out[[i]] <- capture.output(tryCatch({
-            withErrorTracing({runCell_int(cond = conds[i, ],
-                                          parms = parms,
-                                          rep_status = rp)})
-          }, error = function(e){
-            e <<- e
-            cat("ERROR: ", e$message, "\nin ")
-            print(e$call)
-          }))
-        } else {
-          rp_out[[i]] <- tryCatch(
-            {
-              # Try running simulation for condition i, repetition rp
-              runCell_int(cond = conds[i, ],
-                          parms = parms,
-                          rep_status = rp)
-            },
-            error = function(report) {
-              err <- paste0("Original Error: ", report)
-              return(err)
-            }
-          )
-        }
-      }
-    }
     
 # Experiment 4 ------------------------------------------------------------
     
@@ -198,6 +164,46 @@ doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
         }
       }
     }
+    
+
+# Experiment 5 ------------------------------------------------------------
+    
+    if(parms$exp == 5){
+      for(i in 1 : nrow(conds)) {
+        
+        print(paste0("Exp: ", parms$exp, 
+                     " > Rep: ", rp, 
+                     " > Cond: ", i,
+                     " - Time: ",
+                     Sys.time()))
+        
+        if(debug == TRUE){
+          rp_out[[i]] <- capture.output(tryCatch({
+            withErrorTracing({runCell_lv(cond = conds[i, ],
+                                         parms = parms,
+                                         rep_status = rp)})
+          }, error = function(e){
+            e <<- e
+            cat("ERROR: ", e$message, "\nin ")
+            print(e$call)
+          }))
+        } else {
+          rp_out[[i]] <- tryCatch(
+            {
+              # Try running simulation for condition i, repetition rp
+              runCell_add(cond = conds[i, ],
+                          parms = parms,
+                          rep_status = rp)
+            },
+            error = function(report) {
+              err <- paste0("Original Error: ", report)
+              return(err)
+            }
+          )
+        }
+      }
+    }
+    
     
   ## END capture output
   if(verbose == TRUE){
@@ -513,6 +519,7 @@ runCell_lv <- function(cond, parms, rep_status) {
                                 cond = cond,
                                 perform = parms$meth_sel$MI_OP,
                                 parms = parms)
+  
   ## ----------------------------------------------------------------------- ##
   # missForest
   imp_missFor <- impute_missFor(Z = Xy_mis, parms = parms)
@@ -544,7 +551,7 @@ runCell_lv <- function(cond, parms, rep_status) {
   ## ----------------------------------------------------------------------- ##
   
   # ------------------- #
-    ## Analyse and pool ####
+  ## Analyse and pool ####
   # ------------------- #
   
   # For each imp method, analyse all datasets based on model defined in init.R
@@ -1296,3 +1303,335 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                  imp_values   = imp_values)[parms$store]
   return(output)
 }
+
+
+# Addendum ----------------------------------------------------------------
+
+runCell_add <- function(cond, parms, rep_status, data_source, md_pat) {
+  ## Description
+  # Given 1 condition, Generates 1 dataset and performs imputations 
+  # according to selected methods
+  ## For internals
+  # set.seed(1234)
+  # cond        = conds[1, ]
+  
+  prepro_time_start <- Sys.time()
+  ## Data ------------------------------------------------------------------ ##
+  Xy_ls  <- simData_lv(parms, cond)
+  Xy     <- Xy_ls$dat
+  Xy_mis <- imposeMiss_lv_MD(Xy_ls, 
+                             parms, cond, plot = TRUE)
+  O <- !is.na(Xy_mis) # matrix index of observed values
+  miss_descrps <- colMeans(!O)
+  
+  # Prep Data: Single Imputation on Auxiliary variables
+  prep_Si_out <- prep_SI(dt_in = Xy_mis,
+                         model.var = parms$z_m_id,
+                         maxit = 5)
+  Xy_SI <- prep_Si_out$dt_out
+  
+  dt_in <- list(Xy_mis = Xy_mis,
+                Xy_SI  = Xy_SI)
+  
+  ## Imputation ------------------------------------------------------------ ##
+  # Impute m times the data w/ missing values w/ different methods
+  prepro_time_end <- Sys.time()
+  
+  # Impute according to DURR method
+  ctrl_preform <- c(parms$meth_sel$DURR_all, parms$meth_sel$DURR_si)
+  # Lasso
+  imp_DURR_ls <- lapply(c(Xy_mis = 1, Xy_SI  = 2),
+                        function(x){
+                          impute_DURR(Z = dt_in[[x]],
+                                      O = as.data.frame(!is.na(dt_in[[x]])),
+                                      reg_type = "lasso",
+                                      cond = cond,
+                                      perform = ctrl_preform[[x]],
+                                      parms = parms)
+                        })
+
+  # Impute according to IURR method
+  ctrl_preform <- c(parms$meth_sel$IURR_all, parms$meth_sel$IURR_si)
+  # Lasso
+  imp_IURR_ls <- lapply(c(Xy_mis = 1, Xy_SI  = 2),
+                        function(x){
+                          impute_IURR(Z = dt_in[[x]],
+                                      O = as.data.frame(!is.na(dt_in[[x]])),
+                                      reg_type = "lasso",
+                                      cond = cond,
+                                      perform = ctrl_preform[[x]],
+                                      parms = parms)
+                        })
+  
+  # Impute according to Hans Blasso method
+  imp_blasso <- impute_BLAS_hans(Z = Xy_mis,
+                                 parms = parms,
+                                 perform = parms$meth_sel$blasso)
+
+  # Impute according to van Buuren Ridge
+  imp_bridge <- impute_BRIDGE(Z = Xy_mis,
+                              O = data.frame(!is.na(Xy_mis)),
+                              ridge_p = cond$ridge,
+                              parms = parms,
+                              perform = parms$meth_sel$bridge)
+  
+  # Impute according to Howard Et Al 2015 PCA appraoch
+  imp_PCA <- impute_PCA(Z     = Xy_SI,
+                        O     = data.frame(!is.na(Xy_SI)),
+                        cond  = cond,
+                        DA    = FALSE,
+                        parms = parms)
+  
+  # MICE-CART
+  imp_CART <- impute_CART(Z = Xy_mis,
+                          O = data.frame(!is.na(Xy_mis)),
+                          cond = cond,
+                          perform = parms$meth_sel$MI_CART,
+                          parms = parms)
+  
+  # MICE-RF
+  imp_RANF <- impute_RANF(Z = Xy_mis,
+                          O = data.frame(!is.na(Xy_mis)),
+                          cond = cond,
+                          perform = parms$meth_sel$MI_RF,
+                          parms = parms)
+  
+  # MICE w/ true model
+  imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
+                                O = data.frame(!is.na(Xy_mis)),
+                                cond = cond,
+                                perform = parms$meth_sel$MI_OP,
+                                parms = parms)
+  
+  # missForest
+  imp_missFor <- impute_missFor(Z = Xy_mis, parms = parms)
+  
+  # mean imputation
+  Xy_mean <- Xy_mis
+  for (j in 1:ncol(Xy_mean)) {
+    ry <- !is.na(Xy_mean[, j])
+    mu_zj <- mean(Xy_mean[, j], na.rm = TRUE)
+    Xy_mean[!ry, j] <- mu_zj
+  }
+  
+  ## Convergence ------------------------------------------------------------- ##
+  
+  imp_values <- list(DURR_AL    = imp_DURR_ls$Xy_mis$imps,
+                     DURR_SI    = imp_DURR_ls$Xy_SI$imps,
+                     IURR_AL    = imp_IURR_ls$Xy_mis$imps,
+                     IURR_SI    = imp_IURR_ls$Xy_SI$imps,
+                     blasso     = imp_blasso$imps,
+                     bridge     = imp_bridge$imps,
+                     MI_PCA     = imp_PCA$mids,
+                     MI_CART    = imp_CART$imps,
+                     MI_RF      = imp_RANF$imps,
+                     MI_OP      = imp_MICE_OP$mids) 
+  
+  ## ----------------------------------------------------------------------- ##
+  
+  # ------------------- #
+  ## Analyse and pool ####
+  # ------------------- #
+  # For each imp method, analyse all datasets based on model defined in init.R
+  
+  # Create Lists of Imputed Datasets
+  # Single Imputation data
+  SI_dt_ls <- list(missFor = imp_missFor$dats,          
+                   mean    = Xy_mean,
+                   CC      = Xy_mis[rowSums(is.na(Xy_mis[, parms$z_m_id])) == 0, ],
+                   GS      = Xy)
+  # MI data
+  MI_dt_ls <- list(DURR_AL    = imp_DURR_ls$Xy_mis$dats,
+                   DURR_SI    = imp_DURR_ls$Xy_SI$dats,
+                   IURR_AL    = imp_IURR_ls$Xy_mis$dats,
+                   IURR_SI    = imp_IURR_ls$Xy_SI$dats,
+                   bridge  = imp_bridge$dats,
+                   blasso  = imp_blasso$dats,
+                   MI_PCA  = imp_PCA$dats,
+                   MI_CART = imp_CART$dats,
+                   MI_RF   = imp_RANF$dats,
+                   MI_OP   = imp_MICE_OP$dats)
+  
+  ## Create Scored data (needed to define analysis model)
+  
+  SC_dt_sn <- lapply(SI_dt_ls,
+                     scorify, 
+                     cond = cond, 
+                     parms = parms)
+  
+  SC_dt_mi <-  lapply(MI_dt_ls, 
+                      function(x){
+                        lapply(x, scorify, cond = cond, parms = parms)
+                      }
+  )
+  
+  ## Define Analysis models
+  SAT_mod_raw <- SAT_mod_write(parms$z_m_id) # raw data
+  CFA_mod_raw <- CFA_mod_wirte(Xy, 2, parms) # raw data
+  SAT_mod_sco <- SAT_mod_write(colnames(SC_dt_sn$GS)[1:parms$sc_n]) # score data
+  lm_formula <- "sc1 ~ -1 + sc2 + sc3"
+  
+  ## ----------------------------------------------------------------------- ##
+  
+  # ------------------- #
+  ## (1) SEM raw ####
+  # ------------------- #
+  
+  # Fit models
+  semR_fit_mi <- lapply(MI_dt_ls, 
+                        fit_sem, model = SAT_mod_raw)
+  
+  semR_fit_sn <- fit_sem(SI_dt_ls,
+                         model = SAT_mod_raw)
+  
+  # Pool paramters
+  semR_est <- sapply(semR_fit_mi[lapply(semR_fit_mi, length) != 0], 
+                     sem_pool_EST_f)
+  semR_ci  <- sapply(semR_fit_mi[lapply(semR_fit_mi, length) != 0], 
+                     sem_pool_CI_f)
+  semR_fmi <- sapply(semR_fit_mi[lapply(semR_fit_mi, length) != 0], 
+                     .fmi_compute)
+  
+  # Prep final (append single imputations, GS and CC results)
+  semR_est_all <- cbind(semR_est,
+                        sem_EST(semR_fit_sn))
+  
+  semR_ci_all <- cbind(semR_ci,
+                       sem_CI(semR_fit_sn))
+  
+  ## ----------------------------------------------------------------------- ##
+  
+  # ------------------- #
+  ## (2) CFA ####
+  # ------------------- #
+  
+  # Fit models
+  CFA_fit_mi <- lapply(MI_dt_ls, 
+                       fit_sem, 
+                       model = CFA_mod_raw, 
+                       std.lv = TRUE)
+  CFA_fit_sn <- fit_sem(SI_dt_ls,
+                        model = CFA_mod_raw,
+                        std.lv = TRUE)
+  
+  # Pool parameters
+  CFA_est_mi <- sapply(CFA_fit_mi[lapply(CFA_fit_mi, length) != 0], 
+                       sem_pool_EST_f)
+  CFA_ci_mi  <- sapply(CFA_fit_mi[lapply(CFA_fit_mi, length) != 0], 
+                       sem_pool_CI_f)
+  CFA_fmi <- sapply(CFA_fit_mi[lapply(CFA_fit_mi, length) != 0], 
+                    .fmi_compute)
+  
+  # Prep final (append single imputations, GS and CC results)
+  CFA_est_all <- cbind(CFA_est_mi,
+                       sem_EST(CFA_fit_sn))
+  CFA_ci_all <- cbind(CFA_ci_mi,
+                      sem_CI(CFA_fit_sn))
+  
+  ## ----------------------------------------------------------------------- ##
+  
+  # ------------------- #
+  ## (3) SEM on scored data ####
+  # ------------------- #
+  
+  # Fit models
+  semS_fit_mi <- lapply(SC_dt_mi,
+                        fit_sem, model = SAT_mod_sco)
+  semS_fit_sn <- fit_sem(SC_dt_sn,
+                         model = SAT_mod_sco)
+  
+  # Pool parameters (and print FMI)
+  semS_est <- sapply(semS_fit_mi[lapply(semS_fit_mi, length) != 0], 
+                     sem_pool_EST_f)[-c(3, 6),]
+  semS_ci  <- sapply(semS_fit_mi[lapply(semS_fit_mi, length) != 0], 
+                     sem_pool_CI_f)[-c(3, 6, 12, 15),]
+  semS_fmi <- sapply(semS_fit_mi[lapply(semS_fit_mi, length) != 0], 
+                     .fmi_compute)
+  
+  # Prep final (append single imputations, GS and CC results)
+  semS_est_all <- cbind(semS_est,
+                        sem_EST(semS_fit_sn)[-c(3, 6),])
+  
+  semS_ci_all <- cbind(semS_ci,
+                       sem_CI(semS_fit_sn)[-c(3, 6, 12, 15),])
+  
+  
+  ## ----------------------------------------------------------------------- ##
+  
+  # ------------------- #
+  ## (4) LM model ####
+  # ------------------- #
+  
+  # Fit models
+  lm_mi <- lapply(SC_dt_mi, 
+                  fit_lm, model = lm_formula)
+  lm_sn <- lapply(SC_dt_sn, lm, formula = lm_formula)
+  
+  # Pool paramters
+  lm_est <- sapply(lm_mi[lapply(lm_mi, length) != 0], 
+                   lm_pool_EST_f)
+  lm_ci  <- sapply(lm_mi[lapply(lm_mi, length) != 0], 
+                   lm_pool_CI_f)
+  lm_fmi <- sapply(lm_mi[lapply(lm_mi, length) != 0], 
+                   .fmi_compute)
+  
+  # Prep final (append single imputations, GS and CC results)
+  lm_est_all <- cbind(lm_est,
+                      lm_EST(lm_sn))
+  
+  lm_ci_all <- cbind(lm_ci,
+                     lm_CI(lm_sn))
+  
+  ## ----------------------------------------------------------------------- ##
+  
+  # ------------------- #
+  ## Times ####
+  # ------------------- #
+  
+  # aggregate imputation times
+  
+  imp_time <- list(DURR_AL    = imp_DURR_ls$Xy_mis$time,
+                   DURR_SI    = imp_DURR_ls$Xy_SI$time,
+                   IURR_AL    = imp_IURR_ls$Xy_mis$time,
+                   IURR_SI    = imp_IURR_ls$Xy_SI$time,
+                   bridge  = imp_bridge$time,
+                   blasso  = imp_blasso$time,
+                   MI_PCA  = imp_PCA$time,
+                   MI_CART = imp_CART$time,
+                   MI_RF   = imp_RANF$time,
+                   MI_OP   = imp_MICE_OP$time)
+  imp_time <- do.call(cbind, imp_time)[1,]
+  
+  ## ----------------------------------------------------------------------- ##
+  
+  # ------------------- #
+  ## Store Output ####
+  # ------------------- #
+
+  output <- list(cond         = cond,
+                 dat_full     = Xy,
+                 dat_miss     = Xy_mis,
+                 # SEM raw
+                 semR_EST     = semR_est_all,
+                 semR_CI      = semR_ci_all,
+                 # CFA raw
+                 CFA_EST      = CFA_est_all,
+                 CFA_CI       = CFA_ci_all,
+                 # SEM Scored
+                 semS_EST     = semS_est_all,
+                 semS_CI      = semS_ci_all,
+                 # LM Scored
+                 lm_EST       = lm_est_all,
+                 lm_CI        = lm_ci_all,
+                 # Other
+                 fmi          = list(semR = semR_fmi,
+                                     CFA  = CFA_fmi,
+                                     semS = semS_fmi,
+                                     lm   = lm_fmi),
+                 miss_descrps = miss_descrps,
+                 run_time_min = imp_time,
+                 run_time_prep = prepro_time_end - prepro_time_start,
+                 imp_values   = imp_values)[parms$store]
+  return(output)
+}
+

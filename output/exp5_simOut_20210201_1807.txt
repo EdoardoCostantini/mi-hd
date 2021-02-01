@@ -1,0 +1,18 @@
+SIMULATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+        Imputation methods are used on that condition-specific dataset.
+        Results are therefore given per dataset in condition
+
+------
+Starts at: 2021-02-01 18:07:18
+------
+
+2021-02-01 18:07:18 - Starts Repetition: 1
+2021-02-01 18:07:18 - Starts Repetition: 2
+
+------
+Ends at: 2021-02-01 18:07:19
+Run time: 0 h
+------
+
+2021-02-01 18:08:38 - Starts Repetition: 1

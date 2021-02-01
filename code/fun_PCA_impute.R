@@ -21,6 +21,7 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
   # O = as.data.frame(!is.na(Z)) # matrix index of observed values
   # DA = cond$int_da
   # Z = Xy_mis
+  # Z = Xy_SI
   # O = as.data.frame(!is.na(Z)) # matrix index of observed values
   # DA = FALSE
   
@@ -40,8 +41,8 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
       target <- which(colnames(Z) %in% parms$z_m_id)
       
       # Generate DA version of Z_aux if required
-      print("PCA Impute: Preprocessing")
       if(DA == TRUE){
+      print("PCA Impute: Data Augmenting")
         # Create an augmented Z dataset (inlcuding ALL interaction)
         print("PCA Impute: Creating Two Way Interactions")
         twoWays <- computeInteract(scale(Z,
@@ -61,19 +62,21 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
         pMat     <- quickpred(Z_aux, mincor = .3)
         ZDA_mids <- mice(Z_aux,
                          m               = 1, 
-                         maxit           = parms$SI_iter,
+                         maxit           = 100,
                          predictorMatrix = pMat,
-                         printFlag       = FALSE,
+                         # printFlag       = FALSE,
+                         printFlag       = TRUE,
                          ridge           = cond$ridge,
                          method          = "pmm")
+        
         Z_out <- complete(ZDA_mids)
         
         # Define Single Imputed data as the auxiliary set
         Z_aux[, -target] <- Z_out[, -target]
         
-        # Define dataset for output (will be used by other imputation methods)
+        # Define dataset for output
         Z_out <- Z_aux
-        
+
       } else {
         Z_out <- Z_aux # Need it for output consistency
         
@@ -85,11 +88,11 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
         Z_pca <- res.famd$ind$coord[, res.famd$eig[, 3] <= parms$PCA_pcthresh*100]
         
       } else {
-        
+      # If there are continuous and dichotomous variables, then use prcomp
         # Create Model matrix for PCA extraction
         Z_PC <- model.matrix(~ ., Z_aux[, -target])[, -1]
         
-        # Clean mode matrix
+        # Clean model matrix
         emptyvars <- names(which(apply(Z_PC, 2, var) == 0))
         Z_PC_clean <- Z_PC[, !colnames(Z_PC) %in% emptyvars]
         
@@ -116,7 +119,7 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
       imp_PCA_mids <- mice::mice(Z_input,
                                  m      = parms$mice_ndt,
                                  maxit  = parms$mice_iters,
-                                 printFlag = FALSE,
+                                 # printFlag = FALSE,
                                  ridge  = cond$ridge,
                                  method = methods)
       

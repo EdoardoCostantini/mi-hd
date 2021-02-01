@@ -49,7 +49,6 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
           # Monitor progres
           print(paste0("DURR - Chain: ", cc, "/", parms$chains, 
                        "; Iter: ", m, "/", parms$iters))
-          # pb <- txtProgressBar(min = 0, max = p_imp, style = 3)
           
           for (j in 1:p_imp) {
             J <- which(colnames(Zm) %in% p_imp_id[j])
@@ -61,10 +60,6 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
             # Select data
             y_obs_bs <- Zm_bs[O[idx_bs, J], J]  # z_j_obs
             y_mis_bs <- Zm_bs[!O[idx_bs, J], J] # zm_mj [useless]
-            # X_obs_bs <- as.matrix(Zm_bs[O[idx_bs, J], -J]) # Wm_j_obs
-            #   X_obs_bs <- apply(X_obs_bs, 2, as.numeric) # makes dicho numbers
-            # X_mis <- as.matrix(Zm[!O[, J], -J]) # Wm_mj
-            #   X_mis <- apply(X_mis, 2, as.numeric)
             
             X_obs_bs <- Zm_bs[O[idx_bs, J], -J] # Wm_j_obs
               X_obs_bs <- model.matrix(~ ., X_obs_bs)[, -1]
@@ -79,7 +74,6 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
               regu.mod <- rr_est_lasso(X = X_obs_bs, y = y_obs_bs, 
                                        parms = parms, fam = glmfam)
             }
-  
             ## Elastic net
             if(reg_type == "el"){
               regu.mod <- rr_est_elanet(X = X_obs_bs, y = y_obs_bs, 
@@ -101,7 +95,7 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
             # Append imputation
             Zm[is.na(Z[, J]), J] <- zm_j
             imps[[j]][m, ] <- zm_j # save iteration imputation thing
-            
+
             # Monitor Progress
             # setTxtProgressBar(pb, j)
         }
