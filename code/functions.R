@@ -1828,9 +1828,10 @@ plot_fg <- function(dt,
                     dt_reps = 500,
                     ci_lvl = .95,
                     axis.name.x = NULL,
-                    plot_cond = "(empty)",
+                    plot_cond = NULL,
                     plot_name = NULL,
                     y_axLab = TRUE,
+                    summy = FALSE,
                     meth_compare) {
   ## Function inputs
   ## Generic
@@ -1843,6 +1844,7 @@ plot_fg <- function(dt,
   # parPlot <- list(means = 1:6,
   #                 variances = 7:12,
   #                 covariances = 13:27)
+  # summy = TRUE # requires summary or not of stats
   # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
   #                      "MI_PCA",
   #                      "MI_CART", "MI_RF", "missFor", "CC"))
@@ -1866,15 +1868,37 @@ plot_fg <- function(dt,
   # covas = 21:65
   
   ## Prep data for plot
-  
   dt_preEdit <- lapply(parPlot, function(x){
     lapply(dt, function(d){
       d[x, meth_compare]
     })
   })
-
-  dt_edit <- Reduce(c, dt_preEdit)
   
+  # Apply if summary version required
+  if(summy == TRUE){
+  dt_preEdit <- lapply(parPlot, function(x){
+    lapply(dt, function(d){
+      temp <- d[x, meth_compare]
+      as.data.frame(
+        sapply(temp, function(j){ summary(j)[c(1, 4, 6)] })
+      )
+    })
+  })
+  }
+  
+  n_parms <- length(parPlot) # number of parameters
+  n_conds <- length(dt_preEdit[[1]]) # number of conditions
+  n_situa <- n_conds * n_parms # number of combinations/situations/plots
+  
+  # Bring list to 1 level
+  dt_edit <- Reduce(c, dt_preEdit)
+
+  # Count the number of estimates (for each situation)
+  n_estXcond <- lapply(dt_edit, nrow)
+  
+  # Count the number of estimates (for each parameter type)
+  n_estXparm <- unlist(n_estXcond[seq(1, n_situa, n_conds)])
+
   # Make names prettier
   dt_edit <- lapply(dt_edit, function(x){
     colnames(x) <- sub("_la", "", colnames(x))
@@ -1912,9 +1936,9 @@ plot_fg <- function(dt,
   conds <- do.call(c, conds_list)
   
   # Grid Plot Factor 2
-  
+  # parT_index <- (sapply(parPlot, length)+1)*length(dt)*length(meth_compare)
+  parT_index <- (n_estXparm + 1) * length(dt)*length(meth_compare)
   parT <- lapply(1:length(parPlot), function(x){
-    parT_index <- (sapply(parPlot, length)+1)*length(dt)*length(meth_compare)
     rep(x, parT_index[x])
   })
   parT <- Reduce(c, parT)
@@ -1929,7 +1953,7 @@ plot_fg <- function(dt,
   plot_steps <- vector("list", 3)
   plot_ybreaks <- vector("list", 3)
   plot_hlines <- vector("list", 3)
-  for(i in 1:length(dt_preEdit)){
+  for(i in 1:n_parms){
     ref_data <- dt_preEdit[[i]][[1]]
     step_size[[i]]   <- (
       nrow(ref_data) + # number of parameters
@@ -1973,7 +1997,6 @@ plot_fg <- function(dt,
     plot_xlabels <- as.character(round((plot_xbreaks+95)/100, 2))
     plot_vlines <- c(-5, low_thr, hig_thr)
   }
-  
   if(type == "ciw"){
     plot_limits <- c(0, max(dt_edit$value))
     
@@ -1992,7 +2015,6 @@ plot_fg <- function(dt,
     plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
     plot_hlines <- plot_xbreaks[2]
   }
-  
   if(type == "bias_raw"){
     maxB <- max( abs(dt_edit$value) )
     plot_xbreaks <- c(-maxB, -maxB/2, 
@@ -2012,7 +2034,6 @@ plot_fg <- function(dt,
     plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
     plot_hlines <- c(plot_xbreaks[2], plot_xbreaks[4])
   }
-  
   if(type == "bias_sd"){
     # Plot Limits
     plot_xlim   <- c(-1, 1)
@@ -2023,28 +2044,50 @@ plot_fg <- function(dt,
     plot_vlines <- c(-.4, .4)
   }
   
+  # Colors and texts
+  font.plot        <- "Arial" # font for the whole plot
+  x.axis.text.size <- 7.5  # Scale of plotted numbers
+  y.axis.text.size <- 7.5 # Imputation Methods names
+  grid.text.size   <- 10 # Condition + Parameter type
+  segme.thick      <- .5 # thickness of lines reporting results
+  segme.color      <- "black" # color  of lines reporting results
+  h.lines.thick    <- .10 # thickness of lines separating methods
+  h.lines.color    <- "black" # color of lines separating methods
+  v.lines.thick    <- .375 # thickness of reference lines
+  v.lines.color    <- "darkgray" # color of reference lines
+  v.lines.type     <- "dashed" # line type of reference lines
+  
   # Plot
   p <- ggplot(dt_edit, aes(x = value, y = id)) +
     # Title and axis labels
     labs(title = plot_name,
          x     = axis.name.x, 
          y     = element_blank()) +
-    theme(plot.title   = element_text(size = 6.5, 
+    theme(plot.title   = element_text(#family = font.plot,
+                                      size = 6.5, 
                                       face = "plain", 
                                       hjust = .5,
                                       vjust = .5),
           axis.title.x = element_text(size = 5,
-                                      face = "plain"),
-          axis.text.x  = element_text(size = 5,
+                                      face = "plain",
+                                      family = font.plot),
+          # Scale of plotted numbers
+          axis.text.x  = element_text(#family = font.plot,
+                                      size = 5,
                                       angle = 90,
                                       vjust = .5),
-          axis.text.y  = element_text(size = 5),
+          # Imputation Methods names
+          axis.text.y  = element_text(#family = font.plot,
+                                      size = y.axis.text.size),
           plot.margin  = unit(c(0, .0, .0, .0), "cm"),
           # Background
+          panel.background = element_rect(fill = "white", colour = "white"),
+          panel.border     = element_rect(colour = "lightgray", fill = NA),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
-          # Facet Related
-          strip.text = element_text(size = 10,
+          # Condition + Parameter type
+          strip.text = element_text(#family = font.plot,
+                                    size = grid.text.size,
                                     face = "plain",
                                     margin = unit(c(.10, .10, .10, .10), "cm")) 
     )
@@ -2056,8 +2099,8 @@ plot_fg <- function(dt,
       geom_segment(aes(xend = 0, 
                        yend = id),
                    data = dt_edit,
-                   size = .3,
-                   color = "darkgray")
+                   size = segme.thick,
+                   color = segme.color)
   }
   if(length(levels(dt_edit$parT)) > 2){
     p <- p +
@@ -2065,61 +2108,72 @@ plot_fg <- function(dt,
       geom_segment(aes(xend = 0, 
                        yend = id),
                    data = dt_edit[dt_edit$parT != "covariances", ],
-                   size = .3,
-                   color = "darkgray") +
+                   size = segme.thick,
+                   color = segme.color) +
     # For covariances (lighter tone)
       geom_segment(aes(xend = 0, 
                        yend = id),
                    data = dt_edit[dt_edit$parT == "covariances", ],
-                   size = .2,
-                   color = "gray")  
+                   size = segme.thick,
+                   color = segme.color)  
   }
   # Axis
   p <- p +
     # X Axis
     scale_x_continuous(breaks = plot_xbreaks,
                        labels = plot_xlabels) +
-    
     geom_vline(xintercept = plot_vlines,
-               size = .375,
-               linetype = "dashed", 
-               color = "black") +
-    coord_cartesian(xlim = plot_xlim)
+               size       = v.lines.thick,
+               linetype   = v.lines.type, 
+               color      = v.lines.color) +
+    coord_cartesian(xlim  = plot_xlim)
   
   # Add Facet and y lines
   if(length(parPlot) == 1){
     p <- p + 
       facet_grid_custom(rows = vars(parT),
                         cols = vars(conds),
-                        scales = "free", scale_overrides = list(
+                        scales = "free", 
+                        scale_overrides = list(
                           scale_override(1, scale_y_continuous(breaks = plot_ybreaks[[1]],
                                                                labels = plot_ylabels))
                         )) +   
       # Horizontal lines (method separation)
-      geom_hline(data = data.frame(yint = plot_hlines[[1]], parT = levels(dt_edit$parT)[[1]]),
-                 aes(yintercept = yint), size = .25, color = "black")
+      geom_hline(data = data.frame(yint = plot_hlines[[1]], 
+                                   parT = levels(dt_edit$parT)[[1]]),
+                 aes(yintercept = yint), 
+                 size = h.lines.thick, 
+                 color = h.lines.color)
   }
   if(length(parPlot) == 2){
     p <- p + 
       facet_grid_custom(rows = vars(parT),
                         cols = vars(conds),
-                        scales = "free", scale_overrides = list(
+                        scales = "free", 
+                        scale_overrides = list(
                           scale_override(1, scale_y_continuous(breaks = plot_ybreaks[[1]],
                                                                labels = plot_ylabels)),
                           scale_override(2, scale_y_continuous(breaks = plot_ybreaks[[2]],
                                                                labels = plot_ylabels))
                         )) +   
       # Horizontal lines (method separation)
-      geom_hline(data = data.frame(yint = plot_hlines[[1]], parT = levels(dt_edit$parT)[[1]]),
-                 aes(yintercept = yint), size = .25, color = "black") +
-      geom_hline(data = data.frame(yint = plot_hlines[[2]], parT = levels(dt_edit$parT)[[2]]),
-                 aes(yintercept = yint), size = .25, color = "black")
+      geom_hline(data = data.frame(yint = plot_hlines[[1]], 
+                                   parT = levels(dt_edit$parT)[[1]]),
+                 aes(yintercept = yint), 
+                 size = h.lines.thick, 
+                 color = h.lines.color) +
+      geom_hline(data = data.frame(yint = plot_hlines[[2]], 
+                                   parT = levels(dt_edit$parT)[[2]]),
+                 aes(yintercept = yint), 
+                 size = h.lines.thick, 
+                 color = h.lines.color)
   }
   if(length(parPlot) == 3){
     p <- p + 
       facet_grid_custom(rows = vars(parT),
                         cols = vars(conds),
-                        scales = "free", scale_overrides = list(
+                        scales = "free", 
+                        scale_overrides = list(
                           scale_override(1, scale_y_continuous(breaks = plot_ybreaks[[1]],
                                                                labels = plot_ylabels)),
                           scale_override(2, scale_y_continuous(breaks = plot_ybreaks[[2]],
@@ -2128,12 +2182,21 @@ plot_fg <- function(dt,
                                                                labels = plot_ylabels))
                         )) +   
       # Horizontal lines (method separation)
-      geom_hline(data = data.frame(yint = plot_hlines[[1]], parT = levels(dt_edit$parT)[[1]]),
-                 aes(yintercept = yint), size = .25, color = "black") +
-      geom_hline(data = data.frame(yint = plot_hlines[[2]], parT = levels(dt_edit$parT)[[2]]),
-                 aes(yintercept = yint), size = .25, color = "black") +
-      geom_hline(data = data.frame(yint = plot_hlines[[3]], parT = levels(dt_edit$parT)[[3]]),
-                 aes(yintercept = yint), size = .25, color = "black")
+      geom_hline(data = data.frame(yint = plot_hlines[[1]], 
+                                   parT = levels(dt_edit$parT)[[1]]),
+                 aes(yintercept = yint), 
+                 size = h.lines.thick, 
+                 color = h.lines.color) +
+      geom_hline(data = data.frame(yint = plot_hlines[[2]], 
+                                   parT = levels(dt_edit$parT)[[2]]),
+                 aes(yintercept = yint), 
+                 size = h.lines.thick, 
+                 color = h.lines.color) +
+      geom_hline(data = data.frame(yint = plot_hlines[[3]], 
+                                   parT = levels(dt_edit$parT)[[3]]),
+                 aes(yintercept = yint), 
+                 size = h.lines.thick, 
+                 color = h.lines.color)
   }
   
   # Visualize Plot

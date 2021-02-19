@@ -1555,33 +1555,6 @@ runCell_add <- function(cond, parms, rep_status, data_source, md_pat) {
   semS_ci_all <- cbind(semS_ci,
                        sem_CI(semS_fit_sn)[-c(3, 6, 12, 15),])
   
-  
-  ## ----------------------------------------------------------------------- ##
-  
-  # ------------------- #
-  ## (4) LM model ####
-  # ------------------- #
-  
-  # Fit models
-  lm_mi <- lapply(SC_dt_mi, 
-                  fit_lm, model = lm_formula)
-  lm_sn <- lapply(SC_dt_sn, lm, formula = lm_formula)
-  
-  # Pool paramters
-  lm_est <- sapply(lm_mi[lapply(lm_mi, length) != 0], 
-                   lm_pool_EST_f)
-  lm_ci  <- sapply(lm_mi[lapply(lm_mi, length) != 0], 
-                   lm_pool_CI_f)
-  lm_fmi <- sapply(lm_mi[lapply(lm_mi, length) != 0], 
-                   .fmi_compute)
-  
-  # Prep final (append single imputations, GS and CC results)
-  lm_est_all <- cbind(lm_est,
-                      lm_EST(lm_sn))
-  
-  lm_ci_all <- cbind(lm_ci,
-                     lm_CI(lm_sn))
-  
   ## ----------------------------------------------------------------------- ##
   
   # ------------------- #
@@ -1620,14 +1593,10 @@ runCell_add <- function(cond, parms, rep_status, data_source, md_pat) {
                  # SEM Scored
                  semS_EST     = semS_est_all,
                  semS_CI      = semS_ci_all,
-                 # LM Scored
-                 lm_EST       = lm_est_all,
-                 lm_CI        = lm_ci_all,
                  # Other
                  fmi          = list(semR = semR_fmi,
                                      CFA  = CFA_fmi,
-                                     semS = semS_fmi,
-                                     lm   = lm_fmi),
+                                     semS = semS_fmi),
                  miss_descrps = miss_descrps,
                  run_time_min = imp_time,
                  run_time_prep = prepro_time_end - prepro_time_start,

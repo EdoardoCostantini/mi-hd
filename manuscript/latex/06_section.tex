@@ -1,61 +1,130 @@
-\section{Conclusions}
+\section{Discussion}
 
-	We investigated a variety of high-dimensional imputation approaches that can deal with large numbers 
-	of possible predictors in the imputation models.
-	These methods have the potential to simplify the decisions social scientists have to make when defining
-	which predictors to include in their imputation models.
-	The methods performances in terms of estimation bias and confidence interval coverage of true parameter values were 
-	compared with both synthetic and real survey data studies.
+We investigated the relative performances of seven approaches to high-dimensional Multiple Imputation for general 
+missing data patterns that do not require researchers making decisions on which variables to include in the imputation models. 
+In this section, we summarize how the methods performed in our numerical set ups and comment on their strengths and weaknesses.
 
-	We found that \emph{bridge}, a very popular approach to deal with large sets of predictors in the imputation models,
-	is inadequate to deal with strictly high dimensional data set ups ($n < p$).
-	The use of regularized regression within the MICE framework is a powerful tool to automate decisions regarding which
-	variables to include in the imputation models, especially when used exclusively for model trimming (IURR).
-	However, the great performance of these methods comes to a large computational cost that can translates to 
-	prohibitive long imputation procedures in real data research.
+\paragraph{IURR and DURR}
+	Overall, both Direct and Indirect use of regularized regression within MICE (DURR and IURR) returned low bias and good 
+	CI coverage for item means and variances in the simulation studies, and for the regression coefficients in the 
+	resampling study.
+	IURR in particular excelled with some of the smallest estimation biases for item means, variances and 
+	regression coefficients, while DURR struggled with large biases for item variances in the high-$pm$-high-dimensionality 
+	condition in experiment 1.
 
-	Finally, the use of PCA to reduce the dimensionality of the data, as a pre-processing step followed by regular 
-	low-dimensional MICE imputation strategies, proved to be a fast and effective approach.
-	It was especially effective in preserving relationships between variables with missing values:
-	in simulation study 1 and 2, it returned negligible covariance biases when all other methods failed to.
-	However, its application on real survey data and the need for improvements to imputation accuracy suggest 
-	further research is needed.
+	For item covariances, IURR delivered noticeably better performances than all other methods, except MI-PCA.
+	In the high-$pm$-high-dimensionality conditions, most MI methods, including DURR, resulted in PRBs larger than 20\% in size, 
+	and CICs well below 0.9, while the negative covariance estimation bias introduced by IURR in the simulation 
+	studies was just slightly larger than the 10\% threshold and the CI coverage was just around 0.9.
 
-\paragraph{Limitations and future directions}
+	The performances showed by DURR and IURR come at a large computational cost:
+	in our resampling study set up, they took significantly more time to perform on average than all other methods.
 
-	As this work aimed at comparing current implementations of different methods, some limitations
-	to the scope of the simulation and resampling studies were imposed by the current state of development of 
-	the different methods.
-	For example, both IURR/DURR and MI-PCA allow imputation of any type of data:
-	IURR and DURR have been developed for categorical data imputation \citep{dengEtAl:2016},
-	and MI-PCA can be performed with any standard imputation model for categorical data.
-	However, blasso has not been formally developed for multi-categorical imputation target variables yet, 
-	which limited the study to working with missing values on variables that are either continuous in nature 
-	or usually considered as such in practice.
-	IURR, DURR and MI-PCA could have performed better had they been used in their ordered categorical data
-	implementations, but to maintain a fair comparison ground with blasso, they were implemented with the
-	assumption that the imputed variables are continuous and normally distributed.
+\paragraph{Blasso}
+	Overall, Blasso showed good performances in terms of bias, keeping the absolute PRBs for item means 
+	and variances below $10\%$ in the high-dimensional conditions of experiment 1 and 2.
+	While PRBs were high for covariances in these experiments, blasso remained one of the top performer
+	in the resampling study, where the overall pattern of regression coefficients PRBs was quite similar
+	to that of MI-OP.
 
-	Furthermore, in real survey data, the missing data mechanism might be non-linear, which would require
-	including interactions between auxiliary variables and polynomial terms in the imputation models,
-	and would lead to increase dimensionality even more.
-	This factor was not taken into consideration as the inclusion of interactions and squared terms in the 
-	imputation models has as not been developed to the same extent across the different methods.
-	However, all of the high-dimensional imputation methods considered have great potential to allow the 
-	specification of much more complex response mechanisms than traditional methods ones.
+	However, in terms of confidence interval coverage, blasso showed poor performances resulting in either CI 
+	under-coverage or CI over-coverage of true parameter values in almost all high-dimensional conditions, 
+	across the three different experimental set ups.
+	Furthermore, blasso did not fair particularly well in allowing an unbiased recovery of the latent structure 
+	in our second simulation study, as the PRBs for factor loadings were the highest among the MI methods.
 
-	Both IURR and DURR could have implemented with different types of penalty formulations.
-	Along with the traditional lasso penalty, \cite{zhaoLong:2016} used elastic net penalty \citep{zouHastie:2005} 
-	and adaptive lasso \citep{zou:2006}.
-	Although no substantial performance differences between penalty specifications for IURR and DURR emerged 
-	from the joint work of \cite{zhaoLong:2016} and \cite{dengEtAl:2016}, the impact of different types of 
-	regularized regression was not explored in the present study. 
+	As to the method specification, using \cite{hans:2010}'s Bayesian Lasso requires the specification of 6 
+	hyper-parameters, which introduces more researcher degrees of freedom and demands more familiarity with 
+	Bayesian analysis.
+	Although there are recommendations in published work on what values to use for these hyper-parameters,
+	we have not investigated the sensibility of results to different values.
+	
+	Alternative implementations of Bayesian Lasso could be used within a MICE framework.
+	In particular, the well known Bayesian Lasso proposed by \cite{parkCasella:2008} is a viable option.
+	However, the sparsity parameter introduced by \cite{hans:2010} is what allows for a strictly high-dimensional 
+	($p > n$) data imputation.
 
-	MI-PCA specification required making a decision on the number of components to extract from the auxiliary 
-	variables.
-	In this paper, the authors decided to retain the first components that explained 50\% of the 
-	total variance in the auxiliary variables, which allowed for substantial dimensionality reduction, 
-	without relying on too few components.
-	However, this decision is arbitrary and its effect on the imputation accuracy remains an interesting 
-	topic for future research, as it was not explored in this study.
+\paragraph{Bridge}
+	In both the simulation and resampling study the use of a fixed ridge penalty within the imputation
+	algorithm to facilitate the inversion of the observed data matrix manifested the same behaviour:
+	the method was competitive when many predictors were included in the imputation model, but the problem
+	remained low dimensional, while it led to extreme bias and unacceptable confidence interval coverage, 
+	in all the high dimensional conditions.
+
+\paragraph{MI-PCA}
+	Overall, MI-PCA showed low biases for item means and covariances in both simulation 1 and 2.
+	It was the only method showing acceptably low bias and close-to-nominal CI coverage of the true
+	covariance values in the most challenging conditions of experiment 1 and 2.
+
+	MI-PCA showed poor performances in terms of estimation bias of the item variances.
+	In the high-$pm$-high-dimensionality condition of experiment 1, MI-PCA led to item variance PRBs larger 
+	than 20\%.
+	The bias for the item variances that afflicted MI-PCA in the multivariate-normal set up appeared to be related to 
+	the strength of the latent structure: when the latent structure was absent (experiment 1) or weak (experiment 2, 
+	conditions 5 to 8, factor loadings between .5 and .6) item variances were biased, especially in the high-dimensional
+	conditions; 
+	when the latent structure was prominent (experiment 2, conditions 1 to 4), the variances were estimated with 
+	negligible bias, even in the high-dimensional conditions.
+	One possible explanation for this is related to the CFA factor loadings specification. 
+	When data was generated with a CFA model with factor loadings close to 1 (experiment 2, conditions 1 to 4), variables 
+	measuring the same latent constructs became highly correlated.
+	In the resampling study, there were 10 variables with missing values, measuring 2 latent constructs.
+	These items were directly included in the imputation models, and not part of the set of auxiliary variables from which
+	the Principal Components were extracted.
+	So while the PC extraction picked up the correlates of missingness in the auxiliary set, the high correlation
+	between the variables directly included in the imputation models improved the accuracy of the imputation and
+	reduced the item variance estimation bias.
+
+	MI-PCA performed acceptably in the resampling study, with sufficiently low biases and close to nominal 
+	CI coverage for the focal parameters and the overall model parameter assessment.
+	However, the great recovery of bivariate relationships manifested in experiment 1 and 2 (low covariance bias) 
+	did not directly translate in particularly low biases for regression coefficients in the resampling study.
+	PCA is a tool to find a low-dimensional representation of a data set summarizing in a few components as much 
+	unique variation on each dimension of the data as possible.
+	As such, PC extraction is likely negatively affected by the nature of survey data where items are 
+	usually discrete, and their possible values are only a few integer values in relatively small ranges.
+	This key aspect might be the root of the different performances obtained by MI-PCA in the simulation and the 
+	resampling study.
+
+\paragraph{MI-CART and MI-RANF}
+	Overall, MI tree-based methods performed acceptably in terms of bias, although they rarely excelled,
+	and, as all other methods except MI-PCA, they struggled with large covariance biases.
+	Furthermore, when looking at the focal parameter PRBs in the resampling study, MI-RF was the worst 
+	performing MI method, being outperformed even by CC.
+
+	In terms of CI coverage, these methods showed mild-to-extreme under-coverage of most parameters in 
+	the high-$pm$-high-dimensionality.
+	However, the deterioration in performance was led by the higher proportion of missing cases rather than 
+	the increased data dimensionality.
+
+	It is also interesting that it made little difference whether the imputation used CART or Random Forests 
+	as building blocks, and, when the difference was there, it was in favour of the use of the simpler single CART.
+	
+	The use of Random Forests within a MICE algorithm could have been implemented differently.
+	We decided to use \cite{dooveEtAl:2014}'s versions as they are the ones implemented in the popular 
+	\emph{mice} R package, while other versions are not currently supported by active R packages.
+	For example, \cite{shahEtAl:2014} independently developed another integration of Random Forests
+	within the MICE algorithm, which was available in the now archived R package \emph{CALIBERrfimpute}
+	\citep{CALIBERrfimpute}.
+	We are not aware of any evidence or theoretical reason motivating substantial differences in how 
+	the two methods would perform, but we did not verify this empirically.
+
+\paragraph{Single Data Strategies}
+	Overall, missForest showed good performances in terms of bias with PRBs smaller than $10\%$ in size for
+	all parameters except item covariances.
+	However, it resulted in severe confidence interval under-coverage of the true parameter values in virtually 
+	all of our set ups.
+	Under-coverage coupled with unbiased estimates for univariate parameters means that too little uncertainty 
+	is incorporated in the imputation procedure, which is to be expected from a single imputation approach.
+
+	Complete Case analysis showed the worst bias performances, with absolute PRBs often bigger than 20\%, 
+	while occasionally demonstrating good coverage of the true parameter values.
+	This result should be interpreted in light of two considerations.
+	First, coverage close to nominal is a desirable feature of an imputation method only if it accompanied by 
+	unbiased parameter estimates, otherwise it is an indication of an imputation algorithm confidently 
+	performing poor imputation.
+	Second, Complete Case analysis is by definition forced to used a smaller sample size than all other methods,
+	which inevitably results in inflated standard errors and larger confidence intervals that are more likely to 
+	cover the true parameter values, even if their estimate is biased.
+
 

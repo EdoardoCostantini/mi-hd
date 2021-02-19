@@ -3,13 +3,11 @@
 ### Author:   Edoardo Costantini
 ### Created:  2021-01-29
 
-# Data Generation Latent Structure ----------------------------------------
+# Bridge is faster without robustness checks ------------------------------
 
   rm(list=ls())
   source("./init_general.R")
   source("./exp2_init.R")
-
-#  > Bridge is faster without robustness checks ---------------------------
 
   cond <-  conds[2, ]
 
@@ -58,3 +56,42 @@
                               robust = TRUE)
   bridge_PRE$time
 
+# Computation Time --------------------------------------------------------
+
+  out <- readRDS("../output/exp5_simOut_20210201_1850.rds")
+  
+  iters_test <- out$parms$iters
+  iters_goal <- 60
+    
+  sapply(1:out$parms$dt_rep, function(cond_i){
+    # cond_i <- 1
+    imp_time <- t(sapply(1:nrow(out$conds), function(i){
+      out[[cond_i]][[i]]$run_time_min
+    }))
+    
+    prp_time <- sapply(1:nrow(out$conds), function(i){
+      out[[cond_i]][[i]]$run_time_prep # not exactly check what it is
+    })
+    
+    sum( rowSums(imp_time * iters_goal/iters_test) ) / 60
+  })
+  
+  # Estimate for LISA Cluster
+  # Lisa Cluster computes cpu hours as: 
+  # number of nodes *  number of cores *  job time in hours.
+  n_nodes <- 4
+  n_cores <- 16 # fixed ?
+  job_time <- 25 # hours
+  n_nodes * n_cores * job_time
+  
+  # I need to perform 1000 dt reps
+  1e3
+  # And I can perform 15 of them (16 cores - 1) per node
+  1e3 / 15
+  # So I need about 67 nodes
+  
+  n_nodes <- 70
+  n_cores <- 16 # fixed ?
+  job_time <- 25 # hours
+  n_nodes * n_cores * job_time
+  

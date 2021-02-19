@@ -22,13 +22,12 @@
   res <- exp2_res
   
   # Plot Sizes Decisions
-  gp_width <- 13
-  gp_height <- 25
+  gp_width <- 15
+  gp_height <- 20
   sp_width <- 3.75
-  sp_height <- 3
+  sp_height <- 6
   
-# Plots -------------------------------------------------------------------
-  
+# Conds
   res$conds
   cond_names <- paste0(letters[1:nrow(res$conds)], ") ",
                        "Condition ", 1:nrow(res$conds), ": ",
@@ -37,7 +36,12 @@
                        "pm = ",  res$conds$pm)
   data.frame(res$conds, cond_names)
   
-# > Bias (Facet grid) -----------------------------------------------------
+# Select conditions to print
+  conds_select <- 1:4
+  conds_select <- 5:8
+
+# Bias (Facet grid) -------------------------------------------------------
+
   meth_compare = rev(c("DURR_la", "IURR_la", 
                        "blasso", "bridge",
                        "MI_PCA",
@@ -46,11 +50,34 @@
                        "CC",
                        "MI_OP"))
   
-  # Select conditions to print
-  conds_select <- 1:4
-  conds_select <- 5:8
   
-  # Plot
+# > Summary version ####
+  pf <- plot_fg(dt = lapply(1:length(res$semR),
+                            function(x) data.frame( res$semR[[x]]$bias_per))[conds_select],
+                type = "bias",
+                parPlot = list(means = 1:10,
+                               variances = 11:20,
+                               covariances = 21:65),
+                dt_reps = 500,
+                ci_lvl = .95,
+                axis.name.x = NULL,
+                plot_cond = NULL,
+                plot_name = NULL,
+                y_axLab = TRUE,
+                summy = TRUE,
+                meth_compare = meth_compare)
+  pf
+  # Save Plot
+  ggsave(file = paste0("../output/graphs/",
+                       "exp2_semR_bias_",
+                       paste0(range(conds_select), collapse = ""),
+                       "_summy",
+                       ".pdf"),
+         width = sp_width*4, height = sp_height*3,
+         units = "cm",
+         pf)
+  
+# > Supplementary Material ####
   pf <- plot_fg(dt = lapply(1:length(res$semR),
                             function(x) data.frame( res$semR[[x]]$bias_per))[conds_select],
                 type = "bias",
@@ -65,31 +92,18 @@
                 y_axLab = TRUE,
                 meth_compare = meth_compare)
   pf
-  # plot_fg(dt = lapply(1:length(res$semR),
-  #                           function(x) data.frame( res$semR[[x]]$bias_sd))[conds_select],
-  #               type = "bias_sd",
-  #               parPlot = list(means = 1:10,
-  #                              variances = 11:20,
-  #                              covariances = 21:65),
-  #               dt_reps = 500,
-  #               ci_lvl = .95,
-  #               axis.name.x = NULL,
-  #               plot_cond = NULL,
-  #               plot_name = NULL,
-  #               y_axLab = TRUE,
-  #               meth_compare = meth_compare)
   
   # Save Plot
   ggsave(file = paste0("../output/graphs/",
                        "exp2_semR_bias_",
                        paste0(range(conds_select), collapse = ""),
                        ".pdf"),
-         # width = gp_height, height = gp_width,
-         width = sp_width*4, height = sp_height*3,
+         width = gp_width, height = gp_height,
          units = "cm",
          pf)
   
-# > CI (Facet grid) -------------------------------------------------------
+# CI (Facet grid) ---------------------------------------------------------
+
   meth_compare = rev(c("DURR_la", "IURR_la", 
                        "blasso", "bridge",
                        "MI_PCA",
@@ -97,12 +111,32 @@
                        "missFor", 
                        "CC",
                        "MI_OP"))
-  
-  # Select condition to print
-  conds_select <- 1:4
-  conds_select <- 5:8
-  
-  # Plot
+
+# > Summary version ####
+  pf <- plot_fg(dt = lapply(1:length(res$semR),
+                            function(x) data.frame( res$semR[[x]]$ci_cov))[conds_select],
+                type = "ci",
+                parPlot = list(means = 1:10,
+                               variances = 11:20,
+                               covariances = 21:65),
+                dt_reps = 1e3,
+                ci_lvl = .95,
+                axis.name.x = NULL,
+                plot_cond = NULL,
+                plot_name = NULL,
+                y_axLab = TRUE,
+                summy = TRUE,
+                meth_compare = meth_compare)
+  pf
+  ggsave(file = paste0("../output/graphs/",
+                       "exp2_semR_ci_",
+                       paste0(range(conds_select), collapse = ""),
+                       "_summy",
+                       ".pdf"),
+         width = sp_width*4, height = sp_height*3,
+         units = "cm",
+         pf)
+# > Supplementary Material ####
   pf <- plot_fg(dt = lapply(1:length(res$semR),
                             function(x) data.frame( res$semR[[x]]$ci_cov))[conds_select],
                 type = "ci",
@@ -117,18 +151,16 @@
                 y_axLab = TRUE,
                 meth_compare = meth_compare)
   pf
-  
-  # Save plot
   ggsave(file = paste0("../output/graphs/",
                        "exp2_semR_ci_",
                        paste0(range(conds_select), collapse = ""),
                        ".pdf"),
-         # width = gp_height, height = gp_width,
-         width = sp_width*4, height = sp_height*3,
+         width = gp_width, height = gp_height,
          units = "cm",
          pf)
 
-# > CFA (Facet grid) ------------------------------------------------------
+# CFA (Facet grid) --------------------------------------------------------
+  
   meth_compare = rev(c("DURR_la", "IURR_la", 
                        "blasso", "bridge",
                        "MI_PCA",
@@ -137,6 +169,7 @@
                        "CC",
                        "MI_OP"))
   
+  # > Summary version ####
   # Conditona 1-4
   pt.1 <- plot_fg(dt = lapply(1:length(res$CFA),
                               function(x) data.frame( res$CFA[[x]]$bias_per))[1:4],
@@ -144,10 +177,7 @@
                   parPlot = list(Loadings = 1:10),
                   dt_reps = 1e3,
                   ci_lvl = .95,
-                  axis.name.x = NULL,
-                  plot_cond = NULL,
-                  plot_name = NULL,
-                  y_axLab = TRUE,
+                  summy = TRUE,
                   meth_compare = meth_compare)
   
   # Conditions 5-8
@@ -157,10 +187,7 @@
                 parPlot = list(Loadings = 1:10),
                 dt_reps = 1e3,
                 ci_lvl = .95,
-                axis.name.x = NULL,
-                plot_cond = NULL,
-                plot_name = NULL,
-                y_axLab = TRUE,
+                summy = TRUE,
                 meth_compare = meth_compare)
   
   # Combine Elements
@@ -179,8 +206,57 @@
   pf
   
   # Save Plot
-  ggsave(file = "../output/graphs/exp2_CFA_lambda_BPR.pdf",
+  ggsave(file = "../output/graphs/exp2_CFA_lambda_BPR_summy.pdf",
          # width = gp_width*2/3, height = gp_height*2/3,
          width = sp_width*4, height = sp_height*2,
          units = "cm",
          pf)
+
+  # > Supplementary Material ####
+  # Conditona 1-4
+  pt.1 <- plot_fg(dt = lapply(1:length(res$CFA),
+                              function(x) data.frame( res$CFA[[x]]$bias_per))[1:4],
+                  type = "bias",
+                  parPlot = list(Loadings = 1:10),
+                  dt_reps = 1e3,
+                  ci_lvl = .95,
+                  axis.name.x = NULL,
+                  plot_cond = NULL,
+                  plot_name = NULL,
+                  y_axLab = TRUE,
+                  meth_compare = meth_compare)
+  
+  # Conditions 5-8
+  pt.2 <- plot_fg(dt = lapply(1:length(res$CFA),
+                              function(x) data.frame( res$CFA[[x]]$bias_per))[5:8],
+                  type = "bias",
+                  parPlot = list(Loadings = 1:10),
+                  dt_reps = 1e3,
+                  ci_lvl = .95,
+                  axis.name.x = NULL,
+                  plot_cond = NULL,
+                  plot_name = NULL,
+                  y_axLab = TRUE,
+                  meth_compare = meth_compare)
+  
+  # Combine Elements
+  pf <- cowplot::ggdraw() +
+    cowplot::draw_plot(pt.1, 
+                       x = 0, y = .5, 
+                       width = 1, height = .5) +
+    cowplot::draw_plot(pt.2, 
+                       x = 0, y = 0, 
+                       width = 1, height = .5) +
+    cowplot::draw_plot_label(label = c("(A)", "(B)"), 
+                             x = c(0, 0), 
+                             y = c(1, .5), 
+                             size = 5,
+                             fontface = "bold")
+  pf
+  
+  # Save Plot
+  ggsave(file = "../output/graphs/exp2_CFA_lambda_BPR.pdf",
+         width = gp_width, height = gp_height*2/3,
+         units = "cm",
+         pf)
+  

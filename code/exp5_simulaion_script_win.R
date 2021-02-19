@@ -7,7 +7,7 @@ source("./init_general.R")
 source("./exp5_init.R")
 
 ## Create a cluster object:
-clus <- makeCluster(2)
+clus <- makeCluster(5)
 
 ## Two different ways to source a script on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))

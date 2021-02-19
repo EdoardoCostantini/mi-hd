@@ -1,0 +1,120 @@
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{../../output/graphs/exp1_bias_summy.pdf}
+\caption{\label{fig:exp1bias}
+Percent Relative Bias (PRB) for item means, variances, and covariances.
+For every method, single horizontal lines, representing the PRB of a parameter estimate on
+a single variable (or pair of variables), combine to form larger horizontal bars giving an
+aggregate account of how each method performed across multiple variables with missing values.
+}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{../../output/graphs/exp1_CI_summy.pdf}
+\caption{\label{fig:exp1cir}
+Confidence Interval Coverage (CIC) for item means, variances, and covariances.
+For every method, single horizontal lines, representing the CIC of a parameter estimate on
+a single variable (or pair of variables), combine to form larger horizontal bars giving an
+aggregate account of how each method performed across multiple variables with missing values.
+}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics{../../output/graphs/exp2_semR_bias_14_summy.pdf}
+\caption{PRBs for the means, variances and covariances (PRB) for condition 1 to 4.
+For every method, single horizontal lines, representing the PRB of a parameter estimate on
+a single variable (or pair of variables), combine to form larger horizontal bars giving an
+aggregate account of how each method performed across multiple variables with missing values.
+}
+\label{fig:exp2bias14}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics{../../output/graphs/exp2_semR_ci_14_summy.pdf}
+\caption{CIC for the means, variances, and covariances for condition 1 to 4.
+For every method, single horizontal lines, representing the CIC of a parameter estimate on
+a single variable (or pair of variables), combine to form larger horizontal bars giving an
+aggregate account of how each method performed across multiple variables with missing values.
+}
+\label{fig:exp2cir14}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics{../../output/graphs/exp2_semR_bias_58_summy.pdf}
+\caption{PRBs for the means, variances and covariances (PRB) for condition 1 to 4.
+For every method, single horizontal lines, representing the PRB of a parameter estimate on
+a single variable (or pair of variables), combine to form larger horizontal bars giving an
+aggregate account of how each method performed across multiple variables with missing values.
+}
+\label{fig:exp2bias58}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics{../../output/graphs/exp2_semR_ci_58_summy.pdf}
+\caption{CIC for the means, variances, and covariances for condition 1 to 4.
+For every method, single horizontal lines, representing the CIC of a parameter estimate on
+a single variable (or pair of variables), combine to form larger horizontal bars giving an
+aggregate account of how each method performed across multiple variables with missing values.
+}
+\label{fig:exp2cir58}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\includegraphics{../../output/graphs/exp2_CFA_lambda_BPR_summy.pdf}
+\caption{
+Percent Relative Bias (PRB) for the factor loadings in conditions 1 to 4 (panel A)
+and conditions 5 to 8 (panel B).
+Within each panel, for every method, single horizontal lines report the PRB of the
+factor loading estimation for each item with missing values.
+}
+\label{fig:exp2fl14}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+[h]
+\centering
+\includegraphics{\pathFIG/exp4_imp_bias.pdf}
+\caption{PRB in the estimation of parameters of interest $\beta^{(1)}_{1}$ and $\beta^{(2)}_{1}$,
+in model 1 and 2 respectively}
+\label{fig:exp4bias}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+[h]
+\centering
+\includegraphics{\pathFIG/exp4_imp_ci.pdf}
+\caption{CIC in the estimation of parameters of interest $\beta^{(1)}_{1}$ and $\beta^{(2)}_{1}$,
+in model 1 and 2 respectively}
+\label{fig:exp4ci}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{\pathFIG/exp4_imp_bias_allParms_m2.pdf}
+\caption{PRBs for all the model parameters in model 2.
+The order of the bars is based on the absolute value of the PRBs.
+The values for the intercept, the focal regression coefficient, and the regression coefficient with which most
+methods struggle (Largest Bias) are highlighted}
+\label{fig:exp4_bias_allP}
+\end{figure*}
+\begin{figure*}[hbt]
+\ifnextchar[{\eatarg}{}
+
+\centering
+\includegraphics{\pathFIG/exp4_imp_ci_allParms_m2.pdf}
+\caption{CIC for all model parameter in model 2.
+Bars are sorted in by ascending value.
+The values for the intercept, the focal regression coefficient, and the regression coefficient with which most
+methods struggle (Largest Bias) are highlighted}
+\label{fig:exp4_ci_allP}
+\end{figure*}

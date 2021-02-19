@@ -1,28 +1,23 @@
-\section{Imputation methods and Algorithms}
+\section{Imputation methods and Algorithms} \label{secMethods}
 
 Consider a dataset $\bm{Z}$ of dimensionality $n \times p$, with $n$ observations (rows) and 
 $p$ variables (columns).
-Assume there are $t$ $(t<p)$ variables with missing values in $\bm{Z}$ and these $t$ variables
-are part of some substantive model of scientific interest (e.g. some linear regression model).
-An imputation procedure targeting these $t$ variables could be used to allow fitting the 
-substantive model without discarding data units (rows).
-
-Let $z_j$ denote one of these $t$ variables, and let $z_{j, obs}$ and $z_{j, mis}$ denote its 
-observed and missing components.
-Let $\bm{Z}_{-j}$ be the collection of $p-1$ variables in $\bm{Z}$ excluding $z_j$, and denote
-$\bm{Z}_{-j, obs}$ and $\bm{Z}_{-j, mis}$ the components of $\bm{Z}_{-j}$ corresponding to the
+Assume that the first $t$ $(t \leq p)$ variables of $\bm{Z}$ have missing values.
+These $t$ variables are part of some substantive model of scientific interest (e.g. a linear 
+regression model), and are target of imputation.
+The subset of $\bm{Z}$ containing variables $z_1$ to $z_t$ is referred to as the $n \times t$ matrix $\bm{T}$.
+The remaining $n \times (p-t)$ subset of $\bm{Z}$ contains variables that are not target of imputation.
+These variables constitute a pool of possible \emph{auxiliary} variables that could be used to improve 
+the imputation procedure.
+Let $\bm{A}$ denote this set of auxiliary variables so that $\bm{Z} = (T, A)$.
+For a given $z_j$ variable, with $j = (1, ..., p)$, denote its observed and missing components 
+by $z_{j, obs}$ and $z_{j, mis}$, respectively.
+Let $\bm{Z}_{-j} = (z_1, ..., z_{j-1}, z_{j+1}, ..., z_{p})$ be the collection of $p-1$ variables in 
+$\bm{Z}$ excluding $z_j$.
+Denote $\bm{Z}_{-j, obs}$ and $\bm{Z}_{-j, mis}$ the components of $\bm{Z}_{-j}$ corresponding to the
 data units in $z_{j, obs}$ and $z_{j, mis}$, respectively.
 
-$\bm{Z}_{-j}$ contains a $p-t$ subset of variables that are not target of imputation 
-and constitute a pool of possible \emph{auxiliary} variables that could be used to improve the 
-imputation procedure.
-Let $\bm{A}$ denote this set of auxiliary variables.
-
 \subsection{Multiple Imputation by Chained Equations}
-
-The general Multiple Imputation framework considered here is the Fully Conditional Specification of
-imputation models as implemented in the Multiple Imputation by Chained Equations algorithm
-proposed by \cite{mice}.
 
 Assume that $\bm{Z}$ is the result of $n$ random samples from a multivariate distribution defined by 
 an unknown set of parameters $\bm{\theta}$.
@@ -31,123 +26,122 @@ from conditional distributions of the form $P(z_{1}|\bm{Z}_{-1}, \bm{\theta}_{1}
 $P(z_{t}|\bm{Z}_{-t}, \bm{\theta}_{t})$, where $\bm{\theta}_{1}$ $...$ $\bm{\theta}_{t}$ are imputation model 
 parameters specific to the conditional densities of each variable with missing values.
 
-More precisely, the MICE algorithm takes the form of a Gibbs sampler where the $m$-th iteration $(m = 1, ..., M)$
-successively draws, for each $j$-th target variable ($j = 1, ..., t$), from the following distributions:
-
+More precisely, the MICE algorithm takes the form of a Gibbs sampler where the $m$th iteration $(m = 1, ..., M)$
+successively draws, for each $j$th target variable ($j = 1, ..., t$), from the following distributions:
+%
 	\begin{align}
 	\hat{\bm{\theta}}_{j}^{(m)} &\sim 
-		p(\bm{\theta}_j | \bm{z}_{j, obs}, \bm{Z}_{-j, obs}^{(m)}) 
+		p(\bm{\theta}_j | z_{j, obs}, \bm{Z}_{-j, obs}^{(m)}) 
 		\label{eq_pd}\\
 	z_{j, mis}^{(m)} &\sim 
 		p(z_{j, mis} | \bm{Z}_{j, mis}^{(m)}, \hat{\bm{\theta}}_{j}^{(m)}) 
-		\label{eq_ppd}
+		\label{eq_ppd},
 	\end{align}
-
-$\hat{\bm{\theta}}_{j}^{(m)}$ and $z_{j, mis}^{(m)}$ are draws from the parameters full conditional posterior 
+%
+where $\hat{\bm{\theta}}_{j}^{(m)}$ and $z_{j, mis}^{(m)}$ are draws from the parameters full conditional posterior 
 distribution \eqref{eq_pd} and the missing data posterior predictive distribution \eqref{eq_ppd}, respectively.
 After convergence, $D$ different sets of values sampled from the predictive distribution are kept as imputations 
 and $D$ differently imputed data sets are obtained. 
-Any substantive model can then be fit to each dataset, and estimates can be pooled appropriately.
+Any substantive model can then be fit to each dataset, and estimates can be pooled appropriately using Rubin's rules
+\citep{rubin:1987}.
 
 Generally speaking, for each variable $z_j$ target of imputation, a researcher needs to define a set of 
-observed variables that will be included in $\bm{Z}_{-j, obs}^{(m)}$ and $\bm{Z}_{j, mis}^{(m)}$.
-The high-dimensional imputation methods compared in this paper and described below follow this general framework,
-but allow the researcher to include all the information registered in the observed data in the imputation model.
-Each of these methods differ in the building blocks they use to define the distributions in \eqref{eq_pd} and 
-\eqref{eq_ppd}.
+observed variables that will be included in $\bm{Z}_{-j}^{(m)}$.
+The high-dimensional imputation methods compared in this paper and described below follow the general MICE framework,
+but they differ in the elementary imputation methods they use to define equation \eqref{eq_pd} and \eqref{eq_ppd}.
+Each of them has a different way of processing the large number of auxiliary variables provided to the 
+imputation algorithm to allow a maximal inclusive strategy while avoiding its usual obstacles.
 
-\subsubsection{MICE with Bayesian Ridge (bridge)}
-	The \emph{bridge} imputation procedure uses as building block the Bayesian imputation under the normal 
-	linear model, with standard non-informative priors for each parameter, as presented by \cite[p. 68, 
-	algorithm 3.1]{vanBuuren:2012}.
+\subsubsection{MICE with fixed ridge penalty (bridge)}
+	This approach uses as elementary imputation method the Bayesian imputation under the normal linear model 
+	procedure as presented by \cite{vanBuuren:2012} (p. 68, algorithm 3.1).
 
 	In this approach, the sampling of each $\hat{\bm{\theta}}_{j}^{(m)}$ in \eqref{eq_pd} relies on the inversion
 	of the cross-product of the observed data matrix $\bm{Z}_{j, obs}^{(m)}$.
-	By adding a biasing ridge penalty $\kappa$, singularity of this matrix is circumvented and the sampling scheme is 
-	possible even if $\bm{Z}_{j, obs}^{(m)}$ is high-dimensional or afflicted by high collinearity.
+	By adding a biasing ridge penalty $\kappa$, singularity of the cross-product matrix is circumvented and the 
+	sampling scheme is possible even if $\bm{Z}_{j, obs}^{(m)}$ is afflicted by high collinearity and $n$ is not 
+	substantially larger than $p$.
 
 	The value of $\kappa$ is usually chosen close to zero (e.g. $\kappa = 0.0001$), as values larger than $0.1$ 
-	may introduce systematic bias. 
-	However, larger values may be necessary to invert the observed data matrices in certain scenarios.
+	may introduce systematic bias \citep[p. 68]{vanBuuren:2018}.
+	However, larger values may be necessary to invert the observed data matrix cross-product in certain scenarios.
 	In the present work, the value of $\kappa$ was decided by means of a cross-validation procedure
 	described below.
 
 \subsubsection{MICE with Bayesian lasso (blasso)}
-	A Bayesian Lasso linear model for data analysis is a regular Bayesian multiple regression with prior 
-	specifications for the regression coefficients that induces some form of shrinkage toward 0 of the sampled 
-	parameters values \citep{parkCasella:2008, hans:2009} effectively performing a form of Bayesian model 
-	selection.
-
-	Given data with sample size $n$, consider the dependent variable $y$ and a set of predictors $X$, the Bayesian Lasso 
-	linear regression specification, used within the blasso imputation algorithm, is that specified by \cite{hans:2010}:
-
+	A high-dimensional Bayesian lasso imputation algorithm was proposed by \cite{zhaoLong:2016}, but it was tested only
+	in a univariate missing data context.
+	The method relies on the Bayesian lasso model, a regular Bayesian multiple regression with prior specifications 
+	that allow to interpret the mode of the posterior distribution of the regression coefficients as lasso estimates 
+	\citep{parkCasella:2008, hans:2009}.
+	Given data with sample size $n$, consider the dependent variable $y$ and a set of predictors $X$.
+	The Bayesian Lasso linear regression specification we used within the blasso imputation algorithm is that specified 
+	by \cite{hans:2010}:
+%
 	\begin{align}
 	% Likelihood equation
-		p(y|\beta, \sigma^2, \tau) &= N(y|X\beta, \sigma^2I_n) \label{eqn:dens} \\
+		p(y|\beta, \sigma^2, \tau) &= \textrm{N}(y|X\beta, \sigma^2I_n) \label{eqn:dens} \\
 	% Prior for regression coefficients
 		p(\beta_j|\tau, \sigma^2, \rho) &= 
 			(1 - \rho) \delta_0 \beta_j +
-			\rho \left( \frac{\tau}{2\sigma} \right) \times
-			exp \left( \frac{-\tau \norm{\beta}_1}{\sigma} \right) \label{eqn:bprior} \\
+			\rho \left( \frac{\tau}{2\sigma} \right) \times \\
+			\textrm{exp} \left( \frac{-\tau \norm{\beta}_1}{\sigma} \right) \label{eqn:bprior} \\
 	% Hyperprior for error variance
-		\sigma^2 &\sim IG(a, b) \label{eqn:sigprior} \\
+		\sigma^2 &\sim \textrm{Inverse-Gamma}(a, b) \label{eqn:sigprior} \\
 	% Hyperprior for penalty parameter
-		\tau &\sim G(r, s) \label{eqn:tauprior} \\
+		\tau &\sim \textrm{Gamma}(r, s) \label{eqn:tauprior} \\
 	% Hyperprior for sparsity parameter
-		\rho &\sim Beta(g, h) \label{eqn:rhoprior}
+		\rho &\sim \textrm{Beta}(g, h) \label{eqn:rhoprior}
 	\end{align}
-	
-	The expression in \eqref{eqn:dens} represents the density function, of a multivariate normal 
-	random variable with mean $X\beta$ and covariance matrix $\sigma^2I_n$, evaluated at $y$.
-	The prior expressed in \eqref{eqn:bprior} is the expansion on the \cite{parkCasella:2008} double exponential prior
-	developed by \cite{hans:2010} to accommodate for uncertainty regarding, not only the value of the regression
-	coefficients, but also the model sparsity.
-	Finally, equations \eqref{eqn:sigprior} to \eqref{eqn:rhoprior} represent hyper priors for the residual variance $\sigma^2$,
-	the penalty parameter $\tau$, and the sparsity parameter $\rho$.
+%	
+	The expression in equation \eqref{eqn:dens} represents the density function of a multivariate normal random variable 
+	with mean $X\beta$ and covariance matrix $\sigma^2I_n$, evaluated at $y$.
+	The prior expressed in equation \eqref{eqn:bprior} is the expansion on the \cite{parkCasella:2008} double exponential 
+	prior developed by \cite{hans:2010} to accommodate for uncertainty regarding the value of the regression coefficients 
+	and the model sparsity.
+	Finally, equations \eqref{eqn:sigprior} to \eqref{eqn:rhoprior} represent hyper priors for the residual variance 
+	$\sigma^2$, the penalty parameter $\tau$, and the sparsity parameter $\rho$.
+	The blasso imputation algorithm used here is a standard MI MCMC sampler that replaces equation \eqref{eq_pd} with the 
+	full conditional posterior distributions derived by \citet{hans:2010}, based of the prior specifications in equations
+	\eqref{eqn:sigprior} to \eqref{eqn:rhoprior}, and uses posterior parameters draws to sample plausible values from the 
+	predictive distributions of the missing data for equation \eqref{eq_ppd}.
 
-	The Bayesian Lasso imputation algorithm (blasso) used here is a standard Multiple Imputation MCMC sampler 
-	that replaces \eqref{eq_pd} with the full conditional distributions computed by \citet{hans:2010}, 
-	based of the prior specifications in \eqref{eqn:sigprior} to \eqref{eqn:rhoprior}.
-	Posterior parameters draws are then used to sample plausible values from the predictive distributions of 
-	the missing data.
-
-	The R code to perform blasso imputation is heavily based on the Bayesian Lasso R Package \emph{blasso} 
-	\citep{blasso} and can be found on the author's GitHub page.
-	\url{https://github.com/EdoardoCostantini/imputeHD-comp}.
+	The R code to perform blasso imputation is based on the Bayesian Lasso R Package \emph{blasso} \citep{blasso} and can 
+	be found on the author's GitHub page. \url{https://github.com/EdoardoCostantini/imputeHD-comp}.
 	For a detailed description of the algorithm for Bayesian Lasso Multiple Imputation in a univariate
 	missing data context we recommend reading \cite{zhaoLong:2016}.
 
 \subsubsection{Direct Use of Regularized Regression (DURR)}
 	As proposed by \cite{zhaoLong:2016} and \cite{dengEtAl:2016}, Frequentist Regularized Regression can be 
 	directly used in a MICE algorithm to perform multiple imputation of high dimensional data.
-	At iteration $m$, for a target variable $\bm{z}_j$, the DURR algorithm uses these building blocks within 
-	the MICE framework:
+	At iteration $m$, for a target variable $\bm{z}_j$, the DURR algorithm uses as building blocks of the 
+	MICE framework the following two steps:
 
 	\begin{itemize}
 
 	\item Generate a bootstrap sample $\bm{Z}^{*(m)}$ by sampling with replacement from $\bm{Z}$,
 		and train a regularized linear regression model (such as Lasso regression) with
-		$\bm{z}_{j,obs}$ as outcome and $\bm{Z}_{-j,obs}^{*(m)}$ as predictors.
+		$\bm{z}_{j,obs}^{*(m)}$ as outcome and $\bm{Z}_{-j,obs}^{*(m)}$ as predictors.
 		This produces a set of parameter estimates (regression coefficients and error variance)
-		$\hat{\bm{\theta}}_{j}^{(m)}$ that can be considered as samples from \eqref{eq_pd}.
+		$\hat{\bm{\theta}}_{j}^{(m)}$ that can be considered as a sample from equation \eqref{eq_pd}.
 
-	\item Predict $\bm{z}_{j,mis}$, based on $\bm{Z}_{-j, mis}^{*(m)}$ and $\hat{\bm{\theta}}_{j}^{(m)}$, 
-		to obtain draws from the posterior predictive distribution of the missing data \eqref{eq_ppd}.
+	\item Predict $\bm{z}_{j,mis}$, based on $\bm{Z}_{-j, mis}$ and $\hat{\bm{\theta}}_{j}^{(m)}$, 
+		to obtain draws from the posterior predictive distribution of the missing data equation 
+		\eqref{eq_ppd}.
 
 	\end{itemize}
 
 \subsubsection{Indirect Use of Regularized Regression (IURR)}
-	While DURR performs simultaneously model trimming and parameter estimation in \eqref{eq_pd}, another 
-	approach is to use regularized regression exclusively for model trimming, and to follow it with a 
-	standard multiple imputation procedure \citep{zhaoLong:2016, dengEtAl:2016}. 
-	At iteration $m$, the IURR algorithm performs the following steps for each
-	target variable:
-
+	While DURR performs simultaneously model trimming and parameter estimation in equation \eqref{eq_pd}, 
+	another approach is to use regularized regression exclusively for model trimming, and to follow it 
+	with a standard multiple imputation procedure \citep{zhaoLong:2016, dengEtAl:2016}.
+	At iteration $m$, the IURR algorithm performs the following steps for each target variable:
+%
 	\begin{itemize}
-
-	\item Fit a multiple linear regression using a regularized regression method with $\bm{z}_{j,obs}$ as dependent 
-	 	variable and $\bm{Z}_{-j,obs}^{(m)}$ as predictors 
-		(compared to DURR, the original data is used, not a bootstrap sample).
+%
+	\item Fit a multiple linear regression model using a regularized regression method with $\bm{z}_{j,obs}$ as 
+		dependent variable and $\bm{Z}_{-j,obs}^{(m)}$ as predictors (compared to DURR, the original data are 
+		used, not a bootstrap sample).
 		In this model, the regression coefficients that are \emph{not} shrunk to 0 identify the active 
 		set of variables that will be used as predictors in the actual imputation model.
 	
@@ -155,24 +149,25 @@ Each of these methods differ in the building blocks they use to define the distr
 		regression of $\bm{z}_{j,obs}$ on the active set of predictors in $\bm{Z}_{-j,obs}^{(m)}$ and
 		draw a new value of these coefficients by sampling from a multivariate normal distribution
 		centered around these MLEs
-
+%
 		\begin{equation}\label{eq_MLEpd}
-		(\hat{\bm{\theta}}_{j}^{(m)}, \hat{\sigma}_{j}^{(m)}) \sim N(\hat{\bm{\theta}}_{MLE}^{(m)}, \hat{\bm{\Sigma}}_{MLE}^{(m)})
+		(\hat{\bm{\theta}}_{j}^{(m)}, \hat{\sigma}_{j}^{(m)}) \sim N(\hat{\bm{\theta}}_{MLE}^{(m)}, 
+			\hat{\bm{\Sigma}}_{MLE}^{(m)})
 		\end{equation}
-
-		so that \eqref{eq_MLEpd} corresponds to \eqref{eq_pd} in the general MICE framework.
+%
+		so that equation \eqref{eq_MLEpd} corresponds to equation \eqref{eq_pd} in the general MICE framework.
 
 	\item Impute $\bm{z}_{j,mis}$ by sampling from the posterior predictive distribution based 
 		on $\bm{Z}_{j,mis}^{(m)}$ and the parameters posterior draws $(\hat{\bm{\theta}}_{j}^{(m)}, 
 		\hat{\sigma}_{j}^{(m)})$.
-
+%
 	\end{itemize}
 
 \subsubsection{MICE with PCA (MI-PCA)}
-	By extracting Principal Components from the auxiliary variables, it is possible to summarise the 
-	information contained in this set with just a few components, and then perform a standard MICE algorithm 
+	By extracting Principal Components from the auxiliary variables, it is possible to summarise the information 
+	contained in this set with just a few components, and then use them as predictors in a standard MICE algorithm 
 	in a low dimensional setting.
-	The MI-PCA imputation procedure can be summarized as follows:
+	The Multiple Imputation with Principal Component Analysis (MI-PCA) imputation procedure can be summarized as follows:
 
 	\begin{itemize}
 
@@ -180,64 +175,65 @@ Each of these methods differ in the building blocks they use to define the distr
 		in the auxiliary variables $\bm{A}$, and collect them in a new data matrix $\bm{A}^{'}$;
 	\item Create a new data matrix $\bm{Z}^{'}$ by replacing the subset of auxiliary variables $\bm{A}$ 
 		with $\bm{A}^{'}$
-	\item Use the standard MICE algorithm with the Bayesian imputation under the normal linear model, using 
-		standard non-informative priors \citep[p. 68, algorithm 3.1]{vanBuuren:2012}
-		as building block to obtain multiply imputed datasets from the low dimensional $\bm{Z}^{'}$.
+	\item Use the standard MICE algorithm with the Bayesian imputation under the normal linear model 
+		\citep[p. 68, algorithm 3.1]{vanBuuren:2012} as elementary imputation method to obtain multiply 
+		imputed datasets from the low dimensional $\bm{Z}^{'}$.
 	\end{itemize}
 
 	Note that if missing values are present in the set of auxiliary variables, one can fill them in with a 
-	stochastic single imputation algorithm of choice as the goal of said imputation would be to simply
-	allow PCs extraction and not inferential. 
+	stochastic single imputation (SI) algorithm of choice.
+	MI is preferred to SI because it accounts for the uncertainty regarding the missing values when producing 
+	standard errors.
+	As the extraction of PCs does not require the estimation of standard errors, SI suffices.
 	This method is inspired by \cite{howardEtAl:2015} and the \emph{PcAux} R-package \citep{PcAux} that 
 	implements and developed its ideas.
 	
 \subsubsection{MICE with regression trees (MI-CART and MI-RANF)}
-	MI-CART is a method that uses as building blocks for the MI Gibbs sampler non parametric classification
-	and regression trees (CART).
-	At the $m$-th iteration, for a target variable $z_j$, a CART predictive model is trained on the observed 
-	part of the data, which corresponds to equation \ref{eq_pd} in the general MICE framework.
-	This results in a tree with several leaves, each containing a subset of $z_{j, obs}$. 
-	All units with a missing value in $z_{j}$ are then put down this tree and end up in one of the leaves.
-	Finally, one value is randomly selected from the subset of $z_{j, obs}$ in this leaf and used for imputation,
-	a step that corresponds to \ref{eq_ppd} in the general MICE framework.
+	The MI-CART imputation method \citep{burgetteReiter:2010} is a MICE algorithm that uses classification and regression 
+	trees (CART) to define the conditional distributions used in the MI Gibbs sampler.
+	Given an outcome variable $y$ and a set of predictors $X$, CART is a nonparametric recursive partitioning technique 
+	that models the relationship between $y$ and $X$ by sequentially splitting observations in subsets of units with 
+	relatively homogeneous $y$ values.
+	At every splitting stage, a CART algorithm searches through all predictor variables in $X$ to find the best binary 
+	partitioning rule to predict $y$/minimize a homogeneity criterion.
+	The collection of binary splits can be visually represented by a decision tree structure where each terminal 
+	node (or \emph{leaf}) represents the conditional distribution of $y$ for units that satisfy the splitting rules.
 
-	The implementation of MI-CART used in this paper corresponds to the one presented in 
-	\cite[p. 95, algorithm 1]{dooveEtAl:2014}
-	and the \emph{impute.mice.cart()} R function from the mice package.
+	In MI-CART, at the $m$-th iteration for a target variable $z_j$, a CART model to predict $z_{j, obs}$ based on 
+	$\bm{Z}_{-j, obs}^{(m)}$ is trained.
+	For each missing value, a draw form the predictive distribution is taken by sampling from the elements of the terminal 
+	node where the unit of interest belongs to based on $\bm{Z}_{-j, mis}^{(m)}$.
+	The implementation of MI-CART used in this paper corresponds to the one presented by \cite{dooveEtAl:2014}
+	(p. 95, algorithm 1) and the \emph{impute.mice.cart()} R function from the \emph{mice} package.
 
-	The Multiple Imputation with Random Forest algorithm (MI-RANF) is only slightly different from MI-CART, 
-	with the main difference residing in how the donors pool is defined.
-	In MI-RANF, the building block for equation \ref{eq_pd} involves: (1) drawing $k$ bootstrap samples from 
-	the complete dataset; 
-	(2) fitting one tree for every one of them, with random features selection; 
-	(3) determining in which leaf each observation in $z_{j, mis}$ ends up according to the all of the $k$ trees.
-	Subsequently, for \ref{eq_ppd}, the MI-RANF algorithm takes all donors from the $k$ trees and randomly 
-	samples one imputation for each $z_{j, mis}$.
-
-	For greater details on the algorithms, the reader may consult algorithm A.1 in 
-	\cite[p. 103, appendix B]{dooveEtAl:2014}.
+	In MI-RANF, at the $m$-th iteration for a target variable $z_j$, $k$ bootstrap samples are drawn from the complete 
+	dataset and $k$ single trees are fitted to each using a small group of input variables to find the best split at each node.
+	All trees are used to compose the pool of candidates from which imputations are drawn.
+	Bootstrapping and random input selection introduce the model and imputation uncertainty in the imputation procedure,
+	as required by a proper MI procedure.
+	For greater details on the algorithms, the reader may consult \cite{dooveEtAl:2014} (algorithm A.1, p. 103).
 	The programming of the algorithm was heavily inspired by the \emph{impute.mice.rf()} function in the 
 	R package \emph{mice}.
 
 \subsubsection{MICE optimal model (MI-OP)}
-	MI-OP is an ideal specification of the MICE algorithm that uses as building block a low dimensional univariate 
-	Bayesian imputation under the normal linear model, that includes as predictors in the imputation models
-	the following types of variables:
-
+	When dealing with a large set of possible predictors for the imputation models, a common recommendation in the MI 
+	literature is to decide which predictors to include by following three criteria \citep[p. 168]{vanBuuren:2012}:
 	\begin{enumerate}
 
-	\item all the variables in the complete-data analysis models;
-	\item all the variables that are related to the non-response;
-	\item all the variables are correlated with the target variables.
+	\item include all the variables in the complete-data analysis models;
+	\item include all the variables that are related to the non-response;
+	\item include all the variables are correlated with the target variables.
 
 	\end{enumerate}
 
-	Following these criteria is one of the most commonly recommended strategies to deal with a large 
-	number of possible predictors for the imputation models \citep[p. 168]{vanBuuren:2012}.
-	In practice, researchers can never be sure requirement 2 is fulfilled, as there is no way to know exactly 
+	In practice, researchers can never be sure that the second requirement is entirely met, as there is no way to know exactly 
 	which variables are responsible for missingness.
-	The MI-OP approach used here remains \emph{ideal} in the sense that it is not entirely applicable in practice, 
-	but it offers an optimal reference point.
+	However, if we knew which predictors were essential for the imputation models, we could use this information to specify 
+	optimal imputation models.
+	With simulated data, we have perfect knowledge over which variables are involved in the missing data mechanisms.
+	MI-OP is an ideal specification of the MICE algorithm that uses as elementary imputation strategy a low dimensional 
+	univariate Bayesian imputation under the normal linear model and uses this knowledge to include only the relevant 
+	predictors in the imputation models.
 	
 \subsection{Single data strategies}
 
@@ -253,28 +249,22 @@ Each of these methods differ in the building blocks they use to define the distr
 	which is a popular non-parametric imputation approach (which does not suffer from the problem of unidentified 
 	imputation models) that can accommodate for mixed data type of the missing variables, and has been robustly
 	implemented in a popular R-package \citep{missForest}.
-	The approach consists of an iterative imputation that first trains a RF on observed values, and then uses it 
-	to predict the missing values.
+	The approach consists of an iterative imputation that first trains a random forest on observed values, and then 
+	uses it to impute the missing values by averaging the predictions from its different trees.
 	
 	This is a single imputation method and we do not expect it will perform well for inferential tasks,
 	at least compared to the other high dimensional MI methods discussed here.
-	Nevertheless, it is interesting to include it as a low performing reference point.
 
 \paragraph{Complete Case Analysis}
 	Most data analysis software either ignore the presence of missing values or default to list wise deletion: only 
 	complete cases are used for the analysis \citep{R:2020, pandas:2020}.
-	As a default behaviour of most analysis tools, Complete Cases Analysis remains one of the most popular missing 
-	data treatments in the social sciences, despite its renown flaws (\cite[p. 8]{rubin:1987}, \cite[p. 9]{vanBuuren:2012}, 
-	\cite{baraldiEnders:2010}).
-	Therefore, this method was included as a low performing reference point.
-\iffalse 
-\paragraph{Mean Imputation}
-	In the social sciences, and especially in the analysis of social surveys, imputing the mean of the observed values 
-	on a variable is still a quite popular choice in dealing with missing data. 
-	Therefore, we include this method to portray a picture of the possible improvements the different high-dimensional
-	imputation algorithms can achieve.
-\fi	
+	As a default behaviour of most analysis tools, Complete Cases Analysis remains a popular missing data treatments 
+	in the social sciences, despite its known flaws (\citeauthor{rubin:1987}, \citeyear{rubin:1987}, p. 8; 
+	\citeauthor{vanBuuren:2012}, \citeyear{vanBuuren:2012}, p. 9, \citeauthor{baraldiEnders:2010}, 
+	\citeyear{baraldiEnders:2010}).
+	Therefore, this method was included as a reference point.
+
 \paragraph{Gold Standard}
-	Finally, the substantive models are fitted to the true fully observed data. 
+	Finally, the substantive models were fitted to the fully observed data. 
 	Results obtained in this fashion are referred to here and in the results tables as the Gold Standard method.
 	They represent the counterfactual analysis that would have been performed if there had been no missing data.

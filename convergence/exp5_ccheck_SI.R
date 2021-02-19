@@ -76,18 +76,24 @@ stopCluster(clus)
 
 ## Check plots latent variable by latent variable
 
-item_list <- list(LV1 = 1:5, # Core MAR latent var
-                  LV2 = (2-1) * 5+(1:5), # Block A MAR latent var
+item_list <- list(# LV1 = 1:5, # Core MAR latent var
+                  # LV2 = (2-1) * 5+(1:5), # Block A MAR latent var
                   LV3 = (3-1) * 5+(1:5), # Block A MAR latent var
                   LV4 = (4-1) * 5+(1:5), # Block A MAR latent var
-                  LV6 = (8-1) * 5+(1:5), # Blcok A no-MAR high corr latent var
-                  LV7 = (7-1) * 5+(1:5) # Blcok B no-MAR low corr latent var
+                  LV6 = (6-1) * 5+(1:5), # Blcok A no-MAR high corr latent var
+                  LV7 = (7-1) * 5+(1:5), # Blcok B no-MAR low corr latent var
+                  LV70 = (70-1) * 5+(1:5),  # Junk no-MAR low corr latent var
+                  LV80 = (80-1) * 5+(1:5),  # Junk no-MAR low corr latent var
+                  LV90 = (90-1) * 5+(1:5),  # Junk no-MAR low corr latent var
+                  LV100 = (100-1) * 5+(1:5)  # Junk no-MAR low corr latent var
                   )
 
-pdf(file = paste0("../output/", parms$results_file_name, ".pdf"),
+pdf(file = "../output/exp5_conv_20210129_1645.pdf",
     width = 15, height = 15)
 lapply(seq_along(item_list), function(i){
+    # i <- 2
     lapply(seq_along(out), function(x){
+        # x <- 2
         plot(out[[x]],
              main = paste0(names(item_list)[i],
                            " Rep", x),
@@ -101,6 +107,6 @@ dev.off()
 ## Save results
 saveRDS(out, parms$results_file_name)
 
-## Reado Old Results
+## Read Old Results
 out <- readRDS("../output/exp5_conv_20210129_1645.rds")
-
+length()

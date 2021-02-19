@@ -232,8 +232,17 @@ imposeMiss_lv_MD <- function(dat_in, parms, cond, plot = FALSE){
   block_tot <- factor(x = c("Core", "A", "B", "C", "D"), 
                       levels = c("Core", "A", "B", "C", "D"))
   block_siz <- ncol(dat_out)/length(block_tot)
-  block_act <- block_tot[-length(block_tot)]
-  block_mem <- rep(rep(block_act, each = 5), 2)
+  block_mem.1 <- list(L1 = rep("Core", 5),
+                      L2 = rep("A", 5),
+                      L3 = rep("Core", 5),
+                      L4 = rep("B", 5),
+                      L5 = rep("A", 5),
+                      L6 = rep("B", 5),
+                      L7 = rep("C", 5),
+                      L8 = rep("C", 5)
+  )
+  block_mem <- factor(unlist(block_mem.1), 
+                        levels = c("Core", "A", "B", "C", "D"))
   block_tar <- block_siz - table(block_mem)
   store <- list()
   for (m in 1:length(block_tar)) {
@@ -242,7 +251,7 @@ imposeMiss_lv_MD <- function(dat_in, parms, cond, plot = FALSE){
 
   memb <- factor(c(as.character(block_mem), unlist(store)),
                  levels = levels(block_tot))
-
+  table(memb)
   # Impose Matrix Design missingness
   for (s in 1:6) {
     colIndex <- memb %in% missdesc[[s]]
