@@ -87,7 +87,7 @@ research.
 	attitudes toward law and order, attitudes toward authoritarianism, interest in politics, level of political activity,  
 	country, sex, age, education, employment status, socio-economic status, importance of religion in life, 
 	religious denomination, and the size of town where interview was conducted.
-	A researcher might fit this model and look at the value and standard error of $\beta^{(2)}_{1}$, 
+	A researcher might fit this model and look at the estimate and standard error of $\beta^{(2)}_{1}$, 
 	the `nativist attitude' regression coefficient, to test an hypothesis regarding the effect of xenophobia on voting 
 	tendencies.
 
@@ -130,60 +130,19 @@ research.
 
 \subsection{Results}
 
-	\subsubsection{Single Parameter of interest}
-
-	Figures \ref{fig:exp4bias} and \ref{fig:exp4ci} report the PRB and the CIC for parameters $\beta^{(1)}_{1}$ and 
-	$\beta^{(2)}_{1}$, the focal regression coefficients in the two models.
-	Most of the MI methods resulted in negligible biases ($|PRB| < 10\%$) for both parameters in all conditions.
-	The only two exceptions were bridge and MI-RF. 
-	The former was very competitive in the low-dimensional condition, but led to extreme bias and 
-	over-coverage in the high-dimensional condition for $\beta_{1}$ in Model 1; 
-	the latter provided the largest PRBs and worst CIs (under) coverage for the focal regression coefficients among 
-	the other MI methods, and it was consistently outperformed even by Complete Case analysis.
-	missForest also displayed contained focal parameter biases.
-	DURR and IURR gave inconsequential biases for both parameters in all conditions, with PRBs that were
-	often at least half in size as the ones obtained with the other methods, outperforming even MI-OP in the high 
-	dimensional condition for $\beta_{1}$ in Model 2.
-	For $\beta_{1}$ in Model 2, both IURR and DURR remained fairly competitive in terms of coverage 
-	with CICs close to nominal levels, but the advantage they showed in terms of bias was not carried over to 
-	this criterion.
-	Both MI-PCA and Blasso provided CICs either equal or closer to nominal than the ones obtained with
-	IURR and DURR in almost all conditions.
-
-	As for $\beta^{(1)}$ in Model 1, all MI methods led to under-coverage of the true parameter values with CIC smaller 
-	than the threshold value 0.94.
-	Although coverage of the true values was not particularly good for any of the methods selected, the Gold Standard
-	confidence intervals were also under-covering the true value of $\beta_{1}$ in Model 1.
-	This was likely due to the right-skewed nature of the distribution of the dependent variable (euthanasia 
-	acceptance).
-	Most MI imputation methods achieved coverages similar to that of the Gold Standard method, and more importantly 
-	their relative difference, compared to the GS coverages, was in line with what can be seen for $\beta_{1}$ in Model 2.
-
-\begin{figure}[h]
-	\centering
-	\includegraphics{\pathFIG/exp4_imp_bias.pdf}
-	\caption{PRB in the estimation of parameters of interest $\beta^{(1)}_{1}$ and $\beta^{(2)}_{1}$, 
-		in model 1 and 2 respectively}
-	\label{fig:exp4bias}
-\end{figure}
-
-\begin{figure}[h]
-	\centering
-	\includegraphics{\pathFIG/exp4_imp_ci.pdf}
-	\caption{CIC in the estimation of parameters of interest $\beta^{(1)}_{1}$ and $\beta^{(2)}_{1}$, 
-		in model 1 and 2 respectively}
-	\label{fig:exp4ci}
-\end{figure}
-
-\FloatBarrier
-
-	\subsubsection{Overall Model Parameter Assessment}
 	The estimated linear models were multiple regressions, and all regression coefficient estimates were 
 	influenced by the imputations.
-	Therefore, it is important to observe the overall effects of the different methods on model estimation.
-	Figure \ref{fig:exp4_bias_allP} reports the absolute values of the PRBs for every Model 2 parameter 
-	estimate, ordered by size, under each of the different imputation methods.
-	(see figures \ref{fig:exp4bias_m1} and \ref{fig:exp4cir_m1} in the Appendix for Model 1 results).
+	Therefore, it is important to observe the estimation bias and CI coverage rates on all model parameters, not
+	only the focal parameters.
+	Figure \ref{fig:exp4_bias_allP} reports the absolute values of the PRBs for every parameter in Model 2, 
+	ordered by size, under each of the different imputation methods.
+	(the same results are reported for model 1 in the supplementary materials)
+	Most of the MI methods resulted in negligible biases ( $| PRB | < 10\%$) for both parameters in all conditions. 
+	The only two exceptions were bridge and MI-RF: the former was very competitive in condition 1, the low 
+	dimensional one, but led to extreme bias and over(2) coverage in the high dimensional condition for beta1; 
+	the latter provided the largest PRBs and worst CIs (under) coverage for the focal regression coefficients 
+	among the other MI methods, and it was consistently outperformed even by Complete Case analysis. 
+	missForest also displayed contained focal parameter biases.
 	MI-OP showed that even having perfect information regarding the missing data mechanism and data structure,
 	results in some bias for certain estimates.
 	Although the bias for the intercept and the focal parameter were negligible, around half of the estimates 
@@ -201,6 +160,10 @@ research.
 	Figure \ref{fig:exp4_ci_allP} reports the CIC for each parameter estimate in model 2.
 	When using MI-OP, CICs showed a deviation from nominal coverage for only two parameters, with a slight 
 	tendency toward over-coverage.
+	Considering the focal parameter, both IURR and DURR remained fairly competitive in terms of coverage with 
+	CICs close to nominal levels, but the advantage they showed in terms of bias was not carried over to this criterion.
+	Both MI-PCA and Blasso provided CICs either equal or closer to nominal than the ones obtained with IURR 
+	and DURR in almost all conditions.
 	While DURR, IURR, MI-CART and MI-PCA maintained a similar coverage pattern to MI-OP, 
 	blasso, MI-RANF, and missforest were either over- or under-covering many more parameters.
 	The results showed by missForest were as expected. 

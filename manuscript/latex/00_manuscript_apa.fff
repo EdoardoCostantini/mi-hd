@@ -80,24 +80,6 @@ factor loading estimation for each item with missing values.
 \end{figure*}
 \begin{figure*}[hbt]
 \ifnextchar[{\eatarg}{}
-[h]
-\centering
-\includegraphics{\pathFIG/exp4_imp_bias.pdf}
-\caption{PRB in the estimation of parameters of interest $\beta^{(1)}_{1}$ and $\beta^{(2)}_{1}$,
-in model 1 and 2 respectively}
-\label{fig:exp4bias}
-\end{figure*}
-\begin{figure*}[hbt]
-\ifnextchar[{\eatarg}{}
-[h]
-\centering
-\includegraphics{\pathFIG/exp4_imp_ci.pdf}
-\caption{CIC in the estimation of parameters of interest $\beta^{(1)}_{1}$ and $\beta^{(2)}_{1}$,
-in model 1 and 2 respectively}
-\label{fig:exp4ci}
-\end{figure*}
-\begin{figure*}[hbt]
-\ifnextchar[{\eatarg}{}
 
 \centering
 \includegraphics{\pathFIG/exp4_imp_bias_allParms_m2.pdf}

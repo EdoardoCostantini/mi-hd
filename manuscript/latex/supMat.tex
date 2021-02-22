@@ -314,4 +314,48 @@ Supplements to resampling study
 
 \FloatBarrier
 
+\subsection{Experiment 3: Resampling study}
+
+	Figure \ref{fig:exp4_bias_allP} reports the absolute values of the PRBs for every parameter in Model 2, 
+	ordered by size, under each of the different imputation methods.
+
+	comment here
+
+	Figure \ref{fig:exp4_ci_allP} reports the CIC for each parameter estimate in model 2.
+	When using MI-OP, CICs showed a deviation from nominal coverage for only two parameters, with a slight 
+	tendency toward over-coverage.
+
+	comment here
+
+	the important thing is that last comment about the 
+
+	All MI methods led to significant under-coverage of the true parameter values with CIC smaller than the 
+	threshold value 0.94.
+	Although coverage of the true values was not particularly good for any of the methods selected, the Gold Standard
+	confidence intervals were also under-covering the true value of $\beta_{1}$ in Model 1.
+	This was likely due to the right-skewed nature of the distribution of the dependent variable (euthanasia 
+	acceptance).
+	Most MI imputation methods achieved coverages similar to that of the Gold Standard method, and more importantly 
+	their relative difference, compared to the GS coverages, was in line with what can be seen for $\beta_{1}$ in Model 2.
+
+\begin{figure}
+	\centering
+	\includegraphics{\pathFIG/exp4_imp_bias_allParms_m1.pdf}
+	\caption{PRBs for all the model parameters in model 1. 
+		The order of the bars is based on the absolute value of the PRBs.
+		The values for the intercept, the focal regression coefficient, and the regression coefficient with which most 
+		methods struggle (Largest Bias) are highlighted}
+	\label{fig:exp4_bias_allP}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics{\pathFIG/exp4_imp_ci_allParms_m1.pdf}
+	\caption{CIC for all model parameter in model 1.
+		Bars are sorted in by ascending value.
+		The values for the intercept, the focal regression coefficient, and the regression coefficient with which most 
+		methods struggle (Largest Bias) are highlighted}
+	\label{fig:exp4_ci_allP}
+\end{figure}
+
 \end{document}
