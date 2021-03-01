@@ -32,8 +32,12 @@
                        "Condition ", 1:nrow(res$conds), ": ",
                        "p = ",  res$conds$p, "; ",
                        "pm = ",  res$conds$pm)
+  cond_names <- c("low-dim-low-pm",
+                  "high-dim-low-pm",
+                  "low-dim-high-pm",
+                  "high-dim-high-pm")
+  cond_names <- paste0("Condition ", 1:4)
   data.frame(res$conds, cond_names)
-
 
 # Bias (Facet grid) -------------------------------------------------------
   
@@ -53,6 +57,7 @@
                                covariances = 13:27),
                 dt_reps = 1e3, 
                 ci_lvl = .95,
+                cond_labels = cond_names,
                 type = "bias",
                 summy = TRUE,
                 meth_compare = meth_compare)
@@ -69,6 +74,7 @@
                                variances = 7:12,
                                covariances = 13:27),
                 dt_reps = 1e3, 
+                cond_labels = cond_names,
                 ci_lvl = .95,
                 type = "bias",
                 meth_compare = meth_compare)
@@ -95,6 +101,7 @@
                                variances = 7:12,
                                covariances = 13:27),
                 dt_reps = 1e3,
+                cond_labels = cond_names,
                 ci_lvl = .95,
                 summy = TRUE,
                 meth_compare = meth_compare)
@@ -112,6 +119,7 @@
                                variances = 7:12,
                                covariances = 13:27),
                 dt_reps = 1e3,
+                cond_labels = cond_names,
                 ci_lvl = .95,
                 meth_compare = meth_compare)
   pf

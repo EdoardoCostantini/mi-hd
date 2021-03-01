@@ -188,7 +188,7 @@ imputation algorithm to allow a maximal inclusive strategy while avoiding its us
 	This method is inspired by \cite{howardEtAl:2015} and the \emph{PcAux} R-package \citep{PcAux} that 
 	implements and developed its ideas.
 	
-\subsubsection{MICE with regression trees (MI-CART and MI-RANF)}
+\subsubsection{MICE with decision trees (MI-CART and MI-RANF)}
 	The MI-CART imputation method \citep{burgetteReiter:2010} is a MICE algorithm that uses classification and regression 
 	trees (CART) to define the conditional distributions used in the MI Gibbs sampler.
 	Given an outcome variable $y$ and a set of predictors $X$, CART is a nonparametric recursive partitioning technique 
@@ -199,15 +199,18 @@ imputation algorithm to allow a maximal inclusive strategy while avoiding its us
 	The collection of binary splits can be visually represented by a decision tree structure where each terminal 
 	node (or \emph{leaf}) represents the conditional distribution of $y$ for units that satisfy the splitting rules.
 
-	In MI-CART, at the $m$-th iteration for a target variable $z_j$, a CART model to predict $z_{j, obs}$ based on 
-	$\bm{Z}_{-j, obs}^{(m)}$ is trained.
-	For each missing value, a draw form the predictive distribution is taken by sampling from the elements of the terminal 
-	node where the unit of interest belongs to based on $\bm{Z}_{-j, mis}^{(m)}$.
+	In MI-CART, at the $m$-th iteration for a target variable $z_j$, a CART model is trained to predict $z_{j, obs}$ based on 
+	$\bm{Z}_{-j, obs}^{(m)}$.
+	Every observation with a missing value on $z_j$ belongs to a terminal node of this CART model, depending on their values of
+	$\bm{Z}_{-j, mis}^{(m)}$. 
+	Sampling from the $z_{j, obs}$ in a terminal node corresponds to sampling from the missing data posterior predictive
+	distribution.
 	The implementation of MI-CART used in this paper corresponds to the one presented by \cite{dooveEtAl:2014}
 	(p. 95, algorithm 1) and the \emph{impute.mice.cart()} R function from the \emph{mice} package.
 
 	In MI-RANF, at the $m$-th iteration for a target variable $z_j$, $k$ bootstrap samples are drawn from the complete 
-	dataset and $k$ single trees are fitted to each using a small group of input variables to find the best split at each node.
+	dataset and $k$ single trees are fitted.
+	In each sub-sample, only a small random group of input variables is used to find the best split at each node.
 	All trees are used to compose the pool of candidates from which imputations are drawn.
 	Bootstrapping and random input selection introduce the model and imputation uncertainty in the imputation procedure,
 	as required by a proper MI procedure.
@@ -220,9 +223,9 @@ imputation algorithm to allow a maximal inclusive strategy while avoiding its us
 	literature is to decide which predictors to include by following three criteria \citep[p. 168]{vanBuuren:2012}:
 	\begin{enumerate}
 
-	\item include all the variables in the complete-data analysis models;
+	\item include all the variables that are part of the analysis models;
 	\item include all the variables that are related to the non-response;
-	\item include all the variables are correlated with the target variables.
+	\item include all the variables are correlated with the variables target of imputation.
 
 	\end{enumerate}
 

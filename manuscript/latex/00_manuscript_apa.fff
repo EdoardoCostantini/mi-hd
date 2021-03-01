@@ -5,9 +5,8 @@
 \includegraphics{../../output/graphs/exp1_bias_summy.pdf}
 \caption{\label{fig:exp1bias}
 Percent Relative Bias (PRB) for item means, variances, and covariances.
-For every method, single horizontal lines, representing the PRB of a parameter estimate on
-a single variable (or pair of variables), combine to form larger horizontal bars giving an
-aggregate account of how each method performed across multiple variables with missing values.
+Conditions 1 to 4 correspond to the labels low-dim-low-pm, high-dim-low-pm, low-dim-high-pm, and
+high-dim-low-pm in Table \ref{tab:condExp1}.
 }
 \end{figure*}
 \begin{figure*}[hbt]
@@ -17,9 +16,8 @@ aggregate account of how each method performed across multiple variables with mi
 \includegraphics{../../output/graphs/exp1_CI_summy.pdf}
 \caption{\label{fig:exp1cir}
 Confidence Interval Coverage (CIC) for item means, variances, and covariances.
-For every method, single horizontal lines, representing the CIC of a parameter estimate on
-a single variable (or pair of variables), combine to form larger horizontal bars giving an
-aggregate account of how each method performed across multiple variables with missing values.
+Conditions 1 to 4 correspond to the labels low-dim-low-pm, high-dim-low-pm, low-dim-high-pm, and
+high-dim-low-pm in Table \ref{tab:condExp1}.
 }
 \end{figure*}
 \begin{figure*}[hbt]
@@ -27,9 +25,8 @@ aggregate account of how each method performed across multiple variables with mi
 
 \includegraphics{../../output/graphs/exp2_semR_bias_14_summy.pdf}
 \caption{PRBs for the means, variances and covariances (PRB) for condition 1 to 4.
-For every method, single horizontal lines, representing the PRB of a parameter estimate on
-a single variable (or pair of variables), combine to form larger horizontal bars giving an
-aggregate account of how each method performed across multiple variables with missing values.
+Conditions 1 to 4 correspond to the labels low-dim-low-pm-high-$\lambda$, high-dim-low-pm-high-$\lambda$,
+low-dim-high-pm-high-$\lambda$, and high-dim-low-high-low-$\lambda$ in Table \ref{tab:condExp2}.
 }
 \label{fig:exp2bias14}
 \end{figure*}
@@ -38,9 +35,8 @@ aggregate account of how each method performed across multiple variables with mi
 
 \includegraphics{../../output/graphs/exp2_semR_ci_14_summy.pdf}
 \caption{CIC for the means, variances, and covariances for condition 1 to 4.
-For every method, single horizontal lines, representing the CIC of a parameter estimate on
-a single variable (or pair of variables), combine to form larger horizontal bars giving an
-aggregate account of how each method performed across multiple variables with missing values.
+Conditions 1 to 4 correspond to the labels low-dim-low-pm-high-$\lambda$, high-dim-low-pm-high-$\lambda$,
+low-dim-high-pm-high-$\lambda$, and high-dim-low-high-low-$\lambda$ in Table \ref{tab:condExp2}.
 }
 \label{fig:exp2cir14}
 \end{figure*}
@@ -49,9 +45,8 @@ aggregate account of how each method performed across multiple variables with mi
 
 \includegraphics{../../output/graphs/exp2_semR_bias_58_summy.pdf}
 \caption{PRBs for the means, variances and covariances (PRB) for condition 1 to 4.
-For every method, single horizontal lines, representing the PRB of a parameter estimate on
-a single variable (or pair of variables), combine to form larger horizontal bars giving an
-aggregate account of how each method performed across multiple variables with missing values.
+Conditions 5 to 8 correspond to the labels low-dim-low-pm-low-$\lambda$, high-dim-low-pm-low-$\lambda$,
+low-dim-high-pm-low-$\lambda$, and high-dim-low-pm-low-$\lambda$ in Table \ref{tab:condExp2}.
 }
 \label{fig:exp2bias58}
 \end{figure*}
@@ -60,9 +55,8 @@ aggregate account of how each method performed across multiple variables with mi
 
 \includegraphics{../../output/graphs/exp2_semR_ci_58_summy.pdf}
 \caption{CIC for the means, variances, and covariances for condition 1 to 4.
-For every method, single horizontal lines, representing the CIC of a parameter estimate on
-a single variable (or pair of variables), combine to form larger horizontal bars giving an
-aggregate account of how each method performed across multiple variables with missing values.
+Conditions 5 to 8 correspond to the labels low-dim-low-pm-low-$\lambda$, high-dim-low-pm-low-$\lambda$,
+low-dim-high-pm-low-$\lambda$, and high-dim-low-pm-low-$\lambda$ in Table \ref{tab:condExp2}.
 }
 \label{fig:exp2cir58}
 \end{figure*}
@@ -73,8 +67,7 @@ aggregate account of how each method performed across multiple variables with mi
 \caption{
 Percent Relative Bias (PRB) for the factor loadings in conditions 1 to 4 (panel A)
 and conditions 5 to 8 (panel B).
-Within each panel, for every method, single horizontal lines report the PRB of the
-factor loading estimation for each item with missing values.
+Conditions 1 to 8 correspond to the labels in Table \ref{tab:condExp2}.
 }
 \label{fig:exp2fl14}
 \end{figure*}

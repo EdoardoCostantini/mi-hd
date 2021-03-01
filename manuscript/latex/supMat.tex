@@ -73,11 +73,37 @@ of the findings seeds were set using the method by \cite{lecuyer:2002} implement
 Code to run the studies can be found at \url{https://github.com/EdoardoCostantini/imputeHD-comp}.
 In the following, each step of the simulation procedure is described in details for both experiments.
 
+\section{Convergence check details}
+
+	Convergence of the imputation models was assessed in a preprocessing step.
+	Before running the actual simulation studies, 10 datasets were generated according to each experimental set up.
+	Missing values in each dataset were imputed by running 5 parallel imputation chains for each Multiple Imputation 
+	method.
+	Convergence was checked by plotting the mean of the imputed values for each variable in each stream, against the 
+	iteration number.
+	In each parallel run, all the MI algorithms run for 250 iterations.
+	The imputation algorithms were considered to have converged after 50 iterations, after which 10 imputed data 
+	sets were store and used for the subsequent standard complete-data analysis and pooling.
+	The only exception was blasso, which required approximately 2000 iterations for convergence.
+
+\section{Ridge penalty cross-validation details}
+	The ridge penalty used in the bridge algorithm was fixed across iterations .
+	The value used in the simulation was determined by means of cross-validation in a pre-processing phase.
+	The grid of possible values for the ridge penalty was $10^{-1}, 10^{-2}, ..., 10^{-8}$.
+	For each of 100 data repetitions, bridge imputation was performed with each of the different penalty parameters
+	and used to obtain 10 differently imputed datasets.
+	For each data replication, the Fraction of Missing Information (FMI) \citep{savaleiRhemtulla:2012} associated with 
+	each parameter in the analysis models of interest (see next section for details) was computed and then averaged across 
+	repetitions.
+	The mean of these average parameter FMIs was used as a composite measure of FMI associated with each ridge penalty
+	value.
+	Finally, the penalty value with the smallest composite FMI was selected.
+
 \section{Additional Figures}
 
 \subsubsection{Experiment 1}
 
-	Figures \ref{fig:exp1bias} and \ref{fig:exp1cir} report the Percentage Relative Bias and Conﬁdence Interval 
+	Figures \ref{fig:exp1bias} and \ref{fig:exp1cir} report the Percentage Relative Bias and Confidence Interval 
 	Coverage, respectively, for each parameter estimate in the saturated model described above. 
 	In the figures, single horizontal lines, representing the PRB (or CIC) of a parameter estimate for a single 
 	variable, combine to form larger horizontal bars giving an aggregate account of how each method performed 

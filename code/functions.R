@@ -1828,7 +1828,7 @@ plot_fg <- function(dt,
                     dt_reps = 500,
                     ci_lvl = .95,
                     axis.name.x = NULL,
-                    plot_cond = NULL,
+                    cond_labels = NULL,
                     plot_name = NULL,
                     y_axLab = TRUE,
                     summy = FALSE,
@@ -1848,6 +1848,7 @@ plot_fg <- function(dt,
   # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
   #                      "MI_PCA",
   #                      "MI_CART", "MI_RF", "missFor", "CC"))
+  # cond_labels = NULL
   ## EXP 1
   # dt = lapply(1:length(res$sem),
   #             function(x) data.frame( res$sem[[x]]$bias_per))
@@ -1877,8 +1878,10 @@ plot_fg <- function(dt,
   # Apply if summary version required
   if(summy == TRUE){
   dt_preEdit <- lapply(parPlot, function(x){
+    # x <- parPlot[[3]]
     lapply(dt, function(d){
-      temp <- d[x, meth_compare]
+      # d <- dt[[2]]
+      temp <- abs(d[x, meth_compare])
       as.data.frame(
         sapply(temp, function(j){ summary(j)[c(1, 4, 6)] })
       )
@@ -1944,8 +1947,9 @@ plot_fg <- function(dt,
   parT <- Reduce(c, parT)
   
   # Final Data prep
+  if(is.null(cond_labels)){cond_labels <- 1:length(dt)}
   dt_edit <- cbind(dt_edit, 
-                   conds = paste0("Condition ", conds),
+                   conds = factor(cond_labels[conds], levels = cond_labels),
                    parT = factor(parT, labels = names(parPlot)))
   
   # Define Step Size for all parameters sets
@@ -1974,11 +1978,23 @@ plot_fg <- function(dt,
   if(type == "bias"){
     # Plot Limits
     plot_xlim   <- c(-20, 20)
-    
+    if(summy == TRUE){
+      plot_xlim <- c(0, 40)
+    }
     # X axis
-    plot_xbreaks <- c(-20, -10, 0, 10, 20)
-    plot_xlabels <- c("-20", "-10", "0", "10", "20")
-    plot_vlines <- c(-10, 10)
+    xbreaks_low <- min(plot_xlim)
+    xbreaks_top <- max(plot_xlim)
+    xbreaks_center <- mean(plot_xlim)
+    xbreaks_midlow <- mean(xbreaks_center:xbreaks_low)
+    xbreaks_midtop <- mean(xbreaks_center:xbreaks_top)
+    plot_xbreaks <- c(xbreaks_low, xbreaks_midlow, 
+                      xbreaks_center, 
+                      xbreaks_midtop, xbreaks_top) # c(-20, -10, 0, 10, 20)
+    plot_xlabels <- as.character(plot_xbreaks)#c("-20", "-10", "0", "10", "20")
+    plot_vlines <- c(xbreaks_midlow, xbreaks_midtop)
+    if(summy == TRUE){
+      plot_vlines <- c(xbreaks_midlow)
+    }
   }
   if(type == "ci"){
     # Redefine values as differences from target
@@ -1995,53 +2011,7 @@ plot_fg <- function(dt,
     # X axis
     plot_xbreaks <- c(min(plot_xlim), -5, low_thr, 0, hig_thr, max(plot_xlim))
     plot_xlabels <- as.character(round((plot_xbreaks+95)/100, 2))
-    plot_vlines <- c(-5, low_thr, hig_thr)
-  }
-  if(type == "ciw"){
-    plot_limits <- c(0, max(dt_edit$value))
-    
-    plot_xlim   <- c(0, max(dt_edit$value))
-    plot_xbreaks <- round(c(0, mean(dt_edit$value),  max(dt_edit$value) ), 1)
-    plot_xlabels <- rev(as.character(plot_xbreaks))
-    
-    step_size   <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-    plot_steps  <- seq(0, nrow(dt_edit), by = step_size)
-    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-    if(y_axLab == TRUE){
-      plot_ylabels <- as.character(unique(dt_edit$key))
-    } else {
-      plot_ylabels <- rep("", length(plot_ybreaks))
-    }
-    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-    plot_hlines <- plot_xbreaks[2]
-  }
-  if(type == "bias_raw"){
-    maxB <- max( abs(dt_edit$value) )
-    plot_xbreaks <- c(-maxB, -maxB/2, 
-                      0, 
-                      maxB/2, maxB)
-    plot_xlim   <- c(plot_xbreaks[1], plot_xbreaks[5])
-    plot_xlabels <- as.character(plot_xbreaks)
-    
-    step_size    <- max(dt_edit$id)/length(unique(dt_edit$key)) / 2
-    plot_steps   <- seq(0, nrow(dt_edit), by = step_size)
-    plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # keep every other element
-    if(y_axLab == TRUE){
-      plot_ylabels <- as.character(unique(dt_edit$key))
-    } else {
-      plot_ylabels <- rep("", length(plot_ybreaks))
-    }
-    plot_vlines <- plot_steps[c(TRUE, FALSE)] # keep every other element
-    plot_hlines <- c(plot_xbreaks[2], plot_xbreaks[4])
-  }
-  if(type == "bias_sd"){
-    # Plot Limits
-    plot_xlim   <- c(-1, 1)
-    
-    # X axis
-    plot_xbreaks <- c(-1, -.4, 0, .4, 1)
-    plot_xlabels <- c("-1", "-.4", "0", ".4", "1")
-    plot_vlines <- c(-.4, .4)
+    plot_vlines <- c(-5, low_thr, hig_thr, 4.99)
   }
   
   # Colors and texts
@@ -2617,7 +2587,7 @@ plot_exp4_meth <- function(dt,
   #                      "MI_PCA",
   #                      "MI_CART", "MI_RF", "missFor", "CC", "MI_OP"))
   # focal = "rel"
-  # small.ef = "age"
+  # small.ef = ""
   # dt = lapply(1:length(res$m1),
   #             function(x) res$m1[[x]]$bias_per)
   # dt = lapply(1:length(res$m2),
@@ -2636,7 +2606,8 @@ plot_exp4_meth <- function(dt,
     abs(d[, meth_compare])
   })
   
-  conds <- rep(c("Condition 1", "Condition 2"), 2)
+  # conds <- rep(c("Condition 1", "Condition 2"), 2)
+  conds <- rep(c("low-dim condition", "high-dim condition"), 2)
   
   # CONTINUE FROM HERE
   dt_edit <- lapply(1:length(dt_preEdit), function(id) {
@@ -2699,38 +2670,24 @@ plot_exp4_meth <- function(dt,
   # dt_edit$par[!dt_edit$par %in% focal] <- ""
   # Ticks 
   if(type == "bias"){
+    # Levels order
+    levs <- c(yes = ">10%", no = "<10%", focal = "Focal")
+    
     # Grid Plot Color based on exceeding or not PRB reference
-    flag <- ifelse(dt_edit$value >= 10, yes = ">10%", no = "<10%")
-    flag[dt_edit$par %in% c("(Intercept)")] <- "Intercept"
-    flag[dt_edit$par %in% focal] <- "Focal"
-    flag[dt_edit$par %in% small.ef] <- "Largest Bias"
-    dt_edit$flag <- factor(flag)
+    flag <- ifelse(dt_edit$value >= 10, yes = levs[1], no = levs[2])
+    flag[dt_edit$par %in% focal] <- levs[3]
+    # flag[dt_edit$par %in% small.ef] <- "Largest Bias"
+    dt_edit$flag <- factor(flag, levels = levs)
     
     # Plot Limits
-    plot_xlim   <- c(0, 100)
+    plot_xlim   <- c(0, 70)
     
     # X axis
-    plot_xbreaks <- seq(0, 100, by = 10)
+    plot_xbreaks <- seq(min(plot_xlim), max(plot_xlim), by = 10)
     plot_xlabels <- as.character(plot_xbreaks)
     plot_vlines <- c(10)
   }
 
-  if(type == "bias_sd"){
-    # Grid Plot Color based on exceeding or not PRB reference
-    flag <- ifelse(dt_edit$value >= .4, yes = "darkgray", no = "black")
-    dt_edit$flag <- factor(flag)
-    flag[dt_edit$par != ""] <- "Focal"
-    dt_edit$flag <- factor(flag)
-
-    # Plot Limits
-    plot_xlim   <- c(0, 1)
-
-    # X axis
-    plot_xbreaks <- seq(0, 1, by = .1)
-    plot_xlabels <- as.character(plot_xbreaks)
-    plot_vlines <- c(.4)
-  }
-  
   if(type == "ci"){
     # Redefine values as differences from target
     dt_edit$value[dt_edit$value != 0] <- dt_edit$value[dt_edit$value != 0] - 95
@@ -2743,29 +2700,37 @@ plot_exp4_meth <- function(dt,
     low_thr <- ((.95-SEp*2)-.95)*100
     hig_thr <- ((.95+SEp*2)-.95)*100
     
+    # Levels order
+    levs <- c(yes = "Significant", 
+              no = "Not significant", 
+              focal = "Focal")
+    
     # Grid Plot Color based on exceeding or not PRB reference
     flag <- ifelse(dt_edit$value >= hig_thr | dt_edit$value <= low_thr, 
-                     yes = paste0("far from nominal"), no = "close to nominal")
-    flag[dt_edit$par %in% c("(Intercept)")] <- "Intercept"
-    flag[dt_edit$par %in% focal] <- "Focal"
-    flag[dt_edit$par %in% small.ef] <- "Largest Bias"
-    dt_edit$flag <- factor(flag)
+                     yes = levs[1], no = levs[2])
+    flag[dt_edit$par %in% focal] <- levs[3]
+    dt_edit$flag <- factor(flag, levels = levs)
     
     # X axis
     plot_xbreaks <- c(-5, low_thr, 0, hig_thr, 5)
     plot_xlabels <- gsub("0", "", as.character(round((plot_xbreaks+95)/100, 2)))
     plot_vlines <- c(-5, low_thr, hig_thr)
   }
-  
-  if(type == "ciw"){
-    plot_xlim   <- round(c(0, max(dt[[1]]$GS)*2), 0)
-    plot_xbreaks <- seq(plot_xlim[1], plot_xlim[2], by = plot_xlim[2]/4)
-    plot_xlabels <- as.character(plot_xbreaks)
-    flag <- rep("Not focal", nrow(dt_edit))
-    flag[dt_edit$par != ""] <- "Focal"
-    dt_edit$flag <- factor(flag)
-    plot_vlines <- NULL
-  }
+
+  # Colors and texts
+  font.plot        <- "Arial" # font for the whole plot
+  x.axis.text.size <- 7.5  # Scale of plotted numbers
+  y.axis.text.size <- 7.5 # Imputation Methods names
+  grid.text.size   <- 10 # Condition + Parameter type
+  segme.thick      <- 1 # thickness of lines reporting results (was 1)
+  small.color      <- "darkgray" # color of lines |PRB| < 10% 
+  large.color      <- "lightgray" # color of lines |PRB| < 10% 
+  focal.color      <- "black" # color of line reporting focal parameter
+  h.lines.thick    <- .10 # thickness of lines separating methods (was .375)
+  h.lines.color    <- "black" # color of lines separating methods (was gray)
+  v.lines.thick    <- .375 # thickness of reference lines
+  v.lines.color    <- "darkgray" # color of reference lines
+  v.lines.type     <- "dashed" # line type of reference lines
   
   # Plot
   p <- ggplot(dt_edit, aes(x = value, y = id)) +
@@ -2773,17 +2738,19 @@ plot_exp4_meth <- function(dt,
     theme(plot.title   = element_blank(),
           axis.title.x = element_blank(),
           axis.title.y = element_blank(),
-          axis.text.x  = element_text(size = 5),
-          axis.text.y  = element_text(size = 5),
+          axis.text.x  = element_text(size = x.axis.text.size),
+          axis.text.y  = element_text(size = y.axis.text.size),
           plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
           # Background
+          panel.background = element_rect(fill = "white", colour = "white"),
+          panel.border     = element_rect(colour = "lightgray", fill = NA),
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
-          # Facet Related
-          strip.text = element_text(size = 10,
-                                    face = "plain",
-                                    margin = unit(c(.10, .10, .10, .10), 
-                                                  "cm")),
+          # Condition + Parameter type (Facet Related)
+          strip.text = element_text(#family = font.plot,
+            size = grid.text.size,
+            face = "plain",
+            margin = unit(c(.10, .10, .10, .10), "cm")),
           # Legend
           legend.text = element_text(size = 8),
           legend.position = "bottom"
@@ -2793,29 +2760,27 @@ plot_exp4_meth <- function(dt,
     geom_segment(aes(xend = 0, 
                      yend = id,
                      colour = flag),
-                 size = 1) +
+                 size = segme.thick) +
     scale_color_manual(name = "",
-                       values = c("black", 
-                                  "darkgray", 
-                                  "orange",
-                                  "blue",
-                                  "lightgray")) +
+                       values = c(large.color,
+                                  small.color, 
+                                  focal.color)) +
     
     # X Axis
     scale_x_continuous(breaks = plot_xbreaks,
                        labels = plot_xlabels) +
     geom_vline(xintercept = plot_vlines,
-               size = .375,
-               linetype = "dashed", 
-               color = "black") +
+               size = v.lines.thick,
+               linetype = v.lines.type, 
+               color = v.lines.color) +
     coord_cartesian(xlim = plot_xlim) + 
     
     # Y axis
     scale_y_continuous(breaks = plot_ybreaks,
                        labels = plot_ylabels) +
     geom_hline(yintercept = plot_hlines,
-               size = .375,
-               color = "gray") + 
+               size = h.lines.thick,
+               color = h.lines.color) + 
     
     # Facet
     facet_grid(cols = vars(conds))

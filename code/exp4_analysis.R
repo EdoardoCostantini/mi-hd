@@ -166,7 +166,6 @@
                         type = "bias",
                         dt_reps = 1e3,
                         focal = "rel",
-                        small.ef = "age",
                         ci_lvl = .95,
                         meth_compare = meths)
   pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
@@ -174,7 +173,6 @@
                         type = "bias",
                         dt_reps = 1e3,
                         focal = "NatAt",
-                        small.ef = c("countryNetherlands"),
                         ci_lvl = .95,
                         meth_compare = meths)
   
@@ -196,7 +194,6 @@
                         type = "ci",
                         dt_reps = 1e3,
                         focal = "rel",
-                        small.ef = c("age"),
                         ci_lvl = .95,
                         meth_compare = meths)
   pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
@@ -204,7 +201,6 @@
                         type = "ci",
                         dt_reps = 1e3,
                         focal = "NatAt",
-                        small.ef = c("countryNetherlands"),
                         ci_lvl = .95,
                         meth_compare = meths)
   ggsave(pt1,

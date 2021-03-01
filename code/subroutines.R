@@ -223,7 +223,7 @@ runCell <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./exp1_init.R")
-  # cond <- conds[3, ]
+  # cond <- conds[1, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and

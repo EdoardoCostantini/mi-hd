@@ -1,15 +1,15 @@
 % SUGGESTION TO COMPILE IN TERMINAL:
 % 1 pdflatex, 1 bibtex latex, 1 pdflatex, 1 pdflatex
 
-\documentclass[11pt]{article}
+\documentclass[10pt]{article}
 
 %% Packages
 % For page size
 \usepackage[a4paper]{geometry}
  \geometry{
-	total={15cm,25.2cm},
-	hmargin={3cm, 3cm}, % left, right
-	vmargin={2cm,2.5cm} % top, bottom
+	%total={15cm,25.2cm},
+	hmargin={2.1cm, 1.8cm}, % left, right
+	vmargin={2cm,2cm} % top, bottom
  }
 
 % Specific needs
@@ -23,6 +23,9 @@
 \usepackage{graphicx}						% to resize tables
 \usepackage{rotating}						% to rotate pictures
 \usepackage{url}            					% simple URL typesetting
+\usepackage{multicol}% for multicol latex environment
+\usepackage{mathptmx}
+%	\setmainfont{Times New Roman}
 
 % Misc (not sure I need)
 \usepackage[utf8]{inputenc} % allow utf-8 input
@@ -88,6 +91,8 @@
 
 \maketitle
 
+% BEGIN MULTICOL ENVIRONMENT
+\begin{multicols}{2}
 % Introduction
 
 \input{01_section.tex}
@@ -131,6 +136,8 @@
 	\pathBIB/statsLearn/bibtex/papers,
 	\pathBIB/statsLearn/bibtex/software
 	}
+
+\end{multicols} % END MULTICOL
 
 % Compile strategy 1:
 % 0. Go to folder containing 00_manuscript.tex

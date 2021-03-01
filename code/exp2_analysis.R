@@ -29,11 +29,18 @@
   
 # Conds
   res$conds
-  cond_names <- paste0(letters[1:nrow(res$conds)], ") ",
-                       "Condition ", 1:nrow(res$conds), ": ",
-                       "fl = ",  res$conds$fl, "; ",
+  cond_names <- paste0("fl = ",  res$conds$fl, "; ",
                        "lv = ",  res$conds$lv, "; ",
                        "pm = ",  res$conds$pm)
+  cond_names <- c("low-dim-low-pm-high-lambda",
+                  "high-dim-low-pm-high-lambda",
+                  "low-dim-high-pm-high-lambda",
+                  "high-dim-high-pm-high-lambda",
+                  "low-dim-low-pm-low-lambda",
+                  "high-dim-low-pm-low-lambda",
+                  "low-dim-high-pm-low-lambda",
+                  "high-dim-high-pm-low-lambda")
+  cond_names <- paste0("Condition ", 1:8)
   data.frame(res$conds, cond_names)
   
 # Select conditions to print
@@ -50,7 +57,6 @@
                        "CC",
                        "MI_OP"))
   
-  
 # > Summary version ####
   pf <- plot_fg(dt = lapply(1:length(res$semR),
                             function(x) data.frame( res$semR[[x]]$bias_per))[conds_select],
@@ -58,12 +64,9 @@
                 parPlot = list(means = 1:10,
                                variances = 11:20,
                                covariances = 21:65),
-                dt_reps = 500,
+                dt_reps = 1e3,
                 ci_lvl = .95,
-                axis.name.x = NULL,
-                plot_cond = NULL,
-                plot_name = NULL,
-                y_axLab = TRUE,
+                cond_labels = cond_names[conds_select],
                 summy = TRUE,
                 meth_compare = meth_compare)
   pf
@@ -84,12 +87,10 @@
                 parPlot = list(means = 1:10,
                                variances = 11:20,
                                covariances = 21:65),
-                dt_reps = 500,
+                dt_reps = 1e3,
                 ci_lvl = .95,
-                axis.name.x = NULL,
-                plot_cond = NULL,
-                plot_name = NULL,
-                y_axLab = TRUE,
+                cond_labels = cond_names[conds_select],
+                summy = FALSE,
                 meth_compare = meth_compare)
   pf
   
@@ -121,10 +122,7 @@
                                covariances = 21:65),
                 dt_reps = 1e3,
                 ci_lvl = .95,
-                axis.name.x = NULL,
-                plot_cond = NULL,
-                plot_name = NULL,
-                y_axLab = TRUE,
+                cond_labels = cond_names[conds_select],
                 summy = TRUE,
                 meth_compare = meth_compare)
   pf
@@ -145,10 +143,7 @@
                                covariances = 21:65),
                 dt_reps = 1e3,
                 ci_lvl = .95,
-                axis.name.x = NULL,
-                plot_cond = NULL,
-                plot_name = NULL,
-                y_axLab = TRUE,
+                cond_labels = cond_names[conds_select],
                 meth_compare = meth_compare)
   pf
   ggsave(file = paste0("../output/graphs/",
@@ -177,6 +172,7 @@
                   parPlot = list(Loadings = 1:10),
                   dt_reps = 1e3,
                   ci_lvl = .95,
+                  cond_labels = cond_names[1:4],
                   summy = TRUE,
                   meth_compare = meth_compare)
   
@@ -187,6 +183,7 @@
                 parPlot = list(Loadings = 1:10),
                 dt_reps = 1e3,
                 ci_lvl = .95,
+                cond_labels = cond_names[5:8],
                 summy = TRUE,
                 meth_compare = meth_compare)
   
@@ -220,10 +217,7 @@
                   parPlot = list(Loadings = 1:10),
                   dt_reps = 1e3,
                   ci_lvl = .95,
-                  axis.name.x = NULL,
-                  plot_cond = NULL,
-                  plot_name = NULL,
-                  y_axLab = TRUE,
+                  cond_labels = cond_names[1:4],
                   meth_compare = meth_compare)
   
   # Conditions 5-8
@@ -233,10 +227,7 @@
                   parPlot = list(Loadings = 1:10),
                   dt_reps = 1e3,
                   ci_lvl = .95,
-                  axis.name.x = NULL,
-                  plot_cond = NULL,
-                  plot_name = NULL,
-                  y_axLab = TRUE,
+                  cond_labels = cond_names[5:8],
                   meth_compare = meth_compare)
   
   # Combine Elements
