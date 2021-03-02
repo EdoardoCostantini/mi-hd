@@ -2018,7 +2018,7 @@ plot_fg <- function(dt,
   font.plot        <- "Arial" # font for the whole plot
   x.axis.text.size <- 7.5  # Scale of plotted numbers
   y.axis.text.size <- 7.5 # Imputation Methods names
-  grid.text.size   <- 10 # Condition + Parameter type
+  grid.text.size   <- 7.5 # Condition + Parameter type
   segme.thick      <- .5 # thickness of lines reporting results
   segme.color      <- "black" # color  of lines reporting results
   h.lines.thick    <- .10 # thickness of lines separating methods
@@ -2607,7 +2607,8 @@ plot_exp4_meth <- function(dt,
   })
   
   # conds <- rep(c("Condition 1", "Condition 2"), 2)
-  conds <- rep(c("low-dim condition", "high-dim condition"), 2)
+  conds <- rep(c("low-dim \n p = 243, n = 1000", 
+                 "high-dim \n p = 243, n = 300"), 2)
   
   # CONTINUE FROM HERE
   dt_edit <- lapply(1:length(dt_preEdit), function(id) {

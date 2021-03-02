@@ -28,15 +28,17 @@
 # Conditions
   
   res$conds
-  cond_names <- paste0(letters[1:nrow(res$conds)], ") ",
-                       "Condition ", 1:nrow(res$conds), ": ",
-                       "p = ",  res$conds$p, "; ",
+  # Full information names
+  cond_parms <- paste0("p = ",  res$conds$p, "; ",
                        "pm = ",  res$conds$pm)
-  cond_names <- c("low-dim-low-pm",
+  cond_labels <- c("low-dim-low-pm",
                   "high-dim-low-pm",
                   "low-dim-high-pm",
                   "high-dim-high-pm")
-  cond_names <- paste0("Condition ", 1:4)
+  cond_names <- paste(cond_labels, cond_parms, sep = " \n ")
+  
+  # Numbered Conditions
+  # cond_names <- paste0("Condition ", 1:4)
   data.frame(res$conds, cond_names)
 
 # Bias (Facet grid) -------------------------------------------------------

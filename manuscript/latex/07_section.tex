@@ -3,13 +3,13 @@
 	The present work was aimed at comparing current implementations of different existing methods.
 	As a result, the scope of the simulation and resampling studies was limited by the current development state of 
 	the different methods.
-	For example, both IURR, DURR, and MI-PCA allow imputation of any type of data:
-	IURR and DURR have been developed for categorical data imputation \citep{dengEtAl:2016},
+	For example, DURR, IURR, and MI-PCA allow imputation of any type of data:
+	DURR and IURR have been developed for categorical data imputation \citep{dengEtAl:2016},
 	and MI-PCA can be performed with any standard imputation model for categorical data.
 	However, blasso has not been formally developed for multi-categorical imputation target variables yet, 
 	which forced us to work with missing values on variables that are either continuous, or usually 
 	considered as such in practice.
-	To maintain a fair comparison with blasso, they were implemented with the assumption that the imputed 
+	To maintain a fair comparison with blasso, all methods were implemented with the assumption that the imputed 
 	variables are continuous and normally distributed.
 	However, IURR, DURR and MI-PCA could have performed differently in the resampling study had they been used in their
 	ordered categorical data implementations.
@@ -34,7 +34,7 @@
 	In this study, we decided to retain the first components that explained 50\% of the total variance in the 
 	auxiliary variables.
 	However, this decision was arbitrary. 
-	We are currently working on assessing its effect on the imputation accuracy as part of a project to 
+	We plan on assessing its effect on the imputation accuracy as part of a project to 
 	expand and improve the use of principal components within the FCS framework.
 
 	As for blasso, we have not investigated the sensibility of results to different hyper-parameters choices.
@@ -43,9 +43,9 @@
 
 	The use of Random Forests within a MICE algorithm could have also been implemented differently.
 	We decided to use \cite{dooveEtAl:2014} version which is supported in the popular 
-	\emph{mice} R package.
+	mice R package.
 	However, \cite{shahEtAl:2014} independently developed another integration of Random Forests
-	within the MICE algorithm, which was available in the now archived R package \emph{CALIBERrfimpute}
+	within the MICE algorithm, which was available in the now archived R package CALIBERrfimpute
 	\citep{CALIBERrfimpute}.
 	We are not aware of any evidence or theoretical reason to expect differences between the two implementations, 
 	but we did not verify this empirically.

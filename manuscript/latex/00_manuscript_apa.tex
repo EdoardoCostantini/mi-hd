@@ -1,7 +1,7 @@
 % APA STYLE Preamble
 % source: https://www.overleaf.com/latex/templates/your-apa6-style-manuscript/kngbbqpypjcq
 
-\documentclass[a4paper,man,natbib]{apa6}
+\documentclass[a4paper,man]{apa6}
 
 \usepackage[english]{babel}
 \usepackage[utf8x]{inputenc}
@@ -15,7 +15,7 @@
 \usepackage{color, colortbl} 					% for coloring rows of table
 	\definecolor{Gray}{gray}{0.9}
 \usepackage{placeins} 						% to limit push-to-end of figures
-%\usepackage[round]{natbib} 					% for better apalike citation style
+\usepackage[natbibapa]{apacite} 				% for better apalike citation style
 \usepackage{multirow} 						% for multirow tables
 \usepackage{graphicx}						% to resize tables
 \usepackage{rotating}						% to rotate pictures
@@ -66,7 +66,7 @@
 }
 \affiliation{Tilburg University}
 
-\abstract{Your abstract here.}
+\abstract{\input{abstract.tex}}
 
 \begin{document}
 \maketitle
@@ -100,7 +100,7 @@
 \input{07_section.tex}
 
 % Bibliography
-\bibliographystyle{apalike}
+\bibliographystyle{apacite} % version 2 uses & instead of "and" between authors
 
 \bibliography{
 	\pathBIB/missingData/bibtex/papers,

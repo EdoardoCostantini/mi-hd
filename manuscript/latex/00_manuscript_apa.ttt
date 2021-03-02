@@ -10,7 +10,7 @@ condition & label & n & p & pm \\
 3 & low-dim-high-pm  & 200 & 50  & .3 \\
 4 & high-dim-high-pm & 200 & 500 & .3 \\
 \end{tabular}
-\caption{\label{tab:condExp1}Summary of conditions for experiment 1.}
+\caption{\label{tab:condExp1}Summary of conditions for Experiment 1.}
 \end{table*}
 \begin{table*}[hbt]
 \ifnextchar[{\eatarg}{}
@@ -19,16 +19,16 @@ condition & label & n & p & pm \\
 \begin{tabular}{l | r | r | r | r | r | r }
 condition & label & n & p & l & pm & $\lambda$ range \\
 \hline
-1 & low-dim-low-pm-high-$\lambda$ & 200 & 50 &  10 &  0.1 & [.9, .97] \\
-2 & high-dim-low-pm-high-$\lambda$ & 200 & 500 & 100 & 0.1 & [.9, .97] \\
-3 & low-dim-high-pm-high-$\lambda$ & 200 & 50 &  10 &  0.3 & [.9, .97] \\
-4 & high-dim-high-pm-high-$\lambda$ & 200 & 500 & 100 & 0.3 & [.9, .97] \\
-5 & low-dim-low-pm-low-$\lambda$ & 200 & 50 &  10 &  0.1 & [.5, .6]  \\
-6 & high-dim-low-pm-low-$\lambda$ & 200 & 500 & 100 & 0.1 & [.5, .6]  \\
-7 & low-dim-high-pm-low-$\lambda$ & 200 & 50 &  10 &  0.3 & [.5, .6]  \\
-8 & high-dim-high-pm-low-$\lambda$ & 200 & 500 & 100 & 0.3 & [.5, .6]  \\
+1 & low-dim-low-pm-high-$\lambda$ & 200 & 50 &  10 &  0.1 & [0.9, 0.97] \\
+2 & high-dim-low-pm-high-$\lambda$ & 200 & 500 & 100 & 0.1 & [0.9, 0.97] \\
+3 & low-dim-high-pm-high-$\lambda$ & 200 & 50 &  10 &  0.3 & [0.9, 0.97] \\
+4 & high-dim-high-pm-high-$\lambda$ & 200 & 500 & 100 & 0.3 & [0.9, 0.97] \\
+5 & low-dim-low-pm-low-$\lambda$ & 200 & 50 &  10 &  0.1 & [0.5, 0.6]  \\
+6 & high-dim-low-pm-low-$\lambda$ & 200 & 500 & 100 & 0.1 & [0.5, 0.6]  \\
+7 & low-dim-high-pm-low-$\lambda$ & 200 & 50 &  10 &  0.3 & [0.5, 0.6]  \\
+8 & high-dim-high-pm-low-$\lambda$ & 200 & 500 & 100 & 0.3 & [0.5, 0.6]  \\
 \end{tabular}
-\caption{\label{tab:condExp2}Summary of conditions for experiment 2.}
+\caption{\label{tab:condExp2}Summary of conditions for Experiment 2.}
 \end{table*}
 \begin{table*}[hbt]
 \ifnextchar[{\eatarg}{}
