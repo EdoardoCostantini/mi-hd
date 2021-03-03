@@ -1,0 +1,135 @@
+%%% Title:    Advanced Introductory Reading List: Missing Data
+%%% Author:   Kyle M. Lang
+%%% Created:  2019-09-16
+%%% Modified: 2019-11-04
+
+\documentclass[12pt]{article}
+\usepackage{libertine}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage[natbibapa]{apacite}
+\usepackage{multibib}
+\usepackage[libertine]{newtxmath}
+\usepackage{hyperref}
+\usepackage{datetime2}
+
+\hypersetup{colorlinks=true, linkcolor=blue}
+
+\geometry{verbose, tmargin = 1in, bmargin = 1in, lmargin = 1in, rmargin = 1in}
+
+\newcites{semb,mib,genb,semp,algo,rev,ext}{%
+  Seminal\ Books,%
+  MI-Focused\ Books,%
+  Generalist\ Books,%
+  Seminal\ Papers,%
+  Important\ Algorithms,%
+  Reviews/Tutorials,%
+  Important\ Developments/Clarifications/Extensions%
+}
+
+%% Define the path to bibtex files
+\newcommand{\bibPath}{../bibtex}
+%\newcommand{\bibStyle}{apacite} % exclude annotations
+\newcommand{\bibStyle}{apacann} % include annotations
+
+%% Set the title and author info
+\title{Missing Data Analysis\\ \Large Advanced Introductory Reading List}
+\author{Compiled by Edoardo Costantini}
+
+\raggedright
+
+\begin{document}
+
+\maketitle
+
+The sources listed below offer an extended/advanced introduction to missing data
+analysis. This list is meant to cover the basics of missing data from a
+technical, mathematically rigorous perspective. Readers without a strong
+background in mathematics/statistics may wish to begin with the sources listed
+in ``gentle\_intro.tex''.\\
+\vspace{12pt}
+Most of the following sources represent either seminal
+references in missing data or general overviews of the field. Consequently, this
+list does not necessarily represent the latest work in missing data theory.
+These sources should, however, provide a very thorough introduction to/overview
+of modern missing data theory.
+
+\nocitesemb{
+  rubin:1987,
+  littleRubin:2002,
+  schafer:1997%
+}
+
+\nocitemib{
+  vanBuuren:2012,
+  carpenterKenward:2013%
+}
+
+\nocitegenb{
+  allison:2002,
+  enders:2010,
+  graham:2012%
+}
+
+\nocitesemp{
+  rubin:1976,
+  rubin:1978,
+  dempsterEtAl:1977,
+  anderson:1957,
+  orchardWoodbury:1972%
+}
+
+\nocitealgo{
+  raghunathanEtAl:2001,
+  vanBuurenEtAl:2006,
+  tannerWong:1987,
+  little:1988,
+  honakerKing:2010%
+}
+
+\nociterev{
+  rubin:1996,
+  andridgeLittle:2010,
+  sterneEtAl:2009,
+  whiteEtAl:2011%
+}
+
+\nociteext{
+  collinsEtAl:2001,
+  savaleiRhemtulla:2012,
+  graham:2003,
+  vonHippel:2009,
+  belinEtAl:1999,
+  schaferGraham:2002,
+  vinkVanBuuren:2019,
+  whiteCarlin:2010%
+}
+
+\bibliographystylesemb{\bibStyle}
+\bibliographysemb{\bibPath/books.bib}
+
+\bibliographystylegenb{\bibStyle}
+\bibliographygenb{\bibPath/books.bib}
+
+\bibliographystylemib{\bibStyle}
+\bibliographymib{\bibPath/books.bib}
+
+\bibliographystylesemp{\bibStyle}
+\bibliographysemp{\bibPath/papers.bib}
+
+\bibliographystylealgo{\bibStyle}
+\bibliographyalgo{\bibPath/papers.bib}
+
+\bibliographystylerev{\bibStyle}
+\bibliographyrev{\bibPath/papers.bib}
+
+\bibliographystyleext{\bibStyle}
+\bibliographyext{\bibPath/papers.bib,
+		 \bibPath/misc.bib}
+
+\end{document}

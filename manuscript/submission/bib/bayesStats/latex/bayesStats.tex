@@ -1,0 +1,97 @@
+%%% Title:    Mathematical Foundation Books
+%%% Author:   Edoardo Costantini
+%%% Created:  2019-12-10
+%%% Modified: 2020-04-02
+
+\documentclass[12pt]{article}
+\usepackage{libertine}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage[natbibapa]{apacite}
+\usepackage{multibib}
+\usepackage[libertine]{newtxmath}
+\usepackage{hyperref}
+\usepackage{datetime2}
+
+\hypersetup{colorlinks=true, linkcolor=blue}
+
+\geometry{verbose, tmargin = 1in, bmargin = 1in, lmargin = 1in, rmargin = 1in}
+
+\newcites{books,gener,samp,regureg,trees}{%
+  Books,%
+  General\ knowledge,%
+  Sampling,%
+  Regularized\ Regression,%
+  Tree\ modelling%
+ }
+
+%% Define the path to bibtex files
+%% Set to current directory when compiling via 'compileLatex.sh'
+\newcommand{\bibPath}{../bibtex}
+%\newcommand{\bibStyle}{apacite} % exclude annotations
+\newcommand{\bibStyle}{apacann} % include annotations
+
+%% Set the title and author info
+\title{Bayesian Statistics\\ \Large Reading List}
+\author{Compiled by Edoardo Costantini}
+
+\raggedright
+
+\begin{document}
+
+\maketitle
+
+\nocitebooks{
+	hoff:2009,
+	gelman:2013%
+}
+
+\nocitegener{
+	gelman:1993,
+	gelmanRaghunthan:2001%	
+}
+
+\nocitesamp{
+	dagpunar:2007,
+	gilksWild:1992,
+	gilksEtAl:1995,
+	giudiciEtAl:2013,
+	vehtariEtAl:2020%
+}
+
+\nociteregureg{
+	griffinBrown:2005,
+	griffinBrown:2011,
+	hans:2009,
+	hans:2010,
+	kyung:2010,
+	liYao:2018,
+	parkCasella:2008%
+}
+
+\nocitetrees{
+	chipman:1998,
+	chipman:2010%
+}
+
+\bibliographystylebooks{\bibStyle}
+\bibliographybooks{\bibPath/books.bib}
+
+\bibliographystylegener{\bibStyle}
+\bibliographygener{\bibPath/papers.bib}
+
+\bibliographystylesamp{\bibStyle}
+\bibliographysamp{\bibPath/papers.bib}
+
+\bibliographystyleregureg{\bibStyle}
+\bibliographyregureg{\bibPath/papers.bib}
+
+\bibliographystyletrees{\bibStyle}
+\bibliographytrees{\bibPath/papers.bib}
+
+\end{document}

@@ -1,0 +1,126 @@
+% Taylor & Francis LaTeX template for authors (Interact layout + APA reference style)
+% source: https://www.overleaf.com/latex/templates/taylor-and-francis-latex-template-for-authors-interact-layout-plus-apa-reference-style/jqhskrsqqzfz
+
+\documentclass[]{./cls/interact}
+
+% Template Preamble
+
+\usepackage{epstopdf}				% To incorporate .eps illustrations using PDFLaTeX, etc.
+\usepackage[caption=false]{subfig}		% Support for small, `sub' figures and tables
+\usepackage[nolists,tablesfirst]{endfloat}	% To `separate' figures and tables from text if required
+\usepackage[doublespacing]{setspace}		% To produce a `double spaced' document if required
+	\setlength\parindent{24pt}		% To increase paragraph indentation when line spacing is doubled
+
+% Citation support using apacite.sty. 
+\usepackage[natbibapa,nodoi]{apacite}					% Citation support using apacite.sty. 
+\setlength\bibhang{12pt}						% To set the indentation in the list of references using apacite.sty. 
+\renewcommand\bibliographytypesize{\fontsize{10}{12}\selectfont}	% To set the list of references in 10 point font using apacite.sty. 
+
+% Theorem-like structures provided by amsthm.sty
+\theoremstyle{plain}				
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem{notation}{Notation}
+
+% Custom Preamble
+
+% Important packages
+\usepackage{hyperref}	% automatic pdf outline and citations hyperlinks
+\usepackage{placeins} 	% for FloatBarrier
+
+% Paths
+\newcommand{\pathBIB}{./bib}
+\newcommand{\pathFIG}{./figures}
+
+% Macros
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert} % for l2 norm in equations
+
+% Begin Document
+\begin{document}
+
+%\articletype{ARTICLE TEMPLATE}	% Specify the article type or omit as appropriate
+
+\title{High Dimensional Imputation for the Social Sciences: A Comparison of State-of-the-Art Methods}
+
+\author{
+\name{
+	Edoardo Costantini\textsuperscript{a} \thanks{CONTACT Edoardo Costantini. Email: e.costantini@tilburguniversity.edu},
+	Kyle M. Lang\textsuperscript{a},
+	Tim Reeskens\textsuperscript{b}, and
+	Klaas Sijtsma\textsuperscript{a}
+	}
+\affil{
+	\textsuperscript{a}Tilburg University, Department of Methodology and Statistics;
+	\textsuperscript{b}Tilburg University, Department of Sociology
+	}
+}
+
+\maketitle
+
+\begin{abstract}
+	\input{abstract.tex}
+\end{abstract}
+
+\begin{keywords}
+	Multiple Imputation; High-dimensional data; Regularized Regression; Principal Components; CART; Random Forests
+\end{keywords}
+
+% Introduction
+\section{Heading 1: bla bla} Text
+\subsection{Heading 2: Bla bla} Text 
+\subsubsection{Heading 3: Bla bla bla} Text
+\paragraph{Heading 4:BLa bla bla} Text
+\subparagraph{Heading 5: Bla bla bla} Text
+
+\input{01_section.tex}
+
+% Algorithms and Imputation Methods
+
+\input{02_section.tex}
+
+% Simulation Study 1
+
+\input{03_section.tex}
+
+% Simulation Study 2
+
+\input{04_section.tex}
+
+% Resampling Study
+
+\input{05_section.tex}
+
+% Discussion
+
+\input{06_section.tex}
+
+% Conclusions
+
+\input{07_section.tex}
+
+% Bibliography
+\bibliographystyle{apacite} 
+
+\bibliography{
+	\pathBIB/missingData/bibtex/papers,
+	\pathBIB/missingData/bibtex/books,
+	\pathBIB/missingData/bibtex/software,
+	\pathBIB/bayesStats/bibtex/papers,
+	\pathBIB/programming/bibtex/papers,
+	\pathBIB/survey/bibtex/data,
+	\pathBIB/survey/bibtex/studies,
+	\pathBIB/statsLearn/bibtex/books,	
+	\pathBIB/statsLearn/bibtex/papers,
+	\pathBIB/statsLearn/bibtex/software
+	}
+
+\end{document}

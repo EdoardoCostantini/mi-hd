@@ -1,0 +1,69 @@
+%%% Title:    	Survey
+%%% Author:   	Edoardo Costantini
+%%% Created: 2020-11-20
+
+\documentclass[12pt]{article}
+\usepackage{libertine}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage[natbibapa]{apacite}
+\usepackage{multibib}
+\usepackage[libertine]{newtxmath}
+\usepackage{hyperref}
+\usepackage{datetime2}
+
+\hypersetup{colorlinks=true, linkcolor=blue}
+
+\geometry{verbose, tmargin = 1in, bmargin = 1in, lmargin = 1in, rmargin = 1in}
+
+\newcites{studies,data,link}{%
+  Studies,
+  Data,
+  Linked Data Resources%
+ }
+%% Define the path to bibtex files
+%% Set to current directory when compiling via 'compileLatex.sh'
+\newcommand{\bibPath}{../bibtex}
+%\newcommand{\bibStyle}{apacite} % exclude annotations
+\newcommand{\bibStyle}{apacann} % include annotations
+
+%% Set the title and author info
+\title{Surveys\\ \Large Reference List}
+\author{Compiled by Edoardo Costantini}
+
+\raggedright
+
+\begin{document}
+
+\maketitle
+
+\nocitestudies{
+	immerzeel:2015,
+	koneke:2014%
+}
+
+\nocitedata{
+	EVS:2017%
+}
+
+\nocitelink{
+	harronEtAl:2017,
+	jutteEtAl:2011,
+	kozyrskyjEtAl:2009%
+}
+
+\bibliographystylestudies{\bibStyle}
+\bibliographystudies{\bibPath/studies.bib}
+
+\bibliographystyledata{\bibStyle}
+\bibliographydata{\bibPath/data.bib}
+
+\bibliographystylelink{\bibStyle}
+\bibliographylink{\bibPath/studies.bib}
+
+\end{document}

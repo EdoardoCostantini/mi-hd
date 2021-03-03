@@ -1,0 +1,88 @@
+%%% Title:    Gentle Introductory Reading List: Missing Data
+%%% Author:   Kyle M. Lang
+%%% Created:  2019-12-12
+%%% Modified: 2019-12-12
+
+\documentclass[12pt]{article}
+\usepackage{libertine}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage[natbibapa]{apacite}
+\usepackage{multibib}
+\usepackage[libertine]{newtxmath}
+\usepackage{hyperref}
+\usepackage{datetime2}
+
+\hypersetup{colorlinks=true, linkcolor=blue}
+
+\geometry{verbose, tmargin = 2.5cm, bmargin = 2.5cm, lmargin = 2.5cm, rmargin = 2.5cm}
+
+\newcites{b,rr,ensemble,meths,mv,sw}{Books,Regularized Regression,Ensemble Methods,Methods,Multi-View Data Research,Software}
+
+%% Define the path to bibtex files
+%% Set to current directory when compiling via 'compileLatex.sh'
+\newcommand{\bibPath}{../bibtex}
+%\newcommand{\bibStyle}{apacite} % exclude annotations
+\newcommand{\bibStyle}{apacann} % include annotations
+
+%% Set the title and author info
+\title{Statistical Learning Literature \\ \small Annotated}
+\author{Compiled by Edoardo Costantini}
+
+\raggedright
+
+\begin{document}
+
+\maketitle
+
+\nociteb{
+	friedmanEtAl:2001,
+	hastieEtAl:2015,
+	jamesEtAl:2013%
+}
+
+\nociterr{
+	zou:2006,
+	zouHastie:2005%
+}
+
+\nocitemeths{
+	burtonEtAl:2006%
+}
+
+\nociteensemble{
+	breiman:2001%
+}
+\nocitemv{
+	liEtAl:2018,
+	vanLoonEtAl:2020,
+}
+\nocitesw{
+	pandas:2020,
+	R:2020,
+}
+
+\bibliographystyleb{\bibStyle}
+\bibliographyb{\bibPath/books.bib}
+
+\bibliographystylerr{\bibStyle}
+\bibliographyrr{\bibPath/papers.bib}
+
+\bibliographystylemeths{\bibStyle}
+\bibliographymeths{\bibPath/papers.bib}
+
+\bibliographystyleensemble{\bibStyle}
+\bibliographyensemble{\bibPath/papers.bib}
+
+\bibliographystylemv{\bibStyle}
+\bibliographymv{\bibPath/papers.bib}
+
+\bibliographystylesw{\bibStyle}
+\bibliographysw{\bibPath/software.bib}
+
+\end{document}

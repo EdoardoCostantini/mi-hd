@@ -19,10 +19,12 @@ With a sample size fixed at 200, conditions with $l = 10$ resulted in a low-dime
 with $l = 100$ resulted in a high-dimensional settings.
 
 \begin{table}
-	\centering
-	\begin{tabular}{l | r | r | r | r | r | r }
+\tbl{Summary of conditions for Experiment 2.}
+	{
+	\begin{tabular}{l c c c c c c } 
+		\toprule
 		condition & label & n & p & l & pm & $\lambda$ range \\
-		\hline
+		\midrule
 		1 & low-dim-low-pm-high-$\lambda$ & 200 & 50 &  10 &  0.1 & [0.9, 0.97] \\
 		2 & high-dim-low-pm-high-$\lambda$ & 200 & 500 & 100 & 0.1 & [0.9, 0.97] \\
 		3 & low-dim-high-pm-high-$\lambda$ & 200 & 50 &  10 &  0.3 & [0.9, 0.97] \\
@@ -31,8 +33,10 @@ with $l = 100$ resulted in a high-dimensional settings.
 		6 & high-dim-low-pm-low-$\lambda$ & 200 & 500 & 100 & 0.1 & [0.5, 0.6]  \\
 		7 & low-dim-high-pm-low-$\lambda$ & 200 & 50 &  10 &  0.3 & [0.5, 0.6]  \\
 		8 & high-dim-high-pm-low-$\lambda$ & 200 & 500 & 100 & 0.3 & [0.5, 0.6]  \\
+		\bottomrule
 	\end{tabular}
-	\caption{\label{tab:condExp2}Summary of conditions for Experiment 2.}
+	}
+\label{tab:condExp2}
 \end{table}
 
 \FloatBarrier % stops table:condSum leaving its own section
