@@ -37,9 +37,13 @@
 \usepackage{hyperref}	% automatic pdf outline and citations hyperlinks
 \usepackage{placeins} 	% for FloatBarrier
 
-% Paths
+% Paths (self-contained)
+\newcommand{\pathTEX}{./tex}
 \newcommand{\pathBIB}{./bib}
 \newcommand{\pathFIG}{./figures}
+% Paths for work in progress versions
+%\newcommand{\pathFIG}{../output/graphs} 	% pools from my R output folder
+%\newcommand{\pathBIB}{../../statsLib}		% pools from my bibliography
 
 % Macros
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert} % for l2 norm in equations
@@ -67,7 +71,7 @@
 \maketitle
 
 \begin{abstract}
-	\input{abstract.tex}
+	\input{\pathTEX/00_abstract.tex}
 \end{abstract}
 
 \begin{keywords}
@@ -81,31 +85,31 @@
 \paragraph{Heading 4:BLa bla bla} Text
 \subparagraph{Heading 5: Bla bla bla} Text
 
-\input{01_section.tex}
+\input{\pathTEX/01_section.tex}
 
 % Algorithms and Imputation Methods
 
-\input{02_section.tex}
+\input{\pathTEX/02_section.tex}
 
 % Simulation Study 1
 
-\input{03_section.tex}
+\input{\pathTEX/03_section.tex}
 
 % Simulation Study 2
 
-\input{04_section.tex}
+\input{\pathTEX/04_section.tex}
 
 % Resampling Study
 
-\input{05_section.tex}
+\input{\pathTEX/05_section.tex}
 
 % Discussion
 
-\input{06_section.tex}
+\input{\pathTEX/06_section.tex}
 
 % Conclusions
 
-\input{07_section.tex}
+\input{\pathTEX/07_section.tex}
 
 % Bibliography
 \bibliographystyle{apacite} 

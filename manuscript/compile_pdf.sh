@@ -25,9 +25,11 @@ rm *.bbl
 rm *.blg
 rm *.log
 rm *.out
+rm *.fff
+rm *.ttt
 
 # Moved pdf file to correct location
-mv $1.pdf ../pdf/
+mv *.pdf ./pdf/
 
 ## NOTES:
 ## Basic workflow from: http://linuxcommand.org/lc3_wss0010.phpc.w
