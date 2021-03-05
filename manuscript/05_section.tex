@@ -202,17 +202,19 @@ controlled by defining different sizes for the sample taken from the EVS populat
 	sample size, but still required more than ten times the time of MI-PCA and blasso imputation.
 
 \begin{table}
-\tbl{Average imputation time in minutes.}
+\tbl{Average imputation time in minutes for the MI methods compared in Experiment 3.}
 	{
 	\begin{tabular}{l c c c c c c c c} 
 		\toprule
 		condition & DURR & IURR & blasso & bridge & MI-PCA & MI-CART & MI-RF & MI-OP \\
 		\midrule
-		1 & 73.20 & 75.90 & 1.40 & 8.10 & 0.60 & 4.00 & 11.30 & 2.20 \\ 
-		2 & 6.10 & 9.70 & 0.50 & 3.20 & 0.40 & 1.40 & 4.70 & 1.90 \\	
+		low-dim (n = 1000) & 73.20 & 75.90 & 1.40 & 8.10 & 0.60 & 4.00 & 11.30 & 2.20 \\ 
+		high-dim (n = 300) & 6.10 & 9.70 & 0.50 & 3.20 & 0.40 & 1.40 & 4.70 & 1.90 \\	
 		\bottomrule
 	\end{tabular}
 	}
+\tabnote{\textsuperscript{a} In both conditions, the number of data columns was 243; $n$ refers to the 
+	sample size.}
 \label{tab:time}
 \end{table}
 

@@ -12,9 +12,9 @@
 	\setlength\parindent{24pt}		% To increase paragraph indentation when line spacing is doubled
 
 % Citation support using apacite.sty. 
-\usepackage[natbibapa,nodoi]{apacite}					% Citation support using apacite.sty. 
-\setlength\bibhang{12pt}						% To set the indentation in the list of references using apacite.sty. 
-\renewcommand\bibliographytypesize{\fontsize{10}{12}\selectfont}	% To set the list of references in 10 point font using apacite.sty. 
+\usepackage[natbibapa,nodoi]{apacite}				% Citation support using apacite.sty. 
+\setlength\bibhang{12pt}					% To set the indentation in the list of references using apacite.sty. 
+\renewcommand\bibliographytypesize{\fontsize{10}{12}\selectfont}% To set the list of references in 10 point font using apacite.sty. 
 
 % Theorem-like structures provided by amsthm.sty
 \theoremstyle{plain}				
@@ -38,7 +38,6 @@
 \usepackage{placeins} 	% for FloatBarrier
 
 % Paths (self-contained)
-%\newcommand{\pathTEX}{./}
 \newcommand{\pathBIB}{./bib}
 \newcommand{\pathFIG}{./figures}
 % Paths for work in progress versions
@@ -57,7 +56,8 @@
 
 \author{
 \name{
-	Edoardo Costantini\textsuperscript{a} \thanks{CONTACT Edoardo Costantini. Email: e.costantini@tilburguniversity.edu},
+	Edoardo Costantini\textsuperscript{a}
+		\thanks{CONTACT Edoardo Costantini. Email: e.costantini@tilburguniversity.edu},
 	Kyle M. Lang\textsuperscript{a},
 	Tim Reeskens\textsuperscript{b}, and
 	Klaas Sijtsma\textsuperscript{a}
@@ -75,7 +75,12 @@
 \end{abstract}
 
 \begin{keywords}
-	Multiple Imputation; High-dimensional data; Regularized Regression; Principal Components; CART; Random Forests
+	Multiple Imputation; 
+	High-dimensional; 
+	Regularized Regression; 
+	Principal Components; 
+	CART; 
+	Random Forests
 \end{keywords}
 
 % Introduction
@@ -110,6 +115,20 @@
 % Conclusions
 
 \input{07_section.tex}
+
+% Article INformation
+
+\section{Article Information}
+
+\textbf{Conflict of Interest Disclosures}: No authors reported any financial or other conflicts 
+of interest in relation to the work described.
+
+\textbf{Funding}: This work was supported by the Tilburg School of Social and Behavioural Sciences.
+Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors
+and do not necessarily reflect the views of the funding agencies.
+
+\textbf{Data Availability}: The data that support the findings of this study are openly available 
+in GESIS Data Archive at https://doi.org/10.4232/1.13511, reference number ZA7500.
 
 % Bibliography
 \bibliographystyle{apacite} 

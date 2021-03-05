@@ -311,19 +311,19 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Sectioning commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\setcounter{secnumdepth}{5}
+%\setcounter{secnumdepth}{5}
 %\newcounter {part}
 %\newcounter {section}
 %\newcounter {subsection}[section]
 %\newcounter {subsubsection}[subsection]
 %\newcounter {paragraph}[subsubsection]
 %\newcounter {subparagraph}[paragraph]
-\renewcommand\thepart       {\arabic{part}}
-\renewcommand\thesection       {\arabic{section}}
-\renewcommand\thesubsection    {\thesection.\arabic{subsection}}
-\renewcommand\thesubsubsection {\thesubsection.\arabic{subsubsection}}
-\renewcommand\theparagraph     {\thesubsubsection.\arabic{paragraph}}
-\renewcommand\thesubparagraph  {\theparagraph.\arabic{subparagraph}}
+%\renewcommand\thepart       {\arabic{part}}
+%\renewcommand\thesection       {\arabic{section}}
+%\renewcommand\thesubsection    {\thesection.\arabic{subsection}}
+%\renewcommand\thesubsubsection {\thesubsection.\arabic{subsubsection}}
+%\renewcommand\theparagraph     {\thesubsubsection.\arabic{paragraph}}
+%\renewcommand\thesubparagraph  {\theparagraph.\arabic{subparagraph}}
 %
 \renewcommand\section{\@startsection {section}{1}{\z@}%
                                    {-26pt \@plus-4pt \@minus-2pt}%
