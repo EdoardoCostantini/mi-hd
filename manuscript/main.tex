@@ -34,8 +34,9 @@
 % Custom Preamble
 
 % Important packages
-\usepackage{hyperref}	% automatic pdf outline and citations hyperlinks
-\usepackage{placeins} 	% for FloatBarrier
+\usepackage{hyperref}		% automatic pdf outline and citations hyperlinks
+\usepackage{placeins} 		% for FloatBarrier
+\usepackage[document]{ragged2e} % forces no justification
 
 % Paths (self-contained)
 \newcommand{\pathBIB}{./bib}
@@ -69,12 +70,20 @@
 }
 
 \maketitle
+\pagebreak
+
+{\titlefont % Repeat title for submission
+	High Dimensional Imputation for the Social Sciences: \\
+	A Comparison of State-of-the-Art Methods
+}
+\linebreak 
 
 \begin{abstract}
 	\input{00_abstract.tex}
 \end{abstract}
 
 \begin{keywords}
+	Keywords:
 	Multiple Imputation; 
 	High-dimensional; 
 	Regularized Regression; 
@@ -84,12 +93,6 @@
 \end{keywords}
 
 % Introduction
-\section{Heading 1: bla bla} Text
-\subsection{Heading 2: Bla bla} Text 
-\subsubsection{Heading 3: Bla bla bla} Text
-\paragraph{Heading 4:BLa bla bla} Text
-\subparagraph{Heading 5: Bla bla bla} Text
-
 \input{01_section.tex}
 
 % Algorithms and Imputation Methods
@@ -116,7 +119,7 @@
 
 \input{07_section.tex}
 
-% Article INformation
+% Article Information
 
 \section{Article Information}
 

@@ -365,9 +365,11 @@
     {\@ssect{#3}{#4}{#5}{#6}}%
     {\@dblarg{\@sect{#1}{#2}{#3}{#4}{#5}{#6}}}}
 %
-\def\@sseccntformat#1{\csname the#1\endcsname.\hskip 0.5em}
+\def\@sseccntformat#1{}
+%\def\@sseccntformat#1{\csname the#1\endcsname.\hskip 0.5em} % numbers subsections and below
 \def\@appseccntformat#1{\appendixname\ \csname the#1\endcsname.\ }
-\def\@seccntformat#1{\csname the#1\endcsname.\hskip 0.5em}
+\def\@seccntformat#1{}
+%\def\@seccntformat#1{\csname the#1\endcsname.\hskip 0.5em} % numbers sections
 \def\@sect#1#2#3#4#5#6[#7]#8{\ifnum #2>\c@secnumdepth
      \let\@svsec\@empty\else
      \refstepcounter{#1}%
@@ -485,7 +487,7 @@
 %
 \renewenvironment{abstract}{%
         \par\addvspace{0pt plus2pt minus1pt}
-  \abstractfont\noindent{\bfseries \abstractname\\}\ignorespaces%
+  \abstractfont\noindent{\bfseries }\ignorespaces%
 }{%
         \par\addvspace{13pt plus2pt minus1pt}
   \@endparenv}
@@ -499,7 +501,7 @@
 %
 \newenvironment{keywords}{%
         \par\addvspace{13pt plus2pt minus1pt}
-  \keywordfont\noindent{\bfseries \keywordsname\\}\ignorespaces%
+  \keywordfont\noindent{\bfseries }\ignorespaces%
 }{%
         \par\addvspace{13pt plus2pt minus1pt}
   \@endparenv}
