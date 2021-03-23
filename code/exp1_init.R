@@ -121,6 +121,8 @@
 
 # Random forest related
   parms$rfntree <- 10  # default value as no indication is given in paper
+  parms$missFor_maxiter <- 20 # maxiter = 20
+  parms$missFor_ntree <- 100  # ntree = 100
   
 # Bayesina Ridge imputation related
   parms$ridge <- 1e-5

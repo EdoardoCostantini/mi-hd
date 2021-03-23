@@ -11,7 +11,7 @@
 # Itereations, repetitions, etc
   parms$dt_rep     <- 5 # 500 replications for averaging results (200 goal)
   parms$chains     <- 1 # 1   number of parallel chains for convergence check
-  parms$iters      <- 5 # 75
+  parms$iters      <- 2 # 75
   parms$burnin_imp <- 0 # 50  how many imputation iterations should be discarded
   parms$ndt        <- 2 # 10  number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
@@ -92,15 +92,15 @@
   parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic
-  parms$meth_sel <- list(DURR_all = TRUE,  # version w/o SI
-                         DURR_si  = TRUE,  # version w/o SI
-                         IURR_all = TRUE,  # version w/o SI
-                         IURR_si  = TRUE, # version w/ SI
+  parms$meth_sel <- list(DURR_all = FALSE,   # version w/o SI
+                         DURR_si  = FALSE,  # version w/o SI
+                         IURR_all = FALSE,   # version w/o SI
+                         IURR_si  = FALSE,  # version w/ SI
                          blasso   = TRUE,
-                         bridge   = TRUE,
-                         MI_PCA   = TRUE,
-                         MI_CART  = TRUE,
-                         MI_RF    = TRUE,
+                         bridge   = FALSE,
+                         MI_PCA   = FALSE,
+                         MI_CART  = FALSE,
+                         MI_RF    = FALSE,
                          MI_OP    = TRUE,
                          missFor  = TRUE,
                          mean     = TRUE,
@@ -123,6 +123,8 @@
 
 # Random forest related
   parms$rfntree <- 10  # default value as no indication is given in paper
+  parms$missFor_maxiter <- 2 # maxiter = 20
+  parms$missFor_ntree <- 10  # ntree = 100
   
 # Bayesina Ridge imputation related
   parms$ridge <- 1e-5
@@ -159,8 +161,6 @@
                    CFA_CI   = TRUE,
                    semS_EST = TRUE,
                    semS_CI  = TRUE,
-                   lm_EST   = TRUE,
-                   lm_CI    = TRUE,
                    fmi      = TRUE,
                    miss_des = FALSE,
                    time     = TRUE,
@@ -170,9 +170,9 @@
 # Conditions --------------------------------------------------------------
 
   # Define Experimental Factor Values
-  lv    <- c(10, 100)    # number of latent variables
-  pm    <- c(.1, .3)         # proportion of missings level
-  fl    <- c("low")     # factor loadings level
+  lv    <- c(10, 20)     # number of latent variables should be c(10, 100)
+  pm    <- c(.1, .3)     # proportion of missings level
+  fl    <- c("low")      # factor loadings level
   ridge <- c(1e-1, 1e-7) # 1 valude found w/ corssvalidation in exp 2
   
   # Make Conditions

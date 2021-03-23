@@ -1989,7 +1989,7 @@ plot_fg <- function(dt,
     xbreaks_midtop <- mean(xbreaks_center:xbreaks_top)
     plot_xbreaks <- c(xbreaks_low, xbreaks_midlow, 
                       xbreaks_center, 
-                      xbreaks_midtop, xbreaks_top) # c(-20, -10, 0, 10, 20)
+                      xbreaks_midtop, xbreaks_top)# c(-20, -10, 0, 10, 20)
     plot_xlabels <- as.character(plot_xbreaks)#c("-20", "-10", "0", "10", "20")
     plot_vlines <- c(xbreaks_midlow, xbreaks_midtop)
     if(summy == TRUE){
@@ -2016,7 +2016,7 @@ plot_fg <- function(dt,
   
   # Colors and texts
   font.plot        <- "Arial" # font for the whole plot
-  x.axis.text.size <- 7.5  # Scale of plotted numbers
+  x.axis.text.size <- 7.5 # Scale of plotted numbers
   y.axis.text.size <- 7.5 # Imputation Methods names
   grid.text.size   <- 7.5 # Condition + Parameter type
   segme.thick      <- .5 # thickness of lines reporting results
@@ -2720,7 +2720,7 @@ plot_exp4_meth <- function(dt,
 
   # Colors and texts
   font.plot        <- "Arial" # font for the whole plot
-  x.axis.text.size <- 7.5  # Scale of plotted numbers
+  x.axis.text.size <- 7.5 # Scale of plotted numbers
   y.axis.text.size <- 7.5 # Imputation Methods names
   grid.text.size   <- 10 # Condition + Parameter type
   segme.thick      <- 1 # thickness of lines reporting results (was 1)

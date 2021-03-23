@@ -133,6 +133,8 @@
   
   # Random Forest
   parms$rfntree <- 10
+  parms$missFor_maxiter <- 20 # maxiter = 20
+  parms$missFor_ntree <- 100  # ntree = 100
   
   # MICE true
   parms$S_all <- c("y", 

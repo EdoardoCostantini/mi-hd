@@ -193,7 +193,8 @@ doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
               # Try running simulation for condition i, repetition rp
               runCell_add(cond = conds[i, ],
                           parms = parms,
-                          rep_status = rp)
+                          rep_status = rp,
+                          cluster = FALSE)
             },
             error = function(report) {
               err <- paste0("Original Error: ", report)
@@ -203,8 +204,7 @@ doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
         }
       }
     }
-    
-    
+
   ## END capture output
   if(verbose == TRUE){
     sink()
@@ -1307,15 +1307,50 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
 
 # Addendum ----------------------------------------------------------------
 
-runCell_add <- function(cond, parms, rep_status, data_source, md_pat) {
+## Run one replication of the simulation:
+doRep_cluster <- function(rp, conds, parms) { 
+  ## Example Inputs
+  # rp = 1
+  # conds = conds
+  # parms = parms
+  ## Seeds according
+  .lec.SetPackageSeed(rep(parms$seed, 6))
+  if(!rp %in% .lec.GetStreams()) # if the streams do not exist yet
+    .lec.CreateStream(c(1 : parms$nStreams)) # then
+  .lec.CurrentStream(rp) # this is equivalent to setting the seed Rle
+  
+  ## Loop over conditions:
+  for(i in 1 : nrow(conds)){
+  # i = 1
+    runCell_add(cond = conds[i, ],
+                rep_status = rp,
+                parms = parms,
+                cluster = TRUE) # I'm running it with cluster mode
+  }
+  
+  ## Return the rep index
+  rp
+}
+
+runCell_add <- function(cond, parms, 
+                        rep_status,
+                        cluster = TRUE) {
   ## Description
   # Given 1 condition, Generates 1 dataset and performs imputations 
   # according to selected methods
   ## For internals
   # set.seed(1234)
   # cond        = conds[1, ]
+  # cluster = TRUE # if you are running on lisa you want to store differently
   
+  ## Start Timer
   prepro_time_start <- Sys.time()
+  
+  ## Condition Tag
+  cond_tag <- paste0(names(cond), 
+                     sub("\\.", "", as.character(cond)), 
+                     collapse = "")
+  
   ## Data ------------------------------------------------------------------ ##
   Xy_ls  <- simData_lv(parms, cond)
   Xy     <- Xy_ls$dat
@@ -1601,6 +1636,18 @@ runCell_add <- function(cond, parms, rep_status, data_source, md_pat) {
                  run_time_min = imp_time,
                  run_time_prep = prepro_time_end - prepro_time_start,
                  imp_values   = imp_values)[parms$store]
-  return(output)
+  
+  ## Store Results
+  if(cluster == TRUE){
+    saveRDS(output,
+            file = paste0(parms$outDir,
+                          "exp", parms$exp,
+                          "_rep", rp,
+                          "_cond", cond_tag,
+                          ".rds")
+    )
+  } else {
+    return(output)
+  }
 }
 

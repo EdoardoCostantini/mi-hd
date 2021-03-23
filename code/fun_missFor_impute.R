@@ -25,8 +25,10 @@ impute_missFor <- function(Z, parms){
       # to the numeric treatment and suppress the warnings that come
       # out of it
       imp_missForest <- missForest(Z,
-                                   maxiter = 20,
-                                   ntree = 100,
+                                   maxiter = parms$missFor_maxiter,
+                                   ntree = parms$missFor_ntree,
+                                   # maxiter = 20,
+                                   # ntree = 100,
                                    parallelize = "no")
     )
     

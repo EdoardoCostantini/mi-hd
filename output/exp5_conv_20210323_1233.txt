@@ -1,0 +1,11 @@
+CONVERGENCE CHECK PROGRESS REPORT
+Description: For the most challanging condition, data generation is repeated 
+                        a few times, imputation models are used. Obtained imputations can 
+                        then be used to check convergence
+
+------
+Starts at: 2021-03-23 12:33:24
+------
+
+2021-03-23 12:33:24 - Starts Repetition: 1
+2021-03-23 12:33:24 - Starts Repetition: 2
