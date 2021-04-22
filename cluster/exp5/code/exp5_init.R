@@ -9,21 +9,17 @@
   parms$exp <- 5 # second experiment - latent structure
 
 # Itereations, repetitions, etc
-  parms$dt_rep     <- 5 # 500 replications for averaging results (200 goal)
-  parms$chains     <- 1 # 1   number of parallel chains for convergence check
+  parms$dt_rep     <- 30 # Used indirectly to define the Stopos input file
+  parms$chains     <- 1 # 1 number of parallel chains (for convergence check)
   parms$iters      <- 2 # 75
   parms$burnin_imp <- 0 # 50  how many imputation iterations should be discarded
   parms$ndt        <- 2 # 10  number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
-    # every how many iterations should you keep the imputation for a dataset
-    # Example: of 20 iterations, I burn the first 10 I need for convergence
-    # then, I keep 1 set of imputations every "thin"
-    # number of iterations for the MI procedure (20)
-  parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
-  parms$keep_dt <- parms$pos_dt[seq(1, 
-                                    length(parms$pos_dt), 
-                                    parms$thin)] # keep 1 dataset every thin
-
+  parms$pos_dt     <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
+  parms$keep_dt    <- parms$pos_dt[seq(1, 
+                                       length(parms$pos_dt), 
+                                       parms$thin)] # keep 1 dataset every thin
+  
   # For blasso
   parms$chains_bl     <- 1 # 1 number of parallel chains for convergence check
   parms$iters_bl      <- 2 # 2e3
@@ -58,24 +54,18 @@
   parms$blck1_r <- .6 # correlation for highly correlated variables
   parms$blck2_r <- .3 # correlation for correlated variables
 
-# Z gen (fully observed covariates)
-
 # z_m gen (measured items that will have missingness)
-  # parms$z_m_id  <- 1:10
   parms$z_m_id <- paste0("z", 1:10)
-  parms$zm_n <- length(parms$z_m_id)
-  parms$S_all   <- paste0("z", ( 1:(parms$n_it * tail(parms$blck1, 1)) ))
+  parms$zm_n   <- length(parms$z_m_id)
+  parms$S_all  <- paste0("z", ( 1:(parms$n_it * tail(parms$blck1, 1)) ))
     # all measured items (5) for the first 4 lv. These include:
     # - latent variables of items with missing values (1 and 2)
     # - latent variables involved in response model (3 and 4)
     # - all of their items
   
 # y gen / imporntant predictors
-  # parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
   parms$formula <- paste0(parms$z_m_id, collapse = ", ")
-  # variables that are to be imputed
-  # parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
-  parms$lm_model <- parms$z_m_id
+  parms$lm_model <- parms$z_m_id   # variables that are to be imputed
   
 # Response Model
   parms$missType <- c("high", "low")[2]
@@ -87,14 +77,13 @@
   parms$auxWts <- c(1, 1)
   
 # Models ------------------------------------------------------------------
-  parms$lav_model <- NULL #paste(readLines("../txt/lavaan_model_sat.txt"), 
-                          #collapse="\n")
+  parms$lav_model <- NULL
   parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic
-  parms$meth_sel <- list(DURR_all = FALSE,   # version w/o SI
+  parms$meth_sel <- list(DURR_all = FALSE,  # version w/o SI
                          DURR_si  = FALSE,  # version w/o SI
-                         IURR_all = FALSE,   # version w/o SI
+                         IURR_all = FALSE,  # version w/o SI
                          IURR_si  = FALSE,  # version w/ SI
                          blasso   = TRUE,
                          bridge   = FALSE,
@@ -108,7 +97,7 @@
                          GS       = TRUE)
   
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
-    # (GS, CC always last, alwyas present)
+    # (GS, CC always last, always present)
 
   parms$alphaCI <- .95 # confidence level for parameters CI
   parms$k_IURR  <- 0 # k value to bias coef sampling covariance matrix in IURR
@@ -146,6 +135,10 @@
                                     "simOut_", 
                                     parms$start_time,
                                     ".rds")
+  parms$runInfo <- paste0("sInfo",
+                          # parms$start_time,
+                          ".rds")
+  
   parms$description <- c("In each repetition, 1 dataset is created for each condition.
         Imputation methods are used on that condition-specific dataset.
         Results are therefore given per dataset in condition")
@@ -189,24 +182,24 @@
   colnames(conds) <- c("lv", "pm", "fl", "ridge")
 
 ### Same conditions as in experiment 2, but now with matrix desing imposed
-  
-  # Define Experimental Factor Values
-  lv    <- c(10, 100)       # number of latent variables
-  pm    <- c(.1, .3)        # proportion of missings level
-  fl    <- c("high", "low") # factor loadings level
-  ridge <- c(1e-5, 1e-5) # rep(c(1e-1, 1e-7), 4) # 1 valude found w/ corssvalidation
-  
-  # Make Conditions
-  conds <- expand.grid(lv, pm, fl,
-                       stringsAsFactors = FALSE)
-  
-  # Append Ridge Parameter
-  conds <- cbind(conds, ridge)
-  
-  # Select Conditions for run
-  conds <- conds[1:(nrow(conds) - 0), ]
-  
-  # Give Meaningful names to Columns
-  colnames(conds) <- c("lv", "pm", "fl", "ridge")
+
+  # # Define Experimental Factor Values
+  # lv    <- c(10, 100)       # number of latent variables
+  # pm    <- c(.1, .3)        # proportion of missings level
+  # fl    <- c("high", "low") # factor loadings level
+  # ridge <- c(1e-5, 1e-5) # rep(c(1e-1, 1e-7), 4) # 1 valude found w/ corssvalidation
+  # 
+  # # Make Conditions
+  # conds <- expand.grid(lv, pm, fl,
+  #                      stringsAsFactors = FALSE)
+  # 
+  # # Append Ridge Parameter
+  # conds <- cbind(conds, ridge)
+  # 
+  # # Select Conditions for run
+  # conds <- conds[1:(nrow(conds) - 0), ]
+  # 
+  # # Give Meaningful names to Columns
+  # colnames(conds) <- c("lv", "pm", "fl", "ridge")
   
   

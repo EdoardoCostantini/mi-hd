@@ -658,7 +658,7 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   # 3. obtain estimates
     theta <- MLE_fit$par
     OI <- solve(MLE_fit$hessian) # parameters cov maatrix
-    
+
   # Sample parameters for posterior predictive distribution
     pdraws_par <- MASS::mvrnorm(1, 
                                 mu = MLE_fit$par, 
@@ -1262,7 +1262,7 @@ prep_SI <- function(dt_in,
   pMat     <- quickpred(dt_in, mincor = .3)
   mids_obj <- mice(dt_in,
                    predictorMatrix = pMat,
-                   printFlag       = FALSE,
+                   printFlag       = TRUE,
                    method          = "pmm",
                    ...
                    # ridge           = cond$ridge,
@@ -1736,27 +1736,35 @@ mean_traceplot <- function(out,
                            dat = 1, # which data repetition
                            method = "blasso", # same name as in parms
                            y_range = c(-10, 20),
+                           v_range = NULL,
                            iters = 1:5){
   ## Internals
   # dat = 1
-  # out <- out_cnv
+  # out <- out_DURR
   # iters = 1:7
-  # method = "blasso" # same name as in parms
+  # v_range = 170:180
+  # method = "DURR_all" # same name as in parms
   
   ## Description
   # It prints the traceplots for the mean imputed values in each iteration
   # in different chains, by variable, one dataset, one imputation method
   
+  # Variables to display
+  if(is.null(v_range)){
+    v_range <- 1:length(out$parms$z_m_id)
+  }
+  
   # Display in same pane
-  par(mfrow = c(3, ceiling(out$parms$zm_n/3)))
+  par(mfrow = c(3, ceiling(length(v_range)/3)))
   # Plot
   # Are imputations of mids class?
   if(class(out[[dat]][[1]]$imp_values[[method]]) == "mids"){
-    plot(out[[dat]][[1]]$imp_values[[method]])
+    plot(out[[dat]][[1]]$imp_values[[method]],
+         y = paste0("z", v_range))
   } else {
     # For each variable imputed
-    for (v in 1:length(out$parms$z_m_id)) {
-      v <- 1
+    for (v in v_range) {
+      # v <- v_range[1]
       # CHAIN 1
       # Mean imputed value (across individuals), in the first CHAIN,
       # at each iteration

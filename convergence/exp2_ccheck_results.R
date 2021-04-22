@@ -13,7 +13,7 @@ source("./init_general.R")
 # of the simualtion study. It contains an imputation run with many iterations,
 # many chians, for the most difficult condition of experiment 1.
 
-out_cnv <- readRDS("../output/ccheck_exp2_20200811_1626.rds")
+# out_cnv <- readRDS("../output/ccheck_exp2_20200811_1626.rds")
 out_cnv <- readRDS("../output/exp2_conv_20200812_1717.rds")
 
 # Run description
@@ -32,7 +32,7 @@ data.frame(
 exp_dat <- 3 # which data replication (10 possibilities)
 iters_range <- 1:250 # which set of iterations
 y_range <- c(-1, .5)
-
+ls(out_cnv[[1]]$`cond_100_0.3_high_1e-07`)
 # DURR_la (50-100 good for all)
 exp_dat <- 2
 mean_traceplot(out_cnv, 

@@ -66,7 +66,7 @@ sim_start <- Sys.time()
 out <- parLapply(cl = clus, 
                  X = 1 : 10,
                  fun = runCell, 
-                 cond = conds[2, ])
+                 cond = conds[nrow(conds), ])
 
 sim_end <- Sys.time()
 sim_end - sim_start
@@ -75,20 +75,21 @@ sim_end - sim_start
 stopCluster(clus)
 
 ## Check plots latent variable by latent variable
+var_lists <- names(which(rowSums(out[[1]]$predictorMatrix) != 0))
 
-item_list <- list(# LV1 = 1:5, # Core MAR latent var
-                  # LV2 = (2-1) * 5+(1:5), # Block A MAR latent var
-                  LV3 = (3-1) * 5+(1:5), # Block A MAR latent var
-                  LV4 = (4-1) * 5+(1:5), # Block A MAR latent var
-                  LV6 = (6-1) * 5+(1:5), # Blcok A no-MAR high corr latent var
-                  LV7 = (7-1) * 5+(1:5), # Blcok B no-MAR low corr latent var
+# Look at the hand written table in your notion notebook w/ heading 
+# "Defining the Set up: Simulation or Resampling study"
+# to see why you chose these variables
+item_list <- list(LV4 = (4-1) * 5+(1:5), # Block B (no-MAR high cor latent var)
+                  LV5 = (5-1) * 5+(1:5), # Block A (no-MAR low corr latent var)
+                  LV6 = (6-1) * 5+(1:5), # Blcok B (no-MAR low corr latent var)
+                  LV7 = (7-1) * 5+(1:5), # Blcok C no-MAR low corr latent var
+                  LV8 = (8-1) * 5+(1:5), # Blcok C no-MAR low corr latent var
                   LV70 = (70-1) * 5+(1:5),  # Junk no-MAR low corr latent var
-                  LV80 = (80-1) * 5+(1:5),  # Junk no-MAR low corr latent var
-                  LV90 = (90-1) * 5+(1:5),  # Junk no-MAR low corr latent var
                   LV100 = (100-1) * 5+(1:5)  # Junk no-MAR low corr latent var
                   )
 
-pdf(file = "../output/exp5_conv_20210129_1645.pdf",
+pdf(file = "../output/exp5_ccheck_Si_20210326_1750.pdf",
     width = 15, height = 15)
 lapply(seq_along(item_list), function(i){
     # i <- 2
@@ -105,8 +106,11 @@ lapply(seq_along(item_list), function(i){
 dev.off()
 
 ## Save results
-saveRDS(out, parms$results_file_name)
+saveRDS(out, paste0("parms$outDir", 
+                    "exp5_ccheck_S_",
+                    format(Sys.time(), "%Y%m%d_%H%M"),
+                    ".rds"))
 
 ## Read Old Results
-out <- readRDS("../output/exp5_conv_20210129_1645.rds")
-length()
+out <- readRDS("../output/exp5_ccheck_Si_20210326_1750.rds")
+length(out)

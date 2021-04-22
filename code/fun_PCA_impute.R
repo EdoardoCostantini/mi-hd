@@ -122,8 +122,10 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
                                  # printFlag = FALSE,
                                  ridge  = cond$ridge,
                                  method = methods)
-      
       end.time <- Sys.time()
+      
+      imp_PCA_diff_comps <- colSums(!is.na(Z_input[, 1:10])) - 
+        ncol(imp_PCA_mids$predictorMatrix)-1
       
       # Store results
       print("PCA Impute: Storing Results")

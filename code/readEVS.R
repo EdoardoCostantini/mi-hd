@@ -9,8 +9,7 @@ library(labelled) # to extract valriables labels
 # Read Data ---------------------------------------------------------------
 
   dat <- 1
-  file_loc <- c("/Users/Work/Data/ZA7500_v3-0-0.dta/",
-                "/Users/Work/Data/ZA7502_v1-0-0.dta/")[dat]
+  file_loc <- c("/Users/Work/Data/EVS2017/data/")
   
   file_name <- c("ZA7500_v3-0-0.dta",
                  "ZA7502_v1-0-0.dta")[dat]

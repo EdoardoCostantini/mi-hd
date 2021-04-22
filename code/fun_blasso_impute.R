@@ -114,7 +114,8 @@ impute_BLAS_hans <- function(Z, parms, perform = TRUE){
           Z_out <- Z # each iteration will output 1 dataset
           print(paste0("BLASSO - Chain: ",
                        cc, "/", parms$chains_bl, "; Iter: ",
-                       m, "/", parms$iters_bl))
+                       m, "/", parms$iters_bl,
+                       " at ", Sys.time()))
           # Loop across variables (cycle)
           for (j in 1:p_imp) {
             J <- which(colnames(Zm) %in% p_imp_id[j])

@@ -38,6 +38,9 @@
   parms$mice_iters <- 2 # 20
   parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
   
+  # For pre-processing
+  parms$prep_Si_iters <- 50 # 50 goal
+  
 # Data gen ----------------------------------------------------------------
   parms$n_obs <- 200 # number of cases for data generation
   parms$n <- 200 # number of cases for data generation
@@ -92,15 +95,15 @@
   parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic
-  parms$meth_sel <- list(DURR_all = FALSE,   # version w/o SI
-                         DURR_si  = FALSE,  # version w/o SI
-                         IURR_all = FALSE,   # version w/o SI
-                         IURR_si  = FALSE,  # version w/ SI
+  parms$meth_sel <- list(DURR_all = TRUE,   # version w/o SI
+                         DURR_si  = TRUE,  # version w/o SI
+                         IURR_all = TRUE,   # version w/o SI
+                         IURR_si  = TRUE,  # version w/ SI
                          blasso   = TRUE,
-                         bridge   = FALSE,
-                         MI_PCA   = FALSE,
-                         MI_CART  = FALSE,
-                         MI_RF    = FALSE,
+                         bridge   = TRUE,
+                         MI_PCA   = TRUE,
+                         MI_CART  = TRUE,
+                         MI_RF    = TRUE,
                          MI_OP    = TRUE,
                          missFor  = TRUE,
                          mean     = TRUE,
@@ -170,10 +173,10 @@
 # Conditions --------------------------------------------------------------
 
   # Define Experimental Factor Values
-  lv    <- c(10, 20)     # number of latent variables should be c(10, 100)
-  pm    <- c(.1, .3)     # proportion of missings level
-  fl    <- c("low")      # factor loadings level
-  ridge <- c(1e-1, 1e-7) # 1 valude found w/ corssvalidation in exp 2
+  lv    <- c(10, 100)        # number of latent variables should be c(10, 100)
+  pm    <- c(.1, .3)        # proportion of missings level
+  fl    <- c("high", "low") # factor loadings level
+  ridge <- c(1e-7)    # 1 valude found w/ corssvalidation in exp 2
   
   # Make Conditions
   conds <- expand.grid(lv, pm, fl,

@@ -51,7 +51,7 @@ impute_IURR <- function(Z, O, cond, reg_type="lasso", parms, perform = TRUE){
         
         for (m in 2:parms$iters) {
           print(paste0("IURR - Chain: ", cc, "/", parms$chains, 
-                       "; Iter: ", m, "/", parms$iters))
+                       "; Iter: ", m, "/", parms$iters, " at ", Sys.time()))
           # pb <- txtProgressBar(min = 0, max = p_imp, style = 3)
           
           for (j in 1:p_imp) {

@@ -220,7 +220,7 @@
          device = cairo_pdf, # allows for greek letters in text
          pf)
 
-  # > Supplementary Material ####
+  # > Supplementary Material: Bias ####
   # Conditona 1-4
   pt.1 <- plot_fg(dt = lapply(1:length(res$CFA),
                               function(x) data.frame( res$CFA[[x]]$bias_per))[1:4],
@@ -263,3 +263,46 @@
          device = cairo_pdf, # allows for greek letters in text
          pf)
   
+  # > Supplementary Material: CIC ####
+  
+  # Conditona 1-4
+  pt.1 <- plot_fg(dt = lapply(1:length(res$CFA),
+                              function(x) data.frame( res$CFA[[x]]$ci_cov))[1:4],
+                  type = "ci",
+                  parPlot = list(Loadings = 1:10),
+                  dt_reps = 1e3,
+                  ci_lvl = .95,
+                  cond_labels = cond_names[1:4],
+                  meth_compare = meth_compare)
+  
+  # Conditions 5-8
+  pt.2 <- plot_fg(dt = lapply(1:length(res$CFA),
+                              function(x) data.frame( res$CFA[[x]]$ci_cov))[5:8],
+                  type = "ci",
+                  parPlot = list(Loadings = 1:10),
+                  dt_reps = 1e3,
+                  ci_lvl = .95,
+                  cond_labels = cond_names[5:8],
+                  meth_compare = meth_compare)
+  
+  # Combine Elements
+  pf <- cowplot::ggdraw() +
+    cowplot::draw_plot(pt.1, 
+                       x = 0, y = .5, 
+                       width = 1, height = .5) +
+    cowplot::draw_plot(pt.2, 
+                       x = 0, y = 0, 
+                       width = 1, height = .5) +
+    cowplot::draw_plot_label(label = c("(A)", "(B)"), 
+                             x = c(0, 0), 
+                             y = c(1, .5), 
+                             size = 5,
+                             fontface = "bold")
+  pf
+  
+  # Save Plot
+  ggsave(file = "../output/graphs/exp2_CFA_lambda_CIC.pdf",
+         width = gp_width, height = gp_height*2/3,
+         units = "cm",
+         device = cairo_pdf, # allows for greek letters in text
+         pf)

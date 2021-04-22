@@ -843,11 +843,11 @@ runCell_int <- function(cond, parms, rep_status) {
                              parms = parms)
   
   imp_IURR_SI <- impute_IURR(Z = imp_PCA$dtIN,
-                                O = data.frame(!is.na(imp_PCA$dtIN)),
-                                reg_type = "lasso",
-                                cond = cond,
-                                perform = (parms$meth_sel$IURR_SI & cond$int_da),
-                                parms = parms)
+                             O = data.frame(!is.na(imp_PCA$dtIN)),
+                             reg_type = "lasso",
+                             cond = cond,
+                             perform = (parms$meth_sel$IURR_SI & cond$int_da),
+                             parms = parms)
   
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_input[, col$CIDX],
@@ -1340,8 +1340,8 @@ runCell_add <- function(cond, parms,
   # according to selected methods
   ## For internals
   # set.seed(1234)
-  # cond        = conds[1, ]
-  # cluster = TRUE # if you are running on lisa you want to store differently
+  # cond    = conds[1, ]
+  # cluster = FALSE # if you are running on lisa you want to store differently
   
   ## Start Timer
   prepro_time_start <- Sys.time()
@@ -1362,7 +1362,9 @@ runCell_add <- function(cond, parms,
   # Prep Data: Single Imputation on Auxiliary variables
   prep_Si_out <- prep_SI(dt_in = Xy_mis,
                          model.var = parms$z_m_id,
-                         maxit = 5)
+                         m = 1,
+                         maxit = parms$prep_Si_iters,
+                         ridge = cond$ridge)
   Xy_SI <- prep_Si_out$dt_out
   
   dt_in <- list(Xy_mis = Xy_mis,
@@ -1397,7 +1399,7 @@ runCell_add <- function(cond, parms,
                                       perform = ctrl_preform[[x]],
                                       parms = parms)
                         })
-  
+
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis,
                                  parms = parms,
@@ -1451,10 +1453,10 @@ runCell_add <- function(cond, parms,
   
   ## Convergence ------------------------------------------------------------- ##
   
-  imp_values <- list(DURR_AL    = imp_DURR_ls$Xy_mis$imps,
-                     DURR_SI    = imp_DURR_ls$Xy_SI$imps,
-                     IURR_AL    = imp_IURR_ls$Xy_mis$imps,
-                     IURR_SI    = imp_IURR_ls$Xy_SI$imps,
+  imp_values <- list(DURR_all    = imp_DURR_ls$Xy_mis$imps,
+                     DURR_si    = imp_DURR_ls$Xy_SI$imps,
+                     IURR_all    = imp_IURR_ls$Xy_mis$imps,
+                     IURR_si    = imp_IURR_ls$Xy_SI$imps,
                      blasso     = imp_blasso$imps,
                      bridge     = imp_bridge$imps,
                      MI_PCA     = imp_PCA$mids,
@@ -1476,10 +1478,10 @@ runCell_add <- function(cond, parms,
                    CC      = Xy_mis[rowSums(is.na(Xy_mis[, parms$z_m_id])) == 0, ],
                    GS      = Xy)
   # MI data
-  MI_dt_ls <- list(DURR_AL    = imp_DURR_ls$Xy_mis$dats,
-                   DURR_SI    = imp_DURR_ls$Xy_SI$dats,
-                   IURR_AL    = imp_IURR_ls$Xy_mis$dats,
-                   IURR_SI    = imp_IURR_ls$Xy_SI$dats,
+  MI_dt_ls <- list(DURR_all    = imp_DURR_ls$Xy_mis$dats,
+                   DURR_si    = imp_DURR_ls$Xy_SI$dats,
+                   IURR_all    = imp_IURR_ls$Xy_mis$dats,
+                   IURR_si    = imp_IURR_ls$Xy_SI$dats,
                    bridge  = imp_bridge$dats,
                    blasso  = imp_blasso$dats,
                    MI_PCA  = imp_PCA$dats,
@@ -1598,10 +1600,10 @@ runCell_add <- function(cond, parms,
   
   # aggregate imputation times
   
-  imp_time <- list(DURR_AL    = imp_DURR_ls$Xy_mis$time,
-                   DURR_SI    = imp_DURR_ls$Xy_SI$time,
-                   IURR_AL    = imp_IURR_ls$Xy_mis$time,
-                   IURR_SI    = imp_IURR_ls$Xy_SI$time,
+  imp_time <- list(DURR_all    = imp_DURR_ls$Xy_mis$time,
+                   DURR_si    = imp_DURR_ls$Xy_SI$time,
+                   IURR_all    = imp_IURR_ls$Xy_mis$time,
+                   IURR_si    = imp_IURR_ls$Xy_SI$time,
                    bridge  = imp_bridge$time,
                    blasso  = imp_blasso$time,
                    MI_PCA  = imp_PCA$time,

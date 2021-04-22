@@ -30,7 +30,7 @@ inDir=$projDir/code             # Source directory (for R)
 ncores=`sara-get-num-cores` 	# Number of available cores (ADD the -1!!!!)
 idJob=$SLURM_ARRAY_JOB_ID  	# Master ID for the array of jobs
 idTask=$SLURM_ARRAY_TASK_ID 	# Array index for the current job
-idGoal=exp5_mainSim		# Goal of simulation
+#idGoal=exp5_mainSim		# Goal of simulation
 
 ## Define Output Directories
 # Temporary
@@ -38,7 +38,7 @@ tmpOut="$TMPDIR"/$idJob\_$idTask
 mkdir -p $tmpOut
 
 # Final
-outDir=$projDir/output/$idGoal\_$idJob 	# Output directory
+outDir=$projDir/output/$idJob 		# Output directory
 	if [ ! -d "$outDir" ]; then 	# create if missing
 	    mkdir -p $outDir
 	fi
@@ -62,8 +62,13 @@ for (( i=1; i<ncores ; i++ )) ; do
 	    break
 	fi
 
+	## If it's the first Stopos value, then Run the Rscript to store session info
+	if [ $STOPOS_VALUE = 1 ]; then
+	    Rscript ./lisa_step2_storeInfo.R $outDir/
+	fi
+	
 	## Call the R script with the replication number from the stopos pool:
-	Rscript $inDir/exp5_simScript_ms_lisa.R $STOPOS_VALUE $tmpOut/
+	Rscript $inDir/lisa_step3_run_doRep.R $STOPOS_VALUE $tmpOut/
 	# script_name.R --options repetition_counter output_directory
 
  	## Remove the used parameter line from the stopos pool:

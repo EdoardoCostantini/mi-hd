@@ -8,6 +8,7 @@
 
 rm(list = ls())
 source("./init_general.R")
+source("./exp5_init.R")
 source("../convergence/exp5_ccheck_init.R")
 
 ## Create a cluster object:
@@ -15,6 +16,7 @@ clus <- makeCluster(parms$dt_rep)
 
 ## Two different ways to source a script on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
+clusterEvalQ(cl = clus, expr = source("./exp5_init.R"))
 clusterEvalQ(cl = clus, expr = source("../convergence/exp5_ccheck_init.R"))
 
 ## Data directory for storage
@@ -60,6 +62,7 @@ cat(paste0("\n", "------", "\n",
 
 # Attach parm object
 out$parms <- parms
+out$conds <- conds
 
 # Save output -------------------------------------------------------------
 

@@ -1545,7 +1545,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   # model = "semR"
   # model = "CFA"
   # model = "m1"
-  # condition = 2
+  # condition = 1
   # out = output
   # bias_sd = TRUE
   
