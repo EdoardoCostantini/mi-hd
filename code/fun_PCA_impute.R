@@ -124,8 +124,9 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
                                  method = methods)
       end.time <- Sys.time()
       
-      imp_PCA_diff_comps <- colSums(!is.na(Z_input[, 1:10])) - 
-        ncol(imp_PCA_mids$predictorMatrix)-1
+      # Identification of models
+      imp_PCA_diff_comps <- list(nobs = colSums(!is.na(Z_input[, 1:10])), 
+                                 npcs = ncol(imp_PCA_mids$predictorMatrix)-1)
       
       # Store results
       print("PCA Impute: Storing Results")
@@ -145,7 +146,8 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
                   imps = imp_PCA_imps,
                   time = imp_PCA_time,
                   mids = imp_PCA_mids,
-                  dtIN = Z_out))
+                  dtIN = Z_out,
+                  diff_comp = imp_PCA_diff_comps))
       
       ### END TRYCATCH EXPRESSION
     }, error = function(e){
@@ -155,7 +157,8 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
                   imps = NULL,
                   time = NULL,
                   mids = NULL,
-                  dtIN = NULL)
+                  dtIN = NULL,
+                  diff_comp = NULL)
       )
     }
     )
@@ -165,6 +168,7 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
                 imps = NULL,
                 time = NULL,
                 mids = NULL,
-                dtIN = NULL))
+                dtIN = NULL,
+                diff_comp = NULL))
   }
 }

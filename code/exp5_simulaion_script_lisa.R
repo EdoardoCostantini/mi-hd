@@ -17,3 +17,9 @@ parms$outDir <- args[2]   # overwrite output directory defined in exp5_init.R
 ## Run one replication of the simulation:
 doRep_cluster(rp = rp, conds = conds, parms = parms)
 
+## Time Estiamte
+start <- Sys.time()
+out <- doRep(rp = 1, conds = conds, parms = parms,
+             verbose = TRUE)
+end <- Sys.time()
+end-start

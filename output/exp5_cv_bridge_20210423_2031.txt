@@ -1,0 +1,10 @@
+2021-04-23 20:32:03 - Starts Repetition: 3
+2021-04-23 20:32:03 - Starts Repetition: 4
+2021-04-23 20:32:03 - Starts Repetition: 2
+2021-04-23 20:32:03 - Starts Repetition: 1
+2021-04-23 20:32:03 - Starts Repetition: 8
+2021-04-23 20:32:03 - Starts Repetition: 7
+2021-04-23 20:32:03 - Starts Repetition: 10
+2021-04-23 20:32:03 - Starts Repetition: 6
+2021-04-23 20:32:03 - Starts Repetition: 5
+2021-04-23 20:32:03 - Starts Repetition: 9

@@ -16,7 +16,7 @@ parms$store <- c(cond     = TRUE,
                  semS_EST = FALSE,
                  semS_CI  = FALSE,
                  fmi      = TRUE,
-                 miss_des = FALSE,
+                 miss_des = TRUE,
                  time     = TRUE,
                  time_prep = TRUE,
                  imps     = TRUE)
@@ -24,11 +24,11 @@ parms$store <- c(cond     = TRUE,
 # Decide which methods you car about for the convergence check
 parms$meth_sel <- list(DURR_all = FALSE,   # version w/o SI
                        DURR_si  = FALSE,  # version w/o SI
-                       IURR_all = TRUE,   # version w/o SI
-                       IURR_si  = TRUE,  # version w/ SI
+                       IURR_all = FALSE,   # version w/o SI
+                       IURR_si  = FALSE,  # version w/ SI
                        blasso   = FALSE,
                        bridge   = FALSE,
-                       MI_PCA   = FALSE,
+                       MI_PCA   = TRUE,
                        MI_CART  = FALSE,
                        MI_RF    = FALSE,
                        MI_OP    = FALSE,
@@ -45,6 +45,8 @@ parms$missFor_maxiter <- 2 # 20
 parms$missFor_ntree   <- 10 # 100
 
 # Decide which paramters suit best the convergence check
+parms$n_obs <- 4e2 # number of cases for data generation
+parms$n <- 4e2 # number of cases for data generation
 parms$dt_rep     <- 5 # 5
 parms$chains     <- 4 # 4
 parms$iters      <- 250 # 250 if you do not converge before this, the method is not feasable 

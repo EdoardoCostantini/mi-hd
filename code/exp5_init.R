@@ -11,9 +11,9 @@
 # Itereations, repetitions, etc
   parms$dt_rep     <- 5 # 500 replications for averaging results (200 goal)
   parms$chains     <- 1 # 1   number of parallel chains for convergence check
-  parms$iters      <- 2 # 75
-  parms$burnin_imp <- 0 # 50  how many imputation iterations should be discarded
-  parms$ndt        <- 2 # 10  number of imputed datasets to pool esitmaes from (10)
+  parms$iters      <- 60 # 60
+  parms$burnin_imp <- 50 # 50  how many imputation iterations should be discarded
+  parms$ndt        <- 10 # 10  number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
@@ -26,8 +26,8 @@
 
   # For blasso
   parms$chains_bl     <- 1 # 1 number of parallel chains for convergence check
-  parms$iters_bl      <- 2 # 2e3
-  parms$burnin_imp_bl <- 0 # 1950 how many imputation iterations should be discarded
+  parms$iters_bl      <- 60 # 60
+  parms$burnin_imp_bl <- 50 # 50 how many imputation iterations should be discarded
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
@@ -35,15 +35,15 @@
                                              parms$thin_bl)]
   
   # For mice-like algorithms
-  parms$mice_iters <- 2 # 20
+  parms$mice_iters <- 50 # 50
   parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
   
   # For pre-processing
   parms$prep_Si_iters <- 50 # 50 goal
   
 # Data gen ----------------------------------------------------------------
-  parms$n_obs <- 200 # number of cases for data generation
-  parms$n <- 200 # number of cases for data generation
+  parms$n_obs <- 5e2 # number of cases for data generation
+  parms$n <- 5e2 # number of cases for data generation
   
 # "True" values
   parms$lv_mean   <- 0

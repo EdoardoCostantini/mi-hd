@@ -11,7 +11,7 @@ clus <- makeCluster(5)
 
 ## Two different ways to source a script on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
-clusterEvalQ(cl = clus, expr = source("./exp2_init.R"))
+clusterEvalQ(cl = clus, expr = source("./exp5_init.R"))
 
 ## Data directory for storage
 

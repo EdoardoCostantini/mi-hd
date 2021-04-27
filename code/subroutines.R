@@ -1308,11 +1308,12 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
 # Addendum ----------------------------------------------------------------
 
 ## Run one replication of the simulation:
-doRep_cluster <- function(rp, conds, parms) { 
+doRep_cluster <- function(rp, conds, parms, cluster = TRUE) { 
   ## Example Inputs
   # rp = 1
   # conds = conds
   # parms = parms
+  # cluster = FALSE
   ## Seeds according
   .lec.SetPackageSeed(rep(parms$seed, 6))
   if(!rp %in% .lec.GetStreams()) # if the streams do not exist yet
@@ -1325,7 +1326,7 @@ doRep_cluster <- function(rp, conds, parms) {
     runCell_add(cond = conds[i, ],
                 rep_status = rp,
                 parms = parms,
-                cluster = TRUE) # I'm running it with cluster mode
+                cluster = cluster) # I'm running it with cluster mode
   }
   
   ## Return the rep index
@@ -1340,7 +1341,7 @@ runCell_add <- function(cond, parms,
   # according to selected methods
   ## For internals
   # set.seed(1234)
-  # cond    = conds[1, ]
+  # cond    = conds[6, ]
   # cluster = FALSE # if you are running on lisa you want to store differently
   
   ## Start Timer
@@ -1406,11 +1407,14 @@ runCell_add <- function(cond, parms,
                                  perform = parms$meth_sel$blasso)
 
   # Impute according to van Buuren Ridge
+  # perform bridge only if we ask for it in the method list
+  # and the condition is low dimensional
+  perf_bridge <- parms$meth_sel$bridge & cond$lv != 100
   imp_bridge <- impute_BRIDGE(Z = Xy_mis,
                               O = data.frame(!is.na(Xy_mis)),
                               ridge_p = cond$ridge,
                               parms = parms,
-                              perform = parms$meth_sel$bridge)
+                              perform = perf_bridge)
   
   # Impute according to Howard Et Al 2015 PCA appraoch
   imp_PCA <- impute_PCA(Z     = Xy_SI,
@@ -1634,7 +1638,8 @@ runCell_add <- function(cond, parms,
                  fmi          = list(semR = semR_fmi,
                                      CFA  = CFA_fmi,
                                      semS = semS_fmi),
-                 miss_descrps = miss_descrps,
+                 miss_descrps = list(miss_descrps = miss_descrps,
+                                     PCA_diff_comp = imp_PCA$diff_comp),
                  run_time_min = imp_time,
                  run_time_prep = prepro_time_end - prepro_time_start,
                  imp_values   = imp_values)[parms$store]

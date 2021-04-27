@@ -7,9 +7,9 @@
 # Itereations, repetitions, etc
 parms$dt_rep     <- 10
 parms$chains     <- 1 
-parms$iters      <- 75
-parms$burnin_imp <- 50
-parms$ndt        <- 10
+parms$iters      <- 60 # 60
+parms$burnin_imp <- 50 # 50
+parms$ndt        <- 10 # 10
 parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
 parms$pos_dt  <- (parms$burnin_imp+1):parms$iters # candidate datasets (after convergence)
 parms$keep_dt <- parms$pos_dt[seq(1, 
@@ -20,12 +20,12 @@ parms$meth_sel <- list(DURR_all = FALSE,   # version w/o SI
                        DURR_si  = FALSE,  # version w/o SI
                        IURR_all = FALSE,   # version w/o SI
                        IURR_si  = FALSE,  # version w/ SI
-                       blasso   = TRUE,
-                       bridge   = FALSE,
+                       blasso   = FALSE,
+                       bridge   = TRUE,
                        MI_PCA   = FALSE,
                        MI_CART  = FALSE,
                        MI_RF    = FALSE,
-                       MI_OP    = TRUE,
+                       MI_OP    = FALSE,
                        missFor  = TRUE,
                        mean     = TRUE,
                        CC       = TRUE,
@@ -53,9 +53,11 @@ parms$description <- c("In each repetition, 1 dataset is created for each condit
 # Modify condtions for crossvalidation
 
 ridge <- 10^seq(from = -1, to = -8, by = -1)
-lv    <- c(10, 100)       # number of latent variables
+lv    <- c(10)       # number of latent variables
 pm    <- c(.1, .3)        # proportion of missings level
 fl    <- c("high", "low") # factor loadings level
     
 conds <- expand.grid(ridge, lv, pm, fl, stringsAsFactors = FALSE)
   colnames(conds) <- c("ridge", "lv", "pm", "fl")
+
+

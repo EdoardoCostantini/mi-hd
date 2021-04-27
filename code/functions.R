@@ -1853,7 +1853,7 @@ plot_fg <- function(dt,
   #                 variances = 7:12,
   #                 covariances = 13:27)
   # summy = TRUE # requires summary or not of stats
-  # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
+  # meth_compare = rev(c("DURR_la", "IURR_la", "blasso",# "bridge",
   #                      "MI_PCA",
   #                      "MI_CART", "MI_RF", "missFor", "CC"))
   # cond_labels = NULL
@@ -1875,7 +1875,13 @@ plot_fg <- function(dt,
   # means = 1:10
   # varis = 11:16
   # covas = 21:65
-  
+  ## EXP 5
+  # dt = lapply(1:length(res$semR),
+  #             function(x) data.frame( res$semR[[x]]$bias_per))[1:4]
+  # meth_compare = c("DURR_all","DURR_si","IURR_all","IURR_si","blasso",
+  #                  #"bridge",
+  #                  "MI_PCA","MI_CART" ,"MI_RF","MI_OP",
+  #                  "missFor","CC")
   ## Prep data for plot
   dt_preEdit <- lapply(parPlot, function(x){
     lapply(dt, function(d){

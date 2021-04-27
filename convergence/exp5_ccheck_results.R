@@ -14,8 +14,10 @@ source("./init_general.R")
 # many chians, for the most difficult condition of experiment 1.
 
 # DURR --------------------------------------------------------------------
-out_DURR <- readRDS("../output/exp5_conv_20210412_1007.rds") # durr
+
+out_DURR <- readRDS("../output/exp5_conv_20210412_1007_DURR.rds") # durr
 str(out_DURR$parms)
+
 # Methods Names
 names(out_DURR[[1]]$`cond_100_0.3_low_1e-07`$imp_values)
 methods <- names(out_DURR[[1]]$`cond_100_0.3_low_1e-07`$imp_values)[1:2]
@@ -42,31 +44,81 @@ mean_traceplot(out_DURR,
                y_range = y_range, 
                iters = iters_range)
 
-# IURR_la (50-100 good for all)
-mean_traceplot(out_cnv, 
-               method = methods[3], 
+# IURR --------------------------------------------------------------------
+
+out_IURR <- readRDS("../output/exp5_conv_20210416_1437_IURR.rds") # durr
+str(out_IURR$parms)
+
+# Methods Names
+names(out_IURR[[1]]$`cond_100_0.3_low_1e-07`$imp_values)
+methods <- out_IURR$parms$methods[1:2]
+
+# Iterations and repetations to show
+c(Reps   = out_IURR$parms$dt_rep,
+  Chians = out_IURR$parms$chains,
+  Iters = out_IURR$parms$iters)
+exp_dat <- 1 # which data replication
+iters_range <- 1:250 # which set of iterations
+y_range <- c(4.5, 5.5)
+v_range <- list(L1 = 1:5,
+                L2 = 6:10,
+                L4 = 16:20,
+                L7 = 31:35,
+                J = 101:106)
+
+# All variables imputed
+mean_traceplot(out_IURR, 
+               method = methods[1], 
+               dat = 1, 
+               v_range = v_range[[5]],
+               y_range = c(4, 6), 
+               iters = iters_range)
+
+# Imputation with pre-processing
+mean_traceplot(out_IURR, 
+               method = methods[2], 
                dat = exp_dat, 
-               y_range = y_range, iters = iters_range)
-mean_traceplot(out_cnv, 
-               method = methods[4], 
-               dat = exp_dat, 
-               y_range = y_range, iters = iters_range)
+               v_range = v_range[[2]],
+               y_range = y_range, 
+               iters = iters_range)
+
+# Blasso Bridge -----------------------------------------------------------
+out_bbridge <- readRDS("../output/exp5_conv_20210416_1439_blassobridge.rds") # durr
+str(out_bbridge$parms)
+
+# Methods Names
+names(out_bbridge[[1]]$`cond_100_0.3_low_1e-07`$imp_values)
+methods <- out_bbridge$parms$methods[1:2]
+
+iters_range <- 1:250 # which set of iterations
+y_range <- c(4.5, 5.5)
+v_range <- list(L1 = 1:5,
+                L2 = 6:10,
+                L4 = 16:20,
+                L7 = 31:35,
+                J = 101:106)
 
 # blasso (try 1000 iterations)
-mean_traceplot(out_cnv, 
-               method = methods[5], 
-               dat = exp_dat, 
-               y_range = y_range, iters = iters_range)
+mean_traceplot(out_bbridge, 
+               method = methods[1], 
+               dat = 1, 
+               y_range = y_range,
+               v_range = v_range[[2]],
+               iters = iters_range)
 
 # bridge (50-100 good for all)
-mean_traceplot(out_cnv, 
-               method = methods[6], 
-               dat = exp_dat, 
-               y_range = y_range, iters = iters_range)
+mean_traceplot(out_bbridge,
+               method = methods[2], 
+               dat = 5,
+               y_range = y_range,
+               v_range = v_range[[1]],
+               iters = iters_range)
 
 
 # Tree based MI -----------------------------------------------------------
-out_CRF <- readRDS("../output/exp5_conv_20210416_1459.rds") # cart rf
+
+out_CRF <- readRDS("../output/exp5_conv_20210416_1459_ctrf.rds") # cart rf
+
 methods <- out_CRF$parms$methods[1:2]
 iters_range <- 1:250 # which set of iterations
 y_range <- c(4.5, 5.5)
@@ -86,25 +138,31 @@ mean_traceplot(out_CRF,
                y_range = y_range, iters = iters_range)
 
 # MI-PCA and MI-OP --------------------------------------------------------
-out_PCAOP <- readRDS("../output/exp5_conv_20210416_1457.rds") # mipca
+out_PCAOP <- readRDS("../output/exp5_conv_20210416_1457_pcaop.rds") # mipca
+# out_PCAOP <- out
 str(out_PCAOP$parms)
 methods <- out_PCAOP$parms$methods[1:2]
 exp_dat <- 1 # which data replication
 iters_range <- 1:250 # which set of iterations
 y_range <- c(4.5, 5.5)
-
-# MI_T
-mean_traceplot(out_PCAOP, 
-               method = methods[1],
-               dat = 1,
-               v_range = 1:10,
-               y_range = y_range, iters = iters_range)
+v_range <- list(L1 = 1:5,
+                L2 = 6:10,
+                L4 = 16:20,
+                L7 = 31:35,
+                J = 101:106)
 
 # MI_PCA (50-100 good for all)
 mean_traceplot(out_PCAOP, 
+               method = methods[1],
+               dat = 3,
+               v_range = 1:10,
+               y_range = y_range, iters = iters_range)
+
+# MI_T
+mean_traceplot(out_PCAOP, 
                method = methods[2], 
                dat = 5, 
-               v_range = 1:3,
+               v_range = v_range[[2]],
                y_range = y_range, 
                iters = iters_range)
 
