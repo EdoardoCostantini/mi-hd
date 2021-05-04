@@ -95,16 +95,16 @@
   parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic
-  parms$meth_sel <- list(DURR_all = TRUE,   # version w/o SI
-                         DURR_si  = TRUE,  # version w/o SI
+  parms$meth_sel <- list(DURR_all = FALSE,  # version w/o SI
+                         DURR_si  = FALSE,  # version w/o SI
                          IURR_all = TRUE,   # version w/o SI
-                         IURR_si  = TRUE,  # version w/ SI
-                         blasso   = TRUE,
-                         bridge   = TRUE,
-                         MI_PCA   = TRUE,
-                         MI_CART  = TRUE,
-                         MI_RF    = TRUE,
-                         MI_OP    = TRUE,
+                         IURR_si  = FALSE,  # version w/ SI
+                         blasso   = FALSE,
+                         bridge   = FALSE,
+                         MI_PCA   = FALSE,
+                         MI_CART  = FALSE,
+                         MI_RF    = FALSE,
+                         MI_OP    = FALSE,
                          missFor  = TRUE,
                          mean     = TRUE,
                          CC       = TRUE,
@@ -186,7 +186,7 @@
   conds <- cbind(conds, ridge)
   
   # Select Conditions for run
-  conds <- conds[1:(nrow(conds) - 0), ]
+  conds <- conds[6, ]#[1:(nrow(conds) - 0), ]
   
   # Give Meaningful names to Columns
   colnames(conds) <- c("lv", "pm", "fl", "ridge")

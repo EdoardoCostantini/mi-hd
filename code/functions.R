@@ -219,11 +219,6 @@ rr_est_lasso <- function(X, y, parms, fam="gaussian"){
                         nfolds = 10,
                         alpha = 1)
   
-  regu.mod <- glmnet(X, y, 
-                     family = fam,
-                     alpha = 1, 
-                     lambda = cv_lasso$lambda.min)
-  
   return(regu.mod)
 }
 
@@ -591,8 +586,10 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   # X_te <- model.matrix(medv~., test)[,-1]
   # y_tr <- train$medv
   # y_te <- test$medv
-  #   cv <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
+  # model <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
+  # coef(model, s = "lambda.min")
   # model <- glmnet(X_tr, y_tr, alpha = 1, lambda = cv$lambda.min)
+  # coef(model)
   
   ## Inputs from simulation
   # model = regu.mod
@@ -604,9 +601,9 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   ## Body ##
   
   # Select predictors based on rr
-    rr_coef <- as.matrix(coef(model)) # regularized regression coefs
-    rr_coef_no0 <- row.names(rr_coef)[rr_coef != 0]
-    AS <- rr_coef_no0[-1] # predictors active set
+  rr_coef <- as.matrix(coef(model, s = "lambda.min")) # regularized regression coefs
+  rr_coef_no0 <- row.names(rr_coef)[rr_coef != 0]
+  AS <- rr_coef_no0[-1] # predictors active set
   
   # MLE estimate of model parameters
   # # ORIGINAL  
@@ -651,13 +648,13 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   # 2. optimize loss function
     MLE_fit <- optim(startV, 
                      .lm_loss,
-                     method="BFGS",
-                     hessian=T,
+                     method = "BFGS",
+                     hessian = T,
                      y = y_tr, X = X_mle)
     
   # 3. obtain estimates
     theta <- MLE_fit$par
-    OI <- solve(MLE_fit$hessian) # parameters cov maatrix
+    OI <- solve(MLE_fit$hessian) # parameters cov matrix
 
   # Sample parameters for posterior predictive distribution
     pdraws_par <- MASS::mvrnorm(1, 
@@ -752,14 +749,25 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
 }
 
 .lm_loss <-function(theta, y, X){
-  n <- nrow(X)
+  # source: https://rpubs.com/YaRrr/MLTutorial
+  ## Example Inputs
+  # X = X_mle
+  # y = y_obs
+  # theta = startV
+  ## Body
+  # prep
   k <- ncol(X)
   beta <- theta[1:k]
   sigma <- theta[k+1]
-  if(sigma < 0) {
-    dev <- 10000000
+  
+  # Check validity of sigma
+  if(sigma < 0) { 
+    # the optimization procedure to stay away from invalid parameter values.
+    dev <- 1e7
   } else {
+    # calculate (log) likelihood of each data point
     ll <- dnorm(y, mean = X %*% beta, sd = sigma, log = TRUE)
+    # summarize into deviance score
     dev <- -2 * sum(ll)
   }
   # Return 

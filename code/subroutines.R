@@ -1341,7 +1341,7 @@ runCell_add <- function(cond, parms,
   # according to selected methods
   ## For internals
   # set.seed(1234)
-  # cond    = conds[6, ]
+  # cond    = conds[1, ]
   # cluster = FALSE # if you are running on lisa you want to store differently
   
   ## Start Timer

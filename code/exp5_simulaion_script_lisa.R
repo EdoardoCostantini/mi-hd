@@ -23,3 +23,4 @@ out <- doRep(rp = 1, conds = conds, parms = parms,
              verbose = TRUE)
 end <- Sys.time()
 end-start
+sink() # end sing
