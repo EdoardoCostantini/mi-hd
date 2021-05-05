@@ -64,10 +64,10 @@ impute_IURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
             y_obs <- Zm[O[, J] == TRUE,  J]
             y_mis <- Zm[O[, J] == FALSE, J] # useless
             
-            X_obs <- Zm[O[, J], -J] # Wm_j_obs
-            X_obs <- model.matrix(~ ., X_obs)[, -1]
-            X_mis <- Zm[!O[, J], -J] # Wm_mj
-            X_mis <- model.matrix(~ ., X_mis)[, -1]
+            X_obs <- as.matrix(Zm[O[, J], -J]) # Wm_j_obs
+            # X_obs <- model.matrix(~ ., X_obs)[, -1]
+            X_mis <- as.matrix(Zm[!O[, J], -J]) # Wm_mj
+            # X_mis <- model.matrix(~ ., X_mis)[, -1]
             
             glmfam <- detect_family(Zm[, J])
             
@@ -77,10 +77,25 @@ impute_IURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
             cv_lasso <- cv.glmnet(x = X_obs, y = y_obs,
                                   family = glmfam,
                                   nfolds = 10, alpha = 1)
-            rr_coef <- as.matrix(coef(cv_lasso, 
-                                      s = "lambda.min")) # regularized regression coefs
-            rr_coef_no0 <- row.names(rr_coef)[rr_coef != 0]
-            AS <- rr_coef_no0[-1] # predictors active set
+            
+            # Extract Regularized Regression Coefs
+            rr_coef <- as.matrix(coef(cv_lasso, s = "lambda.min"))[, 1]
+            rr_coef_no0 <- names(rr_coef)[rr_coef != 0]
+            rr_coef_noInt <- rr_coef_no0[-1]
+            
+            # Check if n-2 < p
+            # -1 to estiamte sigma, -1 to esimate the intercept
+            if((length(y_obs)-2) < length(rr_coef_noInt)){
+              # Drop the smallest coefficients that make the system defined
+              coef_sort <- sort(rr_coef[names(rr_coef) %in% rr_coef_noInt])
+              coef_drop <- names(coef_sort[-(1:(length(y_obs)-2))])
+              coef_drop_index <- c(1, which(rr_coef_noInt %in% coef_drop))
+            } else {
+              coef_drop_index <- 1 # just intercept
+            }
+            
+            # Define Active Set
+            AS <- rr_coef_no0[-coef_drop_index]
             
             # 2. Predict zm_j (i.e. obtain imputations (imps))
             # Define starting values
@@ -97,11 +112,8 @@ impute_IURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
               # Fix NAs when coefficinet cannot be estiamted because variable
               # is near constant
             }
-            startV <- c(coef(lm_fit)[!is.na(coef(lm_fit))], 
-                        # keep only coefficients for variables that 
-                        # were not kicked out of the equation
-                        sigma(lm_fit))
-            
+            startV <- c(coef(lm_fit), sigma(lm_fit))
+
             # MLE estiamtes by Optimize loss function
             MLE_fit <- optim(startV,
                              .lm_loss,
