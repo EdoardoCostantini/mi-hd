@@ -11,8 +11,8 @@
 # Itereations, repetitions, etc
   parms$dt_rep     <- 5 # 500 replications for averaging results (200 goal)
   parms$chains     <- 1 # 1   number of parallel chains for convergence check
-  parms$iters      <- 60 # 60
-  parms$burnin_imp <- 50 # 50  how many imputation iterations should be discarded
+  parms$iters      <- 30 # 60
+  parms$burnin_imp <- 20 # 50  how many imputation iterations should be discarded
   parms$ndt        <- 10 # 10  number of imputed datasets to pool esitmaes from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
@@ -42,8 +42,8 @@
   parms$prep_Si_iters <- 50 # 50 goal
   
 # Data gen ----------------------------------------------------------------
-  parms$n_obs <- 5e2 # number of cases for data generation
-  parms$n <- 5e2 # number of cases for data generation
+  parms$n_obs <- 2e2 # 5e2 # number of cases for data generation
+  parms$n <- 2e2 # 5e2 number of cases for data generation
   
 # "True" values
   parms$lv_mean   <- 0
@@ -186,7 +186,7 @@
   conds <- cbind(conds, ridge)
   
   # Select Conditions for run
-  conds <- conds[6, ]#[1:(nrow(conds) - 0), ]
+  conds <- conds[1:6, ]#[1:(nrow(conds) - 0), ]
   
   # Give Meaningful names to Columns
   colnames(conds) <- c("lv", "pm", "fl", "ridge")

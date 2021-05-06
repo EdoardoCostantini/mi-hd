@@ -89,7 +89,7 @@ impute_IURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
               # Drop the smallest coefficients that make the system defined
               coef_sort <- sort(rr_coef[names(rr_coef) %in% rr_coef_noInt])
               coef_drop <- names(coef_sort[-(1:(length(y_obs)-2))])
-              coef_drop_index <- c(1, which(rr_coef_noInt %in% coef_drop))
+              coef_drop_index <- c(1, which(rr_coef_no0 %in% coef_drop))
             } else {
               coef_drop_index <- 1 # just intercept
             }

@@ -219,7 +219,7 @@ rr_est_lasso <- function(X, y, parms, fam="gaussian"){
                         nfolds = 10,
                         alpha = 1)
   
-  return(regu.mod)
+  return(cv_lasso)
 }
 
 rr_est_elanet <- function(X, y, parms, fam = "gaussian"){
