@@ -50,6 +50,11 @@ impute_IURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
                                                 p_imp_id[i]]
         MLE_n_par <- vector("list", parms$iters)
         
+        # Active Set Length Store
+        store_AS_len <- matrix(NA, 
+                               nrow = p_imp, 
+                               ncol = parms$iters)
+        
         for (m in 2:parms$iters) {
           print(paste0("IURR - Chain: ", cc, "/", parms$chains, 
                        "; Iter: ", m, "/", parms$iters, " at ", Sys.time()))
@@ -96,6 +101,7 @@ impute_IURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
             
             # Define Active Set
             AS <- rr_coef_no0[-coef_drop_index]
+            store_AS_len[j, m] <- length(AS)
             
             # 2. Predict zm_j (i.e. obtain imputations (imps))
             # Define starting values
@@ -161,7 +167,9 @@ impute_IURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
                   time = difftime(end.time, 
                                   start.time, 
                                   units = "mins"),
-                  succ_ratio = mean(success))
+                  # succ_ratio = mean(success))
+                  succ_ratio = colMeans(store_AS_len, na.rm = T))
+             
       )
       
       
