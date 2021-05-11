@@ -52,7 +52,8 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE, robust = TRUE){
 
         # Loop across Iteration
         for (m in 2:parms$iters) {
-          print(paste0("bridge - Chain: ", cc, "/", parms$chains, "; Iter: ", m, "/", parms$iters))
+          print(paste0("bridge - Chain: ", cc, "/", parms$chains, 
+                       "; Iter: ", m, "/", parms$iters, " at ", Sys.time()))
           # Loop across variables (cycle)
           for (j in 1:p_imp) {
             J <- which(colnames(Zm) %in% p_imp_id[j])

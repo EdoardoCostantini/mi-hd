@@ -66,8 +66,8 @@
 # z_m gen (measured items that will have missingness)
   # parms$z_m_id  <- 1:10
   parms$z_m_id <- paste0("z", 1:10)
-  parms$zm_n <- length(parms$z_m_id)
-  parms$S_all   <- paste0("z", ( 1:(parms$n_it * tail(parms$blck1, 1)) ))
+  parms$zm_n   <- length(parms$z_m_id)
+  parms$S_all  <- paste0("z", ( 1:(parms$n_it * tail(parms$blck1, 1)) ))
     # all measured items (5) for the first 4 lv. These include:
     # - latent variables of items with missing values (1 and 2)
     # - latent variables involved in response model (3 and 4)
@@ -95,16 +95,16 @@
   parms$sc_n <- 3 # how many "Scores" in the sat model for SCore data
   
 # Generic
-  parms$meth_sel <- list(DURR_all = FALSE,  # version w/o SI
-                         DURR_si  = FALSE,  # version w/o SI
-                         IURR_all = TRUE,   # version w/o SI
-                         IURR_si  = FALSE,  # version w/ SI
-                         blasso   = FALSE,
-                         bridge   = FALSE,
-                         MI_PCA   = FALSE,
-                         MI_CART  = FALSE,
-                         MI_RF    = FALSE,
-                         MI_OP    = FALSE,
+  parms$meth_sel <- list(DURR_all = TRUE, # version w/o SI
+                         DURR_si  = TRUE, # version w/o SI
+                         IURR_all = TRUE, # version w/o SI
+                         IURR_si  = TRUE, # version w/ SI
+                         blasso   = TRUE,
+                         bridge   = TRUE,
+                         MI_PCA   = TRUE,
+                         MI_CART  = TRUE,
+                         MI_RF    = TRUE,
+                         MI_OP    = TRUE,
                          missFor  = TRUE,
                          mean     = TRUE,
                          CC       = TRUE,
@@ -173,20 +173,20 @@
 # Conditions --------------------------------------------------------------
 
   # Define Experimental Factor Values
-  lv    <- c(10, 100)        # number of latent variables should be c(10, 100)
-  pm    <- c(.1, .3)        # proportion of missings level
-  fl    <- c("high", "low") # factor loadings level
-  ridge <- c(1e-7)    # 1 valude found w/ corssvalidation in exp 2
+  lv    <- c(10, 100)# number of latent variables should be c(10, 100)
+  pm    <- c(.1, .3) # proportion of missings level
+  fl    <- c("high") #, "low") # factor loadings level
+  ridge <- c(1e-7)   # 1 valude found w/ corssvalidation in exp 2
   
   # Make Conditions
   conds <- expand.grid(lv, pm, fl,
                        stringsAsFactors = FALSE)
   
   # Append Ridge Parameter
-  conds <- cbind(conds, ridge)
+  conds <- cbind(conds, ridge, 1:nrow(conds))
   
   # Select Conditions for run
-  conds <- conds[6, ]#[1:(nrow(conds) - 0), ]
+  conds <- conds[1:(nrow(conds) - 0), ]
   
   # Give Meaningful names to Columns
-  colnames(conds) <- c("lv", "pm", "fl", "ridge")
+  colnames(conds) <- c("lv", "pm", "fl", "ridge", "id")

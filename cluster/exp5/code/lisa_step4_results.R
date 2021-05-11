@@ -14,7 +14,7 @@
   outDir <- "../output/"
   
   # Job ID
-  idJob <- "7535614"
+  idJob <- "7652179"
   
   # Define Output Run folder
   resDir <- paste0(outDir, "exp5_mainSim_", idJob, "/") # location of results
@@ -48,7 +48,7 @@
   names(out) <- fileNames
   
   # Define the Unique repetitions
-  reps <- sInfo$parms$dt_rep # you need to input this manally right now
+  reps <- sInfo$parms$dt_rep # you need to input this manually right now
   rep_index <- paste0("rep", 1:reps, "[^0-9]")
   
   # Create an index based on the reptition membership
@@ -111,11 +111,15 @@
 
 # Save Results ------------------------------------------------------------
 
-output <- lapply(list(semR = semR_res,
-                      CFA  = CFA_res,
-                      semS = semS_res), 
-                 function(x){
-                   names(x) <- paste0("cond", seq_along(out[[1]]))
-                   return(x)
-                 }
-)
+  output <- lapply(list(semR = semR_res,
+                        CFA  = CFA_res,
+                        semS = semS_res), 
+                   function(x){
+                     names(x) <- paste0("cond", seq_along(out[[1]]))
+                     return(x)
+                   }
+  )
+  output <- c(output, parms = list(out$parms), conds = list(out$conds))
+  
+  
+  

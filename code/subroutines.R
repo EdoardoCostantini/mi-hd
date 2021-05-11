@@ -179,9 +179,10 @@ doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
         
         if(debug == TRUE){
           rp_out[[i]] <- capture.output(tryCatch({
-            withErrorTracing({runCell_lv(cond = conds[i, ],
-                                         parms = parms,
-                                         rep_status = rp)})
+            withErrorTracing({runCell_add(cond = conds[i, ],
+                                          parms = parms,
+                                          rep_status = rp,
+                                          cluster = FALSE)})
           }, error = function(e){
             e <<- e
             cat("ERROR: ", e$message, "\nin ")
@@ -1389,7 +1390,12 @@ runCell_add <- function(cond, parms,
                         })
 
   # Impute according to IURR method
-  ctrl_preform <- c(parms$meth_sel$IURR_all, parms$meth_sel$IURR_si)
+  perf_IURR_all <- parms$meth_sel$IURR_all & 
+    ifelse(cond$fl == "low", cond$lv != 100, TRUE)
+    # Do not perform IURR_all for the high-dim low-factor loading 
+    # conditions
+  
+  ctrl_preform <- c(perf_IURR_all, parms$meth_sel$IURR_si)
   # Lasso
   imp_IURR_ls <- lapply(c(Xy_mis = 1, Xy_SI  = 2),
                         function(x){
@@ -1651,7 +1657,8 @@ runCell_add <- function(cond, parms,
             file = paste0(parms$outDir,
                           "exp", parms$exp,
                           "_rep", rp,
-                          "_cond", cond_tag,
+                          "_cond", cond$id, "_",
+                          cond_tag,
                           ".rds")
     )
   } else {

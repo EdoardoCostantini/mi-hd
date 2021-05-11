@@ -219,12 +219,7 @@ rr_est_lasso <- function(X, y, parms, fam="gaussian"){
                         nfolds = 10,
                         alpha = 1)
   
-  regu.mod <- glmnet(X, y, 
-                     family = fam,
-                     alpha = 1, 
-                     lambda = cv_lasso$lambda.min)
-  
-  return(regu.mod)
+  return(cv_lasso)
 }
 
 rr_est_elanet <- function(X, y, parms, fam = "gaussian"){
@@ -591,8 +586,10 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   # X_te <- model.matrix(medv~., test)[,-1]
   # y_tr <- train$medv
   # y_te <- test$medv
-  #   cv <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
+  # model <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
+  # coef(model, s = "lambda.min")
   # model <- glmnet(X_tr, y_tr, alpha = 1, lambda = cv$lambda.min)
+  # coef(model)
   
   ## Inputs from simulation
   # model = regu.mod
@@ -604,9 +601,9 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   ## Body ##
   
   # Select predictors based on rr
-    rr_coef <- as.matrix(coef(model)) # regularized regression coefs
-    rr_coef_no0 <- row.names(rr_coef)[rr_coef != 0]
-    AS <- rr_coef_no0[-1] # predictors active set
+  rr_coef <- as.matrix(coef(model, s = "lambda.min")) # regularized regression coefs
+  rr_coef_no0 <- row.names(rr_coef)[rr_coef != 0]
+  AS <- rr_coef_no0[-1] # predictors active set
   
   # MLE estimate of model parameters
   # # ORIGINAL  
@@ -651,14 +648,14 @@ imp_gaus_IURR <- function(model, X_tr, y_tr, X_te, y_te, parms){
   # 2. optimize loss function
     MLE_fit <- optim(startV, 
                      .lm_loss,
-                     method="BFGS",
-                     hessian=T,
+                     method = "BFGS",
+                     hessian = T,
                      y = y_tr, X = X_mle)
     
   # 3. obtain estimates
     theta <- MLE_fit$par
-    OI <- solve(MLE_fit$hessian) # parameters cov maatrix
-    
+    OI <- solve(MLE_fit$hessian) # parameters cov matrix
+
   # Sample parameters for posterior predictive distribution
     pdraws_par <- MASS::mvrnorm(1, 
                                 mu = MLE_fit$par, 
@@ -752,14 +749,25 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
 }
 
 .lm_loss <-function(theta, y, X){
-  n <- nrow(X)
+  # source: https://rpubs.com/YaRrr/MLTutorial
+  ## Example Inputs
+  # X = X_mle
+  # y = y_obs
+  # theta = startV
+  ## Body
+  # prep
   k <- ncol(X)
   beta <- theta[1:k]
   sigma <- theta[k+1]
-  if(sigma < 0) {
-    dev <- 10000000
+  
+  # Check validity of sigma
+  if(sigma < 0) { 
+    # the optimization procedure to stay away from invalid parameter values.
+    dev <- 1e7
   } else {
+    # calculate (log) likelihood of each data point
     ll <- dnorm(y, mean = X %*% beta, sd = sigma, log = TRUE)
+    # summarize into deviance score
     dev <- -2 * sum(ll)
   }
   # Return 
@@ -1262,7 +1270,7 @@ prep_SI <- function(dt_in,
   pMat     <- quickpred(dt_in, mincor = .3)
   mids_obj <- mice(dt_in,
                    predictorMatrix = pMat,
-                   printFlag       = FALSE,
+                   printFlag       = TRUE,
                    method          = "pmm",
                    ...
                    # ridge           = cond$ridge,
@@ -1545,7 +1553,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   # model = "semR"
   # model = "CFA"
   # model = "m1"
-  # condition = 1
+  # condition = 2
   # out = output
   # bias_sd = TRUE
   
@@ -1736,27 +1744,35 @@ mean_traceplot <- function(out,
                            dat = 1, # which data repetition
                            method = "blasso", # same name as in parms
                            y_range = c(-10, 20),
+                           v_range = NULL,
                            iters = 1:5){
   ## Internals
   # dat = 1
-  # out <- out_cnv
+  # out <- out_DURR
   # iters = 1:7
-  # method = "blasso" # same name as in parms
+  # v_range = 170:180
+  # method = "DURR_all" # same name as in parms
   
   ## Description
   # It prints the traceplots for the mean imputed values in each iteration
   # in different chains, by variable, one dataset, one imputation method
   
+  # Variables to display
+  if(is.null(v_range)){
+    v_range <- 1:length(out$parms$z_m_id)
+  }
+  
   # Display in same pane
-  par(mfrow = c(3, ceiling(out$parms$zm_n/3)))
+  par(mfrow = c(3, ceiling(length(v_range)/3)))
   # Plot
   # Are imputations of mids class?
   if(class(out[[dat]][[1]]$imp_values[[method]]) == "mids"){
-    plot(out[[dat]][[1]]$imp_values[[method]])
+    plot(out[[dat]][[1]]$imp_values[[method]],
+         y = paste0("z", v_range))
   } else {
     # For each variable imputed
-    for (v in 1:length(out$parms$z_m_id)) {
-      v <- 1
+    for (v in v_range) {
+      # v <- v_range[1]
       # CHAIN 1
       # Mean imputed value (across individuals), in the first CHAIN,
       # at each iteration
@@ -1779,36 +1795,32 @@ mean_traceplot <- function(out,
 }
 
 # Crossvalidation
-bridge_cv <- function(out, nconds, nreps, ridge_values, mods = NULL){
+bridge_cv <- function(out, mods = NULL){
   # Returns a df with ridge penality selected for each condition
   # Compute Average FMI across all parameter estiamtes per ridge value
-  # nconds <- 4
-  # nreps <- 10
-  # ridge_values = 10^c(-1, -7)
-  # mods = NULL
+  
   # Arguments check
   if(is.null(mods)) mods = names(out[[1]][[1]]$fmi)
   
   # Body
   store_0 <- list()
-  for (i in 1:nconds) {
+  for (i in 1:nrow(out$conds)) {
     store_1 <- NULL
-    for (dt in 1:nreps) {
+    for (dt in 1:out$parms$dt_rep) {
       store_1 <- cbind(store_1, unlist(out[[dt]][[i]]$fmi[mods]))
     }
     # Within the same condition, take mean of average fmi from 
     # each data repetition
     store_0[[i]] <- rowMeans(store_1)
   }
-  ridge_range    <- length(ridge_values)
-  names(store_0) <- rep(ridge_values, nconds/ridge_range)
+  ridge_range    <- length(unique(out$conds$ridge))
+  names(store_0) <- rep(unique(out$conds$ridge), nrow(out$conds)/ridge_range)
   
   # Within the same condition, take mean of the m1 and m2 fmis
   # (previously aggregated across datasets)
-  avg_fmi <- round(sapply(store_0, mean, na.rm = TRUE), 3)
+  avg_fmi <- round(sapply(store_0, mean), 3)
   
   # Select ridge value with lowest average FMI
-  # for each condition (returned by condition order)
   i <- 1; j <- i + ridge_range - 1
   ridge_s <- NULL
   for (r in 1:(length(avg_fmi)/ridge_range)) {
@@ -1816,7 +1828,13 @@ bridge_cv <- function(out, nconds, nreps, ridge_values, mods = NULL){
     i <- j+1
     j <- i+ridge_range-1
   }
-  return(ridge_s)
+  
+  # Attach ridge value to specific condition
+  col_indx <- colnames(out$conds) != "ridge" # exclude ridge column
+  output <- data.frame(out$conds[!duplicated(out$conds[, col_indx]), 
+                                 col_indx],
+                       ridge = ridge_s)
+  return(output)
 }
 
 # Plot function for experiment 1 and 2
@@ -1843,7 +1861,7 @@ plot_fg <- function(dt,
   #                 variances = 7:12,
   #                 covariances = 13:27)
   # summy = TRUE # requires summary or not of stats
-  # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
+  # meth_compare = rev(c("DURR_la", "IURR_la", "blasso",# "bridge",
   #                      "MI_PCA",
   #                      "MI_CART", "MI_RF", "missFor", "CC"))
   # cond_labels = NULL
@@ -1865,7 +1883,13 @@ plot_fg <- function(dt,
   # means = 1:10
   # varis = 11:16
   # covas = 21:65
-  
+  ## EXP 5
+  # dt = lapply(1:length(res$semR),
+  #             function(x) data.frame( res$semR[[x]]$bias_per))[1:4]
+  # meth_compare = c("DURR_all","DURR_si","IURR_all","IURR_si","blasso",
+  #                  #"bridge",
+  #                  "MI_PCA","MI_CART" ,"MI_RF","MI_OP",
+  #                  "missFor","CC")
   ## Prep data for plot
   dt_preEdit <- lapply(parPlot, function(x){
     lapply(dt, function(d){

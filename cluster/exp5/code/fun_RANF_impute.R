@@ -48,7 +48,7 @@ impute_RANF <- function(Z, O, cond, parms, perform = TRUE){
       
       for (m in 2:parms$iters) {
         print(paste0("RANF - Chain: ", cc, "/", parms$chains, 
-                     "; Iter: ", m, "/", parms$iters))
+                     "; Iter: ", m, "/", parms$iters, " at ", Sys.time()))
         for (j in 1:p_imp) {
           J <- which(colnames(Zm) %in% p_imp_id[j])
           # Select data

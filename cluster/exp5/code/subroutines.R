@@ -844,11 +844,11 @@ runCell_int <- function(cond, parms, rep_status) {
                              parms = parms)
   
   imp_IURR_SI <- impute_IURR(Z = imp_PCA$dtIN,
-                                O = data.frame(!is.na(imp_PCA$dtIN)),
-                                reg_type = "lasso",
-                                cond = cond,
-                                perform = (parms$meth_sel$IURR_SI & cond$int_da),
-                                parms = parms)
+                             O = data.frame(!is.na(imp_PCA$dtIN)),
+                             reg_type = "lasso",
+                             cond = cond,
+                             perform = (parms$meth_sel$IURR_SI & cond$int_da),
+                             parms = parms)
   
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_input[, col$CIDX],
@@ -1309,11 +1309,12 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
 # Addendum ----------------------------------------------------------------
 
 ## Run one replication of the simulation:
-doRep_cluster <- function(rp, conds, parms) { 
+doRep_cluster <- function(rp, conds, parms, cluster = TRUE) { 
   ## Example Inputs
   # rp = 1
   # conds = conds
   # parms = parms
+  # cluster = TRUE
   ## Seeds according
   .lec.SetPackageSeed(rep(parms$seed, 6))
   if(!rp %in% .lec.GetStreams()) # if the streams do not exist yet
@@ -1323,10 +1324,10 @@ doRep_cluster <- function(rp, conds, parms) {
   ## Loop over conditions:
   for(i in 1 : nrow(conds)){
   # i = 1
-    runCell_add(rep_status = rp,
-                cond = conds[i, ],
+    runCell_add(cond = conds[i, ],
+                rep_status = rp,
                 parms = parms,
-                cluster = TRUE) # I'm running it with cluster mode
+                cluster = cluster) # I'm running it with cluster mode
   }
   
   ## Return the rep index
@@ -1342,7 +1343,7 @@ runCell_add <- function(cond, parms,
   ## For internals
   # set.seed(1234)
   # cond    = conds[1, ]
-  # cluster = TRUE # if you are running on lisa you want to store differently
+  # cluster = FALSE # if you are running on lisa you want to store differently
   
   ## Start Timer
   prepro_time_start <- Sys.time()
@@ -1350,7 +1351,7 @@ runCell_add <- function(cond, parms,
   ## Condition Tag
   cond_tag <- paste0(names(cond), 
                      sub("\\.", "", as.character(cond)), 
-                     collapse = "")
+                     collapse = "_")
   
   ## Data ------------------------------------------------------------------ ##
   Xy_ls  <- simData_lv(parms, cond)
@@ -1363,7 +1364,9 @@ runCell_add <- function(cond, parms,
   # Prep Data: Single Imputation on Auxiliary variables
   prep_Si_out <- prep_SI(dt_in = Xy_mis,
                          model.var = parms$z_m_id,
-                         maxit = 5)
+                         m = 1,
+                         maxit = parms$prep_Si_iters,
+                         ridge = cond$ridge)
   Xy_SI <- prep_Si_out$dt_out
   
   dt_in <- list(Xy_mis = Xy_mis,
@@ -1387,7 +1390,12 @@ runCell_add <- function(cond, parms,
                         })
 
   # Impute according to IURR method
-  ctrl_preform <- c(parms$meth_sel$IURR_all, parms$meth_sel$IURR_si)
+  perf_IURR_all <- parms$meth_sel$IURR_all & 
+    ifelse(cond$fl == "low", cond$lv != 100, TRUE)
+    # Do not perform IURR_all for the high-dim low-factor loading 
+    # conditions
+  
+  ctrl_preform <- c(perf_IURR_all, parms$meth_sel$IURR_si)
   # Lasso
   imp_IURR_ls <- lapply(c(Xy_mis = 1, Xy_SI  = 2),
                         function(x){
@@ -1398,18 +1406,21 @@ runCell_add <- function(cond, parms,
                                       perform = ctrl_preform[[x]],
                                       parms = parms)
                         })
-  
+
   # Impute according to Hans Blasso method
   imp_blasso <- impute_BLAS_hans(Z = Xy_mis,
                                  parms = parms,
                                  perform = parms$meth_sel$blasso)
 
   # Impute according to van Buuren Ridge
+  # perform bridge only if we ask for it in the method list
+  # and the condition is low dimensional
+  perf_bridge <- parms$meth_sel$bridge & cond$lv != 100
   imp_bridge <- impute_BRIDGE(Z = Xy_mis,
                               O = data.frame(!is.na(Xy_mis)),
                               ridge_p = cond$ridge,
                               parms = parms,
-                              perform = parms$meth_sel$bridge)
+                              perform = perf_bridge)
   
   # Impute according to Howard Et Al 2015 PCA appraoch
   imp_PCA <- impute_PCA(Z     = Xy_SI,
@@ -1452,10 +1463,10 @@ runCell_add <- function(cond, parms,
   
   ## Convergence ------------------------------------------------------------- ##
   
-  imp_values <- list(DURR_AL    = imp_DURR_ls$Xy_mis$imps,
-                     DURR_SI    = imp_DURR_ls$Xy_SI$imps,
-                     IURR_AL    = imp_IURR_ls$Xy_mis$imps,
-                     IURR_SI    = imp_IURR_ls$Xy_SI$imps,
+  imp_values <- list(DURR_all    = imp_DURR_ls$Xy_mis$imps,
+                     DURR_si    = imp_DURR_ls$Xy_SI$imps,
+                     IURR_all    = imp_IURR_ls$Xy_mis$imps,
+                     IURR_si    = imp_IURR_ls$Xy_SI$imps,
                      blasso     = imp_blasso$imps,
                      bridge     = imp_bridge$imps,
                      MI_PCA     = imp_PCA$mids,
@@ -1477,10 +1488,10 @@ runCell_add <- function(cond, parms,
                    CC      = Xy_mis[rowSums(is.na(Xy_mis[, parms$z_m_id])) == 0, ],
                    GS      = Xy)
   # MI data
-  MI_dt_ls <- list(DURR_AL    = imp_DURR_ls$Xy_mis$dats,
-                   DURR_SI    = imp_DURR_ls$Xy_SI$dats,
-                   IURR_AL    = imp_IURR_ls$Xy_mis$dats,
-                   IURR_SI    = imp_IURR_ls$Xy_SI$dats,
+  MI_dt_ls <- list(DURR_all    = imp_DURR_ls$Xy_mis$dats,
+                   DURR_si    = imp_DURR_ls$Xy_SI$dats,
+                   IURR_all    = imp_IURR_ls$Xy_mis$dats,
+                   IURR_si    = imp_IURR_ls$Xy_SI$dats,
                    bridge  = imp_bridge$dats,
                    blasso  = imp_blasso$dats,
                    MI_PCA  = imp_PCA$dats,
@@ -1599,10 +1610,10 @@ runCell_add <- function(cond, parms,
   
   # aggregate imputation times
   
-  imp_time <- list(DURR_AL    = imp_DURR_ls$Xy_mis$time,
-                   DURR_SI    = imp_DURR_ls$Xy_SI$time,
-                   IURR_AL    = imp_IURR_ls$Xy_mis$time,
-                   IURR_SI    = imp_IURR_ls$Xy_SI$time,
+  imp_time <- list(DURR_all    = imp_DURR_ls$Xy_mis$time,
+                   DURR_si    = imp_DURR_ls$Xy_SI$time,
+                   IURR_all    = imp_IURR_ls$Xy_mis$time,
+                   IURR_si    = imp_IURR_ls$Xy_SI$time,
                    bridge  = imp_bridge$time,
                    blasso  = imp_blasso$time,
                    MI_PCA  = imp_PCA$time,
@@ -1633,7 +1644,9 @@ runCell_add <- function(cond, parms,
                  fmi          = list(semR = semR_fmi,
                                      CFA  = CFA_fmi,
                                      semS = semS_fmi),
-                 miss_descrps = miss_descrps,
+                 miss_descrps = list(miss_descrps = miss_descrps,
+                                     PCA_diff_comp = imp_PCA$diff_comp,
+                                     IURR_AS_size = imp_IURR_ls$Xy_mis$succ_ratio),
                  run_time_min = imp_time,
                  run_time_prep = prepro_time_end - prepro_time_start,
                  imp_values   = imp_values)[parms$store]
@@ -1644,7 +1657,8 @@ runCell_add <- function(cond, parms,
             file = paste0(parms$outDir,
                           "exp", parms$exp,
                           "_rep", rp,
-                          "_cond", cond_tag,
+                          "_cond", cond$id, "_",
+                          cond_tag,
                           ".rds")
     )
   } else {

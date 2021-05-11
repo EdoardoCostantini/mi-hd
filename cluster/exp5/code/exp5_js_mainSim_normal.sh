@@ -1,27 +1,27 @@
 #!/bin/bash
 #SBATCH -N 1
-#SBATCH -p short
-#SBATCH -t 00:04:59
+#SBATCH -p normal
+#SBATCH -t 55:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=e.costantini@tilburguniversity.edu
 
 ## Description
 # Project: 	imputeHD-comp
 # Title: 	lisa job script for experiment 5 (array type)
-# Partitioning: short
+# Partitioning:	normal 
 # Author:	Edoardo Costantini
-# Date:		2021-03-16
+# Date:		2021-05-11
 
 ## USAGE on LISA:
-##   sbatch -a 1-ARRAY_NUM exp5_js_mainSim.sh
+##   sbatch -a 1-ARRAY_NUM exp5_js_mainSim_normal.sh
 ##
 ## ARGS:
 ##   ARRAY_NUM = Number of arrays to parallelize over
 ##
 ## NOTES:
-##	To deploy this script for actual simulation, you need to delete the -p short
-##	detail and update to the correct expected execution time the -t 00:04:59 part
-##	in the preamble.
+##
+##
+##
 
 ## Load Modules
 module load R

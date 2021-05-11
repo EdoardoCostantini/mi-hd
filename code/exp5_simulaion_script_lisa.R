@@ -19,9 +19,12 @@ doRep_cluster(rp = rp, conds = conds, parms = parms)
 
 ## Time Estiamte
 start <- Sys.time()
-out <- doRep(rp = 1, conds = conds[1:2,], parms = parms,
+
+out <- doRep(rp = 1, conds = conds, parms = parms,
              verbose = TRUE)
+
 end <- Sys.time()
+
 end-start
 sink() # end sing
 

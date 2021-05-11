@@ -13,7 +13,7 @@ source("./exp5_init.R")
 
 ## Extract commandline arguments
 args <- commandArgs(trailingOnly = TRUE)
-rp   <- as.numeric(args[1]) # replication rp = 2 to desired
+rp   <- as.numeric(args[1]) # replication rp = 1 to desired
 parms$outDir <- args[2]   # overwrite output directory defined in exp5_init.R
 
 ## Run one replication of the simulation:

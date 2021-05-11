@@ -48,7 +48,7 @@ impute_DURR <- function(Z, O, cond, reg_type = "lasso", parms, perform = TRUE){
         for (m in 2:parms$iters) {
           # Monitor progres
           print(paste0("DURR - Chain: ", cc, "/", parms$chains, 
-                       "; Iter: ", m, "/", parms$iters))
+                       "; Iter: ", m, "/", parms$iters, " at ", Sys.time()))
           
           for (j in 1:p_imp) {
             J <- which(colnames(Zm) %in% p_imp_id[j])
