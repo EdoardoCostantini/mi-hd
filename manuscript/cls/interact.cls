@@ -4,7 +4,7 @@
 %%
 %% This file is part of a Taylor & Francis 'Interact' LaTeX bundle.
 %%
-%% v1.05 - 2017/07/31 (modified by Edoardo Costantini)
+%% v1.05 - 2017/07/31
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -46,7 +46,7 @@
 \def\sectionfont{\fontsize{11}{13}\selectfont\bfseries\raggedright\boldmath}%
 \def\subsectionfont{\fontsize{11}{13}\selectfont\bfseries\itshape\raggedright\boldmath}%
 \def\subsubsectionfont{\fontsize{11}{13}\selectfont\itshape\raggedright}%
-\def\paragraphfont{\fontsize{11}{13}\selectfont\boldmath}%
+\def\paragraphfont{\fontsize{11}{13}\selectfont\bfseries\boldmath}%
 \def\tablecaptionfont{\fontsize{8}{10}\selectfont\leftskip\tabledim\rightskip\tabledim}%
 \def\tablefont{\fontsize{8}{9}\selectfont}%
 \def\tablenumfont{\fontsize{8}{10}\selectfont\bfseries}%
@@ -311,19 +311,19 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Sectioning commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%\setcounter{secnumdepth}{5}
+\setcounter{secnumdepth}{5}
 %\newcounter {part}
 %\newcounter {section}
 %\newcounter {subsection}[section]
 %\newcounter {subsubsection}[subsection]
 %\newcounter {paragraph}[subsubsection]
 %\newcounter {subparagraph}[paragraph]
-%\renewcommand\thepart       {\arabic{part}}
-%\renewcommand\thesection       {\arabic{section}}
-%\renewcommand\thesubsection    {\thesection.\arabic{subsection}}
-%\renewcommand\thesubsubsection {\thesubsection.\arabic{subsubsection}}
-%\renewcommand\theparagraph     {\thesubsubsection.\arabic{paragraph}}
-%\renewcommand\thesubparagraph  {\theparagraph.\arabic{subparagraph}}
+\renewcommand\thepart       {\arabic{part}}
+\renewcommand\thesection       {\arabic{section}}
+\renewcommand\thesubsection    {\thesection.\arabic{subsection}}
+\renewcommand\thesubsubsection {\thesubsection.\arabic{subsubsection}}
+\renewcommand\theparagraph     {\thesubsubsection.\arabic{paragraph}}
+\renewcommand\thesubparagraph  {\theparagraph.\arabic{subparagraph}}
 %
 \renewcommand\section{\@startsection {section}{1}{\z@}%
                                    {-26pt \@plus-4pt \@minus-2pt}%
@@ -365,11 +365,9 @@
     {\@ssect{#3}{#4}{#5}{#6}}%
     {\@dblarg{\@sect{#1}{#2}{#3}{#4}{#5}{#6}}}}
 %
-\def\@sseccntformat#1{}
-%\def\@sseccntformat#1{\csname the#1\endcsname.\hskip 0.5em} % numbers subsections and below
+\def\@sseccntformat#1{\csname the#1\endcsname.\hskip 0.5em}
 \def\@appseccntformat#1{\appendixname\ \csname the#1\endcsname.\ }
-\def\@seccntformat#1{}
-%\def\@seccntformat#1{\csname the#1\endcsname.\hskip 0.5em} % numbers sections
+\def\@seccntformat#1{\csname the#1\endcsname.\hskip 0.5em}
 \def\@sect#1#2#3#4#5#6[#7]#8{\ifnum #2>\c@secnumdepth
      \let\@svsec\@empty\else
      \refstepcounter{#1}%
@@ -487,7 +485,7 @@
 %
 \renewenvironment{abstract}{%
         \par\addvspace{0pt plus2pt minus1pt}
-  \abstractfont\noindent{\bfseries }\ignorespaces%
+  \abstractfont\noindent{\bfseries \abstractname\\}\ignorespaces%
 }{%
         \par\addvspace{13pt plus2pt minus1pt}
   \@endparenv}
@@ -501,7 +499,7 @@
 %
 \newenvironment{keywords}{%
         \par\addvspace{13pt plus2pt minus1pt}
-  \keywordfont\noindent{\bfseries }\ignorespaces%
+  \keywordfont\noindent{\bfseries \keywordsname\\}\ignorespaces%
 }{%
         \par\addvspace{13pt plus2pt minus1pt}
   \@endparenv}

@@ -2,110 +2,91 @@
 
 %\paragraph{(Frame the problem)}
 
-Today’s social, behavioral and medical scientists have access to large multidimensional datasets that can be
-used to investigate the complex relationships between social, psychological and biological factors in 
+Today’s social, behavioral, and medical scientists have access to large multidimensional data sets that can be
+used to investigate the complex roles that social, psychological and biological factors play in 
 shaping individual and societal outcomes.
-Large social science datasets, such as the World Values Survey, or the European Values Study (EVS), 
-are easily available to researchers and initiatives have been undertaken to link and extend these datasets 
-into a system of linked open data.
-Making use of the full potential of these data sets requires dealing with the crucial problem of multivariate
+Large social scientific data sets---such as the World Values Survey and the European Values Study (EVS)---are easily accessible to researchers, but making use of the full potential of these data requires dealing with the crucial problem of multivariate
 missing data.
 
-Rubin's Multiple Imputation (MI) approach \citep{rubin:1987} was developed to specifically address the issue of missing 
+Rubin's Multiple Imputation (MI) approach \citep{rubin:1987} was developed to address missing 
 responses in surveys.
-MI is a three-step process that entails an imputation, analysis, and pooling phase.
+An MI-based analysis is a three-step process that entails an imputation phase, an analysis phase, and a pooling phase.
 The fundamental idea of the imputation phase is to replace each missing data point with $m$ plausible values sampled from 
-their posterior predictive distributions given the observed data.
-This procedure leads to the definition of $m$ complete versions of the original data that can be analyzed separately 
-using standard complete-data analysis models (analysis phase).
-Finally, the $m$ estimates of any parameter of interest can be pooled following Rubin's rules \citep{rubin:1987} 
-(pooling phase).
+the posterior predictive distribution of the missing data given the observed data.
+This procedure generates $m$ completed versions of the original data that are analyzed separately during the analysis phase, using standard complete data analysis models.
+Finally, in the pooling phase, the $m$ estimates of any parameter of interest are pooled following Rubin's rules \citep{rubin:1987} to create the MI parameter estimate.
 
 Since Rubin's seminal work, two main strategies have become popular for multiple imputation of multivariate 
-missing data: joint modelling (JM) \citep[ch. 4]{schafer:1997} and full conditional specification (FCS), also known 
-as Multiple Imputation by Chained Equation (MICE) \citep{vanBuurenEtAl:2006}.
-The first one relies on defining a multivariate distribution for the missing data, deriving conditional
-distributions for each missing data pattern, and obtaining samples from it by means of a Markov Chain Monte Carlo 
+missing data: joint modelling \citep[JM;][ch. 4]{schafer:1997} and full conditional specification (FCS), also known 
+as Multiple Imputation by Chained Equations \citep[MICE;][]{vanBuurenEtAl:2006}.
+JM relies on defining a joint distribution for the missing data, deriving conditional
+distributions for each missing data pattern, and obtaining samples from these distributions by means of a Markov Chain Monte Carlo 
 algorithm.
-The second method defines conditional densities for each incomplete variable and performs iterative imputations on 
+FCS defines conditional distributions for each incomplete variable and performs iterative imputations on 
 a variable-by-variable basis.
-Compared to the JM approach, FCS imputation can easily accommodate for the different distributions of variables and it 
-can preserve unique features in the data, such as variables interactions or questionnaires skip patterns.
+Compared to the JM approach, FCS can more easily accommodate different distributions of the incomplete variables. It is also easier to preserve unique features in the data, such as interactions between variables or skip patterns in questionnaires when using FCS.
 
-Both the JM and the FCS approaches rely on the crucial \emph{missing at random} (MAR) assumption.
-Meeting this assumption requires specifying imputation models for the MI procedure that include all observed
-variables that are correlates of missingness.
-Omitting from the imputation models an observed predictor related to both the missingness and the imputed variables 
-creates a \emph{missing not at random} (MNAR) problem.
-MI under MNAR leads to substantial bias in parameter estimation in the analysis and pooling phases, and 
-invalidates hypothesis testing involving the imputed variables.
-
-As a result, when it comes to defining the set of auxiliary variables for the imputation models within an MI procedure, 
-an inclusive strategy (i.e. including numerous auxiliary variables) is generally preferred to restrictive approach 
-(i.e. including few or no auxiliary variables).
-An inclusive approach reduces the chances of omitting important correlates of missingness, making the MAR assumption 
+Both the JM and FCS rely on the crucial \emph{missing at random} (MAR) assumption.
+Meeting this assumption requires specifying imputation models that include all observed correlates of the missingness.
+Omitting a variable that relates to both the missingness and the incomplete variables induces \emph{missing not at random} (MNAR) data.
+MI under MNAR can lead to substantial bias in the MI parameter estimates, and 
+invalidates hypothesis testing involving the imputed variables. As a result, when choosing which auxiliary variables (i.e., covariates included purely to support the missing data analysis) to include in the imputation model, 
+an inclusive strategy (i.e., including many auxiliary variables) is generally preferred to restrictive approach 
+(i.e., including few or no auxiliary variables).
+An inclusive approach reduces the chances of omitting important correlates of missingness, thereby making the MAR assumption 
 more plausible.
-Furthermore, the inclusive strategy has been shown to reduce estimation bias and increase efficiency \citep{collinsEtAl:2001},
-as well as reducing the chances of specifying uncongenial imputation and analysis models \citep{meng:1994}.
+Furthermore, the inclusive strategy has been shown to reduce estimation bias and increase efficiency \citep{collinsEtAl:2001} and to
+reduce the chances of specifying uncongenial imputation and analysis models \citep{meng:1994}.
 
 Specifying the imputation models for a FCS MI procedure remains one of the most challenging steps in dealing
 with missing values for large multidimensional data sets.
 In practice, the inclusive strategy faces identification and computational limitations.
-One serious risk of an inclusive strategy is the occurrence of singular matrices within the imputation algorithm.
-When data is high-dimensional (i.e. the number of recorded units $n$ is not substantially larger than the number of recorded 
-variables $p$) or afflicted by high collinearity (i.e. one or more of the variables is equal to a linear 
-combination of the others) the data covariance matrix is singular.
-Singular matrices are not invertible, an operation that is fundamental in the estimation of the imputation 
-models in any parametric imputation procedure.
-As a result, the possible high dimensionality of the observed data matrix, resulting from an inclusive strategy, 
-can prevent a straightforward application of MI algorithms or force researchers to make arbitrary choices 
-regarding which variables to include in the imputation models.
+One serious risk of an inclusive strategy is the occurrence of singular covariance matrices within the imputation algorithm.
+When the predictor matrix is high-dimensional (i.e., the number of recorded units, $n$, is not substantially larger than the number of recorded 
+variables, $p$) or afflicted by high collinearity (i.e., some variables are linear combinations of other variables) the covariance matrix of the predictors will be singular.
+Singular matrices cannot be inverted, which is a fundamental part of estimating the imputation 
+model in most parametric imputation procedures.
+As a result, the possible high dimensionality of the predictor matrix resulting from an inclusive strategy 
+can prevent a straightforward application of MI or force researchers to make arbitrary choices 
+regarding which variables to include in the imputation model.
 
-Recent developments in high-dimensional data MI techniques represent interesting opportunities to embrace an 
+\subsection{Prior work on high-dimensional imputation}
+Recent developments in high-dimensional MI techniques represent interesting opportunities to embrace an
 inclusive strategy, without facing its downsides.
-Some statisticians and machine learning experts have focused on high-dimensional Single Imputation (SI) methods in 
-an effort to improve the accuracy of individual imputations \citep[e.g.][]{kimEtAl:2005, stekhovenBuhlmann:2011, 
+High-dimensional Single Imputation methods have been developed in 
+an effort to improve the accuracy of the individual imputations \citep[e.g.,][]{kimEtAl:2005, stekhovenBuhlmann:2011, 
 d'ambrosioEtAl:2012}. 
-However, the main task of social scientists is to make inference about a population based on a sample of observed 
-data points, and SI is simply inadequate for this purpose: it does not provide statistically valid 
+However, the main task of social scientists is to make inference about a population based on a sample, and Single Imputation (SI) is inadequate for this purpose because it does not support statistically valid 
 inference \citep{rubin:1996}.
-The concept of statistical validity as defined by \citep{rubin:1996} is meant to capture two features of 
+The relevant conceptualization of statistical validity was defined by \citet{rubin:1996} as capturing two features of 
 estimation.
 First, the point estimate of a parameter of interest must be unbiased, and second, the actual 
-confidence interval coverage (CIC) of the true parameter value must be equal or greater than nominal 
-coverage rates.
-SI strategies might meet the first requirement, but cannot meet the second as they 
-do not take into account the uncertainty regarding the imputed values.
-MI, on the other hand, was designed to provide statistically valid inference and therefore is 
+confidence interval (CI) coverage of the true parameter value must be equal or greater than nominal the
+coverage rate.
+SI strategies might meet the first requirement but cannot meet the second because they 
+do not account for uncertainty regarding the imputation model parameters.
+MI, on the other hand, was designed to provide statistically valid inference and, therefore, is 
 more suitable for social scientific research.
 
-The combination of MI with high-dimensional prediction models has been directly tackled by algorithms combining 
-full conditional specification of imputation models with shrinkage methods \citep{zhaoLong:2016, dengEtAl:2016},
-but their application has been studied only for biomedical sciences.
-Other researchers have proposed FCS strategies using dimensionality reduction to avoid the obstacles of an inclusive
-strategy in high-dimensional data imputation.
-However, these solutions were either limited to the Joint Modeling approach \citep{songBelin:2004}, 
-or tested exclusively on particularly low-dimensional settings \citep{howardEtAl:2015}.
+The combination of MI with high-dimensional prediction models has been directly tackled by algorithms that combine 
+FCS with shrinkage methods \citep{zhaoLong:2016, dengEtAl:2016}.
+Other researchers have proposed the use of dimensionality reduction to avoid the obstacles of an inclusive strategy.
+However, these solutions were either limited to the JM approach \citep{songBelin:2004}, 
+or tested exclusively in low-dimensional settings \citep{howardEtAl:2015}.
 Finally, tree-based FCS strategies also have the potential to overcome the limitations of inclusive strategies.
-The non-parametric nature of decision trees bypasses the identification issues most parametric methods face
+The nonparametric nature of decision trees bypasses the identification issues most parametric methods face
 in high-dimensional contexts.
-However, these methods have been either used to deal with different issues, such as imputation in the presence
-of interaction effects \citep{dooveEtAl:2014}, or have been tested exclusively on biomedical datasets 
-\citep{shahEtAl:2014}.
-%
-\paragraph{Scope}
-The inclusion of shrinkage methods, principal component analysis and non-parametric decision trees within the FCS framework 
-has the potential of simplifying the decisions social scientists need to make when dealing with missing values.
-The lack of comparative research on the performance of these methods makes it difficult for social scientists working with 
-large multidimensional data sets to decide which imputation method to adopt.
-With this article, we provide a comparison of these state-of-the-art high-dimensional imputation algorithms.
-We compared the imputation methods based on the statistical validity of the complete-data analyses they allow to perform.
-The comparison was based on three numerical experiments: two simulation studies and a resampling study using real survey 
-data.
-%
-\paragraph{Outline}
-In what follows, we first present the general MICE framework, how the high-dimensional MI methods fit within it, and some
-single data missing data strategies considered for reference.
-Then we present the three numerical experiments, their design, and the results.
-We then discus the implications of the results and provides recommendations for applied researchers.
-Finally, we provide a description of the limitations of the study, and possible future research directions.
+
+\subsection{Scope of the current project}
+Including shrinkage methods, Principle Component Analysis (PCA), and decision trees within the FCS framework 
+has the potential to simplify the decisions social scientists need to make when dealing with missing values.
+However, the lack of comparative research on the performance of these methods makes it difficult for social scientists working with 
+large data sets to decide which imputation method to adopt.
+In this article, we provide a comparison of the state-of-the-art in high-dimensional imputation algorithms.
+We compared seven promising imputation methods in terms of their ability to support statistically valid analyses.
+These comparisons were based on three numerical experiments: two Monte Carlo simulation studies and a resampling study using real survey data.
+
+In what follows, we first introduce the missing data treatments that we compared in our study.
+Then we present the methodology and results of the three numerical experiments.
+We discuss the implications of the results and provide recommendations for applied researchers.
+We conclude by describing the limitations of the study and recommending future research directions.

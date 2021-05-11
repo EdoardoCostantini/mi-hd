@@ -54,7 +54,7 @@
 
 % Manuscript details
 \title{High Dimensional Imputation for the Social Sciences: A Comparison of State-of-the-Art Methods}
-
+\maketitle
 \author{
 \name{
 	Edoardo Costantini\textsuperscript{a} \thanks{CONTACT Edoardo Costantini. Email: e.costantini@tilburguniversity.edu},
@@ -68,8 +68,6 @@
 	}
 }
 
-\maketitle
-
 % Body
 \section{Software and other computational details}
 
@@ -80,8 +78,6 @@ Computations were run in parallel across 30 cores.
 Parallel computing was implemented using the R package \emph{parallel} and to ensure replicability 
 of the findings seeds were set using the method by \cite{lecuyer:2002} implemented in the R package 
 \emph{rlecuyer}.
-Code to run the studies can be found at \url{https://github.com/EdoardoCostantini/imputeHD-comp}.
-In the following, each step of the simulation procedure is described in details for both experiments.
 
 \section{Convergence check details}
 
@@ -111,7 +107,7 @@ In the following, each step of the simulation procedure is described in details 
 
 \section{Additional Figures}
 
-\subsubsection{Experiment 1: Simulated Data from Multivariate Normal Distribution}
+\subsection{Experiment 1: Simulated Data from Multivariate Normal Distribution}
 
 	Figures \ref{fig:exp1bias} and \ref{fig:exp1cir} report the Percentage Relative Bias and Confidence Interval 
 	Coverage, respectively, for each parameter estimate in the saturated model described above. 
@@ -154,7 +150,6 @@ In the following, each step of the simulation procedure is described in details 
 	factor loadings.
 	Figure \ref{fig:exp2flAll} reports the PRB for all factor loadings in all conditions.
 
-%\begin{rotatepage}	
 \begin{figure}
 	\includegraphics{\pathFIG/exp2_semR_bias_14.pdf}
 \caption{PRBs for the means, variances and covariances (PRB) for condition 1 to 4.
@@ -192,22 +187,34 @@ In the following, each step of the simulation procedure is described in details 
 	\label{fig:exp2cir58}
 \end{figure}
 
+\FloatBarrier
+
+\subsubsection{Factor Loadings}
+	Figures \ref{fig:exp2flAll_bias} and \ref{fig:exp2flAll_cic} report PRBs and CICc for all factor loadings.
+	IURR, MI-PCA, and MI-OP, outperformed all other methods by producing acceptable biases in all conditions.
+	However, MI-PCA outperformed IURR when factor loadings were low (panel b), maintaining inconsequential biases even when data were high-dimensional and the proportion of missing values was high. DURR, blasso, bridge, and MI-CART produced acceptable to borderline-acceptable biases in all high-$\lambda$ conditions but tended to produce unacceptable biases in the high-pm-low-$\lambda$ conditions. MI-RF, missForest, and CC produced acceptable to borderline-acceptable biases with low $pm$ but tended to produce unacceptable biases when $pm$ was high.
+
 \begin{figure}
 	\includegraphics{\pathFIG/exp2_CFA_lambda_BPR.pdf}
 	\caption{
-		Percent Relative Bias (PRB) for the factor loadings in conditions 1 to 4 (panel A) 
-		and conditions 5 to 8 (panel B).
+		Percent Relative Bias (PRB) for the factor loadings.
 		Within each panel, for every method, single horizontal lines report the PRB of the 
 		factor loading estimation for each item with missing values.
 		}
-\label{fig:exp2flAll}
+\label{fig:exp2flAll_bias}
+\end{figure}
+
+\begin{figure}
+	\includegraphics{\pathFIG/exp2_CFA_lambda_CIC.pdf}
+	\caption{
+		Confidence Interval Coverage (CIC) for the factor loading estimates.
+		}
+\label{fig:exp2flAll_cic}
 \end{figure}
 
 \FloatBarrier
 
 \subsection{Experiment 3: Resampling Study}
-
-Supplements to resampling study
 
 	Figure \ref{fig:exp4bias_m1} reports the absolute values of the PRBs for the intercept and all the partial 
 	regression coefficients in Model 1, under the different imputation methods, for both the low- and high-dimensional

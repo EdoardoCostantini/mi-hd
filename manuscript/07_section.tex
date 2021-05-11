@@ -1,33 +1,31 @@
 \section{Limitations and future directions}
 
-	The present work was aimed at comparing current implementations of different existing methods.
+	The present work was aimed at comparing current implementations of existing imputation methods.
 	As a result, the scope of the simulation and resampling studies was limited by the current development state of 
 	the different methods.
 	For example, DURR, IURR, and MI-PCA allow imputation of any type of data:
 	DURR and IURR have been developed for categorical data imputation \citep{dengEtAl:2016},
 	and MI-PCA can be performed with any standard imputation model for categorical data.
-	However, blasso has not been formally developed for multi-categorical imputation target variables yet, 
-	which forced us to work with missing values on variables that are either continuous, or usually 
-	considered as such in practice.
+	However, blasso has not been formally developed for imputing multi-categorical variables yet. This limitation of blasso forced us to work with missing values on variables that are either continuous, or usually 
+	considered as such in practice (e.g., Likert-type scales).
 	To maintain a fair comparison with blasso, all methods were implemented with the assumption that the imputed 
 	variables are continuous and normally distributed.
-	However, IURR, DURR and MI-PCA could have performed differently in the resampling study had they been used in their
-	ordered categorical data implementations.
+	However, IURR, DURR and MI-PCA could have performed differently in the resampling study if we had used their
+	ordinal data implementations.
 
 	Another limitation of this study is the assumption of a linear missing data mechanism.
-	In real social scientific data the response mechanism might be non-linear, a condition that would require
-	including interactions and polynomial terms in the imputation models.
-	This factor was not part of the scope of this project. 
-	However, all of the high-dimensional imputation methods considered have great potential to account for
-	more complex response mechanisms.
+	In real social scientific data, the response mechanism might be nonlinear, a condition that could require
+	including transformations of the raw variables (e.g., interactions, polynomial terms) in the imputation models.
+	Non-linear response models were not part of the scope of this project. 
+	However, all of the high-dimensional imputation methods considered have the potential to account for more complex response mechanisms.
 
 	Finally, these results only apply to the specific implementations of the algorithms we used. 
 	Many of the methods discussed could have been implemented differently.
-	\cite{zhaoLong:2016} proposed versions of IURR and DURR using the elastic net penalty \citep{zouHastie:2005} or 
-	the adaptive lasso \citep{zou:2006}, instead of the lasso penalty.
+	\cite{zhaoLong:2016} proposed versions of IURR and DURR using the elastic net penalty \citep{zouHastie:2005} and 
+	the adaptive lasso \citep{zou:2006} instead of the lasso penalty.
 	Although no substantial performance differences between penalty specifications emerged 
-	from the joint work of \cite{zhaoLong:2016} and \cite{dengEtAl:2016}, the impact of different types of 
-	regularized regression was not investigated in the present study. 
+	from the work of \cite{zhaoLong:2016} or \cite{dengEtAl:2016}, we must acknowledge that we did not investigate the impact of different types of
+	regularization in the present study. 
 
 	MI-PCA requires making a decision on the number of components to extract from the auxiliary 
 	variables.
@@ -35,16 +33,16 @@
 	auxiliary variables.
 	However, this decision was arbitrary. 
 	We plan on assessing its effect on the imputation accuracy as part of a project to 
-	expand and improve the use of principal components within the FCS framework.
+	expand and improve the use of principal components within the MICE framework.
 
-	As for blasso, we have not investigated the sensibility of results to different hyper-parameters choices.
+	As for blasso, we have not investigated the sensitivity of the results to different hyper-parameters choices.
 	Furthermore, alternative implementations of Bayesian Lasso could be used within a MICE framework.
-	In particular, the well known Bayesian Lasso proposed by \cite{parkCasella:2008} is a viable option.
+	In particular, the well-known Bayesian Lasso proposed by \cite{parkCasella:2008} is a viable option.
 
-	The use of Random Forests within a MICE algorithm could have also been implemented differently.
-	We decided to use \cite{dooveEtAl:2014} version which is supported in the popular 
-	mice R package.
-	However, \cite{shahEtAl:2014} independently developed another integration of Random Forests
+	We could have also implemented the random forests differently.
+	We decided to use the \cite{dooveEtAl:2014} version which is supported in the popular 
+	R package \emph{mice}.
+	However, \cite{shahEtAl:2014} independently developed another implementation of random forests
 	within the MICE algorithm, which was available in the now archived R package CALIBERrfimpute
 	\citep{CALIBERrfimpute}.
 	We are not aware of any evidence or theoretical reason to expect differences between the two implementations, 
