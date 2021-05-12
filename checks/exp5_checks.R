@@ -95,3 +95,60 @@
   job_time <- 25 # hours
   n_nodes * n_cores * job_time
   
+# Factor Loading Size on EVS ----------------------------------------------
+
+  library(semPlot)
+  library(lavaan)
+  
+  rm(list=ls())
+  source("./init_general.R")
+  source("./exp5_init.R")
+  
+  # Read EVS data
+  dat <- readRDS("../data/exp4_EVS2017_full.rds")$full
+  
+  # Define CFA model (choose 1 V)
+  # V1
+  item_ids <- list(trustState = c(120, 121, 127, 131))
+  # V2
+  item_ids <- list(familyVals = 82:84,
+                   genderRole = 72:79)
+  # V3
+  item_ids <- list(poliAction = 98:101,
+                   natatt = 185:187)
+  
+  # For the chosen group of variables, do the following
+  lv_names <- names(item_ids)
+  lv_number = length(item_ids)
+  
+  lv_models <- sapply(1:lv_number, function(i){
+    paste0(lv_names[i], 
+           " =~ ",
+           paste0("v", item_ids[[i]], collapse = " + ")
+    )
+    
+  })
+  CFA_model <- paste(lv_models, collapse = "\n")
+  
+  # Fit CFA
+  fit <- cfa(CFA_model, data = dat, std.lv = TRUE)
+  
+  # Evaluate Fit
+  fit.out <- summary(fit, fit.measures = TRUE, standardized = TRUE)
+  round(fit.out$FIT[c("cfi", "tli", "rmsea", "rmsea.pvalue")], 3)
+  
+  # Compare
+  CFA_par <- parameterEstimates(fit, 
+                                se = FALSE, zstat = FALSE, 
+                                pvalue = FALSE, ci = FALSE,
+                                standardized = TRUE)
+  
+  # Measured
+  # Factor loadings
+  CFA_par[1:length(unlist(item_ids)), c(1:3, 6)]
+  
+  # Plot
+  semPaths(fit, "std",
+           nCharNodes = max(nchar(names(item_ids)))
+           )
+           

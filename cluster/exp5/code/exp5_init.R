@@ -169,11 +169,7 @@
   lv    <- c(10, 100)     # number of latent variables should be c(10, 100)
   pm    <- c(.1, .3)     # proportion of missings level
   fl    <- c("high")      # factor loadings level
-  ridge <- c(1e-1, 1e-7) # 1 value found w/ corssvalidation in exp 2
-  # lv    <- c(10, 100)       # number of latent variables
-  # pm    <- c(.1, .3)        # proportion of missings level
-  # fl    <- c("high") # factor loadings level
-  # ridge <- c(1e-5, 1e-5) # rep(c(1e-1, 1e-7), 4) # 1 valude found w/ corssvalidation
+  ridge <- c(1e-7, 1e-8)   # 1 valude found w/ corssvalidation in exp 2
   
   # Make Conditions
   conds <- expand.grid(lv, pm, fl,
