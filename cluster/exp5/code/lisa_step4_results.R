@@ -14,7 +14,7 @@
   outDir <- "../output/"
   
   # Job ID
-  idJob <- "7652179"
+  idJob <- c("7652179", "7653072")[2]
   
   # Define Output Run folder
   resDir <- paste0(outDir, "exp5_mainSim_", idJob, "/") # location of results

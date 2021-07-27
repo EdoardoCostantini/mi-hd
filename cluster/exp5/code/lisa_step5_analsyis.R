@@ -5,17 +5,16 @@ res$conds
 #                      "pm = ",  res$conds$pm)
 cond_parms <- paste0("l = ",  res$conds$lv, ", ",
                      "pm = ",  res$conds$pm, "\n",
-                     "\u03bb = ", c(rep("(0.9, 0.97)", 4),
-                                    rep("(0.5, 0.6)", 4)))
+                     "\u03bb = ", c(rep("(0.9, 0.97)", 4)))
 
 cond_labels <- c("low-dim-low-pm-high-\u03bb",
                  "high-dim-low-pm-high-\u03bb",
                  "low-dim-high-pm-high-\u03bb",
-                 "high-dim-high-pm-high-\u03bb",
-                 "low-dim-low-pm-low-\u03bb",
-                 "high-dim-low-pm-low-\u03bb",
-                 "low-dim-high-pm-low-\u03bb",
-                 "high-dim-high-pm-low-\u03bb")
+                 "high-dim-high-pm-high-\u03bb")
+                 # "low-dim-low-pm-low-\u03bb",
+                 # "high-dim-low-pm-low-\u03bb",
+                 # "low-dim-high-pm-low-\u03bb",
+                 # "high-dim-high-pm-low-\u03bb")
 cond_names <- paste(cond_labels, cond_parms, sep = " \n ")
 # Numbered Names
 # cond_names <- paste0("Condition ", 1:8)
@@ -23,7 +22,7 @@ data.frame(res$conds, cond_names)
 
 # Select conditions to print
 conds_select <- 5:8
-conds_select <- 1:2
+conds_select <- 1:4
 
 # Bias (Facet grid) -------------------------------------------------------
 
