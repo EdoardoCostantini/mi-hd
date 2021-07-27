@@ -67,3 +67,6 @@ rsconnect/
 
 # Ignore .idea folder
 /.idea/
+
+# Ignore feedback folder
+/manuscript/feedback/
