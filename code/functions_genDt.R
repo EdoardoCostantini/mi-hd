@@ -174,7 +174,7 @@ imposeMiss_lv <- function(dat_in, parms, cond){
   dat_out <- dat_in$dat
   for (i in 1:parms$zm_n) {
     nR <- simMissingness(pm    = cond$pm,
-                         data  = dat_in$scores_lv,
+                         data  = dat_in$dat,
                          preds = parms$rm_x,
                          type  = parms$missType,
                          beta  = parms$auxWts)

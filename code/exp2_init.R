@@ -81,10 +81,10 @@
   parms$missType <- c("high", "low")[2]
   
   # Latent variables 3 and 4 influence missingness
-  parms$rm_x <- c(3, 4)
+  parms$rm_x <- (2*parms$n_it+1):(4*parms$n_it)
   
   # weighting the importance of predictors: all the same
-  parms$auxWts <- c(1, 1)
+  parms$auxWts <- rep(1, length(parms$rm_x))
   
 # Models ------------------------------------------------------------------
   parms$lav_model <- NULL #paste(readLines("../txt/lavaan_model_sat.txt"), 
