@@ -9,6 +9,7 @@
 ## Single Run  
   # Result selection
   filename <- "exp2_simOut_20200819_1743"
+  filename <- "exp2_simOut_20210728_1351" # Items as MAR predictors (1e3)
   
   # Read R object
   out <- readRDS(paste0("../output/", filename, ".rds"))

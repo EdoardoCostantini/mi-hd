@@ -14,13 +14,16 @@
   filename <- "exp2_simOut_20201116_1743" # short run with scaslde items
   filename <- "exp2_simOut_20201117_1125" # short run with scaslde items
   filename <- "exp2_simOut_20200819_1743" # last good one
-  filename <- "exp2_simOut_2020122417" # christmas 1e3
-  "exp1_simOut_20201130_1006"
-  
-  out <- readRDS(paste0("../output/", filename, ".rds"))
+
+  # LVs as MAR (Joined file form two sources)
+  filename <- "exp2_simOut_2020122417" # christmas 1e3 LVs as MAR predictors
   exp2_res <- readRDS(paste0("../output/", filename, "_res.rds"))
   res <- exp2_res
-  
+
+  # Items as MAR
+  filename <- "exp2_simOut_20210728_1351_res" # Items as MAR predictors (1e3)
+  res <- readRDS(paste0("../output/", filename, ".rds"))
+
   # Plot Sizes Decisions
   gp_width <- 15
   gp_height <- 20
@@ -51,8 +54,8 @@
   data.frame(res$conds, cond_names)
   
 # Select conditions to print
-  conds_select <- 5:8
   conds_select <- 1:4
+  conds_select <- 5:8
 
 # Bias (Facet grid) -------------------------------------------------------
 
