@@ -81,8 +81,21 @@
   )
   output$parms <- out$parms
   output$conds <- out$conds
-    
+
+  # Transform for plot
+  gg_out_sem <- plotwise(res = output,
+                         model = "sem",
+                         parPlot = list(Means = 1:6,
+                                        Variances = 7:12,
+                                        Covariances = 13:27),
+                         item_group = c(1:3), # items in a group recieving miss values
+                         meth_compare = c("DURR_la","IURR_la", "blasso", "bridge",
+                                          "MI_PCA", "MI_CART" ,"MI_RF",
+                                          "MI_OP",
+                                          "CC", "GS"))
+
+  # Save
   saveRDS(
-    output, 
-    paste0("../output/", filename, "_res.rds") 
+    output,
+    paste0("../output/", filename, "_res.rds")
   )

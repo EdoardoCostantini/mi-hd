@@ -3057,7 +3057,7 @@ facet_grid_custom <- function(..., scale_overrides = NULL) {
 # p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
 #   geom_point() +
 #   facet_grid(cols = vars(facet_name), scales = "free")
-# 
+#
 # p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
 #   geom_point() +
 #   facet_grid_custom(cols = vars(facet_name), scales = "free", scale_overrides = list(
@@ -3068,17 +3068,144 @@ facet_grid_custom <- function(..., scale_overrides = NULL) {
 # head(test_large_values_data)
 # dim(test_large_values_data)
 # test_large_values_data$group <- 1:3
-# 
+#
 # p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
 #   geom_point() +
 #   facet_grid(rows = vars(group),
-#              cols = vars(facet_name), 
+#              cols = vars(facet_name),
 #              scales = "free")
 # p_annoying_x_scale <- ggplot(test_large_values_data, aes(x_variable, y_variable)) +
 #   geom_point() +
-#   facet_grid_custom(rows = vars(group), 
-#                     cols = vars(facet_name), 
+#   facet_grid_custom(rows = vars(group),
+#                     cols = vars(facet_name),
 #                     scales = "free", scale_overrides = list(
 #     scale_override(1, scale_x_continuous(breaks = c(5750, 5900))),
 #     scale_override(6, scale_x_continuous(breaks = c(17800, 17900)))
 #   ))
+
+plotwise <- function(res,
+                     model,
+                     parPlot,
+                     meth_compare,
+                     item_group){
+  # Inputs
+  # res = output
+  # model = "sem"
+  # parPlot = list(Means = 1:6,
+  #                Variances = 7:12,
+  #                Covariances = 13:27)
+  # item_group = c(1:3) # items in a group recieving miss values
+  # meth_compare = c("DURR_la","IURR_la", "blasso",
+  #                  "MI_PCA", "MI_CART" ,"MI_RF",
+  #                  "MI_OP",
+  #                  "CC", "GS")
+
+  ## Body
+  # Counts
+  n_conds <- nrow(res$conds)
+  n_parms <- length(parPlot)
+
+  # Extract Info from analysis model for both bias and CI coverage
+  dt_bias = lapply(1:length(res[[model]]),
+                   function(x) data.frame( res[[model]][[x]]$bias_per))[1:4]
+  dt_cico = lapply(1:length(res[[model]]),
+                   function(x) data.frame( res[[model]][[x]]$ci_cov))[1:4]
+
+  # Isolate parameters and methods for comparison
+  dt_bias <- lapply(parPlot, function(x){
+    lapply(dt_bias, function(d){
+      d[x, meth_compare]
+    })
+  })
+
+  dt_cico <- lapply(parPlot, function(x){
+    lapply(dt_cico, function(d){
+      d[x, meth_compare]
+    })
+  })
+
+  # Define Condition and Parameters names
+  label_cond <- paste0("p = ",  res$conds$p, " ",
+                       "pm = ", res$conds$pm)
+  label_parm <- paste0(names(parPlot),
+                       " (", sapply(parPlot, length), ")")
+
+  # Create a data matrix structure for facet_grid
+  store <- data.frame(parm = NA,
+                      cond = NA,
+                      methods = NA,
+                      analysis = NA,
+                      Min. = NA,
+                      Mean = NA,
+                      Max. = NA,
+                      mean_i1 = NA,
+                      mean_i2 = NA,
+                      mean_i12 = NA
+  )[0, ]
+
+  # Populate matrix for facet_grid
+  for (p in 1:n_parms) {
+    # p <- 3
+    for(cc in 1:n_conds){
+      # cc <- 1
+      # Extract Results to be processed
+      results_bias <- abs(dt_bias[[p]][[cc]])
+      results_cico <- abs(dt_cico[[p]][[cc]])
+
+      # Create groups of parameters
+      if(p != 3){
+        par_group <- rep(1:2, each = length(parPlot[[p]])/2)
+      }
+      if(p == 3){
+        # Define the unique covariances
+        x <- t(combn(1:length(parPlot$Means), 2))
+        par_group <- rep(NA, nrow(x))
+        # Define which unique covariances go where
+        par_group[which(x[, 1] %in% item_group & x[, 2] %in% item_group)] <- 1
+        par_group[which(x[, 1] %in% item_group & !x[, 2] %in% item_group)] <- 2
+        par_group[which(!x[, 1] %in% item_group & !x[, 2] %in% item_group)] <- 3
+      }
+
+      # Obtain Min, Mean, Max
+      out_bias <- t(sapply(results_bias, summary)[c("Min.", "Mean", "Max."), ])
+      out_cico <- t(sapply(results_cico, summary)[c("Min.", "Mean", "Max."), ])
+
+      # Group Means
+      out_bias <- cbind(out_bias, t(sapply(results_bias, tapply, par_group, mean)))
+      out_cico <- cbind(out_cico, t(sapply(results_cico, tapply, par_group, mean)))
+
+      # Stack results
+      results <- rbind(out_bias, out_cico)
+
+      # Correct names and dimensions
+      rownames(results) <- sub("_", "-", rownames(results))
+      if(ncol(results) < 6){
+        results <- cbind(results, NA)
+      }
+
+      # Attach Methods as factor w/ precise levels order
+      out <- data.frame(
+        parm = label_parm[p],
+        cond = label_cond[cc],
+        methods = factor(rownames(results),
+                         levels = rownames(results),
+                         labels = rownames(results)),
+        analysis = rep(c("Bias", "CI coverage"), each = nrow(out_bias)),
+        results
+      )
+      colnames(out) <- colnames(store)
+
+      # Attach Condition Name
+      store <- rbind(store, out)
+    }
+  }
+
+  # Reshape
+  store_melt <- reshape2::melt(store,
+                               id.var = c("parm", "cond", "methods", "analysis"))
+  levels(store_melt$variable) <- c("Min", "Mean", "Max",
+                                   "Item set 1", "Item set 2",
+                                   "Item set 1 and 2")
+  # Return data.frame Output
+  return(store_melt)
+}
