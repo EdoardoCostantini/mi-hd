@@ -96,6 +96,6 @@
 
   # Save
   saveRDS(
-    output,
+    gg_out_sem,
     paste0("../output/", filename, "_res.rds")
   )
