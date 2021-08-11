@@ -41,7 +41,7 @@
   # Bias
   x <- 1
   methods_sel <- levels(output_sem$methods)[1:9]
-  pm_grep <- "0.1"
+  pm_grep <- "0.3"
 
   pf <- output_sem %>%
     filter(analysis == unique(analysis)[x],
@@ -149,7 +149,7 @@
 
     # Format
     scale_y_discrete(limits = rev) +
-    scale_x_continuous(labels = as.character(xci_breaks),
+    scale_x_continuous(labels = as.character(xci_breaks/100),
                        breaks = xci_breaks) +
     coord_cartesian(xlim = c(min(xci_breaks), max(xci_breaks))) +
     scale_shape_manual(values = c(1, 4, 16)) +

@@ -2736,7 +2736,7 @@ plot_exp4_meth <- function(dt,
     
     # X axis
     plot_xbreaks <- c(-5, low_thr, 0, hig_thr, 5)
-    plot_xlabels <- gsub("0", "", as.character(round((plot_xbreaks+95)/100, 2)))
+    plot_xlabels <- as.character(round((plot_xbreaks+95)/100, 2))
     plot_vlines <- c(-5, low_thr, hig_thr)
   }
 

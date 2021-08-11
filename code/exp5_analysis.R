@@ -61,7 +61,7 @@
                    #"bridge",
                    "MI_PCA","MI_CART" ,"MI_RF","MI_OP",
                    "missFor","CC")
-  
+
 # > Summary version ####
   pf <- plot_fg(dt = lapply(1:length(res$semR),
                             function(x) data.frame( res$semR[[x]]$bias_per))[conds_select],

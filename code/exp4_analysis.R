@@ -148,18 +148,9 @@
                 "blasso", "bridge",
                 "MI_PCA",
                 "MI_CART", "MI_RF",
-                "missFor", 
                 "CC",
                 "MI_OP"))
-  # Which paramters do you want to highlight in the plot?
-  par_high1 <- lapply(1:length(res$m1),
-                      function(x) res$m1[[x]]$bias_raw)
-  par_high2 <- lapply(1:length(res$m2),
-                      function(x) res$m2[[x]]$bias_raw)
-  rownames(par_high2[[1]])[par_high2[[1]]$ref < .1]
-  rownames(par_high1[[1]])[order(abs(par_high1[[1]]$ref))[1:2]]
-  rownames(par_high2[[1]])[order(abs(par_high2[[1]]$ref))[1:2]]
-  
+
   # > Bias (Facet) ####
   pt1 <- plot_exp4_meth(dt = lapply(1:length(res$m1),
                                     function(x) res$m1[[x]]$bias_per),
@@ -179,16 +170,24 @@
   # Save
   ggsave(pt1,
          file = "../output/graphs/exp4_imp_bias_allParms_m1.pdf",
-         width = 15, height = 21,
+         width = 15, height = 19,
          units = "cm",
          device = cairo_pdf)
   ggsave(pt2,
          file = "../output/graphs/exp4_imp_bias_allParms_m2.pdf",
-         width = 15, height = 21,
+         width = 15, height = 19,
          units = "cm",
          device = cairo_pdf)
 
   # > CI (Facet) ####
+  # Which Methods do you want to plot
+  meths = rev(c("DURR_la", "IURR_la",
+                "blasso", "bridge",
+                "MI_PCA",
+                "MI_CART", "MI_RF",
+                "CC",
+                "MI_OP",
+                "GS"))
   pt1 <- plot_exp4_meth(dt = lapply(1:length(res$m1),
                                     function(x) res$m1[[x]]$ci_cov),
                         type = "ci",
