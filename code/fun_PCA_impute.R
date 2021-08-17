@@ -2,7 +2,7 @@
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
 
-impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
+impute_PCA <- function(Z, O, cond, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values, 
@@ -19,12 +19,9 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
   # For internals
   # Z = Xy_input[, CIDX_all]
   # O = as.data.frame(!is.na(Z)) # matrix index of observed values
-  # DA = cond$int_da
   # Z = Xy_mis
   # Z = Xy_SI
   # O = as.data.frame(!is.na(Z)) # matrix index of observed values
-  # DA = FALSE
-  
   
   ## body:
   if(parms$meth_sel$MI_PCA == TRUE){
@@ -39,21 +36,6 @@ impute_PCA <- function(Z, O, cond, DA = FALSE, parms = parms){
       
       # Separate variables target of imputation from auxiliary variables 
       target <- which(colnames(Z) %in% parms$z_m_id)
-      
-      # Generate DA version of Z_aux if required
-      if(DA == TRUE){
-      print("PCA Impute: Data Augmenting")
-        # Create an augmented Z dataset (inlcuding ALL interaction)
-        print("PCA Impute: Creating Two Way Interactions")
-        twoWays <- computeInteract(scale(Z,
-                                         center = parms$int_cen,
-                                         scale  = FALSE),
-                                   idVars = colnames(Z),
-                                   ordVars = NULL,
-                                   nomVars = NULL,
-                                   moderators = colnames(Z))
-        Z_aux <- cbind(Z, twoWays)
-      }
       
       if(sum(is.na(Z_aux[, -target])) > 0){
         # Fill in cases when ZDA has missing values
