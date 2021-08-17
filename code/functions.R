@@ -135,66 +135,6 @@ withErrorTracing = function(expr, silentSuccess=FALSE) {
   if (vexpr$visible) vexpr$value else invisible(vexpr$value)
 }
 
-# Defining columns based on condition
-indexing_columns <- function(Xy_input, cond){
-  
-  if(cond$int_sub == FALSE & cond$int_da == FALSE){
-    CIDX_all <- colnames(Xy_input)[!grepl("\\.", 
-                                          colnames(Xy_input))]
-    CIDX_MOP <- colnames(Xy_input)[!grepl("\\.", 
-                                         colnames(Xy_input))]
-    lm_mod   <- parms$frm
-  }
-  
-  if(cond$int_sub == TRUE & cond$int_da == FALSE){
-    CIDX_all <- colnames(Xy_input)[!grepl("\\.", 
-                                          colnames(Xy_input))]
-    CIDX_MOP <- c(colnames(Xy_input)[!grepl("\\.", 
-                                           colnames(Xy_input))],
-                  "z1.z2")
-    lm_mod   <- parms$frm_int
-  }
-  
-  if(cond$int_sub == FALSE & cond$int_da == TRUE){
-    CIDX_all <- colnames(Xy_input)
-    CIDX_MOP <- colnames(Xy_input)[!grepl("\\.", 
-                                         colnames(Xy_input))]
-    lm_mod <- parms$frm
-  }
-  
-  if(cond$int_sub == TRUE & cond$int_da == TRUE){
-    CIDX_all <- colnames(Xy_input)
-    CIDX_MOP <- c(colnames(Xy_input)[!grepl("\\.", 
-                                           colnames(Xy_input))],
-                  "z1.z2")
-    lm_mod   <- parms$frm_int
-  }
-  
-  return(list(CIDX     = CIDX_all,
-              CIDX_MOP = CIDX_MOP,
-              lm_mod   = lm_mod))
-  
-}
-
-# Function to add interaction term post imputation
-# this way I can have only one lm modle specifcation for the
-# itneraction term
-add_int_term <- function(x, parms){
-  # x <- imp_DURR_la$dats$'1'
-  int_name <- paste0(parms$zInt_id, collapse = ".")
-  if(!int_name %in% colnames(x)){
-    int <- apply(scale(x[, parms$zInt_id],
-                         center = parms$int_cen, 
-                         scale = FALSE),
-                   1, prod)
-    out <- data.frame(cbind(x, int))
-    colnames(out)[colnames(out) == "int"] <- int_name
-  } else {
-    out <- x
-  }
-  return(out)
-}
-
 # Estimation --------------------------------------------------------------
 
 rr_est_lasso <- function(X, y, parms, fam="gaussian"){
@@ -824,28 +764,6 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
 
 # Estimate regression coefficeints
 
-# fit_lm_models <- function(multi_dt, vrbs){
-#   ## Description:
-#   # Given a list of complete datasets it fits a linear model
-#   # to obtain standardized regression coefficients (all vairables 
-#   # are centered and standardized)
-#   ## Example internals
-#   # multi_dt <- imp_DURR_la$dats
-#   # vrbs <- parms$lm_model
-#   if(!is.null(multi_dt)){
-#   mod <- paste0(vrbs[1], 
-#             " ~ - 1 + ", 
-#             paste0(vrbs[-1], collapse = " + ")
-#   )
-#     models <- lapply(X = multi_dt,
-#                      FUN = function(x) lm(mod, 
-#                                           data = as.data.frame( scale(x) )
-#                                           )
-#                      )
-#   } else {models = NULL}
-#   return(models)
-# }
-
 fit_lm_models <- function(multi_dt, mod){
   ## Description:
   # Given a list of complete datasets it fits a linear model
@@ -1167,7 +1085,6 @@ bbootstrap <- function(x) { # Bayesian Bootstrap
   return(bbsample)
 }
 
-## NEW VERSIONS 
 fit_sem <- function(multi_dt, model, std.lv=FALSE){
   # Given a list of complete datasets it fits a model described
   # in mod
@@ -1304,95 +1221,6 @@ check_cover <- function(x){ # 1 is the same value for all parameters
   # the interval
   return(x[, 1] < 1 & x[, 2] > 1)
 }
-
-# extract_results <- function(cond_name, output, dt_rep){
-#   # Example input
-#   # cond_name <- names(out[[1]])[1]
-#   # output <- out
-#   # dt_rep = out[[1]]$cond_200_4$parms$dt_rep
-#   
-#   # Bias
-#   store_sum <- vector("list", dt_rep)
-#   
-#   for (i in 1:dt_rep) {
-#     store_sum[[i]] <- output[[i]][[cond_name]]$cond_bias
-#   }
-#   
-#   bias_out <- round(Reduce("+", store_sum)/dt_rep, 3)
-#   # bias_b1 <- as.data.frame(t(bias_out))[2] # only interested in b1
-#   bias <- as.data.frame(t(bias_out))#[1:4]
-#   
-#   # Average Coverage
-#   store_sum <- vector("list", dt_rep)
-#   
-#   for (i in 1:dt_rep) {
-#     store_sum[[i]] <- output[[i]][[cond_name]]$cond_CIco
-#   }
-#   
-#   CI_out <- Reduce("+", store_sum)/dt_rep
-#     rownames(CI_out) <- rownames(bias_out)
-#   # CI_b1 <- as.data.frame(t(CI_out))[2]
-#   CI <- as.data.frame(t(CI_out))#[1:4]
-#   
-#   # resu <- cbind(bias_b1, CI_b1)
-#   # colnames(resu) <- c("bias", "ci")
-#   resu <- list(bias = bias, 
-#                CI = round(CI, 3))
-#   return(resu)
-# }
-
-# mean_traceplot <- function(out, 
-#                            dat = 1, # which data repetition should I show?
-#                            method = "blasso", # same name as in parms
-#                            y_center = FALSE,
-#                            y_range = c(0, 10),
-#                            iters = 1:5){
-#   ## Internals
-#   # out = out_cnv
-#   # dat = 7
-#   # iters = 1:50
-#   # y_center = TRUE
-#   # y_range = c(1, 1)
-#   # method = out_cnv$parms$method[1]
-# 
-#   ## Description
-#   # It prints the traceplots for the mean imputed values in each iteration
-#   # in different chains, by variable, one dataset, one imputation method
-#   # Display in same pane
-#   par(mfrow = c(3, ceiling(out$parms$zm_n/3)))
-#   
-#   # Plot
-#   # Are imputations of mids class?
-#   if(class(out[[dat]][[1]]$imp_values[[method]]) == "mids"){
-#     plot(out[[dat]][[1]]$imp_values[[method]])
-#   } else {
-#     for (v in 1:length(out$parms$z_m_id)) {
-#       # CHAIN 1
-#       # Mean imputed value across individuals in each iteration
-#       mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[1]][[v]][iters, ])
-#       
-#       # Modify display option based on preference
-#       ifelse(y_center == TRUE, 
-#              y_range_T <- c(mean(mean_imp) - y_range[1], 
-#                             mean(mean_imp) + y_range[2]),
-#              y_range_T <- y_range)
-#       
-#       # Plot chain 1
-#       plot(iters, mean_imp, type = "l",
-#          main = method,
-#          ylim = y_range_T,
-#          ylab = out$parms$z_m_id[v], # old paste0("z", v)
-#          xlab = "Iteration",
-#          lwd  = 1)
-#       
-#       # Plot chain 2 to m 
-#       for (i in 2:(out$parms$chains)) {
-#         mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[i]][[v]][iters, ])
-#         lines(iters, mean_imp, col = i+1, lwd  = 1)
-#       }
-#     }
-#   }
-# }
  
 # Rhat convergence checks 
 Rhat.sim <- function(out, cond = 1, meth, dat, iter_max = NULL, iter_burn){
@@ -1446,7 +1274,6 @@ res_sem_time <- function(out, condition = 1){
   return( round(colMeans(res_time), 3) )
 }
 
-# ####### #
 # Euclidean Distance overall
 res_ed_overall <- function(out, condition){
 # condition = 1
@@ -1546,8 +1373,8 @@ res_ed_overall <- function(out, condition){
               ed_ci = data.frame(t(ed_ci)))
   )
 }
-# ####### #
 
+# Where should this function be loaceted?
 res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   # model = "sem"
   # model = "semR"
@@ -2196,19 +2023,6 @@ plot_fg <- function(dt,
   return(p)
 }
 
-# ggsave(file  = "~/Desktop/exp1_bias.pdf",
-#        width = 15, height = 15/4*3,
-#        units = "cm",
-#        p)
-# 
-# mydata = data.frame(q = seq(.25, .65, by=.05), response = rnorm(9))
-# ggplot(mydata, aes(y=response,x=q)) +
-#   geom_line(aes(y=response))  +
-#   scale_x_continuous(breaks=seq(.25, .65, .05), 
-#                      labels=sub("^(-?)0.", "\\1.", 
-#                                 sprintf("%.2f", seq(.25, .65, .05)))
-#                      )
-
 # Custom plot_gg function for experiment 4
 plot_exp4 <- function(dt, 
                       dt_CIW = NULL,
@@ -2392,202 +2206,6 @@ plot_exp4 <- function(dt,
                size = .375,
                linetype = "dashed", 
                color = "black")
-  p
-  return(p)
-}
-
-plot_exp4_coef <- function(dt, 
-                           dt_reps = 500,
-                           ci_lvl = .95,
-                           type = "ci", 
-                           plot_cond = NULL,
-                           plot_name = NULL,
-                           bar_col = "#595959",
-                           meth_compare,
-                           meth_sort = FALSE) {
-  
-  # Function Inputs
-  ## New Input
-  # dt = lapply(1:length(res$m1),
-  #                  function(x) res$m1[[x]]$bias_per)
-  # dt = lapply(1:length(res$m2),
-  #             function(x) res$m2[[x]]$bias_per)
-  # # CI Par interest
-  # dt = list(lapply(1:length(res$m1),
-  #                  function(x) res$m1[[x]]$ci_cov["rel", ]),
-  #           lapply(1:length(res$m2),
-  #                  function(x) res$m2[[x]]$ci_cov["NatAt", ]))
-  # # Mean CIW
-  # dt = list(lapply(1:length(res$m1),
-  #                  function(x) data.frame(t(colMeans(res$m1[[x]]$CIW)))),
-  #           lapply(1:length(res$m2),
-  #                  function(x) data.frame(t(colMeans(res$m2[[x]]$CIW)))))
-  # # ED
-  # dt = list(lapply(1:length(res$m1),
-  #                  function(x) res$m1[[x]]$ed_est),
-  #           lapply(1:length(res$m2),
-  #                  function(x) res$m2[[x]]$ed_est))
-  # # CIED
-  # dt = list(lapply(1:length(res$m1),
-  #                  function(x) res$m1[[x]]$ed_ci),
-  #           lapply(1:length(res$m2),
-  #                  function(x) res$m2[[x]]$ed_ci))
-  ## Generic inputs
-  # dt_reps = 500
-  # ci_lvl = .95
-  # type = c("bias", "ci", "ciw", "ed")[3]
-  # dt_CIW = NULL
-  # plot_name = "Untitled"
-  # plot_cond = "(empty)"
-  # meth_compare = c("DURR_la", "IURR_la", "blasso",
-  #                  "MI_PCA", "MI_OP", "CC")
-  # meth_sort = FALSE
-  # bar_col = "#595959"
-  
-  # Put data in the correct form
-  dt_edit <- lapply(dt, function(x){
-    as.data.frame(t(abs(x[, meth_compare])))  
-  })
-  
-  # Reduce to single list
-  # dt_edit <- Reduce(c, dt_edit)
-  
-  # # Add Blank Row to improve readability
-  # dt_edit <- lapply(dt_edit, function(x){
-  #   x[nrow(x)+1,] <- -5  # add blank row to improve visualization
-  #   return(x)
-  # })
-  
-  # Get Dimensions
-  dt_dims <- lapply(dt_edit, dim)
-  
-  # Gather data within list
-  dt_edit <- lapply(dt_edit, gather)
-  
-  # Define Plotting Factors
-  dt_edit <- lapply(1:2, function(x){
-    # Conditins
-    dt_edit[[x]]$cond <- rep(c(1,2)[x], 
-        each = prod(dt_dims[[x]]))
-    # Model
-    dt_edit[[x]]$model <- rep(c(1,1)[x], 
-                             each = prod(dt_dims[[x]]))
-    # Methods
-    dt_edit[[x]]$meth <- factor(meth_compare, levels = meth_compare)
-    return(dt_edit[[x]])
-  })
-  
-  # Shape for ggplot
-  dt_edit <- lapply(dt_edit, function(x){
-    x$id <- 1:nrow(x)
-    return(x)
-  })
-  
-  # Count internal rows
-  n <- sapply(dt_edit, nrow)
-  
-  # Combine for facet
-  dt_edit <- do.call(rbind, dt_edit)
-  
-  # Plot step for labels
-  plot_step <- n[[1]]/(nrow(dt[[1]]))/2
-  plot_xbreaks <- seq(0, n[[1]], by = plot_step)[c(FALSE, TRUE)]
-  plot_xlabels <- unique(dt_edit$key)
-  plot_vlines <- seq(0, n[[1]], by = plot_step)[c(TRUE, FALSE)] + .5
-  
-  # Define Factor 1 for plot
-  n_conds <- length(dt[[1]])
-  
-  # Summary specific
-  if(type == "bias"){
-    plot_ylim   <- c(0, 50)
-    dt_edit$value[dt_edit$value > plot_ylim[2]] <- plot_ylim[2] + 1.5
-    plot_ybreaks <- c(0, 10, 20, 30, 40, 50)
-    plot_ylabels <- as.character(plot_ybreaks)
-    plot_hlines <- 10
-  }
-  
-  if(type == "ci"){
-    dt_edit$value <- dt_edit$value - 95    # Transform to a difference value
-    plot_xlim   <- c(-5, 5)                # Plot Limits (reference: 0 = .95)
-    SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps) # SE for threshold 
-    low_thr <- ((.95-SEp*2)-.95)*100
-    hig_thr <- ((.95+SEp*2)-.95)*100
-    plot_breaks <-  c(-5, low_thr, 0, hig_thr, 5)
-    # plot_labels <- gsub("0", "", as.character(round((plot_breaks+95)/100, 2)))
-    plot_labels <- as.character(round((plot_breaks+95)/100, 2))
-    plot_hlines <- 1:length(meth_compare)
-    plot_vlines <- c(-5, low_thr, hig_thr)
-  }
-  
-  if(type == "ed"){
-    plot_xlim   <- c(0, round_any(max(dt_edit[dt_edit$key != "bridge", "value"]),  
-                                  0.1, 
-                                  f = ceiling)
-    )
-    plot_breaks <- round_any(seq(plot_xlim[1], plot_xlim[2], 
-                                 length.out = 3), 0.1, f = ceiling)
-    plot_breaks <- round(seq(plot_xlim[1], plot_xlim[2], length.out = 3), 
-                         1)
-    plot_labels <- gsub("0.", ".", plot_breaks)
-    # if("GS" %in% dt_edit$key) {
-    #   plot_vlines <- dt_edit[dt_edit$key=="GS", "value"]
-    # } else {
-    plot_vlines <- NULL
-    # }
-    plot_hlines <- NULL
-  }
-  
-  if(type == "ciw"){
-    ref_max <- max(dt_edit[dt_edit$key == "CC", "value"])
-    ref_min <- min(dt_edit[dt_edit$key == "missFor", "value"])
-    plot_xlim   <- c(0, (ref_max*1.5))
-    plot_breaks <- c(0, ref_min, ref_max, ref_max*1.5)
-    plot_labels <- as.character(round(plot_breaks, 2))
-    plot_hlines <- 1:length(meth_compare)
-    plot_vlines <- NULL
-  }
-
-  # Plot
-  p <- ggplot(dt_edit, aes(x = id, y = value, group = meth)) +
-    coord_cartesian(ylim = plot_ylim) + 
-    geom_point(aes(shape = meth),
-               position = position_dodge(width=1)) + 
-    # scale_shape_manual(values=c(1:(length(meth_compare)+1))) +
-    # scale_shape_manual(values=c(1:length(meth_compare) )) +
-    # Faceting
-    facet_grid(rows = vars(model),
-               cols = vars(cond),
-               scales = "free") +
-    # X Axis
-    scale_x_continuous(breaks = plot_xbreaks,
-                       labels = plot_xlabels) +
-    geom_vline(xintercept = plot_vlines,
-               size = .375,
-               linetype = "dashed", 
-               color = "black") +
-    # Y Axis
-    scale_y_continuous(breaks = plot_ybreaks,
-                       labels = plot_ylabels) + 
-    # Horizontal lines
-    geom_hline(yintercept = plot_hlines, 
-               size = .25,
-               color = "gray") +
-    # Cosmetic
-    labs(title = element_blank(),
-         x     = element_blank(), 
-         y     = element_blank()) + 
-    theme(axis.text.x  = element_text(size = 5),
-          axis.text.y  = element_text(size = 5),
-          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
-          # Background
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          # Facet Related
-          strip.text = element_text(size = 8,
-                                    face = "plain",
-                                    margin = unit(c(.10, .10, .10, .10), "cm")) 
-    )
   p
   return(p)
 }
