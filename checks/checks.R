@@ -5,7 +5,6 @@
 rm(list=ls())
 source("./init_general.R")
 source("./exp2_init.R")
-source("./init_exp3.R")
 
 # SEM Model convergence ---------------------------------------------------
 
