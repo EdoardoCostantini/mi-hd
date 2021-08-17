@@ -30,6 +30,11 @@ We used R for these simulations.
 
 ### Simulation Study: data from a multivariate normal distribution
 1. Installing Dependencies:
+   1. Open the script [init_general.R](./code/init_general.R) and install the
+      packages with the traditional `install.packages()` function.
+   2. Install the package `PcAux` using `devtools::install_github("PcAux")`
+   3. Install the package `blasso` by downloading a compatible version of the package
+      from the [package author's website](https://www.asc.ohio-state.edu/hans.11/software/blasso/)  
 2. Running the simulation:
    1. Open the script [exp1_simulation_script_win.R](./code/exp1_simulation_script_win.R)
    2. Make sure the working directory is set to the location of this script (`./code/`)
