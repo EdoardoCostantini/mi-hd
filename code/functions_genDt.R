@@ -215,3 +215,17 @@ imposeMiss_evs <- function(dat_in, parms, cond){
   # Result
   return( dat_out )
 }
+
+# Function to fix factors in the EVS population generation procedure
+fix.factor <- function(v, dt_h, dt_imp){
+  if(is.factor(dt_imp[[v]])){
+    original <- data.frame(value = dt_imp[[v]])
+    key <- data.frame(value = val_labels(dt_h[[v]]),
+                      label = names(val_labels(dt_h[[v]])),
+                      row.names = NULL)
+    v.out <- factor(plyr::join(original, key)[, 2])
+  } else {
+    v.out <- dt_imp[[v]]
+  }
+  return(v.out)
+}

@@ -2,6 +2,7 @@
 ### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
 ### Created:  2020-07-01
+### Modified: 2021-08-17
 
 # Packages ----------------------------------------------------------------
 
@@ -18,7 +19,6 @@ pack_list <- c("tidyverse",
                "lavaan",
                "FactoMineR",
                "devtools",
-               "xtable",
                "rstan",
                "gridExtra",
                "grid",
@@ -45,4 +45,3 @@ source("./fun_missFor_impute.R")
 source("./functions_genDt.R")
 source("./subroutines.R")
 source("./simMissingness.R")
-source("./functions_EVS.R")

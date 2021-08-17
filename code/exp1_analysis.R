@@ -9,7 +9,7 @@
   source("./init_general.R")
   
 # Read results from the combined results
-  res <- exp1_res <- readRDS("../output/exp1_simOut_2020121516_res.rds")
+  res <- readRDS("../output/exp1_simOut_2020121516_res.rds")
   
 # Plot Sizes Decisions
 

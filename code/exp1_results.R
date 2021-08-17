@@ -3,7 +3,6 @@
 ### Created:  2020-05-19
 
   rm(list = ls())
-  library(xtable)
   source("./init_general.R")
 
 ## Single Run

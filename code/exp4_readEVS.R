@@ -1,6 +1,7 @@
 ### Title:    Reading EVS data for resampoling experiment
 ### Author:   Edoardo Costantini
 ### Created:  2020-06-22
+### Modified: 2021-08-17
   
   rm(list=ls())
   library(foreign) # to import .dta data
@@ -9,14 +10,12 @@
   library(dplyr)
   library(forcats) # for fct_collapse() function to recode factors
   
-  source("./functions_EVS.R")
+  source("./functions_genDt.R")
 
 # Read Data ---------------------------------------------------------------
 
-  file_loc <- "/Users/Work/Data/EVS2017/data/"
+  file_loc <- "/Users/Work/data/" # where you store the Gesis Data
   file_int <- "ZA7500_v3-0-0" # integrated data
-  file_mat <- "ZA7502_v1-0-0" # matrix desing version
-  miss_tag <- "_missing.txt"
   
   # Read Integrated data
   int.dt <- haven::read_dta(paste0(file_loc, file_int, ".dta"))
@@ -24,24 +23,25 @@
 
   int.df <- as.data.frame(int.dt)
   int.df$country_org <- int.df$country #original country variable
-  # int.df$country <- factor(int.df[, "country"],
-  #                          levels = val_labels(int.df[, "country"]),
-  #                          labels = names(val_labels(int.df[, "country"])))
   length(val_labels(int.df$country))
 
-# Decisions ---------------------------------------------------------------
+# Subset data -------------------------------------------------------------
   
-  # Subset data
-  subsample <- c(1, 4)
-  # countries  <- c("France", "Germany", "Italy", "Netherlands")
-  countries  <- c(France = 250, Germany = 276, Italy = 380, Netherlands = 528)
+  # only certain modes and countries
+  subsample <- c(1, 4) # 1 = CAPI PAPI CATI; 4 = CAWI Mail
+  countries  <- c(France = 250,
+                  Germany = 276,
+                  Italy = 380,
+                  Netherlands = 528)
   
   int.df <- int.df %>%
     filter(mm_select_sample %in% subsample) %>%
     filter(country %in% countries)
-  colnames(int.df)
-  # Variables Selection
+
+  # define id name
   id  <- "id_cocas"
+
+  # Variable types
   ord <- paste0("v", c(1:8, 32:39, 46:50, 53:54, 63:70, 72:84,
                        97:107, 115:168, 170:172, 176:203, 205:224, 
                        240, 242, 267:274, 280, 
@@ -53,10 +53,10 @@
                        108:111, 113:114, 234, 244, 238,
                        264, 265, 266, "276_r")) 
   
-  # I will make sure the following variables are excluded
-  excl <- c("v27", # not really a variable in the 
-            # countries we are investigating (98% of responses 
-            # was same category)
+  # Make sure the following columns are excluded
+  excl <- c("v27",  # not really a variable in the
+                    # countries we are investigating (98% of responses
+                    # was same category)
             "v239a", "v239b",
             # Gated
             "v53", "v247", "v248", "v252_ISCED_1", "v170",
@@ -69,9 +69,7 @@
             # mother related question to discard after use
             "v232", "v233b", "v233b_r"
   )
-  
-# Prepare Variables -------------------------------------------------------
-  
+
 # Political Parties
   pol <- c("v175_LR", "v174_LR")
   
@@ -106,7 +104,6 @@
   
 # Sex
   sex <- "v225"
-  # int.df$v225 <- recode(int.df$v225, "2" = 0)
   
 # Union Membership
   um <- "v11"
@@ -122,27 +119,25 @@
   re_cb <- case_when(re_alter == "not applicable" ~ re_intw, # country of birth
                      re_alter != "not applicable" ~ re_alter)
   
-  
   # Father's country
     fa_alter <- ISO3116$name[match(int.df[, "v231b_r"], ISO3116$code)]
+                  # Respondent born in country of interview -> keep that value
     fa_cb    <- case_when(int.df[, "v230"] == 1 ~ re_intw,
+                          # Respondent born in other country -> check
                           int.df[, "v230"] == 2 ~ fa_alter)
     # Add to dataset
     int.df$fa_cb <- fa_cb
     
-    father_index <- c("fa_cb")
-    
   # Mother's country
     ma_alter <- ISO3116$name[match(int.df[, "v233b_r"], ISO3116$code)]
-                        # Respondent born in country of interview -> keep that value
+                  # Respondent born in country of interview -> keep that value
     ma_cb <- case_when(int.df[, "v232"] == 1 ~ re_intw,
-                        # REspondent born in other country -> check 
+                       # Respondent born in other country -> check
                        int.df[, "v232"] == 2 ~ ma_alter)
     # Add to dataset
     int.df$ma_cb <- ma_cb
 
 # Define Vector of variable names
-  # Prepare vector of column names to keep
   var_indx <- unique(c(id,
                        "country", 
                        gtools::mixedsort(c(ord, dic, nom, pol, age, mart, 
@@ -151,10 +146,8 @@
                        "ma_cb", "fa_cb"))
   
   var_vec <- var_indx[!var_indx %in% excl]
-  
-# Get desired data --------------------------------------------------------
 
-  # Perform Variable Selection
+  # Perform subsetting
   EVS2017 <- dplyr::select(int.df, var_vec)
   dim(EVS2017)
   
@@ -179,10 +172,13 @@
     lab_index <- 
       val_labels(EVS2017[, v]) %in% NA_map$codes & 
       names(val_labels(EVS2017[, v])) %in% NA_map$type
-    EVS2017[, v][EVS2017[, v] == val_labels(EVS2017[, v])[lab_index]] <- NA
+    if(any(lab_index)){
+      lab_NA_value <- val_labels(EVS2017[, v])[lab_index]
+      EVS2017[, v][EVS2017[, v] == lab_NA_value] <- NA
+    }
   }
   
-  # Assign NA to all coded as missings
+  # Assign NA to all coded as missings (negative values)
   col_indx <- var_vec[!var_vec %in% c("fa_cb", "ma_cb", "country")]
   EVS2017[, col_indx][EVS2017[, col_indx] < 0] <- NA
   
@@ -208,63 +204,53 @@
   # Make ID column as row name
   EVS2017_cl <- data.frame(EVS2017_cl, row.names = 1)[, -c(249, 250)]
   sapply(EVS2017_cl, class)
-  
-  # Imputation with PMM
+
+# Impute to obtain pseudo population --------------------------------------
+  # variablewise missing counts/proportions:
   N <- nrow(EVS2017_cl)
   missPat <- mice::md.pattern(EVS2017_cl, plot = FALSE)
-  
-  ## variablewise missing counts/proportions:
-  missPat[nrow(missPat), ]
-  
-  missPat[nrow(missPat), -ncol(missPat)]
-  percent_m <- round(missPat[nrow(missPat), -ncol(missPat)]/N, 3)
-  percent_m["v276_r"]
+  pm <- round(missPat[nrow(missPat), -ncol(missPat)]/N, 3)
+  pm["v276_r"]
   predMat <- quickpred(EVS2017_cl, mincor = .3)
-  
+
   # Check out which variables are used for which imputation models
   store <- data.frame(imp = rep(NA, ncol(predMat)),
                       pred = rep(NA, ncol(predMat)))
-  
+
   for (v in 1:ncol(predMat)) {
     store[v, ] <- c(rownames(predMat)[v],
                     paste0(names(which(predMat[v, ] != 0)), collapse = ", "))
   }
-  
-  # Perform Convergence check
+  store
+
+  # Imputation with PMM
   mids_pmm <- mice::mice(EVS2017_cl,
                          m = 5, maxit = 200,
                          predictorMatrix = predMat,
                          method = "pmm")
-  saveRDS(mids_pmm, "../convergence/exp4_ccheck_mids_pmm.rds")
 
+  # Perform Convergence check
   var_target <- names(which(missPat[nrow(missPat), ] != 0))
   plot(mids_pmm, y = var_target[var_target %in% var_vec[1:20]])
-  
-  # Final Version
-  # mids_final <- mice::mice(EVS2017_cl, 
-  #                          m = 1, maxit = 1e2, # NEED TO RUN SERIOUSLY
-  #                          predictorMatrix = predMat,
-  #                          method = "pmm")
-  # mids_final$loggedEvents
-  # EVS2017_psuedo <- complete(mids_final)
-  
-  # or simply save 1 dataset from the 5 you have in the mids_pmm output
-  mids_pmm <- readRDS("../convergence/exp4_ccheck_mids_pmm.rds")
+
+  # If convergence is reached, save first dataset from the PMM
+  # run described above
   EVS2017_psuedo <- complete(mids_pmm, action = 1)
   
-## Fix factors ------------------------------------------------------------- ##
-  
+# Fix factors -------------------------------------------------------------
+
+EVS2017_psuedo$v264
+EVS2017$v264
+EVS2017_final$v264
   EVS2017_final <- sapply(colnames(EVS2017_psuedo), 
-                          fix.factor, 
+                          fix.factor,
                           dt_h = EVS2017,
                           dt_imp = EVS2017_psuedo,
                           simplify = FALSE,
                           USE.NAMES = TRUE)
   EVS2017_final <- do.call(data.frame, EVS2017_final)
   
-## Fix Low variance variables ---------------------------------------------- ##
-  # EVS2017_cl <- readRDS("../data/exp4_EVS2017_full.rds")$orig
-  # EVS2017_final <- readRDS("../data/exp4_EVS2017_full.rds")$full
+# Fix Low variance variables ----------------------------------------------
 
   # Generate model matrix
   mm <- model.matrix(~., EVS2017_final)[, -1]
@@ -301,7 +287,7 @@
   EVS2017_final <- EVS2017_final[ , !colnames(EVS2017_final) %in% bin.disc] # get rid of
   
   ## Deal w/ categorical "non-variables"
-  # Dummies for unpopular categories need to be dealt on a case by case basis
+  # Combine unpopular categories on a case by case basis
   
   # Religiosity
     round(prop.table(table(EVS2017_final$v51v52_comb)), 3)
@@ -375,8 +361,6 @@
     prop.table(table(v246))*100
     EVS2017_final$v246_egp <- v246
     
-    dim(EVS2017_final)
-    
 # Save Results of cleaning and imputation ---------------------------------
     
   out <- list(orig = EVS2017_cl,
@@ -389,48 +373,3 @@
               )
   
   saveRDS(out, "../data/exp4_EVS2017_full.rds")
-  
-# Prepare Pattern For Missing Data ----------------------------------------
-# According to Matrix Desing
-  
-  rm(list=ls())
-  source("./init_general.R")
-  source("./exp4_init.R")
-  
-  # Load Data Variables
-  data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
-  
-  # Clean Variable Names
-  EVS_vars <- gsub("_(.*)", "", colnames(data_source))
-
-  # Load Variable-Block legend
-  X <- read.csv("~/Data/EVS2017/documents/ZA7500_vars_blcok_membership.csv",
-                header = TRUE)
-  class(X) # check type
-  
-  # Clean Block names
-  X$Variable <- tolower(trimws(as.character(X$Variable)))
-  
-  # Obtain Variables Block Classification
-  var_class <- filter(X, Variable %in% EVS_vars)
-  extra <- data.frame(Variable = EVS_vars[!EVS_vars %in% X$Variable],
-                      Block = c("Core","Core","Core","Core","Core"))
-  var_class_f <- rbind(var_class, extra)
-  
-  # Check for duplicates
-  n_occur <- data.frame(table(var_class_f$Variable))
-  n_occur[n_occur$Freq > 1,]
-  var_class_f <- var_class_f[-(which(var_class_f$Variable=="v242"))[1], ]
-    # drop after checking that it's a different formulation of same question
-  
-  # Order levels and drop unused levels
-  var_class_f$Block <- factor(var_class_f$Block, 
-                              levels = c("Core", "A", "B", "C", "D"))
-  
-  # Verify proportions
-  table(var_class_f$Block)
-  
-  # Store results
-  saveRDS(var_class_f, "../data/exp4_EVS2017_md.rds")
-
-  
