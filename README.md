@@ -1,7 +1,7 @@
 # imputeHD-comp
 Repository hosting project high-dimensional imputation comparison.
 
-## Summary
+# Summary
 Including a large number of predictors in the imputation model underlying a 
 Multiple Imputation (MI) procedure is one of the most challenging tasks 
 imputers face.
@@ -21,6 +21,17 @@ analysis models.
 We find that using regularized regression to select the predictors used in the
 MI model, and using principal component analysis to reduce the dimensionality 
 of auxiliary data produce the best results.
+
+# Contents
+This directory contains the following main subfolders:
+- code: the main software to run the study
+- output: the folder where the results of scripts located in code are stored
+- data: where the EVS data should be store after cleaning
+- convergence: contains scripts to perform convergence checks
+- crossvalidate: contains scripts to perform cross-validation of the ridge penalty for
+  one of the methods used in the study (bridge)
+- checks: contains scripts checking expected behaviour of different functions
+   and set-ups
 
 # How to replicate results
 
