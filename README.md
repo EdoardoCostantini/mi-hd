@@ -55,8 +55,8 @@ We used R for these simulations.
 
 ### EVS resampling study
 1. Installing Dependencies: same as above
-2. Preparing the EVS population data:
-   1. Download the appropriate EVS wave
+2. Preparing the EVS population data: 
+   1. Download the EVS 2017 Third pre-release [https://doi.org/10.4232/1.13511](https://doi.org/10.4232/1.13511)
    2. Store it in the data folder inside this project (at the same level as the code 
       folder)
    3. Run the script [exp4_readEVS.R](./code/exp4_readEVS.R) 
