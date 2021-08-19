@@ -9,19 +9,16 @@
   source("./init_general.R")
   
   # Read results from a run of simulation study
-  # exp2_res <- readRDS("../output/exp2_simOut_20200812_1449_res.rds") # way out
-  
-  filename <- "exp2_simOut_20201116_1743" # short run with scaslde items
-  filename <- "exp2_simOut_20201117_1125" # short run with scaslde items
-  filename <- "exp2_simOut_20200819_1743" # last good one
+  # filename <- "exp2_simOut_20201116_1743" # short run with scaslde items
+  # filename <- "exp2_simOut_20201117_1125" # short run with scaslde items
+  # filename <- "exp2_simOut_20200819_1743" # last good one
 
-  # LVs as MAR (Joined file form two sources)
-  filename <- "exp2_simOut_2020122417" # christmas 1e3 LVs as MAR predictors
-  exp2_res <- readRDS(paste0("../output/", filename, "_res.rds"))
-  res <- exp2_res
+  # LVs as MAR (Joined file form two sources) 1e3 reps
+  filename <- "exp2_simOut_2020122417"
+  res <- readRDS(paste0("../output/", filename, "_res.rds"))
 
-  # Items as MAR
-  filename <- "exp2_simOut_20210728_1351_res" # Items as MAR predictors (1e3)
+  # Items as MAR 1e3 reps
+  filename <- "exp2_simOut_20210728_1351_res"
   res <- readRDS(paste0("../output/", filename, ".rds"))
 
   # Plot Sizes Decisions
@@ -32,9 +29,8 @@
   
 # Conds
   res$conds
+
   # Full information names
-  # cond_parms <- paste0("l = ",  res$conds$lv, ", ",
-  #                      "pm = ",  res$conds$pm)
   cond_parms <- paste0("l = ",  res$conds$lv, ", ",
                        "pm = ",  res$conds$pm, "\n",
                        "\u03bb = ", c(rep("(0.9, 0.97)", 4),
