@@ -10,7 +10,11 @@
   
 # Read results from the combined results
   res <- readRDS("../output/exp1_simOut_2020121516_res.rds")
-  
+
+  # Change names of methods if required
+  levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")
+  levels(res$methods) <- str_replace(levels(res$methods), "bridge", "BRidge")
+
 # Plot Sizes Decisions
 
   gp_width <- 15
@@ -39,7 +43,7 @@
   vline_vanBuu <- 90
 
   # Bias
-  x <- 1
+  x <- 1 # bias
   methods_sel <- levels(output_sem$methods)[1:9]
   pm_grep <- "0.3"
 
@@ -97,7 +101,7 @@
            pf)
 
   # Confidence Interval
-  x <- 2
+  x <- 2 # Confidence intervals
   methods_sel <- levels(output_sem$methods)#[-8]
 
   # SE for threshold
