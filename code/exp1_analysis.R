@@ -15,6 +15,9 @@
   levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")
   levels(res$methods) <- str_replace(levels(res$methods), "bridge", "BRidge")
 
+# Which plot to plot
+  pm_grep <- c("0.1", "0.3")[2]
+
 # Plot Sizes Decisions
 
   gp_width <- 15
@@ -45,7 +48,6 @@
   # Bias
   x <- 1 # bias
   methods_sel <- levels(output_sem$methods)[1:9]
-  pm_grep <- "0.3"
 
   pf <- output_sem %>%
     filter(analysis == unique(analysis)[x],
