@@ -2211,12 +2211,11 @@ plot_exp4 <- function(dt,
 }
 
 plot_exp4_meth <- function(dt,
-                    type = "bias",
-                    dt_reps = 500,
-                    ci_lvl = .95,
-                    focal = "", # name of prameter to highlight
-                    small.ef = "",
-                    meth_compare) {
+                           type = "bias",
+                           dt_reps = 500,
+                           ci_lvl = .95,
+                           focal = "", # name of prameter to highlight
+                           meth_compare) {
   ## Function inputs
   ## Generic
   # type = "bias"
@@ -2280,18 +2279,18 @@ plot_exp4_meth <- function(dt,
   # Put them in groups by condition
   dt_edit <- lapply(dt_edit, function(x){do.call(rbind, x)})
   
-  # Count contents
-  n <- lapply(dt_preEdit, function(x){nrow(x)+1}) # +1 to improve spacing
-  
   dt_edit <- lapply(dt_edit, function(x){
     x$id <- 1:nrow(x)
     return(x)
   })
-  n_facet <- length(dt_edit)
   
   # Combine for facet in one list
   dt_edit <- do.call(rbind, dt_edit)
-  
+
+  # Change Methods labels
+  dt_edit$key <- str_replace(dt_edit$key, "blasso", "BLasso")
+  dt_edit$key <- str_replace(dt_edit$key, "bridge", "BRidge")
+
   # Define Step Size for all parameters sets
   step_size   <- (
     nrow(dt_preEdit[[1]]) + # number of parameters
