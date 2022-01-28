@@ -84,10 +84,10 @@ impute_PCA <- function(Z, O, cond, parms = parms){
         ## Compute and store the cumulative proportion of variance explained by
         ## the component scores:
         rSquared <- cumsum(pcaOut$sdev^2) / sum(pcaOut$sdev^2)
-        
+
         ## Extract the principal component scores:
         Z_pca <- pcaOut$x[, rSquared <= parms$PCA_pcthresh]
-        
+
       }
       
       ## Define Imputation methods

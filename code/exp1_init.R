@@ -92,14 +92,15 @@
   
   
 # Generic
-  parms$meth_sel <- data.frame(DURR_la    = TRUE,
-                               IURR_la    = TRUE,
-                               blasso     = TRUE,
-                               bridge     = TRUE,
-                               MI_PCA     = TRUE,
-                               MI_CART    = TRUE,
-                               MI_RF      = TRUE,
+  parms$meth_sel <- data.frame(DURR_la    = FALSE,
+                               IURR_la    = FALSE,
+                               blasso     = FALSE,
+                               bridge     = FALSE,
+                               MI_PCA     = FALSE,
+                               MI_CART    = FALSE,
+                               MI_RF      = FALSE,
                                MI_qp      = TRUE,
+                               MI_am      = TRUE,
                                MI_OP      = TRUE,
                                missFor    = TRUE,
                                mean       = TRUE,
