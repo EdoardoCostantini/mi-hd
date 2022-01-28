@@ -1431,13 +1431,13 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
                      apply(store, 1, var))
   }
   colnames(par_avg) <- colnames(par_var) <- out$parms$methods
-  
+
   # Store Objects
   avg <- par_avg
-  avg <- data.frame(avg[, colSums(is.nan(avg)) == 0])
-    # get rid of NaNs that come up in exp3 for conditions that are not using 
-    # certain methods
   validReps  <- avg["rep", ] # number of successes
+  avg <- data.frame(avg[, colSums(is.nan(avg)) == 0])
+    # get rid of NaNs that come up in exp3 for conditions that are not using
+    # certain methods
   avg        <- avg[-which(rownames(avg) == "rep"), ]
   psd_tr_vec <- avg[, "GS"] # pseudo true values
   
