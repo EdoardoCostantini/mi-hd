@@ -99,6 +99,7 @@
                                MI_PCA     = TRUE,
                                MI_CART    = TRUE,
                                MI_RF      = TRUE,
+                               MI_qp      = TRUE,
                                MI_OP      = TRUE,
                                missFor    = TRUE,
                                mean       = TRUE,

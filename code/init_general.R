@@ -2,7 +2,7 @@
 ### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
 ### Created:  2020-07-01
-### Modified: 2021-08-17
+### Modified: 2022-01-28
 
 # Packages ----------------------------------------------------------------
 
@@ -38,6 +38,7 @@ source("./fun_IURR_impute.R")
 source("./fun_blasso_impute.R")
 source("./fun_bridge_impute.R")
 source("./fun_PCA_impute.R")
+source("./fun_MICE_qp.R")
 source("./fun_MICE_TR_impute.R")
 source("./fun_RANF_impute.R")
 source("./fun_CART_impute.R")

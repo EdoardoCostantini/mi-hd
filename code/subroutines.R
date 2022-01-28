@@ -248,6 +248,11 @@ runCell <- function(cond, parms, rep_status) {
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
 
+  # MICE w/ quickpred
+  imp_qp <- impute_MICE_qp(Z = Xy_mis,
+                           perform = parms$meth_sel$MI_qp,
+                           parms = parms)
+
   # MICE w/ true model
   imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
                                 O = O,
@@ -275,6 +280,7 @@ runCell <- function(cond, parms, rep_status) {
                      MI_PCA  = imp_PCA$mids,
                      MI_CART = imp_CART$imps,
                      MI_RF   = imp_RANF$imps,
+                     MI_qp   = imp_qp$imps,
                      MI_OP   = imp_MICE_OP$mids) # I need this for convergence
   
   ## Analyse --------------------------------------------------------------- ##
@@ -291,6 +297,7 @@ runCell <- function(cond, parms, rep_status) {
                           MI_PCA  = imp_PCA$dats,
                           MI_CART = imp_CART$dats,
                           MI_RF   = imp_RANF$dats,
+                          MI_QP   = imp_qp$dats,
                           MI_OP   = imp_MICE_OP$dats), 
                      fit_sat_model)
   
@@ -312,6 +319,7 @@ runCell <- function(cond, parms, rep_status) {
                          MI_PCA  = imp_PCA$dats,
                          MI_CART = imp_CART$dats,
                          MI_RF   = imp_RANF$dats,
+                         MI_QP   = imp_qp$dats,
                          MI_OP   = imp_MICE_OP$dats), 
                     fit_lm_models, mod = parms$lm_model)
   
@@ -366,6 +374,7 @@ runCell <- function(cond, parms, rep_status) {
                    MI_PCA  = imp_PCA$time,
                    MI_CART = imp_CART$time,
                    MI_RF   = imp_RANF$time,
+                   MI_QP   = imp_qp$time,
                    MI_OP   = imp_MICE_OP$time)
   imp_time <- do.call(cbind, imp_time)[1,]
   
