@@ -37,11 +37,56 @@
   out$conds <- out_pt1$conds
   out$parms$dt_rep <- dt_reps_true
   
-  
+
   # append info from single runs
   out$info <- list(out_pt1 = out_pt1[c(501:length(out_pt1))],
                    out_pt2 = out_pt2[c(501:length(out_pt2))])
-  
+
+# Join additional methods not considered before
+
+# Define file names for the new file to join to the old
+nw_filename <- "exp4_simOut_20220131_1501" # new rds filename
+filename <- nw_filename
+
+# Read it in of them in R
+nw_out <- readRDS(paste0("../output/", nw_filename, ".rds"))
+
+# Extract the meta data from both
+meta <- list(og_out = tail(out, 3),
+             nw_out = tail(nw_out, 3))
+
+# Get rid of the meta data
+og_out <- out[1:5] # temporary mod
+nw_out <- nw_out[1:nw_out$parms$dt_rep]
+
+# Append new methods as columns to each repetition and condition --------
+
+for(i in 1:length(og_out)){ # for every repetition
+  for(j in 1:length(og_out[[i]])){ # for every condition
+    for(h in 2:length(og_out[[i]][[j]])){
+      multi_dim <- length(dim(og_out[[i]][[j]][[h]])) == 2
+      if(multi_dim){
+        colnames1 <- colnames(og_out[[i]][[j]][[h]])
+        colnames2 <- colnames(nw_out[[i]][[j]][[h]])
+        colindex <- !colnames2 %in% colnames1
+        og_out[[i]][[j]][[h]] <- cbind(og_out[[i]][[j]][[h]],
+                                       nw_out[[i]][[j]][[h]][, colindex,
+                                                               drop = FALSE])
+      } else {
+        names1 <- names(og_out[[i]][[j]][[h]])
+        names2 <- names(nw_out[[i]][[j]][[h]])
+        namesindex <- !names2 %in% names1
+        og_out[[i]][[j]][[h]] <- c(og_out[[i]][[j]][[h]],
+                                   nw_out[[i]][[j]][[h]][namesindex])
+      }
+    }
+  }
+}
+
+out <- og_out
+out <- append(out, meta$nw_out)
+out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$methods))
+
 # Time Analyses -----------------------------------------------------------
 
   out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
