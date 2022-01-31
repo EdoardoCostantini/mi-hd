@@ -3,7 +3,8 @@
 ### Author:   Edoardo Costantini
 ### Created:  2022-01-28
 
-impute_MICE_cp <- function(Z, preds = c(), perform = TRUE, parms = parms){
+impute_MICE_cp <- function(Z, preds = c(), perform = TRUE, parms = parms,
+                           ridge = 0, eps = 0, threshold = 1){
   
   ## Input: 
   # @Z: dataset w/ missing values
@@ -42,12 +43,12 @@ impute_MICE_cp <- function(Z, preds = c(), perform = TRUE, parms = parms){
                                 m = parms$mice_ndt,
                                 maxit = parms$mice_iters,
                                 printFlag = FALSE,
-                                ridge = 0,
-                                eps = 0,
-                                threshold = 1,
+                                ridge = ridge,
+                                eps = eps,
+                                threshold = threshold,
                                 method = methods)
     end.time <- Sys.time()
-    
+
     # Store results
     imp_MIcp_dats <- mice::complete(imp_MIcp_mids, "all")
     imp_MIcp_imps <- imp_MIcp_mids$imp

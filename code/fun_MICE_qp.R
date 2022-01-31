@@ -3,7 +3,8 @@
 ### Author:   Edoardo Costantini
 ### Created:  2022-01-28
 
-impute_MICE_qp <- function(Z, perform = TRUE, parms = parms){
+impute_MICE_qp <- function(Z, perform = TRUE, parms = parms,
+                           ridge = 0, eps = 0, threshold = 1){
   
   ## Input: 
   # @Z: dataset w/ missing values
@@ -11,9 +12,6 @@ impute_MICE_qp <- function(Z, perform = TRUE, parms = parms){
   
   ## Example inputs
   # Z = Xy_mis # or
-  # Z = Xy_MIOP[, CIDX_MOP]
-  # O <- as.data.frame(!is.na(Z))            # matrix index of observed values
-  # cond = conds[2,]
   # parms = parms
   
   ## output: 
@@ -42,9 +40,9 @@ impute_MICE_qp <- function(Z, perform = TRUE, parms = parms){
                                 m = parms$mice_ndt,
                                 maxit = parms$mice_iters,
                                 printFlag = FALSE,
-                                ridge = 0,
-                                eps = 0,
-                                threshold = 1,
+                                ridge = ridge,
+                                eps = eps,
+                                threshold = threshold,
                                 method = methods)
     end.time <- Sys.time()
     

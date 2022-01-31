@@ -1,7 +1,7 @@
-### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-05-19
-### Modified: 2021-08-17
+# Title:    Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-05-19
+# Modified: 2022-01-31
 
 # Functions ---------------------------------------------------------------
 
@@ -250,12 +250,14 @@ runCell <- function(cond, parms, rep_status) {
   # MICE w/ quickpred
   imp_qp <- impute_MICE_qp(Z = Xy_mis,
                            perform = parms$meth_sel$MI_qp,
+                           ridge = 1e-5, eps = 1e-04, threshold = .999,
                            parms = parms)
 
   # MICE w/ analysis model only
   imp_MICE_am <- impute_MICE_cp(Z = Xy_mis,
                                 preds = parms$z_m_id,
                                 perform = parms$meth_sel$MI_am,
+                                ridge = 1e-5, eps = 1e-04, threshold = .999,
                                 parms = parms)
 
   # MICE w/ true model
