@@ -1,7 +1,8 @@
-### Title:    helper functions
-### Porject:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-05-19
+# Title:    helper functions
+# Porject:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-05-19
+# Modified: 2022-01-31
 
 # generic functions -------------------------------------------------------
 
@@ -2731,13 +2732,19 @@ plotwise <- function(res,
   # Isolate parameters and methods for comparison
   dt_bias <- lapply(parPlot, function(x){
     lapply(dt_bias, function(d){
-      d[x, meth_compare]
+      # Check which of the desired methods are here
+      colIndex <- colnames(d) %in% meth_compare
+      # Select the corresponding columns
+      d[x, colIndex]
     })
   })
 
   dt_cico <- lapply(parPlot, function(x){
     lapply(dt_cico, function(d){
-      d[x, meth_compare]
+      # Check which of the desired methods are here
+      colIndex <- colnames(d) %in% meth_compare
+      # Select the corresponding columns
+      d[x, colIndex]
     })
   })
 

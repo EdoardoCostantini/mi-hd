@@ -1,15 +1,17 @@
-### Title:    Analysis of results
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-07-09
-### Notes:    reads output form results.R script and shows the numbers that
-###           are used to draw the conclusions.
+# Title:    Analysis of results
+# Project:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-07-09
+# Modified: 2022-01-31
+# Notes:    reads output form results.R script and shows the numbers that
+#           are used to draw the conclusions.
 
   rm(list = ls())
   source("./init_general.R")
   
 # Read results from the combined results
-  res <- readRDS("../output/exp1_simOut_2020121516_res.rds")
+  res <- readRDS("../output/exp1_simOut_2020121516_res.rds") # original results
+  res <- readRDS("../output/exp1_simOut_20220128_1635_joined_20201130_1006_res.rds") # results with MI_qp and MI_am
 
   # Change names of methods if required
   levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")
@@ -47,7 +49,7 @@
 
   # Bias
   x <- 1 # bias
-  methods_sel <- levels(output_sem$methods)[1:9]
+  methods_sel <- levels(output_sem$methods)[c(1:9, 11:12)]
 
   pf <- output_sem %>%
     filter(analysis == unique(analysis)[x],

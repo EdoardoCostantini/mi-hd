@@ -1,6 +1,8 @@
-### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-05-19
+# Title:    Putting result object together
+# Project:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-05-19
+# Modified: 2022-01-31
 
   rm(list = ls())
   source("./init_general.R")
@@ -44,7 +46,7 @@
 
 # Define file names for the two files to join
 og_filename <- "exp1_simOut_20201130_1006" # original rds filename
-nw_filename <- "exp1_simOut_20220128_1446" # new rds filename
+nw_filename <- "exp1_simOut_20220128_1635" # new rds filename
 
 # Read both of them in R
 og_out <- readRDS(paste0("../output/", og_filename, ".rds"))
@@ -55,7 +57,7 @@ meta <- list(og_out = tail(og_out, 3),
              nw_out = tail(nw_out, 3))
 
 # Get rid of the meta data
-og_out <- og_out[1:5] # temporary mod
+og_out <- og_out[1:og_out$parms$dt_rep] # temporary mod
 nw_out <- nw_out[1:nw_out$parms$dt_rep]
 
 # Append new methods as columns to each repetition and condition --------
@@ -139,9 +141,10 @@ out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$metho
                          meth_compare = c("DURR_la","IURR_la", "blasso", "bridge",
                                           "MI_PCA", "MI_CART" ,"MI_RF",
                                           "MI_OP",
-                                          "CC", "GS"))
+                                          "CC", "GS", "MI_qp", "MI_am"))
 
   # Save
+  filename <- paste0("exp1_simOut_20220128_1635_", "joined_", "20201130_1006")
   saveRDS(
     gg_out_sem,
     paste0("../output/", filename, "_res.rds")
