@@ -752,7 +752,7 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   # according to selected methods
   ## For internals
   # set.seed(1234)
-  # cond <- conds[2, ]
+  # cond <- conds[1, ]
   # data_source <- readRDS("../data/exp4_EVS2017_full.rds")$full
   
   ## Data ------------------------------------------------------------------ ##
@@ -819,7 +819,22 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                           cond = cond,
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
-  
+
+  # MICE w/ quickpred
+  imp_qp <- impute_MICE_qp(Z = Xy_mis,
+                           perform = parms$meth_sel$MI_qp,
+                           ridge = 1e-5, eps = 1e-04, threshold = .999,
+                           # mice defaults!
+                           parms = parms)
+
+  # MICE w/ analysis model only
+  imp_MICE_am <- impute_MICE_cp(Z = Xy_mis,
+                                preds = parms$am_vars,
+                                ridge = 1e-5, eps = 1e-04, threshold = .999,
+                                # mice defaults!
+                                perform = parms$meth_sel$MI_am,
+                                parms = parms)
+
   # MICE w/ true model
   imp_MICE_OP <- impute_MICE_OP(Z = Xy_mis,
                                 O = data.frame(!is.na(Xy_mis)),
@@ -839,7 +854,7 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   }
   
 ## Convergence ------------------------------------------------------------- ##
-  
+
   imp_values <- list(DURR_la    = imp_DURR_la$imps,
                      IURR_la    = imp_IURR_la$imps,
                      blasso     = imp_blasso$imps,
@@ -847,7 +862,9 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                      MI_PCA     = imp_PCA$mids,
                      MI_CART    = imp_CART$imps,
                      MI_RF      = imp_RANF$imps,
-                     MI_OP      = imp_MICE_OP$mids) 
+                     MI_qp      = imp_qp$imps,
+                     MI_am      = imp_MICE_am$imps,
+                     MI_OP      = imp_MICE_OP$mids)
 
 ## Analyse ----------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
@@ -861,6 +878,8 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                   MI_PCA     = imp_PCA$dats,
                   MI_CART    = imp_CART$dats,
                   MI_RF      = imp_RANF$dats,
+                  MI_qp      = imp_qp$dats,
+                  MI_am      = imp_MICE_am$dats,
                   MI_OP      = imp_MICE_OP$dats)
   
   si_data <- list(missFor = imp_missFor$dats,
@@ -873,11 +892,11 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
   # model 1
   m1_mi <- lapply(mi_data, exp4_fit_mod1)
   m1_sn <- exp4_fit_mod1(si_data)
-  
+
   # Model 2
   m2_mi <- lapply(mi_data, exp4_fit_mod2)
   m2_sn <- exp4_fit_mod2(si_data)
-  
+
 ## Pool MI paramters ------------------------------------------------------- ##
   
   # Model 1
@@ -950,6 +969,8 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                    MI_PCA     = imp_PCA$time,
                    MI_CART    = imp_CART$time,
                    MI_RF      = imp_RANF$time,
+                   MI_qp      = imp_qp$time,
+                   MI_am      = imp_MICE_am$time,
                    MI_OP      = imp_MICE_OP$time)
   imp_time <- do.call(cbind, imp_time)[1,]
   

@@ -81,13 +81,15 @@
 
 # Imputation methods ------------------------------------------------------
   parms$alphaCI <- .95 # confidence level for parameters CI
-  parms$meth_sel <- data.frame(DURR_la    = TRUE,
-                               IURR_la    = TRUE,
-                               blasso     = TRUE,
-                               bridge     = TRUE,
-                               MI_PCA     = TRUE,
-                               MI_CART    = TRUE,
-                               MI_RF      = TRUE,
+  parms$meth_sel <- data.frame(DURR_la    = FALSE,
+                               IURR_la    = FALSE,
+                               blasso     = FALSE,
+                               bridge     = FALSE,
+                               MI_PCA     = FALSE,
+                               MI_CART    = FALSE,
+                               MI_RF      = FALSE,
+                               MI_qp      = TRUE,
+                               MI_am      = TRUE,
                                MI_OP      = TRUE,
                                missFor    = TRUE,
                                mean       = TRUE,
@@ -127,6 +129,29 @@
                    paste0("v", c(31, 126, 120:121, 127, 131, 225, 6,
                                  145, 110, 97:101, 234, 54)),
                    "v51v52_comb", "v246_egp", "v276_r")
+
+  # Analysis model variables
+  parms$am_vars <- c("v156", # attitudes toward euthanasia
+                     "v31", # General Trust
+                     "v126", # Confidence in Health care sys
+                     "v118", # Confidence in press
+                     c("v121", "v120", "v127", "v131"), # items for confidence in state scale
+                     "v174_LR", # Left / Right voting
+                     "country", # Country
+                     "v225", # binary gender
+                     "v246_egp", # socio economic status
+                     c("v185", "v186", "v187"), # items making up Native attitudes
+                     "v145", # attitude toward strong leaders
+                     "v110", # attitude toward "order" in law and order
+                     "v97", # Political Interest
+                     paste0("v", 98:101), # items for politicla action scale
+                     "age", # age
+                     "v243_ISCED_1", # education
+                     "v234", # marital status
+                     "v276_r", # urb
+                     "v6", # Religiousness
+                     "v51v52_comb"  # Denomination
+  )
 
 # Simulation desing -------------------------------------------------------
   # Replicability
