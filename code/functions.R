@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-01-31
+# Modified: 2022-02-04
 
 # generic functions -------------------------------------------------------
 
@@ -1263,16 +1263,27 @@ Rhat.sim <- function(out, cond = 1, meth, dat, iter_max = NULL, iter_burn){
   return(Rhat.sim.out)
 }
 
-res_sem_time <- function(out, condition = 1){
-  # Sem Model
+res_sem_time <- function(out,
+                         n_reps = 10,
+                         methods = c("DURR_la", "IURR_la"),
+                         condition = 1){
+  # Define what condition we are working with
   select_cond <- names(out[[1]])[condition]
-  
-  # Time
-  res_time <- NULL
-  for (i in 1:out$parms$dt_rep) {
-    res_time <- rbind(res_time, out[[i]][[select_cond]]$run_time_min)
+
+  # Define the stoirng object
+  n_methods <- length(methods)
+  res_time <- matrix(rep(NA, n_reps * n_methods),
+                     nrow = n_reps,
+                     ncol = n_methods,
+                     dimnames = list(NULL, methods))
+
+  # Cycle through the n_reps to store the time it took
+  for (i in 1:n_reps) {
+    run_time_ith <- out[[i]][[select_cond]]$run_time_min
+    success_methods <- colnames(res_time) %in% names(run_time_ith)
+    res_time[i, success_methods] <- run_time_ith
   }
-  return( round(colMeans(res_time), 3) )
+  return( round(colMeans(res_time, na.rm = TRUE), 3) )
 }
 
 # Euclidean Distance overall
@@ -2263,8 +2274,8 @@ plot_exp4_meth <- function(dt,
     
     # Extract Results for a method
     output_2 <- lapply(1:ncol(x), function(l){
-      par_names <- rownames(x[l])[order(x[l], decreasing = TRUE)]
-      par_value <- x[l][order(x[l], decreasing = TRUE), ]
+      par_names <- rownames(x[l])[order(x[[l]], decreasing = TRUE)]
+      par_value <- x[l][order(x[[l]], decreasing = TRUE), ]
 
       # Compose output for method
       output_1 <- data.frame(key = methods[l], # method

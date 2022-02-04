@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-01-31
+# Modified: 2022-02-04
 
   rm(list = ls())
   source("./init_general.R")
@@ -46,7 +46,7 @@
 
 # Define file names for the two files to join
 og_filename <- "exp1_simOut_20201130_1006" # original rds filename
-nw_filename <- "exp1_simOut_20220128_1635" # new rds filename
+nw_filename <- "exp1_simOut_20220201_1749" # new rds filename
 
 # Read both of them in R
 og_out <- readRDS(paste0("../output/", og_filename, ".rds"))
@@ -90,7 +90,13 @@ out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$metho
 
 # Time Analyses -----------------------------------------------------------
 
-  out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
+  out_time <- sapply(1:nrow(out$conds),
+                     res_sem_time,
+                     out = out,
+                     n_reps = out$parms$dt_rep,
+                     methods = out$parms$methods[c(1:8, 13:14)]
+  )
+
   colnames(out_time) <- names(out[[1]])
   t(out_time)
   
