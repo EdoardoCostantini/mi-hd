@@ -2,6 +2,7 @@
 ### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
+### Modified: 2022-02-14
 
 impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE, robust = TRUE){
   
@@ -101,13 +102,13 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE, robust = TRUE){
             # Obtain Post Draw
             pdraw <- .norm.draw(y       = target, 
                                 ry      = rj,
-                                x       = Zx,
+                                x       = cbind(1, Zx),
                                 ls.meth = "ridge", 
                                 ridge   = ridge_p)
-            
+
             # Obtain posterior predictive draws
-            pdraw_zj_imp <- Z_mis %*% pdraw$beta + rnorm(sum(!rj)) * pdraw$sigma
-            
+            pdraw_zj_imp <- cbind(1, Z_mis) %*% pdraw$beta + rnorm(sum(!rj)) * pdraw$sigma
+
             # Append imputation (for next iteration)
             Zm[!rj, J] <- pdraw_zj_imp
             
