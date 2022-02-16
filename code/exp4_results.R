@@ -1,19 +1,22 @@
-### Title:    Results for experiment 4
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-10-05
+# Title:    Results for experiment 4
+# Project:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-10-05
+# Modified: 2022-02-16
 
   rm(list = ls())
   source("./init_general.R")
   
-# Analysis single result
-  filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
-  filename <- "exp4_simOut_20201207_1134" # same seed as 20201204_2121, but next 500 samples
-  
-  # Read R object
-  out <- readRDS(paste0("../output/", filename, ".rds"))
+# Single Run -------------------------------------------------------------------
 
-## Join multiple results
+  # filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
+  # filename <- "exp4_simOut_20201207_1134" # same seed as 20201204_2121, but next 500 samples
+  #
+  # # Read R object
+  # out <- readRDS(paste0("../output/", filename, ".rds"))
+
+# Join additional repetitions multiple results ---------------------------------
+
   filename1 <- "exp4_simOut_20201204_2121"
   filename2 <- "exp4_simOut_20201207_1134"
   filename <- "exp4_simOut_2020120704" # to save the output
@@ -42,10 +45,10 @@
   out$info <- list(out_pt1 = out_pt1[c(501:length(out_pt1))],
                    out_pt2 = out_pt2[c(501:length(out_pt2))])
 
-# Join additional methods not considered before
+# Join additional methods not considered before --------------------------------
 
 # Define file names for the new file to join to the old
-nw_filename <- "exp4_simOut_20220131_1501" # new rds filename
+nw_filename <- "exp4_simOut_20220131_1603" # new rds filename
 filename <- nw_filename
 
 # Read it in of them in R
@@ -56,10 +59,10 @@ meta <- list(og_out = tail(out, 3),
              nw_out = tail(nw_out, 3))
 
 # Get rid of the meta data
-og_out <- out[1:5] # temporary mod
+og_out <- out[1:out$parms$dt_rep] # temporary mod
 nw_out <- nw_out[1:nw_out$parms$dt_rep]
 
-# Append new methods as columns to each repetition and condition --------
+# Append new methods as columns to each repetition and condition
 
 for(i in 1:length(og_out)){ # for every repetition
   for(j in 1:length(og_out[[i]])){ # for every condition
@@ -87,12 +90,111 @@ out <- og_out
 out <- append(out, meta$nw_out)
 out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$methods))
 
+# Replace results of a method that was re-run ----------------------------------
+
+# Load results
+rp_filename <- "exp4_simOut_20220215_1009"
+rp_out <- readRDS(paste0("../output/", rp_filename, ".rds"))
+
+# Extract the meta data from both
+meta <- list(bs_out = tail(out, 3), # base file
+             rp_out = tail(rp_out, 3)) # replacing file
+
+# Get rid of the meta data
+bs_out <- out[1:out$parms$dt_rep] # temporary mod
+rp_out <- rp_out[1:rp_out$parms$dt_rep]
+
+# Original order of methods
+mt_order <- colnames(bs_out[[1]]$cond_50_FALSE_0.1$sem_EST)
+mt_order_mitime <- names(bs_out[[1]]$cond_50_FALSE_0.1$run_time_min)
+
+# Append new methods as columns to each repetition and condition --------
+rp_method <- c("bridge")
+
+for(i in 1:length(bs_out)){ # for every repetition
+  # i <- 1
+  for(j in 1:length(bs_out[[i]])){ # for every condition
+    # j <- 1
+    for(h in 2:length(bs_out[[i]][[j]])){ # for every object stored (excpet condition label)
+      # h <- 6
+      print(paste0("i = ", i, "; j = ", j, "; h = ", h))
+      multi_dim <- length(dim(bs_out[[i]][[j]][[h]])) == 2
+      if(multi_dim){
+        # Check method was succesful
+        bs_success <- rp_method %in% colnames(bs_out[[i]][[j]][[h]])
+        rp_success <- rp_method %in% colnames(rp_out[[i]][[j]][[h]])
+        if(bs_success & rp_success){
+          # Check method was successful in run
+          bs_out[[i]][[j]][[h]][, rp_method] <-
+            rp_out[[i]][[j]][[h]][, rp_method]
+        }
+        if(!bs_success & rp_success){
+          print(paste0("i = ", i, "; j = ", j, "; h = ", h))
+          # Append column
+          bs_out[[i]][[j]][[h]] <- cbind(bs_out[[i]][[j]][[h]],
+                                         rp_out[[i]][[j]][[h]][, rp_method, drop = FALSE])
+          # Put in original order
+          bs_out[[i]][[j]][[h]] <- bs_out[[i]][[j]][[h]][, mt_order]
+        }
+        if(bs_success & !rp_success){
+          colindex <- !colnames(bs_out[[i]][[j]][[h]]) %in% rp_method
+          bs_out[[i]][[j]][[h]] <- bs_out[[i]][[j]][[h]][, colindex]
+        }
+        if(!bs_success & !rp_success){
+          next
+        }
+      } else {
+        # Check method was succesful
+        bs_success <- rp_method %in% names(bs_out[[i]][[j]][[h]])
+        rp_success <- rp_method %in% names(rp_out[[i]][[j]][[h]])
+        if(bs_success & rp_success){
+          # Replcae column
+          bs_out[[i]][[j]][[h]][rp_method] <-
+            rp_out[[i]][[j]][[h]][rp_method]
+        }
+        if(!bs_success & rp_success){
+          print(paste0("i = ", i, "; j = ", j, "; h = ", h))
+          # Append value
+          bs_out[[i]][[j]][[h]] <- c(bs_out[[i]][[j]][[h]],
+                                     rp_out[[i]][[j]][[h]][rp_method])
+          # Put in original order
+          bs_out[[i]][[j]][[h]] <- bs_out[[i]][[j]][[h]][mt_order_mitime]
+        }
+        if(bs_success & !rp_success){
+          # Get rid of column
+          index <- !names(bs_out[[i]][[j]][[h]]) %in% rp_method
+          bs_out[[i]][[j]][[h]] <- bs_out[[i]][[j]][[h]][index]
+        }
+        if(!bs_success & !rp_success){
+          next
+        }
+      }
+    }
+  }
+}
+
+# Check it worked
+id <- sample(1:1e3, 1)
+cbind(og = out[[id]]$`cond_1000_1e-04`$m2_EST[, "bridge"],
+      bs = bs_out[[id]]$`cond_1000_1e-04`$m2_EST[, "bridge"],
+      rp = rp_out[[id]]$`cond_1000_1e-04`$m2_EST[, "bridge"])
+
+# Fix meta data
+out <- bs_out
+out <- append(out, meta$rp_out)
+out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$methods))
+
+
 # Time Analyses -----------------------------------------------------------
 
-  out_time <- sapply(1:length(names(out[[1]])), res_sem_time, out = out)
+  out_time <- sapply(1:nrow(out$conds),
+                     res_sem_time,
+                     out = out,
+                     n_reps = out$parms$dt_rep,
+                     methods = out$parms$methods[c(1:8, 13:14)]
+  )
   colnames(out_time) <- names(out[[1]])
   t(out_time)
-  # The warnings are failed convergence methods
   
   # Catch weird runs
   condition <- 2
@@ -168,5 +270,5 @@ out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$metho
   
   saveRDS(
     output, 
-    paste0("../output/", filename, "_res.rds")
+    paste0("../output/", "exp4_simOut_20220215_1009", "_res.rds")
   )

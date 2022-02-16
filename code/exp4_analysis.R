@@ -18,6 +18,8 @@
   filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
   filename <- "exp4_simOut_20201207_1134" # same seed as 20201204_2121, but next 500 samples
   filename <- "exp4_simOut_2020120704" # joined 20201204_2121 and 20201207_1134
+  filename <- "exp4_simOut_20220131_1603" # joined 20201204_2121 and 20201207_1134 + MI-qp and MI-am
+  filename <- "exp4_simOut_20220215_1009" # see readme for details
   
   # Read R object
   res <- readRDS(paste0("../output/", filename, "_res.rds"))
@@ -47,9 +49,9 @@
   
   # Confidence Intervals
   lapply(1:length(res$m1),
-         function(x) res$m1[[x]]$ci_cov[m1.indx, ])[[1]]
+         function(x) res$m1[[x]]$ci_cov["rel", ])[[1]]
   lapply(1:length(res$m2),
-         function(x) res$m2[[x]]$ci_cov[m2.indx, ])
+         function(x) res$m2[[x]]$ci_cov["NatAt", ])
 
 # Variable of interest ----------------------------------------------------
 
@@ -61,6 +63,8 @@
                 "MI_CART", "MI_RF", 
                 "missFor", 
                 "CC",
+                "MI_qp",
+                "MI_am",
                 "MI_OP"))
   pf <- plot_exp4(dt = list(lapply(1:length(res$m1),
                                    function(x) res$m1[[x]]$bias_per["rel", ]),
@@ -90,6 +94,8 @@
                 "MI_CART", "MI_RF", 
                 "missFor", 
                 "CC",
+                "MI_qp",
+                "MI_am",
                 "MI_OP",
                 "GS"))
   
@@ -120,6 +126,8 @@
                 "MI_CART", "MI_RF", 
                 "missFor", 
                 "CC",
+                "MI_qp",
+                "MI_am",
                 "MI_OP",
                 "GS"))
   
@@ -148,8 +156,10 @@
                 "blasso", "bridge",
                 "MI_PCA",
                 "MI_CART", "MI_RF",
-                "CC",
-                "MI_OP"))
+                "MI_qp",
+                "MI_am",
+                "MI_OP",
+                "CC"))
 
   # > Bias (Facet) ####
   pt1 <- plot_exp4_meth(dt = lapply(1:length(res$m1),
@@ -159,6 +169,7 @@
                         focal = "rel",
                         ci_lvl = .95,
                         meth_compare = meths)
+
   pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
                                     function(x) res$m2[[x]]$bias_per),
                         type = "bias",
@@ -185,9 +196,12 @@
                 "blasso", "bridge",
                 "MI_PCA",
                 "MI_CART", "MI_RF",
-                "CC",
+                "MI_qp",
+                "MI_am",
                 "MI_OP",
+                "CC",
                 "GS"))
+
   pt1 <- plot_exp4_meth(dt = lapply(1:length(res$m1),
                                     function(x) res$m1[[x]]$ci_cov),
                         type = "ci",
@@ -195,6 +209,7 @@
                         focal = "rel",
                         ci_lvl = .95,
                         meth_compare = meths)
+
   pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
                                     function(x) res$m2[[x]]$ci_cov),
                         type = "ci",
@@ -202,6 +217,7 @@
                         focal = "NatAt",
                         ci_lvl = .95,
                         meth_compare = meths)
+
   ggsave(pt1,
          file = "../output/graphs/exp4_imp_ci_allParms_m1.pdf",
          width = 15, height = 21,
@@ -217,13 +233,13 @@
   pt1 <- plot_exp4_meth(dt = lapply(1:length(res$m1),
                                     function(x) res$m1[[x]]$CIW),
                         type = "ciw",
-                        dt_reps = 500,
+                        dt_reps = 1e3,
                         ci_lvl = .95,
                         meth_compare = meths)
   pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
                                     function(x) res$m2[[x]]$CIW),
                         type = "ciw",
-                        dt_reps = 500,
+                        dt_reps = 1e3,
                         ci_lvl = .95,
                         meth_compare = meths)
   ggsave(pt1,
@@ -302,11 +318,6 @@
   rm(list = ls())
   source("./init_general.R")
   
-  # Result selection
-  filename <- "exp4_simOut_20201019_1344" # current one
-  filename <- "exp4_simOut_20201027_1610" # current one
-  filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
-  
   # Read R object
   res <- readRDS(paste0("../output/", filename, ".rds"))
 
@@ -315,7 +326,10 @@
   sp_height <- 4
   
   # Produce data for plot
-  out_time <- sapply(1:length(names(res[[1]])), res_sem_time, out = res)
+  out_time <- sapply(1:nrow(out$conds), res_sem_time,
+                     out = out,
+                     n_reps = out$parms$dt_rep,
+                     methods = out$parms$methods[c(1:8, 13, 14)])
   colnames(out_time) <- names(res[[1]])
   dt = t(out_time)
   

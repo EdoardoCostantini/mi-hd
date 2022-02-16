@@ -11,7 +11,8 @@
   
 # Read results from the combined results
   res <- readRDS("../output/exp1_simOut_2020121516_res.rds") # original results
-  res <- readRDS("../output/exp1_simOut_20220128_1635_joined_20201130_1006_res.rds") # results with MI_qp and MI_am
+  res <- readRDS("../output/exp1_simOut_20220201_1749_res.rds") # results with MI_qp and MI_am
+  res <- readRDS("../output/exp1_simOut_20220214_1418_res.rds") # results bridge w/ intercept
 
   # Change names of methods if required
   levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")
@@ -47,9 +48,13 @@
   vline_burton <- c(low_thr, hig_thr)
   vline_vanBuu <- 90
 
+  # Fix methods order
+  output_sem$methods <- factor(output_sem$methods,
+                               levels = levels(output_sem$methods)[c(1:7, 11:12, 8, 9, 10)])
+
   # Bias
   x <- 1 # bias
-  methods_sel <- levels(output_sem$methods)[c(1:9, 11:12)]
+  methods_sel <- levels(output_sem$methods)[1:11]
 
   pf <- output_sem %>%
     filter(analysis == unique(analysis)[x],
@@ -98,7 +103,7 @@
     pf
 
     plot_name <- paste0("../output/graphs/exp1_", "bias", "_",
-                        as.numeric(pm_grep)*100, ".pdf")
+                        as.numeric(pm_grep)*100, "revision.pdf")
     ggsave(file = plot_name,
            width = gp_width, height = gp_height*.65,
            units = "cm",
@@ -176,7 +181,7 @@
     pf
 
     plot_name <- paste0("../output/graphs/exp1_", "CI", "_",
-                        as.numeric(pm_grep)*100, ".pdf")
+                        as.numeric(pm_grep)*100, "revision.pdf")
     ggsave(file = plot_name,
            width = gp_width, height = gp_height*.65,
            units = "cm",
