@@ -2,19 +2,16 @@
 ### Project:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
 ### Created:  2020-05-19
-### Modified: 2022-02-14
+### Modified: 2022-02-22
 
 impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE, robust = TRUE){
   
   # Prep data ---------------------------------------------------------------
-  # Z = Xy_input[, col$CIDX]
-  # Z = Xy_mis
-  # Z = Xy_SI
-  # O = as.data.frame(!is.na(Z))            # matrix index of observed values
-  # ridge_p = cond$ridge
-  # robust = FALSE
+  # robust = TRUE
   # cc <- 1
-  
+  # m <- 2
+  # j <- 1
+
   if(perform == TRUE){
     
     tryCatch({
@@ -59,55 +56,63 @@ impute_BRIDGE <- function(Z, O, ridge_p, parms, perform = TRUE, robust = TRUE){
           for (j in 1:p_imp) {
             J <- which(colnames(Zm) %in% p_imp_id[j])
             rj <- !is.na(Z[, J])
+
+            # Define observed ys
             zj_obs <- Zm[rj, J]
-            zj_mis <- Zm[!rj, J]
-            
-            # PREP data for post draw
-            target   <- Zm[, p_imp_id[j]]
-            Zx       <- model.matrix(~ ., Zm[, -J])[, -1]
-            
-            # Clean data relative data to make it more solid
+
+            # Separate predictor from dependent variable
+            Zx <- Zm[, -J]
+
+            # Create model matrix (no inercept)
+            Zx <- model.matrix(~ ., Zx)[, -1]
+
+            # Clean data
             if(robust == TRUE){
-              # Find Constants
-              const <- names(which(apply(Zx, 2, var) == 0))
-              Zx    <- Zx[, !colnames(Zx) %in% const]
-              
               # Find Dummies that have 99% of objservations in 1 category
               tabular <- apply(Zx, 2, table)
-              
+
               # Select only dummies
               tabular <- tabular[sapply(tabular, length) == 2]
-              
+
               # Vector of dummy names to discard
               dum.disc <- lapply(tabular, function(x) {
                 x[1] / sum(x) > .95 | x[1] / sum(x) < 1-.95
               })
               dum.disc <- names(which(dum.disc == TRUE))
               Zx    <- Zx[, !colnames(Zx) %in% dum.disc]
-              
+
               # Find collinear variables
               coll.vars <- find.collinear(Zx)
               Zx  <- Zx[, !colnames(Zx) %in% coll.vars]
-              
-              # Fix Z_mis to drop columns that are not relevant anymore
-              Z_mis <- Zm[!rj, -J]
-              Z_mis <- model.matrix(~ ., Z_mis)[, -1]
-              Z_mis <- Z_mis[, !colnames(Z_mis) %in% c(const, dum.disc, coll.vars)]
-            } else {
-              # Define Z_mis
-              Z_mis <- Zm[!rj, -J]
-              Z_mis <- model.matrix(~ ., Z_mis)[, -1]
             }
 
-            # Obtain Post Draw
-            pdraw <- .norm.draw(y       = target, 
-                                ry      = rj,
-                                x       = cbind(1, Zx),
-                                ls.meth = "ridge", 
-                                ridge   = ridge_p)
+            # Center predictors (to avoid penalization of intercept)
+            Zx <- apply(Zx, 2, function (col) col - mean(col))
+
+            # Separate mis and obs parts of the data
+            Zx_obs <- Zx[rj, ] # X values for missing ys
+            Zx_mis <- Zx[!rj, ] # X values for missing ys
+
+            # Add contants for intercept
+            Zx_obs <- cbind(1, Zx_obs)
+            Zx_mis <- cbind(1, Zx_mis)
+
+            # Estimate values to define posterior distributions
+            df <- max(length(zj_obs) - ncol(Zx_obs), 1)
+            xtx <- crossprod(Zx_obs)        # get cross-product matrix
+            pen <- ridge_p * diag(xtx)      # define vector of penalties
+              pen[1] <- 0                   # make sure interecept is not penalized
+            v <- solve(xtx + diag(pen))     # obtain penalised solution
+            c <- t(zj_obs) %*% Zx_obs %*% v # obtain regression weights
+            r <- zj_obs - Zx_obs %*% t(c)   # define residuals
+
+            # Obtain posterior draws
+            sigma_star <- sqrt(sum((r)^2) / rchisq(1, df))
+            beta_star <- t(c) + (t(chol(v)) %*% rnorm(ncol(Zx_obs))) * sigma_star
+            pdraw <- list(coef = c, beta = beta_star, sigma = sigma_star)
 
             # Obtain posterior predictive draws
-            pdraw_zj_imp <- cbind(1, Z_mis) %*% pdraw$beta + rnorm(sum(!rj)) * pdraw$sigma
+            pdraw_zj_imp <- Zx_mis %*% pdraw$beta + rnorm(sum(!rj)) * pdraw$sigma
 
             # Append imputation (for next iteration)
             Zm[!rj, J] <- pdraw_zj_imp
