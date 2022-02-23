@@ -1,9 +1,8 @@
-### Title:    Simulation script for ridge paramter cross-validation
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-08-25
-### Notes:    The goal is to find out how many iterations should be used
-###           in the full study for each method.
+# Title:    Simulation script for ridge paramter cross-validation
+# Project:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-08-25
+# Modified: 2022-02-23
 
 rm(list = ls())
 source("./init_general.R")

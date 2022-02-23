@@ -1,7 +1,8 @@
-### Title:    Conergence Check Blasso
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-08-25
+# Title:    Simulation script for ridge paramter cross-validation
+# Project:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-08-25
+# Modified: 2022-02-23
 
 rm(list = ls())
 source("./init_general.R")
