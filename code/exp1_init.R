@@ -1,7 +1,8 @@
-### Title:    Initialization scirpt parameter
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-05-19
+# Title:    Initialization scirpt parameter
+# Project:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-05-19
+# Modified: 2022-02-23
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -170,7 +171,7 @@
   p   <- c(50, 500) # c(50, 500) # number of variables
   latent <- c(FALSE, TRUE)[1]
   pm <- c(.1, .3)
-  ridge <- c(1e-9, 1e-8, 1e-2, 1e-3) # values found w/ corssvalidation
+  ridge <- c(1e-1, 1e-6, 1e-5, 1e-4) # values found w/ corssvalidation
   
   conds <- expand.grid(p, latent, pm)
     colnames(conds) <- c("p", "latent", "pm")

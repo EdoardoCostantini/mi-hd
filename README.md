@@ -81,3 +81,41 @@ resampling study.
    is plotted by the script. For example, by changing `pm_grep <- "0.3"` to `0.1`
    you will be able to produce the plots for the smaller proportion of missing 
    cases.
+
+## Keeping track of the results
+
+Because it happens that after getting a review you need to add conditions, repetitions, or tweak other aspects of simulation studies, you need to be able to re-run only certain aspects of the study.
+This requires being able to stitch together parts of the results.
+Here, I want to keep track of which filenames are important for the results.
+
+### Simulation Study
+
+1. `exp1_simOut_20201130_1006.rds`
+   - 1e3 repetitions
+   - all the original methods (pre-SMR submission)
+2. `exp1_simOut_20220201_1749.rds`
+   - 1e3 repetitions
+   - only additional methods MI-qp and MI-am run as a result of the SMR review
+3. `exp1_simOut_20220201_1749_res.rds`
+   - outcome of the exp1_results.R script combining (1) and (2)
+4. `exp1_simOut_20220214_1418.rds`
+   - 1e3 repetitions
+   - re-run of bridge with correct intercept inclusion
+5. `exp1_cv_bridge_20220223_1029.rds` 
+   - contains the results for corssvalidation of bridge with the correct use of intercept
+6. `exp1_simOut_20220214_1418_res.rds`
+   - outcome of the exp1_results.R script combining (1), (2), and (4)
+
+### Resampling Study
+1. `exp4_simOut_20201204_2121.rds`
+   - first 500 repetitions
+2. `exp4_simOut_20201207_1134.rds`
+   - next 500 repetitions
+3. `exp4_simOut_20220131_1603.rds`
+   - 1e3 repetitions
+   - only additional methods MI-qp and MI-am run as a result of the SMR review
+4. `exp4_simOut_20220215_1009.rds`
+   - 1e3 repetitions
+   - re-run of bridge with correct intercept inclusion
+5. `exp4_simOut_20220215_1009_res.rds`
+   - outcome of the exp4_results.R script combining (1), (2), (3), and (4)
