@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-02-04
+# Modified: 2022-02-15
 
 # generic functions -------------------------------------------------------
 
@@ -154,7 +154,7 @@ rr_est_lasso <- function(X, y, parms, fam="gaussian"){
   # y = y_obs
   # parms = parms
   # fam = "gaussian"
-  
+
   cv_lasso <- cv.glmnet(X, y,
                         family = fam,
                         nfolds = 10,
@@ -422,6 +422,10 @@ imp_gaus_DURR <- function(model, X_tr, y_tr, X_te, parms){
   # y_tr <- train$medv
   #   cv <- cv.glmnet(X_tr, y_tr, alpha = 1) # cross validate lambda value
   # model <- glmnet(X_tr, y_tr, alpha = 1, lambda = cv$lambda.min)
+  # model = regu.mod
+  # X_tr = X_obs_bs
+  # y_tr = y_obs_bs
+  # X_te = X_mis
   
   ## Body ##
   s2hat   <- mean((predict(model, X_tr) - y_tr)**2) 
@@ -1279,9 +1283,8 @@ res_sem_time <- function(out,
 
   # Cycle through the n_reps to store the time it took
   for (i in 1:n_reps) {
-    run_time_ith <- out[[i]][[select_cond]]$run_time_min
-    success_methods <- colnames(res_time) %in% names(run_time_ith)
-    res_time[i, success_methods] <- run_time_ith
+    run_time_ith <- out[[i]][[select_cond]]$run_time_min[methods]
+    res_time[i, methods] <- run_time_ith
   }
   return( round(colMeans(res_time, na.rm = TRUE), 3) )
 }
@@ -1422,27 +1425,29 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
   
   par_avg <- NULL
   par_var <- NULL
-  for(m in out$parms$methods){
-    # m <- out$parms$methods[2]
+  for(M in 1:length(out$parms$methods)){
+    # M <- 4
+    m <- out$parms$methods[M]
     store <- NULL
     count <- 0
     for (i in 1:out$parms$dt_rep) {
       # i <- 1
       succ_method <- colnames(out[[i]][[select_cond]][[est]])
-      result <- as.matrix(out[[i]][[select_cond]][[est]])[, succ_method %in% m]
+      result <- as.matrix(out[[i]][[select_cond]][[est]])[, succ_method %in% m, drop = FALSE]
       if(any(is.na(result))) {
         count <- count+1
         next
       }
       store <- cbind(store, result)
     }
-    par_avg <- cbind(par_avg, 
-                     c(rowMeans(store, na.rm = TRUE), 
+    par_avg <- cbind(par_avg,
+                     c(rowMeans(store, na.rm = TRUE),
                        rep = ncol(store)))
-    par_var <- cbind(par_var, 
+    colnames(par_avg)[M] <- m
+    par_var <- cbind(par_var,
                      apply(store, 1, var))
+    colnames(par_var)[M] <- m
   }
-  colnames(par_avg) <- colnames(par_var) <- out$parms$methods
 
   # Store Objects
   avg <- par_avg
