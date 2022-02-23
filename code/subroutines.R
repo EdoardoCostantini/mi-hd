@@ -926,7 +926,7 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
     # preprocessing procedure does not do the trick, it is
     # automatically excluded by this if statement
     # I ideally this should be done in the result function not here!
-    m1_fmi <- .9999999
+    m1_fmi <- NA
   }
   
   # Model 2
@@ -956,7 +956,7 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
     # preprocessing procedure does not do the trick, it is
     # automatically excluded by this if statement
     # I ideally this should be done in the result function not here!
-    m2_fmi <- .9999999
+    m2_fmi <- NA
   }
 
 ## Times ------------------------------------------------------------------- ##
