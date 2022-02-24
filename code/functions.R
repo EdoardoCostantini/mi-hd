@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-02-15
+# Modified: 2022-02-24
 
 # generic functions -------------------------------------------------------
 
@@ -1639,46 +1639,52 @@ mean_traceplot <- function(out,
 }
 
 # Crossvalidation
-bridge_cv <- function(out, mods = NULL){
-  # Returns a df with ridge penality selected for each condition
-  # Compute Average FMI across all parameter estiamtes per ridge value
+bridge_cv <- function(out, mods = NULL, exp_factors = NULL){
+  ## Internals
+  # mods = names(out[[1]][[1]]$fmi)[1]
+  # exp_factors = colnames(out$conds)[c(2, 4)]
   
+  ## Body
   # Arguments check
-  if(is.null(mods)) mods = names(out[[1]][[1]]$fmi)
-  
-  # Body
-  store_0 <- list()
+  if(is.null(mods)) mods <- names(out[[1]][[1]]$fmi)
+
+  # Add an extra column to the data to store the FMI along the conditions
+  out$conds$FMI <- NA
+
   for (i in 1:nrow(out$conds)) {
+    # Extract fmi for all parameters for all models
     store_1 <- NULL
     for (dt in 1:out$parms$dt_rep) {
-      store_1 <- cbind(store_1, unlist(out[[dt]][[i]]$fmi[mods]))
+      store_1[[dt]] <- unlist(out[[dt]][[i]]$fmi[mods])
     }
-    # Within the same condition, take mean of average fmi from 
-    # each data repetition
-    store_0[[i]] <- rowMeans(store_1)
+
+    # Store the average FMI across model parameters and repetitions
+    if(is.null(store_1)){
+      # If the run failed just put an NA there
+      out$conds$FMI[i] <- NA
+      rownames(out$conds)[i] <- names(out[[dt]][i])
+    } else {
+      # Average across model parameters
+      avg_fmi_parms <- sapply(store_1, mean, na.rm = TRUE)
+      # Average across repetitions
+      out$conds$FMI[i] <- mean(avg_fmi_parms, na.rm = TRUE)
+      rownames(out$conds)[i] <- names(out[[dt]][i])
+    }
   }
-  ridge_range    <- length(unique(out$conds$ridge))
-  names(store_0) <- rep(unique(out$conds$ridge), nrow(out$conds)/ridge_range)
-  
-  # Within the same condition, take mean of the m1 and m2 fmis
-  # (previously aggregated across datasets)
-  avg_fmi <- round(sapply(store_0, mean), 3)
-  
-  # Select ridge value with lowest average FMI
-  i <- 1; j <- i + ridge_range - 1
-  ridge_s <- NULL
-  for (r in 1:(length(avg_fmi)/ridge_range)) {
-    ridge_s[r] <- as.numeric(names(which.min(avg_fmi[i:j])))
-    i <- j+1
-    j <- i+ridge_range-1
-  }
-  
-  # Attach ridge value to specific condition
-  col_indx <- colnames(out$conds) != "ridge" # exclude ridge column
-  output <- data.frame(out$conds[!duplicated(out$conds[, col_indx]), 
-                                 col_indx],
-                       ridge = ridge_s)
-  return(output)
+
+  # Group by conditions
+  solution <- out$conds %>% group_by_at(exp_factors) %>% slice(which.min(FMI))
+
+  # Plots
+  # Make ridge a factor
+  grid_y_axis <- exp_factors[1]
+  grid_x_axis <- exp_factors[2]
+  out$conds$ridge <- factor(out$conds$ridge, levels = unique(out$conds$ridge))
+  p <- ggplot(out$conds, aes(ridge, FMI)) + geom_point() +
+    facet_grid(reformulate(grid_x_axis, grid_y_axis))
+
+  return(list(values = solution,
+              plot = p))
 }
 
 # Plot function for experiment 1 and 2
