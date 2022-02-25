@@ -2,13 +2,13 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-25
-# Modified: 2022-02-23
+# Modified: 2022-02-25
 
 rm(list = ls())
 source("./init_general.R")
 
 # Load data
-out <- readRDS("../output/exp1_cv_bridge_20220223_1408.rds")
+out <- readRDS("../output/exp1_cv_bridge_20220224_1042.rds")
 
 # Obtain conditions with cv ridge
 conds_bridge <- bridge_cv(out,
