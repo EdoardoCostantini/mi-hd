@@ -1,7 +1,8 @@
-### Title:    Initialization scirpt, experiment 4 (EVS resampling)
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-07-01
+# Title:    Initialization scirpt parameter
+# Project:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-07-01
+# Modified: 2022-02-25
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -209,6 +210,6 @@
   conds <- expand.grid(n = n)
   
   # Add ridge specification for each condition
-  conds <- cbind(conds, ridge = c(1e-4, 
-                                  1e-1))
+  conds <- cbind(conds, ridge = c(1e-2,
+                                  1e-07))
   
