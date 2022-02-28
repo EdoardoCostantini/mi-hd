@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-02-24
+# Modified: 2022-02-28
 
 # generic functions -------------------------------------------------------
 
@@ -736,16 +736,19 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
   return(fmi)
 }
 
-.fmi_compute <- function(fits){
+.fmi_compute <- function(fits,
+                         form = c("asymptotic", "finite")[1]
+){
   ## Description
   # Given a list of fits on multiply imputed datasets
   # it returns the fmi for each estiamted paramter
   
   ## For internals
-  # fits = semR_fit_mi[["bridge"]]
+  # fits = sem_fits[lapply(sem_fits, length) != 0][[1]]
   
   ## Body
   ## Coef estimates
+  n <- nobs(fits[[1]])
   m <- length(fits)
 
   coefs <- sapply(X = fits,
@@ -760,10 +763,21 @@ imp_dich_IURR <- function(model, X_tr, y_tr, X_te, parms){
   B <- diag(1 / (m-1) * (coefs - Q_bar) %*% t(coefs - Q_bar))
   
   T_var <- U_bar + B + B/m
-  
+
   # FMI vector
-  FMI <- round(.fmi(m = m, b = B, t = T_var), 3)
-  
+  if(form == "asymptotic"){
+    FMI <- .fmi(m = m, b = B, t = T_var)
+  }
+  if(form == "finite"){
+    # nu v1
+    # nu <- (m-1) * (1 + U_bar/( ( 1 + 1/m ) * B ) )^2
+
+    # nu with funciton
+    nu_com <- n - nrow(coefs) # n - k where k number of paramteres estimated
+    nu <- .miDf(length(fits), b = B, t = T_var, nu_com)
+    r <- ( (1 + 1/m) * B ) / U_bar
+    FMI <- ( r + 2 / (nu + 3) ) / (r + 1)
+  }
   return(FMI)
 }
 
