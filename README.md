@@ -101,7 +101,7 @@ Here, I want to keep track of which filenames are important for the results.
 4. `exp1_simOut_20220214_1418.rds`
    - 1e3 repetitions
    - re-run of bridge with correct intercept inclusion
-5. `exp1_cv_bridge_20220223_1029.rds` 
+5. `exp1_cv_bridge_20220224_1042.rds` 
    - contains the results for corssvalidation of bridge with the correct use of intercept
 6. `exp1_simOut_20220214_1418_res.rds`
    - outcome of the exp1_results.R script combining (1), (2), and (4)
@@ -119,3 +119,5 @@ Here, I want to keep track of which filenames are important for the results.
    - re-run of bridge with correct intercept inclusion
 5. `exp4_simOut_20220215_1009_res.rds`
    - outcome of the exp4_results.R script combining (1), (2), (3), and (4)
+6. `exp4_cv_bridge_20220223_1646.rds`
+   - contains the results for corssvalidation of bridge with the correct use of intercept
