@@ -1501,9 +1501,8 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
       store <- NULL
       for (i in 1:out$parms$dt_rep) {
         succ_method <- colnames(out[[i]][[select_cond]][[est]])
-        store <- cbind(store, 
-                       out[[i]][[select_cond]][[est]][,
-                                                      succ_method %in% m]
+        store <- cbind(store,
+                       as.matrix(out[[i]][[select_cond]][[est]])[, succ_method %in% m, drop = FALSE]
         )
       }
       return( apply(t(store), 2, sd, na.rm = TRUE) )
@@ -1525,10 +1524,9 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     for (i in 1:out$parms$dt_rep) {
       succ_method <- colnames(out[[i]][[select_cond]][[est]])
       col_indx <- succ_method %in% m
-      cond_est <- out[[i]][[select_cond]][[est]]
-      cond_CI  <- out[[i]][[select_cond]][[ci]]
-      ci_low   <- cond_CI[1:str_thrs, col_indx]
-      ci_hig   <- cond_CI[-(1:str_thrs), col_indx]
+      cond_CI  <- as.matrix(out[[i]][[select_cond]][[ci]])
+      ci_low   <- cond_CI[1:str_thrs, col_indx, drop = FALSE]
+      ci_hig   <- cond_CI[-(1:str_thrs), col_indx, drop = FALSE]
       store <- cbind(store, 
                      ci_low < psd_tr_vec & psd_tr_vec < ci_hig
       )
@@ -1569,8 +1567,7 @@ res_sum <- function(out, model, condition = 1, bias_sd = FALSE){
     for (i in 1:out$parms$dt_rep) {
       succ_method <- colnames(out[[i]][[select_cond]][[est]])
       col_indx <- succ_method %in% m
-      cond_est <- out[[i]][[select_cond]][[est]]
-      cond_CI  <- out[[i]][[select_cond]][[ci]]
+      cond_CI  <- as.matrix(out[[i]][[select_cond]][[ci]])
       ci_low   <- cond_CI[1:str_thrs, ]
       ci_hig   <- cond_CI[-(1:str_thrs), ]
       
