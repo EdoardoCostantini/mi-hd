@@ -1,9 +1,10 @@
-### Title:    Analysis of results from experiment 2
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-08-27
-### Notes:    reads output form results.R script and shows the numbers that
-###           are used to draw the conclusions.
+# Title:    Analysis of results from experiment 4 (EVS)
+# Porject:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-08-27
+# Modified: 2022-02-28
+# Notes:    reads output form results.R script and shows the numbers that
+#           are used to draw the conclusions.
 
   rm(list = ls())
   source("./init_general.R")
@@ -18,8 +19,9 @@
   filename <- "exp4_simOut_20201204_2121" # updated model 1, 500 data
   filename <- "exp4_simOut_20201207_1134" # same seed as 20201204_2121, but next 500 samples
   filename <- "exp4_simOut_2020120704" # joined 20201204_2121 and 20201207_1134
+  filename <- "exp4_simOut_20220226_0950" # see readme for details
   filename <- "exp4_simOut_20220131_1603" # joined 20201204_2121 and 20201207_1134 + MI-qp and MI-am
-  filename <- "exp4_simOut_20220215_1009" # see readme for details
+  filename <- "exp4_simOut_20220226_0950" # see readme for details
   
   # Read R object
   res <- readRDS(paste0("../output/", filename, "_res.rds"))
@@ -28,7 +30,7 @@
   # Plot Size
   sp_width <- 5
   sp_height <- 4
-  
+
 # Summary of set up -------------------------------------------------------
 
   # Bias percent
@@ -52,6 +54,8 @@
          function(x) res$m1[[x]]$ci_cov["rel", ])[[1]]
   lapply(1:length(res$m2),
          function(x) res$m2[[x]]$ci_cov["NatAt", ])
+  lapply(1:length(res$m2),
+           function(x) res$m1[[x]]$ci_cov)[[1]]
 
 # Variable of interest ----------------------------------------------------
 

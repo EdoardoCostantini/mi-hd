@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-09
-# Modified: 2022-01-31
+# Modified: 2022-03-16
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -12,11 +12,20 @@
 # Read results from the combined results
   res <- readRDS("../output/exp1_simOut_2020121516_res.rds") # original results
   res <- readRDS("../output/exp1_simOut_20220201_1749_res.rds") # results with MI_qp and MI_am
-  res <- readRDS("../output/exp1_simOut_20220214_1418_res.rds") # results bridge w/ intercept
+  res <- readRDS("../output/exp1_simOut_20220225_1035_res.rds") # results bridge w/ intercept
 
   # Change names of methods if required
   levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")
   levels(res$methods) <- str_replace(levels(res$methods), "bridge", "BRidge")
+  levels(res$methods) <- str_replace(levels(res$methods),
+                                     "MI-qp",
+                                     "MI-QP")
+  levels(res$methods) <- str_replace(levels(res$methods),
+                                     "MI-am",
+                                     "MI-AM")
+  levels(res$methods) <- str_replace(levels(res$methods),
+                                     "MI-OP",
+                                     "MI-OR")
 
 # Which plot to plot
   pm_grep <- c("0.1", "0.3")[2]

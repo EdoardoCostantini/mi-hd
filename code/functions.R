@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-02-28
+# Modified: 2022-03-16
 
 # generic functions -------------------------------------------------------
 
@@ -2115,13 +2115,29 @@ plot_exp4 <- function(dt,
   dt_edit <- lapply(dt_edit, function(x){
     # Make methods rownames for ordering reasons
     rownames(x) <- x$key
+
     # select methods to keep
-    x <- x[meth_compare, ] 
+    x <- x[meth_compare, ]
+
+    # Change any name
+    x$key <- str_replace(x$key,
+                         "MI_qp",
+                         "MI-QP")
+    x$key <- str_replace(x$key,
+                         "MI_am",
+                         "MI-AM")
+    x$key <- str_replace(x$key,
+                         "MI_OP",
+                         "MI-OR")
+
     # Make names prettier
     x$key <- sub("_la", "", x$key)
     x$key <- sub("_", "-", x$key)
+
     # fix order of methods
     x$key <- factor(x$key, levels = x$key)
+
+    # Return
     return(x)
   })
   
@@ -2286,11 +2302,14 @@ plot_exp4_meth <- function(dt,
   # CONTINUE FROM HERE
   dt_edit <- lapply(1:length(dt_preEdit), function(id) {
     x <- dt_preEdit[[id]]
-    
-    # Make Methods names prettier
+
+    # Adapt method names
     colnames(x) <- sub("_la", "", colnames(x))
     colnames(x) <- sub("_", "-", colnames(x))
-    
+    colnames(x) <- sub("MI-qp", "MI-QP", colnames(x))
+    colnames(x) <- sub("MI-am", "MI-AM", colnames(x))
+    colnames(x) <- sub("MI-OP", "MI-OR", colnames(x))
+
     # Extract Methods Name
     methods <- names(x)
     
