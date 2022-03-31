@@ -98,12 +98,12 @@ Here, I want to keep track of which filenames are important for the results.
    - only additional methods MI-qp and MI-am run as a result of the SMR review
 3. `exp1_simOut_20220201_1749_res.rds`
    - outcome of the exp1_results.R script combining (1) and (2)
-4. `exp1_simOut_20220214_1418.rds`
+4. `exp1_simOut_20220225_1035.rds`
    - 1e3 repetitions
    - re-run of bridge with correct intercept inclusion
 5. `exp1_cv_bridge_20220224_1042.rds` 
    - contains the results for corssvalidation of bridge with the correct use of intercept
-6. `exp1_simOut_20220214_1418_res.rds`
+6. `exp1_simOut_20220225_1035_res.rds`
    - outcome of the exp1_results.R script combining (1), (2), and (4)
 
 ### Resampling Study
@@ -114,10 +114,10 @@ Here, I want to keep track of which filenames are important for the results.
 3. `exp4_simOut_20220131_1603.rds`
    - 1e3 repetitions
    - only additional methods MI-qp and MI-am run as a result of the SMR review
-4. `exp4_simOut_20220215_1009.rds`
+4. `exp4_simOut_20220226_0950.rds`
    - 1e3 repetitions
    - re-run of bridge with correct intercept inclusion
-5. `exp4_simOut_20220215_1009_res.rds`
+5. `exp4_simOut_20220226_0950_res.rds`
    - outcome of the exp4_results.R script combining (1), (2), (3), and (4)
 6. `exp4_cv_bridge_20220223_1646.rds`
-   - contains the results for corssvalidation of bridge with the correct use of intercept
+   - contains the results for cross-validation of bridge with the correct use of intercept
