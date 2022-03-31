@@ -351,7 +351,7 @@ runCell <- function(cond, parms, rep_status) {
   sem_pool_MI_CI  <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
                             sem_pool_CI_f)
   sem_fmi <- sapply(sem_fits[lapply(sem_fits, length) != 0], 
-                    .fmi_compute)
+                    .fmi_compute, form = "finite")
   
   # append single imputations, and GS and CC results
   sem_gather_EST <- cbind(sem_pool_MI_EST,
@@ -364,7 +364,7 @@ runCell <- function(cond, parms, rep_status) {
   lm_pool_est <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_EST_f)
   lm_pool_CI <- sapply(lm_fits[lapply(lm_fits, length) != 0], lm_pool_CI_f)
   lm_fmi <- sapply(lm_fits[lapply(lm_fits, length) != 0], 
-                    .fmi_compute)
+                    .fmi_compute, form = "finite")
   
   # append single imputations, and GS and CC results
   lm_pool_EST <- cbind(lm_pool_est,
