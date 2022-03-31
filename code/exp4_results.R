@@ -93,7 +93,7 @@ out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$metho
 # Replace results of a method that was re-run ----------------------------------
 
 # Load results
-rp_filename <- "exp4_simOut_20220215_1009"
+rp_filename <- "exp4_simOut_20220226_0950"
 rp_out <- readRDS(paste0("../output/", rp_filename, ".rds"))
 
 # Extract the meta data from both
@@ -116,7 +116,7 @@ for(i in 1:length(bs_out)){ # for every repetition
   for(j in 1:length(bs_out[[i]])){ # for every condition
     # j <- 1
     for(h in 2:length(bs_out[[i]][[j]])){ # for every object stored (excpet condition label)
-      # h <- 6
+      # h <- 2
       print(paste0("i = ", i, "; j = ", j, "; h = ", h))
       multi_dim <- length(dim(bs_out[[i]][[j]][[h]])) == 2
       if(multi_dim){
@@ -177,7 +177,7 @@ for(i in 1:length(bs_out)){ # for every repetition
 id <- sample(1:1e3, 1)
 cbind(og = out[[id]]$`cond_1000_1e-04`$m2_EST[, "bridge"],
       bs = bs_out[[id]]$`cond_1000_1e-04`$m2_EST[, "bridge"],
-      rp = rp_out[[id]]$`cond_1000_1e-04`$m2_EST[, "bridge"])
+      rp = rp_out[[id]]$cond_1000_0.01$m2_EST[, "bridge"])
 
 # Fix meta data
 out <- bs_out
@@ -270,5 +270,5 @@ out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$metho
   
   saveRDS(
     output, 
-    paste0("../output/", "exp4_simOut_20220215_1009", "_res.rds")
+    paste0("../output/", "exp4_simOut_20220226_0950", "_res.rds")
   )

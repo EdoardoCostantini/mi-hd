@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-02-04
+# Modified: 2022-02-28
 
   rm(list = ls())
   source("./init_general.R")
@@ -91,7 +91,7 @@ out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$metho
 # Replace results of a method that was re-run ----------------------------------
 
 # Load results
-rp_filename <- "exp1_simOut_20220214_1418"
+rp_filename <- "exp1_simOut_20220225_1035"
 rp_out <- readRDS(paste0("../output/", rp_filename, ".rds"))
 
 # Extract the meta data from both
@@ -241,7 +241,7 @@ cbind(bs_out[[id]]$cond_50_FALSE_0.3$sem_EST[, "bridge"],
                                           "CC", "GS", "MI_qp", "MI_am"))
 
   # Save
-  filename <- paste0("exp1_simOut_20220214_1418")
+  filename <- paste0("exp1_simOut_20220225_1035")
   saveRDS(
     gg_out_sem,
     paste0("../output/", filename, "_res.rds")
