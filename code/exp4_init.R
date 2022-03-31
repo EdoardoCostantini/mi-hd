@@ -156,7 +156,7 @@
 
 # Simulation desing -------------------------------------------------------
   # Replicability
-  parms$seed     <- 20200512
+  parms$seed     <- 20220131
   parms$nStreams <- 1000
 
   # Output and Progres report related
