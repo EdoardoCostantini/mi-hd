@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-09
-# Modified: 2022-03-16
+# Modified: 2022-04-01
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -91,7 +91,7 @@
     facet_grid(rows = vars(factor(parm,
                   levels = unique(parm))),
                cols = vars(cond)) +
-    geom_vline(data = data.frame(xint = c(10),
+    geom_vline(data = data.frame(xint = 10,
                                  analysis = "Percentage Relative Bias"),
                linetype = "dashed",
                size = .35,
@@ -99,15 +99,26 @@
 
     # Format
     scale_y_discrete(limits = rev) +
-    scale_shape_manual(values = c(1, 4, 16)) +
+    scale_shape_manual(values = c("I", "I", "I")) +
     coord_cartesian(xlim = c(0, 50)) +
     labs(#title = label_parm[x],
       x     = NULL,
       y     = NULL,
       linetype = NULL,
       shape = NULL) +
-    theme(legend.position ="bottom",
-          text = element_text(size = 9))
+    theme(
+      panel.background = element_rect(fill = NA,
+                                      color = "gray"),
+      panel.grid.major = element_line(color = "gray",
+                                      size = 0.15,
+                                      linetype = 1),
+      legend.key = element_rect(colour = "gray",
+                                fill = NA,
+                                size = .15
+      ),
+      text = element_text(size = 9),
+      axis.ticks = element_blank(),
+      legend.position = "none")
 
     pf
 
@@ -130,7 +141,7 @@
   hig_thr <- (.95+SEp*2)*100
   vline_burton <- c(low_thr, hig_thr)
   vline_vanBuu <- c(90, 99)
-  xci_breaks <- sort(c(80, vline_vanBuu, round(vline_burton, 1), 100))
+  xci_breaks <- sort(c(80, vline_vanBuu, 95, round(vline_burton, 1), 100))
 
   pf <- output_sem %>%
     filter(analysis == unique(analysis)[x],
@@ -151,41 +162,59 @@
     ggplot(data = ., aes(y = methods,
                          x = value,
                          shape = variable)) +
-    geom_point(size = 1) +
+    geom_point(size = 1, show.legend = FALSE) +
     geom_line(aes(group = methods),
               size = .25) +
     # Grid
     facet_grid(rows = vars(factor(parm,
                   levels = unique(parm))),
                cols = vars(cond)) +
-    geom_vline(data = data.frame(xint = c(vline_burton),
-                                     analysis = "CI coverage"),
-                   aes(xintercept = xint,
-                       lty = paste0("Burton's range")),
-                   size = .5) +
-    geom_vline(data = data.frame(xint = c(vline_vanBuu),
+    geom_vline(data = data.frame(xint = 95,
                                  analysis = "CI coverage"),
-               linetype = "longdash",
-               aes(xintercept = xint),
-               size = .35) +
+               aes(xintercept = xint,
+                   lty = paste0("nominal level")),
+               size = .20) +
+    geom_vline(data = data.frame(xint = vline_vanBuu,
+                                 analysis = "CI coverage"),
+               aes(xintercept = xint,
+                   lty = paste0("van Buuren's range")),
+               size = .15) +
+    geom_vline(data = data.frame(xint = vline_burton,
+                                 analysis = "CI coverage"),
+               aes(xintercept = xint,
+                   lty = paste0("Burton's range")),
+               size = .20) +
 
     # Format
     scale_y_discrete(limits = rev) +
-    scale_x_continuous(labels = as.character(xci_breaks/100),
+    scale_x_continuous(labels = as.character(round(xci_breaks/100, 2)),
                        breaks = xci_breaks) +
     coord_cartesian(xlim = c(min(xci_breaks), max(xci_breaks))) +
-    scale_shape_manual(values = c(1, 4, 16)) +
-    scale_linetype_manual(values = c("dotted", "dotted")) +
+    scale_shape_manual(values = c("I", "I", "I")) +
+    scale_linetype_manual(values = c("longdash", "dashed", "solid")) +
+    guides(linetype = guide_legend(override.aes = list(size = c(.20, .20, .15)))) +
     labs(#title = label_parm[x],
       x     = NULL,
       y     = NULL,
       linetype = NULL,
       shape = NULL) +
-    theme(legend.position ="bottom",
-          text = element_text(size = 9),
-          axis.text.x = element_text(angle = 90,
-                                     vjust = 0.5,
-                                     hjust = 1))
+    theme(
+      panel.background = element_rect(fill = NA,
+                                      color = "gray"),
+      panel.grid.major = element_line(color = "gray",
+                                      size = 0.15,
+                                      linetype = 1),
+      legend.key = element_rect(colour = "gray",
+                                fill = NA,
+                                size = .15
+      ),
+      axis.ticks = element_blank(),
+      legend.position ="bottom",
+      text = element_text(size = 9),
+      axis.text.x = element_text(angle = 90,
+                                 vjust = 0.5,
+                                 hjust = 1)
+    )
 
     pf
 
