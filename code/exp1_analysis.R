@@ -56,6 +56,7 @@
   hig_thr <- (.95+SEp*2)*100
   vline_burton <- c(low_thr, hig_thr)
   vline_vanBuu <- 90
+  xci_breaks <- sort(c(0, 10, 20, 50))
 
   # Fix methods order
   output_sem$methods <- factor(output_sem$methods,
@@ -84,7 +85,7 @@
     ggplot(data = ., aes(y = methods,
                          x = value,
                          shape = variable)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.75) +
     geom_line(aes(group = methods),
               size = .25) +
     # Grid
@@ -93,11 +94,13 @@
                cols = vars(cond)) +
     geom_vline(data = data.frame(xint = 10,
                                  analysis = "Percentage Relative Bias"),
-               linetype = "dashed",
-               size = .35,
+               linetype = "solid",
+               size = .15,
                aes(xintercept = xint)) +
 
     # Format
+    scale_x_continuous(labels = xci_breaks,
+                       breaks = xci_breaks) +
     scale_y_discrete(limits = rev) +
     scale_shape_manual(values = c("I", "I", "I")) +
     coord_cartesian(xlim = c(0, 50)) +
@@ -162,7 +165,7 @@
     ggplot(data = ., aes(y = methods,
                          x = value,
                          shape = variable)) +
-    geom_point(size = 1, show.legend = FALSE) +
+    geom_point(size = 1.75, show.legend = FALSE) +
     geom_line(aes(group = methods),
               size = .25) +
     # Grid
@@ -171,19 +174,20 @@
                cols = vars(cond)) +
     geom_vline(data = data.frame(xint = 95,
                                  analysis = "CI coverage"),
+               linetype = "solid",
+               size = .15,
                aes(xintercept = xint,
-                   lty = paste0("nominal level")),
-               size = .20) +
-    geom_vline(data = data.frame(xint = vline_vanBuu,
-                                 analysis = "CI coverage"),
-               aes(xintercept = xint,
-                   lty = paste0("van Buuren's range")),
-               size = .15) +
-    geom_vline(data = data.frame(xint = vline_burton,
-                                 analysis = "CI coverage"),
-               aes(xintercept = xint,
-                   lty = paste0("Burton's range")),
-               size = .20) +
+                   lty = paste0("nominal level"))) +
+    # geom_vline(data = data.frame(xint = vline_vanBuu,
+    #                              analysis = "CI coverage"),
+    #            aes(xintercept = xint,
+    #                lty = paste0("van Buuren's range")),
+    #            size = .20) +
+    # geom_vline(data = data.frame(xint = vline_burton,
+    #                              analysis = "CI coverage"),
+    #            aes(xintercept = xint,
+    #                lty = paste0("Burton's range")),
+    #            size = .20) +
 
     # Format
     scale_y_discrete(limits = rev) +
@@ -191,8 +195,8 @@
                        breaks = xci_breaks) +
     coord_cartesian(xlim = c(min(xci_breaks), max(xci_breaks))) +
     scale_shape_manual(values = c("I", "I", "I")) +
-    scale_linetype_manual(values = c("longdash", "dashed", "solid")) +
-    guides(linetype = guide_legend(override.aes = list(size = c(.20, .20, .15)))) +
+    # scale_linetype_manual(values = c("longdash", "dashed", "solid")) +
+    # guides(linetype = guide_legend(override.aes = list(size = c(.20, .20, .15)))) +
     labs(#title = label_parm[x],
       x     = NULL,
       y     = NULL,
@@ -202,13 +206,13 @@
       panel.background = element_rect(fill = NA,
                                       color = "gray"),
       panel.grid.major = element_line(color = "gray",
-                                      size = 0.15,
+                                      size = 0.175,
                                       linetype = 1),
+      axis.ticks = element_blank(),
       legend.key = element_rect(colour = "gray",
                                 fill = NA,
                                 size = .15
       ),
-      axis.ticks = element_blank(),
       legend.position ="bottom",
       text = element_text(size = 9),
       axis.text.x = element_text(angle = 90,

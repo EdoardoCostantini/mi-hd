@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-27
-# Modified: 2022-02-28
+# Modified: 2022-04-01
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -170,7 +170,6 @@
                                     function(x) res$m1[[x]]$bias_per),
                         type = "bias",
                         dt_reps = 1e3,
-                        focal = "rel",
                         ci_lvl = .95,
                         meth_compare = meths)
 
@@ -178,7 +177,6 @@
                                     function(x) res$m2[[x]]$bias_per),
                         type = "bias",
                         dt_reps = 1e3,
-                        focal = "NatAt",
                         ci_lvl = .95,
                         meth_compare = meths)
   
@@ -210,7 +208,6 @@
                                     function(x) res$m1[[x]]$ci_cov),
                         type = "ci",
                         dt_reps = 1e3,
-                        focal = "rel",
                         ci_lvl = .95,
                         meth_compare = meths)
 
@@ -218,7 +215,6 @@
                                     function(x) res$m2[[x]]$ci_cov),
                         type = "ci",
                         dt_reps = 1e3,
-                        focal = "NatAt",
                         ci_lvl = .95,
                         meth_compare = meths)
 

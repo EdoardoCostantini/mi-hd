@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-03-16
+# Modified: 2022-04-01
 
 # generic functions -------------------------------------------------------
 
@@ -2264,7 +2264,6 @@ plot_exp4_meth <- function(dt,
                            type = "bias",
                            dt_reps = 500,
                            ci_lvl = .95,
-                           focal = "", # name of prameter to highlight
                            meth_compare) {
   ## Function inputs
   ## Generic
@@ -2275,7 +2274,6 @@ plot_exp4_meth <- function(dt,
   # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
   #                      "MI_PCA",
   #                      "MI_CART", "MI_RF", "missFor", "CC", "MI_OP"))
-  # focal = "rel"
   # small.ef = ""
   # dt = lapply(1:length(res$m1),
   #             function(x) res$m1[[x]]$bias_per)
@@ -2360,15 +2358,13 @@ plot_exp4_meth <- function(dt,
   plot_ylabels <- as.character(unique(dt_edit$key)) # unique for everyone
   
   # Paramter Labels
-  # dt_edit$par[!dt_edit$par %in% focal] <- ""
   # Ticks 
   if(type == "bias"){
     # Levels order
-    levs <- c(yes = ">10%", no = "<10%", focal = "Focal")
+    levs <- c(no = "<10%", yes = ">10%")
     
     # Grid Plot Color based on exceeding or not PRB reference
-    flag <- ifelse(dt_edit$value >= 10, yes = levs[1], no = levs[2])
-    flag[dt_edit$par %in% focal] <- levs[3]
+    flag <- ifelse(dt_edit$value >= 10, yes = levs[2], no = levs[1])
     # flag[dt_edit$par %in% small.ef] <- "Largest Bias"
     dt_edit$flag <- factor(flag, levels = levs)
     
@@ -2378,7 +2374,7 @@ plot_exp4_meth <- function(dt,
     # X axis
     plot_xbreaks <- seq(min(plot_xlim), max(plot_xlim), by = 10)
     plot_xlabels <- as.character(plot_xbreaks)
-    plot_vlines <- c(10)
+    plot_vlines <- 10
   }
 
   if(type == "ci"){
@@ -2394,20 +2390,18 @@ plot_exp4_meth <- function(dt,
     hig_thr <- ((.95+SEp*2)-.95)*100
     
     # Levels order
-    levs <- c(yes = "Significant", 
-              no = "Not significant", 
-              focal = "Focal")
+    levs <- c(no = "Not significant",
+              yes = "Significant")
     
     # Grid Plot Color based on exceeding or not PRB reference
     flag <- ifelse(dt_edit$value >= hig_thr | dt_edit$value <= low_thr, 
-                     yes = levs[1], no = levs[2])
-    flag[dt_edit$par %in% focal] <- levs[3]
+                     yes = levs[2], no = levs[1])
     dt_edit$flag <- factor(flag, levels = levs)
     
     # X axis
-    plot_xbreaks <- c(-5, low_thr, 0, hig_thr, 5)
+    plot_xbreaks <- c(-5, low_thr, 0, hig_thr, 4, 5)
     plot_xlabels <- as.character(round((plot_xbreaks+95)/100, 2))
-    plot_vlines <- c(-5, low_thr, hig_thr)
+    plot_vlines <- c(-5, low_thr, hig_thr, 4)
   }
 
   # Colors and texts
@@ -2417,48 +2411,25 @@ plot_exp4_meth <- function(dt,
   grid.text.size   <- 10 # Condition + Parameter type
   segme.thick      <- 1 # thickness of lines reporting results (was 1)
   small.color      <- "darkgray" # color of lines |PRB| < 10% 
-  large.color      <- "lightgray" # color of lines |PRB| < 10% 
-  focal.color      <- "black" # color of line reporting focal parameter
-  h.lines.thick    <- .10 # thickness of lines separating methods (was .375)
-  h.lines.color    <- "black" # color of lines separating methods (was gray)
+  large.color      <- "lightgray" # color of lines |PRB| < 10%
+  h.lines.thick    <- .35 # thickness of lines separating methods (was .375)
+  h.lines.color    <- "gray" # color of lines separating methods (was gray)
   v.lines.thick    <- .375 # thickness of reference lines
   v.lines.color    <- "darkgray" # color of reference lines
   v.lines.type     <- "dashed" # line type of reference lines
   
   # Plot
   p <- ggplot(dt_edit, aes(x = value, y = id)) +
-    # Title and axis labels
-    theme(plot.title   = element_blank(),
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(),
-          axis.text.x  = element_text(size = x.axis.text.size),
-          axis.text.y  = element_text(size = y.axis.text.size),
-          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
-          # Background
-          panel.background = element_rect(fill = "white", colour = "white"),
-          panel.border     = element_rect(colour = "lightgray", fill = NA),
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          # Condition + Parameter type (Facet Related)
-          strip.text = element_text(#family = font.plot,
-            size = grid.text.size,
-            face = "plain",
-            margin = unit(c(.10, .10, .10, .10), "cm")),
-          # Legend
-          legend.text = element_text(size = 8),
-          legend.position = "bottom"
-    ) +
-    
+
     # Plot Content
     geom_segment(aes(xend = 0, 
                      yend = id,
                      colour = flag),
                  size = segme.thick) +
     scale_color_manual(name = "",
-                       values = c(large.color,
-                                  small.color, 
-                                  focal.color)) +
-    
+                       values = c(small.color,
+                                  large.color)) +
+
     # X Axis
     scale_x_continuous(breaks = plot_xbreaks,
                        labels = plot_xlabels) +
@@ -2466,17 +2437,43 @@ plot_exp4_meth <- function(dt,
                size = v.lines.thick,
                linetype = v.lines.type, 
                color = v.lines.color) +
-    coord_cartesian(xlim = plot_xlim) + 
+    coord_cartesian(xlim = plot_xlim,
+                    ylim = c(min(dt_edit$id), max(dt_edit$id)) ) +
     
     # Y axis
     scale_y_continuous(breaks = plot_ybreaks,
-                       labels = plot_ylabels) +
+                       labels = plot_ylabels, expand = c(.010, .010)) +
     geom_hline(yintercept = plot_hlines,
                size = h.lines.thick,
                color = h.lines.color) + 
     
     # Facet
-    facet_grid(cols = vars(conds))
+    facet_grid(cols = vars(conds)) +
+
+    # Title and axis labels
+    theme(plot.title   = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x  = element_text(size = x.axis.text.size),
+          axis.text.y  = element_text(size = y.axis.text.size),
+          plot.margin  = unit(c(0, 0.1, 0, 0.05), "cm"),
+          # Background
+          panel.background = element_rect(fill = "white", colour = "white"),
+          axis.ticks = element_blank(),
+          panel.border     = element_rect(fill = NA,
+                                          color = "gray",  size = 0.35),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          # Condition + Parameter type (Facet Related)
+          strip.text = element_text(#family = font.plot,
+            size = grid.text.size,
+            face = "plain",
+            margin = unit(c(.10, .10, .10, .10), "cm")),
+          # Legend
+          legend.key = element_rect(colour = "gray", fill = NA, size = .15),
+          legend.text = element_text(size = 8),
+          legend.position = "bottom"
+    )
   
   p
   return(p)
