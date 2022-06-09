@@ -35,11 +35,13 @@ This directory contains the following main subfolders:
 
 # How to replicate results
 
+The content of this directory can be used to replicate the results reported in the manuscript: "SMR-21-0138.R1 - High-dimensional imputation for the social sciences: a comparison of state-of-the-art methods"
+
 ## Running the simulations
 
 We used R for these simulations.
 
-### Simulation Study: data from a multivariate normal distribution
+### Simulation study
 1. Installing Dependencies:
    1. Open the script [init_general.R](./code/init_general.R) and install the
       packages with the traditional `install.packages()` function.
