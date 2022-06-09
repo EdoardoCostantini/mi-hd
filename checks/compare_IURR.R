@@ -1,5 +1,5 @@
 ### Title:    comparing IURR implementations within mice framework and outside
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-00
 ### Notes:    This shows the equivalence of my fun_IURR_impute.R with an
 ###           implementation of IURR within the mice R package framework

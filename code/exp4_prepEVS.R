@@ -1,5 +1,5 @@
 ### Title:    Reading EVS data for resampoling experiment
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-22
 ### Modified: 2021-08-17
   

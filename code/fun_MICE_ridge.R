@@ -1,5 +1,5 @@
 ### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-19
 ### Notes:    Imputation done with regular bayesian model with ridge
 ###           penality to deal with high-dimensionality

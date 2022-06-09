@@ -1,5 +1,5 @@
 ### Title:    Adding my own imputation function
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-08
 ### Notes:    Create a version of mice.impute.method that corresponds to your 
 ###           DURR proposition in DengEtAl 2016

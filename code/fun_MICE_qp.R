@@ -1,6 +1,6 @@
 ### Title:    Imputation model defined based on quickpred()
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2022-01-28
 
 impute_MICE_qp <- function(Z, perform = TRUE, parms = parms,

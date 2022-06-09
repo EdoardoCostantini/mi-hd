@@ -1,5 +1,5 @@
 ### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-07-08
 
 # Missing data pm ---------------------------------------------------------

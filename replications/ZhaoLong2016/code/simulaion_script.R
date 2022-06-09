@@ -1,5 +1,5 @@
 ### Title:    Replication Zhao Long 2016 - Simulation script
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-03-03
 ### Modified: 2020-03-03
 

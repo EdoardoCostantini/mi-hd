@@ -1,6 +1,6 @@
 ### Title:    Checking parts of experiment 4 work as expected
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-10-06
 
 # Substantive models ------------------------------------------------------

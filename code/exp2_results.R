@@ -1,6 +1,6 @@
 ### Title:    Results for experiment 2
 ### Porject:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-19
 
   rm(list = ls())

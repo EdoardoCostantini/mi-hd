@@ -1,5 +1,5 @@
 ### Title:    imputeHD-comp impute w/ Regu Freq Regr IURR
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-02-23
 ### Notes:    function to impute data according to IURR method following 
 ###           reference papers Zhao Long 2016 (for univariate miss) and 

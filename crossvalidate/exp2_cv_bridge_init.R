@@ -1,6 +1,6 @@
 ### Title:    Initialization scirpt mods for ridge penalty cross validation
 ### Project:  Imputing High Dimensional Data (exp 2)
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-07-22
 
 # Modify parms ------------------------------------------------------------

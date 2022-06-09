@@ -1,6 +1,6 @@
 # Title:    Analysis of results
 # Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
+# Author:   Anonymized for peer review
 # Created:  2020-07-09
 # Modified: 2022-04-01
 # Notes:    reads output form results.R script and shows the numbers that

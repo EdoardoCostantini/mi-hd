@@ -1,5 +1,5 @@
 ### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-26
 ### Notes:    function to impute data according to Random Forest method
 ###           used in mice. This function differs from mice.impute.rf

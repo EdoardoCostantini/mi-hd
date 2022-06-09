@@ -1,5 +1,5 @@
 ### Title:    Replication Deng Et Al 2016 - initialization script
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-05
 ### Notes: With this init file you can formulate the set up for ZL2016 replication
 ###        and test that set up with the multivariate generalization of imputation 

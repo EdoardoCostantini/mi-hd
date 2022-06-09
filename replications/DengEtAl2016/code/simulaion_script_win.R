@@ -1,5 +1,5 @@
 ### Title:    Replication Deng Et Al 2016 - Simulation script w/ parallel for windows
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-16
 
 rm(list=ls())

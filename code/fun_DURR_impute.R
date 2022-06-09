@@ -1,5 +1,5 @@
 ### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-19
 ### Notes:    function to impute data according to DURR method following 
 ###           reference papers Zhao Long 2016 (for univariate miss) and 

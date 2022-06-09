@@ -1,5 +1,5 @@
 ### Title:    Generating lavan model text
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-24
 
 ## To get a model, create the object parms$z_m_id

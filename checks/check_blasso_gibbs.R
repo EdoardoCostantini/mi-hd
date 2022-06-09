@@ -1,5 +1,5 @@
 ### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-08
 ### Notes:    In your code you are using the blasso.vs funcion to obtain 
 ###           one sample at the time from the coditional posteriors within

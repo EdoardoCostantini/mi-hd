@@ -58,7 +58,7 @@ supported, highdimensionality etc.)
 			making the apporach fail.
 	* Packages: none, R function to perform imputation is operational
 	* Doubts: The sampling of sigma2. in your code there is no variation in the parameter sigma_j^2. You keep the 
-		value estiamted with the lasso model. Ask Kyle for help.
+		value estiamted with the lasso model. Ask Anonymized for peer review for help.
 
 
 * **Bayesian LASSO** following Zhao Long 2016;

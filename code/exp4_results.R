@@ -1,6 +1,6 @@
 # Title:    Results for experiment 4
 # Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
+# Author:   Anonymized for peer review
 # Created:  2020-10-05
 # Modified: 2022-02-16
 

@@ -1,5 +1,5 @@
 ### Title:    Initialize Environment and Parameters for Imputed DV Simulation
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-02-13
 ### Modified: 2020-02-15
 

@@ -1,6 +1,6 @@
 # Title:    Conergence Check Blasso
 # Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
+# Author:   Anonymized for peer review
 # Created:  2020-08-24
 # Modified: 2022-02-25
 

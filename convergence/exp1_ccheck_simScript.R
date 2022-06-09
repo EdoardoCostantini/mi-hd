@@ -1,6 +1,6 @@
 ### Title:    Convergence Checks: Initialization Script for Exp 1 (windows)
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-07-03
 ### Notes:    Runs the simulation for convergence checks (few repetitions, 
 ###           more chains)

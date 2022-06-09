@@ -1,6 +1,6 @@
 ### Title:    Analysis of results from experiment 2
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-07-09
 ### Notes:    reads output form results.R script and shows the numbers that
 ###           are used to draw the conclusions.

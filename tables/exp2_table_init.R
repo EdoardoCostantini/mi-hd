@@ -1,6 +1,6 @@
 ### Title:    Analysis of results from experiment 2: initialize results for tables
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-07-09
 ### Notes:    wd should be the code folder
 

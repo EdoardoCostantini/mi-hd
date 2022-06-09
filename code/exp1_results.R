@@ -1,6 +1,6 @@
 # Title:    Putting result object together
 # Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
+# Author:   Anonymized for peer review
 # Created:  2020-05-19
 # Modified: 2022-02-28
 

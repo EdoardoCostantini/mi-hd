@@ -1,6 +1,6 @@
 ### Title:    Initialization scirpt, general (functions and packages)
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-07-01
 ### Modified: 2022-01-28
 

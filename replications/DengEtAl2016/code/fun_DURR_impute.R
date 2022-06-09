@@ -1,5 +1,5 @@
 ### Title:    imputeHD-comp impute w/ Regu Freq Regr DURR
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-01-8
 ### Modified: 2020-02-24
 ### Notes:    function to impute data according to DURR method following 

@@ -1,6 +1,6 @@
 ### Title:    Imputation model using custom predictors
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2022-01-28
 
 impute_MICE_cp <- function(Z, preds = c(), perform = TRUE, parms = parms,

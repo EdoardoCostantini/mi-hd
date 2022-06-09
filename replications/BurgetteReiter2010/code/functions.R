@@ -1,5 +1,5 @@
 ### Title:    Replication Burgette Reiter 2010 - Functions
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-JAN-10
 ### Modified: 2020-JAN-10
 ### Notes:    Create simulated data for sim study p.1072

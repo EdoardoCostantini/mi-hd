@@ -1,5 +1,5 @@
 ### Title:    Replication Burgette Reiter 2010 - Simulation Subroutines
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-JAN-10
 ### Modified: 2020-JAN-10
 ### Notes:    Routines for the simulation study
@@ -58,7 +58,7 @@ imposeMiss <- function(Xy){
     Xy[simMissingness(pm = .17, data = Xy,
                       preds = preds,
                       type  = type, beta  = runif(2) ), col_indx[mis]] <- NA
-    # simMissingness comes from Kyle's script and simulates a nonresponse vector
+    # simMissingness comes from Anonymized for peer review's script and simulates a nonresponse vector
     # according to the proportion of missings desired on a variable, with certain
     # predictors (causes) coming from a given datasets
   }

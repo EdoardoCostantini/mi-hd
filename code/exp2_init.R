@@ -1,6 +1,6 @@
 ### Title:    Initialization scirpt parameter for experiment 3 (simple latent)
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-07-22
 
 # Fixed Parameters --------------------------------------------------------

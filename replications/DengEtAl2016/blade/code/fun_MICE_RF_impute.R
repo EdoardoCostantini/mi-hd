@@ -1,5 +1,5 @@
 ### Title:    imputeHD-comp impute w/ Regu Freq Regr DURR
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-08
 
 impute_MICE_RF <- function(Z, parms){

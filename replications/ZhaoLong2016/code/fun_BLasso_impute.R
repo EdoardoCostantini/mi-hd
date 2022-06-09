@@ -1,5 +1,5 @@
 ### Title:    imputeHD-comp impute w/ Regularized Frequentiest Regressions DURR
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-04
 ### Notes:    Function can be used only for univariate missingness imputation
 

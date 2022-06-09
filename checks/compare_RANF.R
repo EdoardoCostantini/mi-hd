@@ -1,6 +1,6 @@
 ### Title:    Compare Random Forest Imputation approaches
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-26
 ### Notes:    This shows the equivalence of my fun_RANF_impute.R with an
 ###           the mice.rf.impute function from mice package.

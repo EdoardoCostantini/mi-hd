@@ -1,6 +1,6 @@
 # Project:   imputeHD-comp
 # Objective: Compute probability of a dublicated dataset
-# Author:    Edoardo Costantini
+# Author:    Anonymized for peer review
 # Created:   2022-06-03
 # Modified:  2022-06-03
 

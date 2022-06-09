@@ -1,5 +1,5 @@
 ### Title:    Imputing High Dimensional Data: cart imputation
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-19
 
 impute_MICE_CART <- function(Z, parms){

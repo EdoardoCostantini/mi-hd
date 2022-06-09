@@ -1,6 +1,6 @@
 ### Title:    Elastic Net imputation time and cross-validation
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-19
 
 rm(list=ls())

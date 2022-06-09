@@ -1,5 +1,5 @@
 ### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-09
 ### Notes:    Differs from version 1 in the code folder in what imputations
 ###           are stored: here we store the last imputed datasets of distinct

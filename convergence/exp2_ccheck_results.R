@@ -1,6 +1,6 @@
 ### Title:    Conergence Check Blasso
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-07-03
 ### Notes:    The goal is to find out how many iterations should be used
 ###           in the full study for each method.

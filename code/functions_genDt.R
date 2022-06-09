@@ -1,6 +1,6 @@
 ### Title:    data geneartion functions
 ### Porject:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-23
 ### Modified: 2021-08-17
 

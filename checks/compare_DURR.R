@@ -1,5 +1,5 @@
 ### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-08
 ### Notes:    This shows the equivalence of my fun_DURR_impute.R with an
 ###           implementation of DURR within the mice R package framework

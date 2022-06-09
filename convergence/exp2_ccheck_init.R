@@ -1,6 +1,6 @@
 ### Title:    Convergence Checks: Initialization Script for Exp 2
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-08-11
 ### Notes:    The goal is to find out how many iterations should be used
 ###           in the full study for each method.

@@ -1,5 +1,5 @@
 ### Title:    Replication Zhao Long 2016 - Check certain key elements
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-02-20
 ### Modified: 2020-02-20
 ### Notes:    Check whether some setups of the simulation are achieved

@@ -1,5 +1,5 @@
 ### Title:    Replication Deng Et Al 2016 - Simulation script
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-05
 
 rm(list=ls())

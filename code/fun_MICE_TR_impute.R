@@ -1,6 +1,6 @@
 ### Title:    Imputation according to optimal oracle imputation model
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-19
 
 impute_MICE_OP <- function(Z, O, cond, perform = TRUE, parms = parms){

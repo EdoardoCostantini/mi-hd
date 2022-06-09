@@ -1,6 +1,6 @@
 ### Title:    Generating lavan model text file for experiment 2
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-08-05
 
 ## To get a model, create the object parms$z_m_id

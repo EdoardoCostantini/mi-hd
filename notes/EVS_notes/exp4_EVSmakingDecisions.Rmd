@@ -1,6 +1,6 @@
 ---
 title: "Making Choices about the EVS data"
-author: "Edoardo Costantini"
+author: "Anonymized for peer review"
 date: "9/22/2020"
 output:
   html_document: default

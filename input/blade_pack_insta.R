@@ -1,5 +1,5 @@
 ### Title:    Intialization for Blade Computing run
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-16
 
 # Packges to install:

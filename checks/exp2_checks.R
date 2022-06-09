@@ -1,6 +1,6 @@
 ### Title:    Checking parts of experiment 2 work as expected
 ### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-19
 
 # Data Generation Latent Structure ----------------------------------------

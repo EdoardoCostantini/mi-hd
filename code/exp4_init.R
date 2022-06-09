@@ -1,6 +1,6 @@
 # Title:    Initialization scirpt parameter
 # Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
+# Author:   Anonymized for peer review
 # Created:  2020-07-01
 # Modified: 2022-02-25
 

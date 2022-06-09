@@ -1,5 +1,5 @@
 ### Title:    Compare dataset with missings and pmm imputed dataset
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-09-18
 
 rm(list=ls())

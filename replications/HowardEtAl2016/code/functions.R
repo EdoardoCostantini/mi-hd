@@ -1,5 +1,5 @@
 ### Title:    Replication Howard et al 2015
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-05-18
 
 # data generation ---------------------------------------------------------

@@ -1,5 +1,5 @@
 ### Title:    Run imputations (parallel)
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-02-13
 ### Modified: 2020-02-15
 ### Note:     This version of the parallel imputation uses parLapply

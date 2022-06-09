@@ -1,5 +1,5 @@
 ### Title:    mice.impute.IURR
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-06-09
 ### Notes:    Create a version of mice.impute.method that corresponds to your 
 ###           IURR proposition in DengEtAl 2016

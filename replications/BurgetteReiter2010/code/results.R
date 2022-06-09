@@ -1,5 +1,5 @@
 ### Title:    Replication Burgette Reiter 2010 - Compare methods
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-02-10
 ### Modified: 2020-02-14
 

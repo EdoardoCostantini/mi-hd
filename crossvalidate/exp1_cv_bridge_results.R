@@ -1,6 +1,6 @@
 # Title:    Simulation script for ridge paramter cross-validation
 # Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
+# Author:   Anonymized for peer review
 # Created:  2020-08-25
 # Modified: 2022-02-25
 

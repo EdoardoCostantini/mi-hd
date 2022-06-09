@@ -1,5 +1,5 @@
 ### Title:    test IURR approach
-### Author:   Edoardo Costantini
+### Author:   Anonymized for peer review
 ### Created:  2020-03-05
 ### Modified: 2020-03-05
 ### Notes:    test what might go wrong with the IURR impute function
