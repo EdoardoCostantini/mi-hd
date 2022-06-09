@@ -1,0 +1,12 @@
+BRIDGE CROSSVALIDATION PROGRESS REPORT
+Description: In each repetition, 1 dataset is created for each condition.
+        Imputation methods are used on that condition-specific dataset.
+        Results are therefore given per dataset in condition
+
+------
+Starts at: 2022-02-23 10:00:25
+------
+
+2022-02-23 10:00:25 - Starts Repetition: 3
+2022-02-23 10:00:25 - Starts Repetition: 1
+2022-02-23 10:00:25 - Starts Repetition: 2
