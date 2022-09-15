@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-04-01
+# Modified: 2022-09-15
 
 # generic functions -------------------------------------------------------
 
@@ -2777,6 +2777,10 @@ plotwise <- function(res,
                    function(x) data.frame( res[[model]][[x]]$bias_per))[1:4]
   dt_cico = lapply(1:length(res[[model]]),
                    function(x) data.frame( res[[model]][[x]]$ci_cov))[1:4]
+  dt_CIW = lapply(
+    1:length(res[[model]]),
+    function(x) data.frame(res[[model]][[x]]$CIW)
+  )[1:4]
 
   # Isolate parameters and methods for comparison
   dt_bias <- lapply(parPlot, function(x){
@@ -2790,6 +2794,15 @@ plotwise <- function(res,
 
   dt_cico <- lapply(parPlot, function(x){
     lapply(dt_cico, function(d){
+      # Check which of the desired methods are here
+      colIndex <- colnames(d) %in% meth_compare
+      # Select the corresponding columns
+      d[x, colIndex]
+    })
+  })
+
+  dt_CIW <- lapply(parPlot, function(x) {
+    lapply(dt_CIW, function(d) {
       # Check which of the desired methods are here
       colIndex <- colnames(d) %in% meth_compare
       # Select the corresponding columns
@@ -2818,12 +2831,13 @@ plotwise <- function(res,
 
   # Populate matrix for facet_grid
   for (p in 1:n_parms) {
-    # p <- 3
+    # p <- 1
     for(cc in 1:n_conds){
       # cc <- 1
       # Extract Results to be processed
       results_bias <- abs(dt_bias[[p]][[cc]])
       results_cico <- abs(dt_cico[[p]][[cc]])
+      results_CIW <- abs(dt_CIW[[p]][[cc]])
 
       # Create groups of parameters
       if(p != 3){
@@ -2842,13 +2856,15 @@ plotwise <- function(res,
       # Obtain Min, Mean, Max
       out_bias <- t(sapply(results_bias, summary)[c("Min.", "Mean", "Max."), ])
       out_cico <- t(sapply(results_cico, summary)[c("Min.", "Mean", "Max."), ])
+      out_CIW <- t(sapply(results_CIW, summary)[c("Min.", "Mean", "Max."), ])
 
       # Group Means
       out_bias <- cbind(out_bias, t(sapply(results_bias, tapply, par_group, mean)))
       out_cico <- cbind(out_cico, t(sapply(results_cico, tapply, par_group, mean)))
+      out_CIW <- cbind(out_CIW, t(sapply(results_CIW, tapply, par_group, mean)))
 
       # Stack results
-      results <- rbind(out_bias, out_cico)
+      results <- rbind(out_bias, out_cico, out_CIW)
 
       # Correct names and dimensions
       rownames(results) <- sub("_", "-", rownames(results))
@@ -2863,7 +2879,7 @@ plotwise <- function(res,
         methods = factor(rownames(results),
                          levels = rownames(results),
                          labels = rownames(results)),
-        analysis = rep(c("Bias", "CI coverage"), each = nrow(out_bias)),
+        analysis = rep(c("Bias", "CI coverage", "CI width"), each = nrow(out_bias)),
         results
       )
       colnames(out) <- colnames(store)

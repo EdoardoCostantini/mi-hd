@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-09
-# Modified: 2022-04-01
+# Modified: 2022-09-15
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -132,7 +132,8 @@
            units = "cm",
            pf)
 
-  # Confidence Interval
+# Confidence interval coverage ------------------------------------------------
+
   x <- 2 # Confidence intervals
   methods_sel <- levels(output_sem$methods)#[-8]
 
@@ -229,3 +230,90 @@
            units = "cm",
            pf)
 
+# Confidence Interval Width ---------------------------------------------------
+
+# SE for threshold
+dt_reps <- 1e3
+
+# Fix methods order
+output_sem$methods <- factor(output_sem$methods,
+  levels = levels(output_sem$methods)[c(1:7, 11:12, 8, 9, 10)]
+)
+
+# Bias
+x <- 3 # CIW
+methods_sel <- levels(output_sem$methods)[-c(12)]
+
+pf <- output_sem %>%
+  filter(
+    analysis == unique(analysis)[x],
+    grepl(pm_grep, cond),
+    variable %in% c("Mean"),
+    methods %in% methods_sel
+  ) %>%
+  # Drop pm = ** as we are plotting only one value for this condition
+  mutate(cond = fct_relabel(
+    cond,
+    str_replace,
+    " pm = [0-9]\\.[0-9]", ""
+  )) %>%
+  mutate(methods = fct_relabel(
+    methods,
+    str_replace,
+    "-la", ""
+  )) %>%
+  # Main Plot
+  ggplot(data = ., aes(
+    y = methods,
+    x = value
+  )) +
+  geom_point(size = 1.75) +
+  # Grid
+  facet_grid(
+    rows = vars(factor(parm,
+      levels = unique(parm)
+    )),
+    cols = vars(cond)
+  ) +
+  coord_cartesian(xlim = c(0, 10)) +
+  
+  # Format
+  scale_y_discrete(limits = rev) +
+  labs( # title = label_parm[x],
+    x = NULL,
+    y = NULL,
+    linetype = NULL
+  ) +
+  theme(
+    panel.background = element_rect(
+      fill = NA,
+      color = "gray"
+    ),
+    panel.grid.major = element_line(
+      color = "gray",
+      size = 0.15,
+      linetype = 1
+    ),
+    legend.key = element_rect(
+      colour = "gray",
+      fill = NA,
+      size = .15
+    ),
+    text = element_text(size = 9),
+    axis.ticks = element_blank(),
+    legend.position = "none"
+  )
+
+pf
+
+plot_name <- paste0(
+  "../output/graphs/exp1_", "ciw", "_",
+  as.numeric(pm_grep) * 100, "revision.pdf"
+)
+
+ggsave(
+  file = plot_name,
+  width = gp_width, height = gp_height * .65,
+  units = "cm",
+  pf
+)
