@@ -1,13 +1,13 @@
-### Title:    Initialization scirpt, general (functions and packages)
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-07-01
-### Modified: 2022-01-28
+# Title:    Initialization scirpt, general (functions and packages)
+# Project:  Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-07-01
+# Modified: 2022-09-15
 
 # Packages ----------------------------------------------------------------
 
 pack_list <- c("tidyverse",
-               "CVTuningCov",
+            #    "CVTuningCov",
                "mvtnorm",
                "monomvn",
                "glmnet",
@@ -28,6 +28,12 @@ pack_list <- c("tidyverse",
                "PcAux",
                "blasso")
 
+# If not available, install
+for(PKG in pack_list){
+    if (!require(PKG, character.only = TRUE)) install.packages(PKG)
+}
+
+# then load all
 lapply(pack_list, library, character.only = TRUE)
 
 # Support Functions -------------------------------------------------------
