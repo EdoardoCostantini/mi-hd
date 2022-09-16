@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-27
-# Modified: 2022-04-01
+# Modified: 2022-09-16
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -232,16 +232,17 @@
   # > CIW (Facet) ####
   pt1 <- plot_exp4_meth(dt = lapply(1:length(res$m1),
                                     function(x) res$m1[[x]]$CIW),
-                        type = "ciw",
+                        type = "CIW",
                         dt_reps = 1e3,
                         ci_lvl = .95,
                         meth_compare = meths)
   pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
                                     function(x) res$m2[[x]]$CIW),
-                        type = "ciw",
+                        type = "CIW",
                         dt_reps = 1e3,
                         ci_lvl = .95,
                         meth_compare = meths)
+
   ggsave(pt1,
          file = "../output/graphs/exp4_imp_ciw_allParms_m1.pdf",
          width = sp_width*2, height = sp_height*2,

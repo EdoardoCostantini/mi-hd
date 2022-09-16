@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-10-05
-# Modified: 2022-02-16
+# Modified: 2022-09-16
 
   rm(list = ls())
   source("./init_general.R")
@@ -226,6 +226,7 @@ out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$metho
   # Bias for a given model
   lapply(1:length(out[[1]]), function(x) m1_res[[x]]$bias_per)
   lapply(1:length(out[[1]]), function(x) round(m1_res[[x]]$bias_sd, 1))
+  lapply(1:length(out[[1]]), function(x) m1_res[[x]]$CIW)
   
   # CI
   lapply(1:length(out[[1]]), function(x) m1_res[[x]]$ci_cov)
@@ -243,6 +244,7 @@ out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$metho
   # Bias for model 2
   lapply(1:length(out[[1]]), function(x) m2_res[[x]]$bias_per)
   lapply(1:length(out[[1]]), function(x) round(m2_res[[x]]$bias_sd, 1))
+  lapply(1:length(out[[1]]), function(x) m2_res[[x]]$CIW)
   
   # CI
   lapply(1:length(out[[1]]), function(x) m2_res[[x]]$ci_cov)

@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-upmod
+# Modified:  2022-09-16
 
 # generic functions -------------------------------------------------------
 
@@ -2404,6 +2404,24 @@ plot_exp4_meth <- function(dt,
     plot_vlines <- c(-5, low_thr, hig_thr, 4)
   }
 
+  if (type == "CIW") {
+    # Plot Limits
+    plot_xlim <- c(0, 10)
+
+    # Color bras that are above x limit differently
+    levs <- c(no = "<10%", yes = ">10%")
+
+    # Grid Plot Color based on exceeding or not PRB reference
+    flag <- ifelse(dt_edit$value >= 10, yes = levs[2], no = levs[1])
+    # flag[dt_edit$par %in% small.ef] <- "Largest Bias"
+    dt_edit$flag <- factor(flag, levels = levs)
+
+    # X axis
+    plot_xbreaks <- seq(min(plot_xlim), max(plot_xlim), by = 1)
+    plot_xlabels <- as.character(plot_xbreaks)
+    plot_vlines <- NULL
+  }
+
   # Colors and texts
   font.plot        <- "Arial" # font for the whole plot
   x.axis.text.size <- 7.5 # Scale of plotted numbers
@@ -2820,16 +2838,16 @@ plotwise <- function(res,
   if (model == "sem") {
     store <- data.frame(
       parm = NA,
-                      cond = NA,
-                      methods = NA,
-                      analysis = NA,
-                      Min. = NA,
-                      Mean = NA,
-                      Max. = NA,
-                      mean_i1 = NA,
-                      mean_i2 = NA,
-                      mean_i12 = NA
-  )[0, ]
+      cond = NA,
+      methods = NA,
+      analysis = NA,
+      Min. = NA,
+      Mean = NA,
+      Max. = NA,
+      mean_i1 = NA,
+      mean_i2 = NA,
+      mean_i12 = NA
+    )[0, ]
   } else {
     store <- data.frame(
       parm = NA,
@@ -2853,18 +2871,18 @@ plotwise <- function(res,
       results_CIW <- abs(dt_CIW[[p]][[cc]])
 
       if (model == "sem") {
-      # Create groups of parameters
+        # Create groups of parameters
         if (p != 3) {
           par_group <- rep(1:2, each = length(parPlot[[p]]) / 2)
-      }
+        }
         if (p == 3) {
-        # Define the unique covariances
-        x <- t(combn(1:length(parPlot$Means), 2))
-        par_group <- rep(NA, nrow(x))
-        # Define which unique covariances go where
-        par_group[which(x[, 1] %in% item_group & x[, 2] %in% item_group)] <- 1
-        par_group[which(x[, 1] %in% item_group & !x[, 2] %in% item_group)] <- 2
-        par_group[which(!x[, 1] %in% item_group & !x[, 2] %in% item_group)] <- 3
+          # Define the unique covariances
+          x <- t(combn(1:length(parPlot$Means), 2))
+          par_group <- rep(NA, nrow(x))
+          # Define which unique covariances go where
+          par_group[which(x[, 1] %in% item_group & x[, 2] %in% item_group)] <- 1
+          par_group[which(x[, 1] %in% item_group & !x[, 2] %in% item_group)] <- 2
+          par_group[which(!x[, 1] %in% item_group & !x[, 2] %in% item_group)] <- 3
         }
       }
 
@@ -2875,9 +2893,9 @@ plotwise <- function(res,
 
       if (model == "sem") {
         # Item groups Means (strong weak items)
-      out_bias <- cbind(out_bias, t(sapply(results_bias, tapply, par_group, mean)))
-      out_cico <- cbind(out_cico, t(sapply(results_cico, tapply, par_group, mean)))
-      out_CIW <- cbind(out_CIW, t(sapply(results_CIW, tapply, par_group, mean)))
+        out_bias <- cbind(out_bias, t(sapply(results_bias, tapply, par_group, mean)))
+        out_cico <- cbind(out_cico, t(sapply(results_cico, tapply, par_group, mean)))
+        out_CIW <- cbind(out_CIW, t(sapply(results_CIW, tapply, par_group, mean)))
       }
 
       # Stack results
