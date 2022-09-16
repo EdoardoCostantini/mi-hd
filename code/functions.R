@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-09-15
+upmod
 
 # generic functions -------------------------------------------------------
 
@@ -2817,7 +2817,9 @@ plotwise <- function(res,
                        " (", sapply(parPlot, length), ")")
 
   # Create a data matrix structure for facet_grid
-  store <- data.frame(parm = NA,
+  if (model == "sem") {
+    store <- data.frame(
+      parm = NA,
                       cond = NA,
                       methods = NA,
                       analysis = NA,
@@ -2828,6 +2830,17 @@ plotwise <- function(res,
                       mean_i2 = NA,
                       mean_i12 = NA
   )[0, ]
+  } else {
+    store <- data.frame(
+      parm = NA,
+      cond = NA,
+      methods = NA,
+      analysis = NA,
+      Min. = NA,
+      Mean = NA,
+      Max. = NA
+    )[0, ]
+  }
 
   # Populate matrix for facet_grid
   for (p in 1:n_parms) {
@@ -2839,11 +2852,12 @@ plotwise <- function(res,
       results_cico <- abs(dt_cico[[p]][[cc]])
       results_CIW <- abs(dt_CIW[[p]][[cc]])
 
+      if (model == "sem") {
       # Create groups of parameters
-      if(p != 3){
-        par_group <- rep(1:2, each = length(parPlot[[p]])/2)
+        if (p != 3) {
+          par_group <- rep(1:2, each = length(parPlot[[p]]) / 2)
       }
-      if(p == 3){
+        if (p == 3) {
         # Define the unique covariances
         x <- t(combn(1:length(parPlot$Means), 2))
         par_group <- rep(NA, nrow(x))
@@ -2851,6 +2865,7 @@ plotwise <- function(res,
         par_group[which(x[, 1] %in% item_group & x[, 2] %in% item_group)] <- 1
         par_group[which(x[, 1] %in% item_group & !x[, 2] %in% item_group)] <- 2
         par_group[which(!x[, 1] %in% item_group & !x[, 2] %in% item_group)] <- 3
+        }
       }
 
       # Obtain Min, Mean, Max
@@ -2858,10 +2873,12 @@ plotwise <- function(res,
       out_cico <- t(sapply(results_cico, summary)[c("Min.", "Mean", "Max."), ])
       out_CIW <- t(sapply(results_CIW, summary)[c("Min.", "Mean", "Max."), ])
 
-      # Group Means
+      if (model == "sem") {
+        # Item groups Means (strong weak items)
       out_bias <- cbind(out_bias, t(sapply(results_bias, tapply, par_group, mean)))
       out_cico <- cbind(out_cico, t(sapply(results_cico, tapply, par_group, mean)))
       out_CIW <- cbind(out_CIW, t(sapply(results_CIW, tapply, par_group, mean)))
+      }
 
       # Stack results
       results <- rbind(out_bias, out_cico, out_CIW)

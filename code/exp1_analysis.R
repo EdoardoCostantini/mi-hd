@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-09
-# Modified: 2022-09-15
+# Modified: 2022-09-16
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -13,6 +13,7 @@
   res <- readRDS("../output/exp1_simOut_2020121516_res.rds") # original results
   res <- readRDS("../output/exp1_simOut_20220201_1749_res.rds") # results with MI_qp and MI_am
   res <- readRDS("../output/exp1_simOut_20220225_1035_res.rds") # results bridge w/ intercept
+  res <- readRDS("../output/exp1_simOut_20220225_1035_lm_res.rds") # results bridge w/ intercept lm model
 
   # Change names of methods if required
   levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")

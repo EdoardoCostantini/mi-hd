@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-02-28
+# Modified: 2022-09-16
 
   rm(list = ls())
   source("./init_general.R")
@@ -228,17 +228,44 @@ cbind(bs_out[[id]]$cond_50_FALSE_0.3$sem_EST[, "bridge"],
   output$parms <- out$parms
   output$conds <- out$conds
 
-  # Transform for plot
-  gg_out_sem <- plotwise(res = output,
-                         model = "sem",
-                         parPlot = list(Means = 1:6,
-                                        Variances = 7:12,
-                                        Covariances = 13:27),
-                         item_group = c(1:3), # items in a group recieving miss values
-                         meth_compare = c("DURR_la","IURR_la", "blasso", "bridge",
-                                          "MI_PCA", "MI_CART" ,"MI_RF",
-                                          "MI_OP",
-                                          "CC", "GS", "MI_qp", "MI_am"))
+  # Transform for plot lm model
+  gg_out_lm <- plotwise(
+    res = output,
+    model = "lm",
+    parPlot = list(Betas = 1:5),
+    item_group = c(1:3), # items in a group recieving miss values
+    meth_compare = c(
+      "DURR_la", "IURR_la", "blasso", "bridge",
+      "MI_PCA", "MI_CART", "MI_RF",
+      "MI_OP",
+      "CC", "GS", "MI_qp", "MI_am"
+    )
+  )
+
+  # Save
+  filename_lm <- paste0("exp1_simOut_20220225_1035_lm")
+  saveRDS(
+    gg_out_lm,
+    paste0("../output/", filename_lm, "_res.rds")
+  )
+
+  # Transform for plot sem model
+  gg_out_sem <- plotwise(
+    res = output,
+    model = "sem",
+    parPlot = list(
+      Means = 1:6,
+      Variances = 7:12,
+      Covariances = 13:27
+    ),
+    item_group = c(1:3), # items in a group recieving miss values
+    meth_compare = c(
+      "DURR_la", "IURR_la", "blasso", "bridge",
+      "MI_PCA", "MI_CART", "MI_RF",
+      "MI_OP",
+      "CC", "GS", "MI_qp", "MI_am"
+    )
+  )
 
   # Save
   filename <- paste0("exp1_simOut_20220225_1035")
