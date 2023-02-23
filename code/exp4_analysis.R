@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-27
-# Modified: 2022-09-16
+# Modified: 2023-02-23
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -245,12 +245,12 @@
 
   ggsave(pt1,
          file = "../output/graphs/exp4_imp_ciw_allParms_m1.pdf",
-         width = sp_width*2, height = sp_height*2,
+         width = 15, height = 21,
          units = "cm",
          device = cairo_pdf)
   ggsave(pt2,
          file = "../output/graphs/exp4_imp_ciw_allParms_m2.pdf",
-         width = sp_width*2, height = sp_height*2,
+         width = 15, height = 21,
          units = "cm",
          device = cairo_pdf)
   
