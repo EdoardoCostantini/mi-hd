@@ -79,7 +79,7 @@ simData_lv <- function(parms, cond){
 # (1) Block structure/Autoregressive correlation structure
   Phi <- diag(cond$lv)
   # Block 1: highly correlated variables
-  Phi[parms$blck1, ] <- .99
+  Phi[parms$blck1, ] <- parms$blck1_r
   # Block 2: not so highly correlated variables
   Phi[parms$blck2, ] <- parms$blck2_r
   # Block 3: uncorrelated variables
@@ -141,8 +141,6 @@ simData_lv <- function(parms, cond){
     x[i, ] <- t(parms$item_mean + Lambda %*% scs_lv[i, ] + scs_delta[i, ])
   }
   colnames(x) <- paste0("z", seq(1:n_it_tot))
-
-  cor(x)[1:15, 1:15]
 
   # Function output
   return( list(dat    = as.data.frame(x),
