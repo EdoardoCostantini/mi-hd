@@ -24,8 +24,6 @@ simData_exp1 <- function(cond, parms){
 
   # Check collinearity condition is present in the set
     if("collinearity" %in% colnames(cond)){
-      # Within-block-1 correlation
-      Sigma[parms$blck1, parms$blck1] <- cond$collinearity
       # Within-block-2 correlation
       Sigma[parms$blck2, parms$blck2] <- cond$collinearity
       # Within-block-3 correlation
