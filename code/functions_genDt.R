@@ -2,27 +2,42 @@
 ### Porject:  Imputing High Dimensional Data
 ### Author:   Edoardo Costantini
 ### Created:  2020-06-23
-### Modified: 2021-08-17
+### Modified: 2023-03-17
 
 # Experiment 1: Multivariate Data -----------------------------------------
 simData_exp1 <- function(cond, parms){
   # For internals
-  # cond <- conds[1,]
+  # cond <- conds[4,]
   
   # 1. Generate covariance matrix -----------------------------------------
     Sigma <- diag(cond$p)
+    
   # Block 1: highly correlated variables
     Sigma[parms$blck1, ] <- parms$blck1_r
+
   # Block 2: not so highly correlated variables
     Sigma[parms$blck2, ] <- parms$blck2_r
+
   # Block 3: uncorrelated variables
     block3_p <- cond$p - length(c(parms$blck1, parms$blck2))
     Sigma[-c(parms$blck1, parms$blck2), ] <- .01
+
+  # Check collinearity condition is present in the set
+    if("collinearity" %in% colnames(cond)){
+      # Within-block-1 correlation
+      Sigma[parms$blck1, parms$blck1] <- cond$collinearity
+      # Within-block-2 correlation
+      Sigma[parms$blck2, parms$blck2] <- cond$collinearity
+      # Within-block-3 correlation
+      Sigma[-c(parms$blck1, parms$blck2), -c(parms$blck1, parms$blck2)] <- cond$collinearity
+    }
+
   # Fix diagonal
     diag(Sigma) <- 1
+
   # Make symmetric
     Sigma[upper.tri(Sigma)] <- t(Sigma)[upper.tri(Sigma)]
-  
+
   # 2. Gen n x p data -----------------------------------------------------
     # Sample
     Z <- rmvnorm(n     = parms$n, 
