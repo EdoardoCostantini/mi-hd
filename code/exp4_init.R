@@ -82,21 +82,24 @@
 
 # Imputation methods ------------------------------------------------------
   parms$alphaCI <- .95 # confidence level for parameters CI
-  parms$meth_sel <- data.frame(DURR_la    = FALSE,
-                               IURR_la    = FALSE,
-                               blasso     = FALSE,
-                               bridge     = FALSE,
-                               MI_PCA     = FALSE,
-                               MI_CART    = FALSE,
-                               MI_RF      = FALSE,
-                               MI_qp      = TRUE,
-                               MI_am      = TRUE,
-                               MI_OP      = TRUE,
-                               missFor    = TRUE,
-                               mean       = TRUE,
-                               CC         = TRUE,
-                               GS         = TRUE)
-  
+  parms$meth_sel <- data.frame(
+    DURR_la = FALSE,
+    IURR_la = FALSE,
+    blasso = FALSE,
+    bridge = FALSE,
+    MI_PCA = FALSE,
+    MI_CART = FALSE,
+    MI_RF = FALSE,
+    stepFor = TRUE,
+    MI_qp = FALSE,
+    MI_am = FALSE,
+    MI_OP = FALSE,
+    missFor = TRUE,
+    mean = TRUE,
+    CC = TRUE,
+    GS = TRUE
+  )
+
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
     # (missFor, mean, CC, GS always last, alwyas present)
   

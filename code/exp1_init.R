@@ -100,6 +100,7 @@
                                MI_PCA     = FALSE,
                                MI_CART    = FALSE,
                                MI_RF      = FALSE,
+                               stepFor    = TRUE,
                                MI_qp      = TRUE,
                                MI_am      = TRUE,
                                MI_OP      = TRUE,

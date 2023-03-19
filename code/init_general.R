@@ -26,6 +26,9 @@ pack_list <- c("tidyverse",
                "plot.matrix", # for missing data pattern plot
                "xtable",
                "PcAux",
+               "miceadds",
+               "ridge",
+               "imputeR",
                "blasso")
 
 # If not available, install
