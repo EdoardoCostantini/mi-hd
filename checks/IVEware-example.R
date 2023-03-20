@@ -1,7 +1,9 @@
 # Title:    Example imputation with IVEware 
 # Author:   Edoardo Costantini
 # Created:  2023-02-23
-# Modified: 2023-02-23
+# Modified: 2023-03-20
+
+# Simple example ---------------------------------------------------------------
 
 # Load IVEwareExampleData example data for imputation
 load(file = "../data/IVEwareExampleData.rda")
@@ -53,3 +55,12 @@ cbind(
     imp1 = imp_list[[1]][NA_index, var_to_check],
     imp2 = imp_list[[2]][NA_index, var_to_check]
 )
+
+# List files in the directory
+files <- list.files()
+
+# Identify the ones that are not R scripts or .set (IVEware instructions)
+files.to.remove <- files[!grepl(pattern = "*.R|*.set", x = files)]
+
+# Remove files
+lapply(files.to.remove, unlink)
