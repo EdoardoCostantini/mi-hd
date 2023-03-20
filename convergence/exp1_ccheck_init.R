@@ -9,19 +9,22 @@
 source("./exp1_init.R")
 
 # Decide which methods you car about for the convergence check
-parms$meth_sel <- data.frame(DURR_la = TRUE,
-                             DURR_el = FALSE,
-                             IURR_la = TRUE,
-                             IURR_el = FALSE,
-                             blasso  = TRUE,
-                             bridge  = TRUE,
-                             MI_PCA  = TRUE,
-                             MI_CART = TRUE,
-                             MI_RF   = TRUE,
-                             MI_OP   = TRUE,
-                             missFor = TRUE,
-                             GS      = TRUE,
-                             CC      = TRUE
+parms$meth_sel <- data.frame(
+    DURR_la = FALSE,
+    IURR_la = FALSE,
+    blasso = FALSE,
+    bridge = FALSE,
+    MI_PCA = FALSE,
+    MI_CART = FALSE,
+    MI_RF = FALSE,
+    stepFor = TRUE,
+    MI_qp = FALSE,
+    MI_am = FALSE,
+    MI_OP = FALSE,
+    missFor = TRUE,
+    mean = TRUE,
+    CC = TRUE,
+    GS = TRUE
 )
 
 # Decide which paramters suit best the convergence check
