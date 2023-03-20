@@ -91,7 +91,7 @@
   ##       it creates problems. Run it just once to have it in the correct folder.
   parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), collapse="\n")
   
-  
+
 # Generic
   parms$meth_sel <- data.frame(DURR_la    = FALSE,
                                IURR_la    = FALSE,
@@ -172,9 +172,15 @@
   p   <- c(50, 500) # c(50, 500) # number of variables
   latent <- c(FALSE, TRUE)[1]
   pm <- c(.1, .3)
+
+  # Bridge special parameters
   ridge <- c(1e-1, 1e-07, 1e-1, 1e-7) # values found w/ corssvalidation
-  
+
+  # IVEware special parameters
+  minR2 <- c(.01, .01, .01, .01) # TODO: to be cross-validated
+
+  # Create conditions  
   conds <- expand.grid(p, latent, pm)
     colnames(conds) <- c("p", "latent", "pm")
   conds$ridge <- ridge
-    
+  conds$minR2 <- minR2

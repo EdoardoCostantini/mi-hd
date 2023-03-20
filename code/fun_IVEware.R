@@ -4,7 +4,7 @@
 # Created:  2023-03-20
 # Modified: 2023-03-20
 
-impute_IVEware <- function(Z, perform = TRUE, parms = parms){
+impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values
@@ -12,6 +12,7 @@ impute_IVEware <- function(Z, perform = TRUE, parms = parms){
   
   ## Example inputs
   # Z = Xy_mis # or
+  # minR2 = 0.01
   # parms = parms
   
   ## output: 
@@ -38,7 +39,7 @@ impute_IVEware <- function(Z, perform = TRUE, parms = parms){
         "datain Z; \n",
         "dataout Z_imputed; \n",
         "default continuous; \n",
-        "minrsqd .01; \n",
+        paste0("minrsqd ", minR2, "; \n"),
         paste0("iterations ", parms$iters, "; \n"),
         paste0("multiples ", parms$mice_ndt, "; \n"),
         "run;",

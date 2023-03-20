@@ -184,7 +184,7 @@ runCell <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./exp1_init.R")
-  # cond <- conds[1, ]
+  # cond <- conds[4, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
@@ -250,6 +250,7 @@ runCell <- function(cond, parms, rep_status) {
   # MICE w/ step-wise forward regression
   imp_stepFor <- impute_IVEware(
     Z = Xy_mis,
+    minR2 = cond$minR2,
     parms = parms
   )
 
