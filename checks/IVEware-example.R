@@ -20,7 +20,7 @@ source(
 )
 
 # Store the file name containing the imputation instructions
-instr <- "IVEware-instructions"
+instr <- "IVEwareExampleInstr"
 
 # Perform the imputations
 impute(name = instr)
@@ -31,7 +31,7 @@ M <- 5
 # Store the outputs
 lapply(1:M, function(m){
     putdata(
-        name = "IVEware-instructions", 
+        name = "IVEwareExampleInstr", 
         dataout = paste0("imp_", m), 
         mult = m)
 })
