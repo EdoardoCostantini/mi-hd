@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-02-25
+# Modified: 2023-03-20
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -101,9 +101,9 @@
                                MI_CART    = FALSE,
                                MI_RF      = FALSE,
                                stepFor    = TRUE,
-                               MI_qp      = TRUE,
-                               MI_am      = TRUE,
-                               MI_OP      = TRUE,
+                               MI_qp      = FALSE,
+                               MI_am      = FALSE,
+                               MI_OP      = FALSE,
                                missFor    = TRUE,
                                mean       = TRUE,
                                CC         = TRUE,

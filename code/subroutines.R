@@ -248,12 +248,8 @@ runCell <- function(cond, parms, rep_status) {
                           parms = parms)
 
   # MICE w/ step-wise forward regression
-  imp_stepFor <- impute_stepwise(
+  imp_stepFor <- impute_IVEware(
     Z = Xy_mis,
-    O = as.data.frame(O),
-    direction = "forw",
-    cond = cond,
-    perform = parms$meth_sel$stepFor,
     parms = parms
   )
 

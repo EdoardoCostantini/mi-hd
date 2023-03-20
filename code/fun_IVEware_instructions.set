@@ -1,0 +1,8 @@
+title Multiple imputation; 
+ datain Z; 
+ dataout Z_imputed; 
+ default continuous; 
+ minrsqd .01; 
+ iterations 5; 
+ multiples 5; 
+ run;
