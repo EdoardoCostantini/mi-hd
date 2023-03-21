@@ -60,7 +60,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
     )
 
     # Define a log file to store all the console output
-    IVEware_log <- file(paste0(instr, "_log.txt"))
+    IVEware_log <- file(paste0(instr, ".txt"))
 
     # Sink the log
     sink(IVEware_log, append = TRUE, type = "output")
