@@ -831,6 +831,14 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
 
+
+  # MICE w/ step-wise forward regression
+  imp_stepFor <- impute_IVEware(
+    Z = Xy_mis,
+    minR2 = cond$minR2,
+    parms = parms
+  )
+
   # MICE w/ step-wise forward regression
   imp_stepFor <- impute_stepwise(
     Z = Xy_mis,

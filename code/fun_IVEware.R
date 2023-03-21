@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2023-03-20
-# Modified: 2023-03-20
+# Modified: 2023-03-21
 
 impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
   
@@ -24,24 +24,43 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
   if(perform == TRUE){
     
     tryCatch({
-      
-    start.time <- Sys.time()
+
+    # Identify variables under imputations in Z
+    target.Z <- names(which(colSums(is.na(Z)) != 0))
+
+    # Store a new version of Z
+    Z_IVEware <- Z
+
+    # Store current NA option
+    default.na.action <- options("na.action")$na.action
+
+    # Make sure options for na is set to pass
+    options(na.action = "na.pass")
+
+    # Make Z a design matrix as a data.frame
+    Z_IVEware <- data.frame(model.matrix(~., data = Z_IVEware)[, -1])
+
+    # Sanitize the names of the factors for easy processing in IVEware (required for evs)
+    colnames(Z_IVEware) <- paste0("v", 1:ncol(Z_IVEware))
+
+    # Identify variables under imputations in Z_IVEware
+    target.ZIVEware <- names(which(colSums(is.na(Z_IVEware)) != 0))
 
     # Save the current data set as a temp data for processing
-    save(Z, file = "Z.rda")
+    save(Z_IVEware, file = "Z_IVEware.rda")
 
     # Define instruction name
-    instr <- "fun_IVEware_instructions"
+    instr <- "fun_IVEware_instructions_EVS"
 
     # Assemble .set script
     cat(
         "title Multiple imputation; \n",
-        "datain Z; \n",
-        "dataout Z_imputed; \n",
+        "datain Z_IVEware; \n",
+        "dataout Z_IVEware_imputed; \n",
         "default continuous; \n",
         paste0("minrsqd ", minR2, "; \n"),
         paste0("iterations ", parms$iters, "; \n"),
-        paste0("maxpred ", ncol(Z), "; \n"),
+        paste0("maxpred ", ncol(Z)-1, "; \n"),
         paste0("multiples ", parms$mice_ndt, "; \n"),
         "print all; \n",
         "run;",
@@ -62,6 +81,9 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
     # Define a log file to store all the console output
     IVEware_log <- file(paste0(instr, ".txt"))
 
+    # Define start time
+    start.time <- Sys.time()
+
     # Sink the log
     sink(IVEware_log, append = TRUE, type = "output")
 
@@ -69,7 +91,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
     impute(name = instr)
 
     # Close the full log
-    closeAllConnections() # Close connection to log file
+    closeAllConnections()
 
     # Define end time
     end.time <- Sys.time()
@@ -88,8 +110,14 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
       # Load a dataset
       load(file = paste0("imp_", m, ".rda"))
 
+      # Make a copy of z
+      Z_temp <- Z
+
       # Return the dataset "imp" so that it can be stored separately
-      imp
+      Z_temp[, target.Z] <- imp[, target.ZIVEware]
+
+      # Return
+      Z_temp
     })
 
     # List files in the directory
