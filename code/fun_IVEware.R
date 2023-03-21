@@ -50,7 +50,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
     save(Z_IVEware, file = "Z_IVEware.rda")
 
     # Define instruction name
-    instr <- "fun_IVEware_instructions_EVS"
+    instr <- paste0("fun_IVEware_instructions_EVS")
 
     # Assemble .set script
     cat(
@@ -85,13 +85,13 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
     start.time <- Sys.time()
 
     # Sink the log
-    sink(IVEware_log, append = TRUE, type = "output")
+    # sink(IVEware_log, append = TRUE, type = "output")
 
     # Perform imputation
     impute(name = instr)
 
     # Close the full log
-    closeAllConnections()
+    # closeAllConnections()
 
     # Define end time
     end.time <- Sys.time()
