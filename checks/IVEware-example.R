@@ -53,7 +53,10 @@ NA_index <- is.na(IVEwareExampleData[, var_to_check])
 cbind(
     OG = IVEwareExampleData[NA_index, var_to_check],
     imp1 = imp_list[[1]][NA_index, var_to_check],
-    imp2 = imp_list[[2]][NA_index, var_to_check]
+    imp2 = imp_list[[2]][NA_index, var_to_check],
+    imp3 = imp_list[[3]][NA_index, var_to_check],
+    imp4 = imp_list[[4]][NA_index, var_to_check],
+    imp5 = imp_list[[5]][NA_index, var_to_check]
 )
 
 # List files in the directory

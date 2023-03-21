@@ -4,5 +4,7 @@ title Multiple imputation;
  default continuous; 
  minrsqd 0.01; 
  iterations 5; 
+ maxpred 500; 
  multiples 5; 
+ print all; 
  run;

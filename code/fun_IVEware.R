@@ -41,7 +41,9 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
         "default continuous; \n",
         paste0("minrsqd ", minR2, "; \n"),
         paste0("iterations ", parms$iters, "; \n"),
+        paste0("maxpred ", ncol(Z), "; \n"),
         paste0("multiples ", parms$mice_ndt, "; \n"),
+        "print all; \n",
         "run;",
         file = paste0(instr, ".set")
     )
@@ -57,8 +59,17 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
       )
     )
 
+    # Define a log file to store all the console output
+    IVEware_log <- file(paste0(instr, "_log.txt"))
+
+    # Sink the log
+    sink(IVEware_log, append = TRUE, type = "output")
+
     # Perform imputation
     impute(name = instr)
+
+    # Close the full log
+    closeAllConnections() # Close connection to log file
 
     # Define end time
     end.time <- Sys.time()
