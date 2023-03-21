@@ -17,6 +17,6 @@ out <- readRDS(paste0(dataDir, filename, ".rds"))
 range(out$conds$ridge)
 
 # Obtain conditions with cv ridge
-conds_bridge <- bridge_cv(out, exp_factors = c("n"))
+conds_bridge <- cvParm(out, exp_factors = c("n"))
 conds_bridge$values
 conds_bridge$plot
