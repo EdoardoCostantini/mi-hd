@@ -75,7 +75,7 @@ parms$results_file_name <- paste0(
 
 # > Conditions -----------------------------------------------------------------
 
-minR2 <- c(.1, .01)
+minR2 <- c(.2, 10^seq(from = -1, to = -5, by = -1))
 p <- c(50, 500) # c(50, 500) # number of variables
 latent <- c(FALSE, TRUE)[1]
 pm <- c(.1, .3)
@@ -110,6 +110,9 @@ saveRDS(
                 parms$results_file_name
         )
 )
+
+# Read the results again
+out <- readRDS("../output/exp1_cv_IVEware_20230321_1748.rds")
 
 # Obtain conditions with cv ridge
 conds_bridge <- cvParm(
