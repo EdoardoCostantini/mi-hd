@@ -21,7 +21,7 @@ parms
 conds
 
 # Create a cluster object:
-clus <- makeCluster(parms$dt_rep)
+clus <- makeCluster(5)
 
 # Prep Environments
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
