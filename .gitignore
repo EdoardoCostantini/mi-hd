@@ -62,6 +62,9 @@ rsconnect/
 # Ignore folder with notes
 /notes/data_notes
 
+# Ignore runs folder
+/runs
+
 # Ignore with packages
 /packages/
 
