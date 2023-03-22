@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2023-03-20
+# Modified: 2023-03-22
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -180,10 +180,10 @@
   pm <- c(.1, .3)
 
   # Bridge special parameters
-  ridge <- c(1e-1, 1e-07, 1e-1, 1e-7) # values found w/ corssvalidation
+  ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
 
   # IVEware special parameters
-  minR2 <- c(.01, .01, .01, .01) # TODO: to be cross-validated
+  minR2 <- c(.001, .001, .001, .001)
 
   # Create conditions  
   conds <- expand.grid(p, latent, pm)
