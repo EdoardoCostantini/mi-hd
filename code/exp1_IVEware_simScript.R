@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-25
-# Modified: 2022-02-23
+# Modified: 2023-03-22
 
 rm(list = ls())
 source("./init_general.R")
@@ -117,8 +117,8 @@ out <- readRDS("../output/exp1_cv_IVEware_20230321_1748.rds")
 # Obtain conditions with cv ridge
 conds_bridge <- cvParm(
         out = out,
-        cv.parm = colnames(conds)[1],
-        exp_factors = colnames(conds)[c(2, 4)]
+        cv.parm = colnames(out$conds)[1],
+        exp_factors = colnames(out$conds)[c(2, 4)]
 )
 
 # Look at plot
