@@ -23,6 +23,22 @@ clusterEvalQ(cl = clus, expr = source("./init_general.R"))
 clusterEvalQ(cl = clus, expr = source("./exp1_init.R"))
 clusterEvalQ(cl = clus, expr = source("../crossvalidate/exp1_cv_minR2_init.R"))
 
+# Create a progress report file
+file.create(paste0(parms$outDir, parms$report_file_name))
+cat(
+        paste0(
+                "IVEWARE MINR2 CROSSVALIDATION PROGRESS REPORT",
+                "\n",
+                "Description: ", parms$description, "\n",
+                "\n", "------", "\n",
+                "Starts at: ", Sys.time(),
+                "\n", "------", "\n"
+        ),
+        file = paste0(parms$outDir, parms$report_file_name),
+        sep = "\n",
+        append = TRUE
+)
+
 # Run the computations in parallel on the 'clus' object:
 out <- parLapply(
         cl = clus,
@@ -37,6 +53,20 @@ stopCluster(clus)
 
 # Time stamp: end
 sim_ends <- Sys.time()
+
+# Take note of end in progress report
+cat(
+        paste0(
+                "\n", "------", "\n",
+                "Ends at: ", Sys.time(), "\n",
+                "Run time: ",
+                round(difftime(sim_ends, sim_start, units = "hours"), 3), " h",
+                "\n", "------", "\n"
+        ),
+        file = paste0(parms$outDir, parms$report_file_name),
+        sep = "\n",
+        append = TRUE
+)
 
 # Append parms and conds to out object
 out$parms <- parms
