@@ -41,3 +41,7 @@
 # Copy the data folder
 
   cp -a data $loc/
+
+# Copy the readme
+
+  cp README.md $loc/
