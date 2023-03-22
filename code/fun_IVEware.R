@@ -71,7 +71,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parm
         paste0("minrsqd ", minR2, "; \n"),
         paste0("iterations ", parms$iters, "; \n"),
         paste0("maxpred ", ncol(Z)-1, "; \n"),
-        paste0("multiples ", parms$mice_ndt, "; \n"),
+        paste0("multiples ", parms$ndt, "; \n"),
         # "print all; \n", # generally don't want a lot of output
         "run;",
         file = paste0(instr, ".set")
@@ -107,7 +107,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parm
     end.time <- Sys.time()
 
     # Store the outputs
-    lapply(1:parms$mice_ndt, function(m) {
+    lapply(1:parms$ndt, function(m) {
       putdata(
         name = instr,
         dataout = paste0("imp_", m),
@@ -116,7 +116,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parm
     })
 
     # Load and save each data in internal objects local to this environment
-    imp_list <- lapply(1:parms$mice_ndt, function(m) {
+    imp_list <- lapply(1:parms$ndt, function(m) {
       # Load a dataset
       load(file = paste0("imp_", m, ".rda"))
 
