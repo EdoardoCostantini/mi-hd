@@ -14,24 +14,34 @@ source("../crossvalidate/exp4_cv_minR2_init.R")
 # Check where are you running IVEware is correct for OS
 parms$IVEloc
 
-# Time stamp: start
-sim_start <- Sys.time()
+# Check parameters in use
+parms
+
+# Check conditions in use
+conds
 
 # Create a cluster object:
-clus <- makeCluster(5)
+clus <- makeCluster(parms$dt_rep)
 
 # Prep Environments
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
 clusterEvalQ(cl = clus, expr = source("./exp4_init.R"))
 clusterEvalQ(cl = clus, expr = source("../crossvalidate/exp4_cv_minR2_init.R"))
 
+# Progress report file ----------------------------------------------------
+
 # Create a progress report file
 file.create(paste0(parms$outDir, parms$report_file_name))
+
+# Add prints
 cat(
         paste0(
-                "IVEWARE MINR2 CROSSVALIDATION PROGRESS REPORT (EVS)",
+                "IVEWARE MINR2 CROSSVALIDATION PROGRESS REPORT",
+                ## Description
                 "\n",
-                "Description: ", parms$description, "\n",
+                "Description: ", parms$description,
+                "\n",
+                ## Time
                 "\n", "------", "\n",
                 "Starts at: ", Sys.time(),
                 "\n", "------", "\n"
@@ -41,13 +51,20 @@ cat(
         append = TRUE
 )
 
+# parallel apply ---------------------------------------------------------------
+
+# Time stamp: start
+sim_start <- Sys.time()
+
 # Run the computations in parallel on the 'clus' object:
 out <- parLapply(
         cl = clus,
         X = 1:parms$dt_rep,
         fun = doRep,
         conds = conds,
-        parms = parms
+        parms = parms,
+        debug = FALSE,
+        verbose = FALSE
 )
 
 # Kill the cluster:
@@ -70,7 +87,6 @@ cat(
         append = TRUE
 )
 
-
 # Append parms and conds to out object
 out$parms <- parms
 out$conds <- conds
@@ -86,7 +102,7 @@ saveRDS(
 )
 
 # Read the results again
-out <- readRDS("../output/exp1_cv_IVEware_20230321_1748.rds")
+out <- readRDS("../output/exp4_cv_IVEware_20230321_1748.rds")
 
 # Obtain conditions with cv ridge
 minR2_cv <- cvParm(

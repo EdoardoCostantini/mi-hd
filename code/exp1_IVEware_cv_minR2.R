@@ -8,28 +8,39 @@
 rm(list = ls())
 source("./init_general.R")
 source("./exp1_init.R")
+source("../crossvalidate/exp1_cv_minR2_init.R")
 
 # Check where are you running IVEware is correct for OS
 parms$IVEloc
 
-# Time stamp: start
-sim_start <- Sys.time()
+# Check parameters in use
+parms
+
+# Check conditions in use
+conds
 
 # Create a cluster object:
-clus <- makeCluster(5)
+clus <- makeCluster(parms$dt_rep)
 
 # Prep Environments
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
 clusterEvalQ(cl = clus, expr = source("./exp1_init.R"))
 clusterEvalQ(cl = clus, expr = source("../crossvalidate/exp1_cv_minR2_init.R"))
 
+# Progress report file ----------------------------------------------------
+
 # Create a progress report file
 file.create(paste0(parms$outDir, parms$report_file_name))
+
+# Add prints
 cat(
         paste0(
                 "IVEWARE MINR2 CROSSVALIDATION PROGRESS REPORT",
+                ## Description
                 "\n",
-                "Description: ", parms$description, "\n",
+                "Description: ", parms$description,
+                "\n",
+                ## Time
                 "\n", "------", "\n",
                 "Starts at: ", Sys.time(),
                 "\n", "------", "\n"
@@ -39,13 +50,20 @@ cat(
         append = TRUE
 )
 
+# parallel apply ---------------------------------------------------------------
+
+# Time stamp: start
+sim_start <- Sys.time()
+
 # Run the computations in parallel on the 'clus' object:
 out <- parLapply(
         cl = clus,
         X = 1:parms$dt_rep,
         fun = doRep,
         conds = conds,
-        parms = parms
+        parms = parms,
+        debug = FALSE,
+        verbose = FALSE
 )
 
 # Kill the cluster:
