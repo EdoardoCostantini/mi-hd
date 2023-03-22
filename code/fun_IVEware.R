@@ -2,9 +2,9 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2023-03-20
-# Modified: 2023-03-21
+# Modified: 2023-03-22
 
-impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
+impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values
@@ -14,6 +14,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
   # Z = Xy_mis # or
   # minR2 = 0.01
   # parms = parms
+  # rep_status = 1
   
   ## output: 
   # - a list of chains imputed datasets at iteration iters
@@ -24,6 +25,15 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
   if(perform == TRUE){
     
     tryCatch({
+
+    # Define a temp folder name
+    tempfold <- paste0("IVEware-temp-", rep_status)
+
+    # Create temp folder for processing
+    dir.create(tempfold)
+
+    # Move to the tempfold
+    setwd(tempfold)
 
     # Identify variables under imputations in Z
     target.Z <- names(which(colSums(is.na(Z)) != 0))
@@ -50,7 +60,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
     save(Z_IVEware, file = "Z_IVEware.rda")
 
     # Define instruction name
-    instr <- paste0("fun_IVEware_instructions_EVS")
+    instr <- paste0("fun_IVEware_instructions")
 
     # Assemble .set script
     cat(
@@ -120,14 +130,11 @@ impute_IVEware <- function(Z, minR2 = 0.01, perform = TRUE, parms = parms){
       Z_temp
     })
 
-    # List files in the directory
-    files <- list.files()
+    # Move back to previous wd location
+    setwd("../")
 
-    # Identify the ones that are not R scripts or .set (IVEware instructions)
-    files.to.remove <- files[!grepl(pattern = "*.R|*.set", x = files)]
-
-    # Remove files
-    lapply(files.to.remove, unlink)
+    # Remove temp folder
+    unlink(tempfold, recursive = TRUE)
 
     # Store results
     imp_IVEware_dats <- imp_list
