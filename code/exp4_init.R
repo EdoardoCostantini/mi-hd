@@ -159,7 +159,7 @@
 
   # IVE specifics
   parms$IVEloc <- c(
-    win = "C:\\Program Files\\Srclib", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+    win = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
     mac = "/Library/Srclib/R"
   )[2]
 
