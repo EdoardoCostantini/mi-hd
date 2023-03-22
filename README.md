@@ -47,7 +47,8 @@ We used R for these simulations.
       packages with the traditional `install.packages()` function.
    2. Install the package `PcAux` using `devtools::install_github("PcAux")`
    3. Install the package `blasso` by downloading a compatible version of the package
-      from the [package author's website](https://www.asc.ohio-state.edu/hans.11/software/blasso/)  
+      from the [package author's website](https://www.asc.ohio-state.edu/hans.11/software/blasso/)
+      If you are running on windows, you need to install g++ to be able to install this package. You can follow these [instructions](https://www3.cs.stonybrook.edu/~alee/g++/g++.html)
 2. Running the simulation:
    1. Open the script [exp1_simulation_script_win.R](./code/exp1_simulation_script_win.R)
    2. Make sure the working directory is set to the location of this script (`./code/`)
