@@ -78,7 +78,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parm
     )
 
     # Define the location of scrlib app
-    srclib <<- "/Library/Srclib/R"
+    srclib <<- parms$IVEloc
 
     # Initialize srclib
     source(

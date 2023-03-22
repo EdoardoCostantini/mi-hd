@@ -131,6 +131,12 @@
 # Bayesina Ridge imputation related
   parms$ridge <- 1e-5
   
+# IVE specifics
+  parms$IVEloc <- c(
+    win = "C:\\Program Files\\Srclib", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+    mac = "/Library/Srclib/R"
+  )[2]
+
 # Replicability related
   parms$seed     <- 20200512 #20200309
   parms$nStreams <- 1000
