@@ -51,7 +51,7 @@ We used R for these simulations.
    4. Install IVEware by following this [guide](https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/)
 2. Running the simulation:
    1. Open the script [exp1_init.R](./code/exp1_init.R) and make sure that the parameters and conditions of the simulation study are set to desired values. In particular, pay attention to:
-      - `parms$IVEloc` whihc needs to be set to the correct path for the operating system you are running (for more info look for `~/srclib` [here](https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/))
+      - `parms$IVEloc` which needs to be set to the correct path for the operating system you are running (for more info look for `~/srclib` [here](https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/))
    2. Open the script [exp1_simulation_script_win.R](./code/exp1_simulation_script_win.R)
    3. Make sure the working directory is set to the location of this script (`./code/`)
    4. Define the number of clusters to be used by specifying the first argument in the
