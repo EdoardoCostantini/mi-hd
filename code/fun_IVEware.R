@@ -72,7 +72,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parm
         paste0("iterations ", parms$iters, "; \n"),
         paste0("maxpred ", ncol(Z)-1, "; \n"),
         paste0("multiples ", parms$mice_ndt, "; \n"),
-        "print all; \n",
+        # "print all; \n", # generally don't want a lot of output
         "run;",
         file = paste0(instr, ".set")
     )
@@ -89,7 +89,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parm
     )
 
     # Define a log file to store all the console output
-    IVEware_log <- file(paste0(instr, ".txt"))
+    # IVEware_log <- file(paste0(instr, ".txt"))
 
     # Define start time
     start.time <- Sys.time()
