@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-01
-# Modified: 2023-03-21
+# Modified: 2023-03-22
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -156,6 +156,12 @@
                      "v6", # Religiousness
                      "v51v52_comb"  # Denomination
   )
+
+  # IVE specifics
+  parms$IVEloc <- c(
+    win = "C:\\Program Files\\Srclib", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+    mac = "/Library/Srclib/R"
+  )[2]
 
 # Simulation desing -------------------------------------------------------
   # Replicability
