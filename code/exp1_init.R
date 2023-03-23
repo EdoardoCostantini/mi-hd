@@ -131,11 +131,24 @@
 # Bayesina Ridge imputation related
   parms$ridge <- 1e-5
   
-# IVE specifics
+  # Detect computer OS
+  parms$OS <- switch(Sys.info()[["sysname"]],
+    Windows = {
+      print("Windows")
+    },
+    Linux = {
+      print("Linux")
+    },
+    Darwin = {
+      print("Mac")
+    }
+  )
+
+  # IVE specifics
   parms$IVEloc <- c(
-    win = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
-    mac = "/Library/Srclib/R"
-  )[2]
+    Windwos = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+    Mac = "/Library/Srclib/R"
+  )[parms$OS]
 
 # Replicability related
   parms$seed     <- 20200512 #20200309

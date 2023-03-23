@@ -157,11 +157,24 @@
                      "v51v52_comb"  # Denomination
   )
 
+  # Detect computer OS
+  parms$OS <- switch(Sys.info()[["sysname"]],
+    Windows = {
+      print("Windows")
+    },
+    Linux = {
+      print("Linux")
+    },
+    Darwin = {
+      print("Mac")
+    }
+  )
+
   # IVE specifics
   parms$IVEloc <- c(
-    win = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
-    mac = "/Library/Srclib/R"
-  )[1]
+    Windwos = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+    Mac = "/Library/Srclib/R"
+  )[parms$OS]
 
 # Simulation desing -------------------------------------------------------
   # Replicability
