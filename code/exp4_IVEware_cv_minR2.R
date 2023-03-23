@@ -102,13 +102,13 @@ saveRDS(
 )
 
 # Read the results again
-out <- readRDS("../output/exp4_cv_IVEware_20230321_1748.rds")
+out <- readRDS("../output/exp4_cv_IVEware_20230322_1841.rds")
 
 # Obtain conditions with cv ridge
 minR2_cv <- cvParm(
         out = out,
         cv.parm = colnames(out$conds)[1],
-        exp_factors = colnames(out$conds)[c(2, 4)]
+        exp_factors = colnames(out$conds)[2]
 )
 
 # Look at plot
