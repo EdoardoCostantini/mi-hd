@@ -94,7 +94,7 @@
     MI_qp = FALSE,
     MI_am = FALSE,
     MI_OP = FALSE,
-    missFor = TRUE,
+    missFor = FALSE,
     mean = TRUE,
     CC = TRUE,
     GS = TRUE
@@ -161,7 +161,7 @@
   parms$IVEloc <- c(
     win = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
     mac = "/Library/Srclib/R"
-  )[2]
+  )[1]
 
 # Simulation desing -------------------------------------------------------
   # Replicability
