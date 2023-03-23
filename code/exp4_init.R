@@ -235,6 +235,6 @@
   conds <- cbind(
     conds,
     ridge = c(1e-2,1e-07), # cross-validated
-    minR2 = c(.001, .0001) # cross-validated
+    minR2 = c(.0001, .001) # cross-validated
   )
   
