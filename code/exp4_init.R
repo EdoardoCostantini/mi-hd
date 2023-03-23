@@ -94,10 +94,10 @@
     MI_qp = FALSE,
     MI_am = FALSE,
     MI_OP = FALSE,
-    missFor = FALSE,
-    mean = TRUE,
-    CC = TRUE,
-    GS = TRUE
+    missFor = TRUE, # must be true
+    mean = TRUE,    # must be true
+    CC = TRUE,      # must be true 
+    GS = TRUE       # must be true
   )
 
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
@@ -123,9 +123,9 @@
   parms$PCA_pcthresh <- .5 # proportion of vairance for selection of PCs
   
   # Random Forest
-  parms$rfntree <- 10
-  parms$missFor_maxiter <- 20 # maxiter = 20
-  parms$missFor_ntree <- 100  # ntree = 100
+  parms$rfntree <- 1
+  parms$missFor_maxiter <- 1 # maxiter = 20
+  parms$missFor_ntree <- 2  # ntree = 100
   
   # MICE true
   parms$S_all <- c(parms$rm_x,   # variables influencing the missingness
