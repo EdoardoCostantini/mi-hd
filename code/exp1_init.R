@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-02-25
+# Modified: 2023-03-22
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -91,7 +91,7 @@
   ##       it creates problems. Run it just once to have it in the correct folder.
   parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), collapse="\n")
   
-  
+
 # Generic
   parms$meth_sel <- data.frame(DURR_la    = FALSE,
                                IURR_la    = FALSE,
@@ -101,9 +101,9 @@
                                MI_CART    = FALSE,
                                MI_RF      = FALSE,
                                stepFor    = TRUE,
-                               MI_qp      = TRUE,
-                               MI_am      = TRUE,
-                               MI_OP      = TRUE,
+                               MI_qp      = FALSE,
+                               MI_am      = FALSE,
+                               MI_OP      = FALSE,
                                missFor    = TRUE,
                                mean       = TRUE,
                                CC         = TRUE,
@@ -131,6 +131,12 @@
 # Bayesina Ridge imputation related
   parms$ridge <- 1e-5
   
+# IVE specifics
+  parms$IVEloc <- c(
+    win = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+    mac = "/Library/Srclib/R"
+  )[2]
+
 # Replicability related
   parms$seed     <- 20200512 #20200309
   parms$nStreams <- 1000
@@ -172,9 +178,15 @@
   p   <- c(50, 500) # c(50, 500) # number of variables
   latent <- c(FALSE, TRUE)[1]
   pm <- c(.1, .3)
-  ridge <- c(1e-1, 1e-07, 1e-1, 1e-7) # values found w/ corssvalidation
-  
+
+  # Bridge special parameters
+  ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
+
+  # IVEware special parameters
+  minR2 <- c(.001, .001, .001, .001)
+
+  # Create conditions  
   conds <- expand.grid(p, latent, pm)
     colnames(conds) <- c("p", "latent", "pm")
   conds$ridge <- ridge
-    
+  conds$minR2 <- minR2

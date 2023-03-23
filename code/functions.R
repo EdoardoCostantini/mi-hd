@@ -1650,10 +1650,11 @@ mean_traceplot <- function(out,
 }
 
 # Crossvalidation
-bridge_cv <- function(out, mods = NULL, exp_factors = NULL){
+cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
   ## Internals
   # mods = names(out[[1]][[1]]$fmi)[1]
   # exp_factors = colnames(out$conds)[c(2, 4)]
+  # cv.parm = colnames(out$conds)[1]
   
   ## Body
   # Arguments check
@@ -1690,8 +1691,10 @@ bridge_cv <- function(out, mods = NULL, exp_factors = NULL){
   # Make ridge a factor
   grid_y_axis <- exp_factors[1]
   grid_x_axis <- exp_factors[2]
-  out$conds$ridge <- factor(out$conds$ridge, levels = unique(out$conds$ridge))
-  p <- ggplot(out$conds, aes(ridge, FMI)) + geom_point() +
+  out$conds[, cv.parm] <- factor(out$conds[, cv.parm], levels = unique(out$conds[, cv.parm]))
+  p <- ggplot(
+    out$conds, aes(.data[[cv.parm]], FMI)) + 
+    geom_point() +
     facet_grid(reformulate(grid_x_axis, grid_y_axis))
 
   return(list(values = solution,

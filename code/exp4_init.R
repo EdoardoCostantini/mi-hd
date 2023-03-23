@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-01
-# Modified: 2022-02-25
+# Modified: 2023-03-22
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -157,6 +157,12 @@
                      "v51v52_comb"  # Denomination
   )
 
+  # IVE specifics
+  parms$IVEloc <- c(
+    win = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+    mac = "/Library/Srclib/R"
+  )[2]
+
 # Simulation desing -------------------------------------------------------
   # Replicability
   parms$seed     <- 20220131
@@ -213,6 +219,9 @@
   conds <- expand.grid(n = n)
   
   # Add ridge specification for each condition
-  conds <- cbind(conds, ridge = c(1e-2,
-                                  1e-07))
+  conds <- cbind(
+    conds,
+    ridge = c(1e-2,1e-07), # cross-validated
+    minR2 = c(.001, .0001) # cross-validated
+  )
   

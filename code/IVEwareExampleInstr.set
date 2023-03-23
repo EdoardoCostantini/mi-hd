@@ -1,6 +1,6 @@
 title Multiple imputation;
 datain ../data/IVEwareExampleData;
-dataout ../output/IVEwareExampleDataImputed;
+dataout ./IVEwareExampleDataImputed;
 default continuous;
 categorical casecnt gender race3 hyper diab smoke fammi edusubj3 cholesth;
 mixed cafftot alcohol3;
@@ -11,5 +11,6 @@ maxpred redtot(3) wgtkg(2);
 minrsqd .01;
 iterations 5;
 multiples 5;
+print all;
 seed 2001;
 run;

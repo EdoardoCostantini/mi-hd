@@ -56,7 +56,7 @@ cat(paste0("\n", "------", "\n",
 # Attach Extrac Infor Objects
 out$parms <- parms
 out$conds <- conds
-out$session_info <- session_info()
+out$session_info <- devtools::session_info()
 
 # Save output -------------------------------------------------------------
 

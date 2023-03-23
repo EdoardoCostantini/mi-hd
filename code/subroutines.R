@@ -1,7 +1,7 @@
 # Title:    Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2022-01-31
+# Modified: 2023-03-22
 
 # Functions ---------------------------------------------------------------
 
@@ -184,7 +184,8 @@ runCell <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./exp1_init.R")
-  # cond <- conds[1, ]
+  # rep_status <- 1
+  # cond <- conds[4, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
@@ -248,12 +249,10 @@ runCell <- function(cond, parms, rep_status) {
                           parms = parms)
 
   # MICE w/ step-wise forward regression
-  imp_stepFor <- impute_stepwise(
+  imp_stepFor <- impute_IVEware(
     Z = Xy_mis,
-    O = as.data.frame(O),
-    direction = "forw",
-    cond = cond,
-    perform = parms$meth_sel$stepFor,
+    minR2 = cond$minR2,
+    rep_status = rep_status,
     parms = parms
   )
 
@@ -834,15 +833,15 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
 
+
   # MICE w/ step-wise forward regression
-  imp_stepFor <- impute_stepwise(
+  imp_stepFor <- impute_IVEware(
     Z = Xy_mis,
-    O = data.frame(!is.na(Xy_mis)),
-    direction = "forw",
-    cond = cond,
-    perform = parms$meth_sel$stepFor,
+    minR2 = cond$minR2,
+    rep_status = rep_status,
     parms = parms
   )
+
 
   # MICE w/ quickpred
   imp_qp <- impute_MICE_qp(Z = Xy_mis,

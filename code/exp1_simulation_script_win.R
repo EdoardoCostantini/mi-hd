@@ -50,7 +50,7 @@ sim_ends <- Sys.time()
 # Attach Info Objects
 out$parms <- parms
 out$conds <- conds
-out$session_info <- session_info()
+out$session_info <- devtools::session_info()
 
 ## Close report file
 cat(paste0("\n", "------", "\n",

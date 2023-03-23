@@ -11,7 +11,7 @@ source("./init_general.R")
 out <- readRDS("../output/exp2_cv_bridge_20200812_1132.rds")
 
 # Extract average fmi for a given model type ------------------------------
-conds_bridge <- bridge_cv(out, 
+conds_bridge <- cvParm(out, 
                           mods = names(out[[1]][[1]]$fmi)[-2] # CFA failed fitting
                           )
 conds_bridge

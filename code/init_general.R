@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-01
-# Modified: 2022-09-15
+# Modified: 2023-03-20
 
 # Packages ----------------------------------------------------------------
 
@@ -18,7 +18,7 @@ pack_list <- c("tidyverse",
                "truncnorm",
                "lavaan",
                "FactoMineR",
-               "devtools",
+            #  "devtools", #TODO: DO I need this? creates problems with IVEware
                "rstan",
                "gridExtra",
                "grid",
@@ -47,6 +47,7 @@ source("./fun_IURR_impute.R")
 source("./fun_blasso_impute.R")
 source("./fun_bridge_impute.R")
 source("./fun_PCA_impute.R")
+source("./fun_IVEware.R")
 source("./fun_MICE_qp.R")
 source("./fun_MICE_TR_impute.R")
 source("./fun_MICE_cp.R")

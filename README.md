@@ -46,15 +46,17 @@ We used R for these simulations.
    1. Open the script [init_general.R](./code/init_general.R) and install the
       packages with the traditional `install.packages()` function.
    2. Install the package `PcAux` using `devtools::install_github("PcAux")`
-   3. Install the package `blasso` by downloading a compatible version of the package
-      from the [package author's website](https://www.asc.ohio-state.edu/hans.11/software/blasso/)
-      If you are running on windows, you need to install g++ to be able to install this package. You can follow these [instructions](https://www3.cs.stonybrook.edu/~alee/g++/g++.html)
+   3. Install the package `blasso` by downloading a compatible version of the package from the [package author's website](https://www.asc.ohio-state.edu/hans.11/software/blasso/). If you are running on windows, you need to install g++ to be able to install this package. You can follow these [instructions](https://www3.cs.stonybrook.edu/~alee/g++/g++.html)
+   4. Install IVEware by following this [guide](https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/)
+
 2. Running the simulation:
-   1. Open the script [exp1_simulation_script_win.R](./code/exp1_simulation_script_win.R)
-   2. Make sure the working directory is set to the location of this script (`./code/`)
-   3. Define the number of clusters to be used by specifying the first argument in the
+   1. Open the script [exp1_init.R](./code/exp1_init.R) and make sure that the parameters and conditions of the simulation study are set to desired values. In particular, pay attention to:
+      - `parms$IVEloc` which needs to be set to the correct path for the operating system you are running (for more info look for `~/srclib` [here](https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/))
+   2. Open the script [exp1_simulation_script_win.R](./code/exp1_simulation_script_win.R)
+   3. Make sure the working directory is set to the location of this script (`./code/`)
+   4. Define the number of clusters to be used by specifying the first argument in the
       function `makeCluster()`
-   4. Run the entire script
+   5. Run the entire script
 
 ### EVS resampling study
 1. Installing Dependencies: same as above
