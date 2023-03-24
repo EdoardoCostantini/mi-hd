@@ -129,5 +129,7 @@ Here, I want to keep track of which filenames are important for the results.
    - outcome of the exp4_results.R script combining (1), (2), (3), and (4)
 7. `exp4_simOut_20230323_1551_res.rds`
    - outcome of the exp4_results.R script combining (1), (2), (3), (4), and (5)
-7. `exp4_cv_bridge_20220223_1646.rds`
+8. `exp4_cv_bridge_20220223_1646.rds`
    - contains the results for cross-validation of bridge with the correct use of intercept
+9. `exp4_cv_IVEware_20230322_1841.rds`
+   - contains the results for cross-validation of IVEware `minR2` parameter
