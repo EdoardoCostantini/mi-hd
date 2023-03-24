@@ -2,7 +2,7 @@
 # Objective: Edits to default parms for cv of minR2 in IVEware imputation for EVS
 # Author:    Edoardo Costantini
 # Created:   2023-03-22
-# Modified:  2023-03-22
+# Modified:  2023-03-24
 # Notes:
 
 # Modify parameter of interest -------------------------------------------------
@@ -12,10 +12,11 @@ parms$meth_sel <- data.frame(
     DURR_la = FALSE,
     IURR_la = FALSE,
     blasso = FALSE,
-    bridge = TRUE,
+    bridge = FALSE,
     MI_PCA = FALSE,
     MI_CART = FALSE,
     MI_RF = FALSE,
+    stepFor = TRUE,
     MI_qp = FALSE,
     MI_am = FALSE,
     MI_OP = FALSE,
