@@ -252,6 +252,7 @@ runCell <- function(cond, parms, rep_status) {
   imp_stepFor <- impute_IVEware(
     Z = Xy_mis,
     minR2 = cond$minR2,
+    iters = parms$iters,
     rep_status = rep_status,
     perform = parms$meth_sel$stepFor,
     parms = parms
@@ -840,6 +841,7 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
     Z = Xy_mis,
     minR2 = cond$minR2,
     rep_status = rep_status,
+    iters = parms$iters,
     perform = parms$meth_sel$stepFor,
     parms = parms
   )
