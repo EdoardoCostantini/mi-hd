@@ -1,6 +1,7 @@
-### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-05-19
+# Title:    Imputing High Dimensional Data
+# Author:   Edoardo Costantini
+# Created:  2020-05-19
+# Modified: 2023-03-24
 
 rm(list=ls())
 source("./init_general.R")
@@ -409,3 +410,63 @@ fit <- multinom(y ~ X)
 list(est = round(coef(fit), 3),
      true = round(out$true_par,3))
 # estiamted and true parameters values are almost the same
+
+# Collinearity data check ------------------------------------------------------
+
+rm(list = ls())
+source("./init_general.R")
+source("./exp2_init.R")
+
+# Define experimental factor levels
+p <- c(50) # c(50, 500) # number of variables
+collinearity <- c(NA, .8, .9, .99)
+
+# Create experimental conditions
+conds <- expand.grid(
+  p = p,
+  collinearity = collinearity
+)
+
+# Crate a place to store factor structures
+storenScree <- list()
+i <- 2
+parms$n <- 1e4
+par(mfrow = c(2,2))
+i <- 1
+for(i in 1:nrow(conds)){
+  # Define active condition
+  cond <- conds[i, ]
+
+  # Generate data
+  Xy <- simData_exp1(cond, parms)
+
+  # Check correlation matrix
+  round(cor(Xy), 1)[1:20, 1:20] * 100
+
+  # 3 factor structure
+  storenScree <- rbind(storenScree, nFactors::nScree(Xy)$Components)
+
+  # Fit model regressing one variable on all the others
+  model_all <- lm(z1 ~ ., data = Xy)
+
+  # Compute the VIFs
+  vif_values <- car::vif(model_all)
+
+  # Plot the vif values
+  barplot(vif_values,
+    main = paste0("VIF Values", " (cor = ", cond[, "collinearity"], ")"),
+    horiz = TRUE,
+    col = "steelblue"
+  ) # create
+
+  # And plot a reference line at 5 (VIF > 5 -> problem!)
+  abline(v = 5, lwd = 3, lty = 2) # add vertical line at 5 as
+  # If the value of VIF is :
+  # - VIF < 1: no correlation
+  # - 1 < VIF < 5, there is a moderate correlation 
+  # - VIF > 5: severe correlation
+  
+}
+
+# Factor structure
+cbind(conds, storenScree)
