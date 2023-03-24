@@ -188,18 +188,22 @@
 
 # Conditions --------------------------------------------------------------
 
+  # Define experimental factor levels
   p   <- c(50, 500) # c(50, 500) # number of variables
   latent <- c(FALSE, TRUE)[1]
   pm <- c(.1, .3)
+  collinearity <- c(NA, .6, .99)
 
-  # Bridge special parameters
-  ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
+  # Create experimental conditions
+  conds <- expand.grid(
+    p = p,
+    latent = latent, 
+    pm = pm, 
+    collinearity = collinearity
+  )
+  
+  # Bridge special parameters per condition #TODO: cross-validate
+  conds$ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
 
-  # IVEware special parameters
-  minR2 <- c(.001, .001, .001, .001)
-
-  # Create conditions  
-  conds <- expand.grid(p, latent, pm)
-    colnames(conds) <- c("p", "latent", "pm")
-  conds$ridge <- ridge
-  conds$minR2 <- minR2
+  # IVEware special parameters per condition #TODO: cross-validate
+  conds$minR2 <- c(.001, .001, .001, .001)

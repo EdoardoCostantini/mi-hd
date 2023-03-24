@@ -22,8 +22,8 @@ simData_exp1 <- function(cond, parms){
     block3_p <- cond$p - length(c(parms$blck1, parms$blck2))
     Sigma[-c(parms$blck1, parms$blck2), ] <- .01
 
-  # Check collinearity condition is present in the set
-    if("collinearity" %in% colnames(cond)){
+  # If collinearity factor is not NA
+    if(!is.na(cond$collinearity)){
       # Within-block-2 correlation
       Sigma[parms$blck2, parms$blck2] <- cond$collinearity
       # Within-block-3 correlation
