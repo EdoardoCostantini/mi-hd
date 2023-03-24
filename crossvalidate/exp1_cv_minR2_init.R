@@ -44,7 +44,7 @@ parms$store <- c(
 )
 
 # Iterations, repetitions, etc
-parms$dt_rep <- 20
+parms$dt_rep <- 30
 parms$chains <- 1
 parms$iters <- 70
 parms$burnin_imp <- 50
