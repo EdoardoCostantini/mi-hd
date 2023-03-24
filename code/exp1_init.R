@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2023-03-22
+# Modified: 2023-03-24
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -188,11 +188,17 @@
 
 # Conditions --------------------------------------------------------------
 
-  # Define experimental factor levels
-  p   <- c(50, 500) # c(50, 500) # number of variables
+  # Experimental factors that do not change between studies
   latent <- c(FALSE, TRUE)[1]
+  p   <- c(50, 500) # c(50, 500) # number of variables
+
+  # Main study: experimental factor levels
   pm <- c(.1, .3)
-  collinearity <- c(NA, .6, .99)
+  collinearity <- c(NA)
+
+  # Collinearity study: experimental factor levels
+  pm <- .3
+  collinearity <- c(NA, .6, .8, .9, .99)
 
   # Create experimental conditions
   conds <- expand.grid(
