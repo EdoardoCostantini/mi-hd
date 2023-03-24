@@ -72,7 +72,7 @@ parms$results_file_name <- paste0(
 # > Conditions -----------------------------------------------------------------
 
 # Define factor values
-minR2 <- c(.2, 10^seq(from = -1, to = -5, by = -1))
+minR2 <- c(10^seq(from = -1, to = -7, by = -1))
 p <- c(50, 500) # c(50, 500) # number of variables
 latent <- c(FALSE, TRUE)[1]
 pm <- c(.1, .3)
