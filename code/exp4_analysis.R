@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-27
-# Modified: 2023-02-23
+# Modified: 2023-03-24
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -22,6 +22,7 @@
   filename <- "exp4_simOut_20220226_0950" # see readme for details
   filename <- "exp4_simOut_20220131_1603" # joined 20201204_2121 and 20201207_1134 + MI-qp and MI-am
   filename <- "exp4_simOut_20220226_0950" # see readme for details
+  filename <- "exp4_simOut_20230323_1551" # see readme for details
   
   # Read R object
   res <- readRDS(paste0("../output/", filename, "_res.rds"))
@@ -64,7 +65,9 @@
   meths = rev(c("DURR_la", "IURR_la", 
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF", 
+                "MI_CART", 
+                "MI_RF", 
+                "stepFor", 
                 "missFor", 
                 "CC",
                 "MI_qp",
@@ -95,7 +98,9 @@
   meths = rev(c("DURR_la", "IURR_la", 
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF", 
+                "MI_CART", 
+                "MI_RF", 
+                "stepFor", 
                 "missFor", 
                 "CC",
                 "MI_qp",
@@ -127,7 +132,9 @@
   meths = rev(c("DURR_la", "IURR_la", 
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF", 
+                "MI_CART", 
+                "MI_RF", 
+                "stepFor", 
                 "missFor", 
                 "CC",
                 "MI_qp",
@@ -159,7 +166,9 @@
   meths = rev(c("DURR_la", "IURR_la", 
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF",
+                "MI_CART", 
+                "MI_RF",
+                "stepFor",
                 "MI_qp",
                 "MI_am",
                 "MI_OP",
@@ -197,7 +206,9 @@
   meths = rev(c("DURR_la", "IURR_la",
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF",
+                "MI_CART",
+                "MI_RF",
+                "stepFor",
                 "MI_qp",
                 "MI_am",
                 "MI_OP",
