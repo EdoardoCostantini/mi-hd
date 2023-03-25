@@ -54,27 +54,30 @@ for (i in 1:nrow(conds)) {
 
 # Save results
 saveRDS(
-    store_imps,
+    list(
+        original.data = Xy_mis,
+        imputed.data = store_imps
+    ),
     paste0(
-        "exp1_conv_IVEware_",
+        "../output/exp1_conv_IVEware_",
         format(Sys.time(), "%Y%m%d_%H%M"),
         ".rds"
     )
 )
 
 # Read results
-store_imps <- readRDS("")
+conv.out <- readRDS("../output/exp1_conv_IVEware_20230325_1156.rds")
 
 # For every imputed variable
 par(mfrow = c(3, 2))
 
 # Loop over conditions
-for (condition in 1:nrow(conds)) {
+for (condition in 1:nrow(conv.out$conds)) {
     # Look over variables
     for (variable in parms$z_m_id) {
         # Plot baseline
         plot(
-            density(na.omit(Xy_mis[, variable])),
+            density(na.omit(conv.out$original.data[, variable])),
             lwd = 2,
             main = paste0("Density plot for observed and imputed ", variable),
             xlab = ""
@@ -82,7 +85,7 @@ for (condition in 1:nrow(conds)) {
         # Add densities for
         lapply(1:parms$ndt, function(j) {
             lines(
-                density(store_imps[[condition]]$dats[[j]][, variable]),
+                density(conv.out$imputed.data[[condition]]$dats[[j]][, variable]),
                 col = "blue",
                 lwd = 1
             )
