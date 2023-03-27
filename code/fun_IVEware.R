@@ -2,9 +2,9 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2023-03-20
-# Modified: 2023-03-22
+# Modified: 2023-03-24
 
-impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parms = parms){
+impute_IVEware <- function(Z, minR2 = 0.01, iters = 5, rep_status = 1, perform = TRUE, parms = parms){
   
   ## Input: 
   # @Z: dataset w/ missing values
@@ -69,7 +69,7 @@ impute_IVEware <- function(Z, minR2 = 0.01, rep_status = 1, perform = TRUE, parm
         "dataout Z_IVEware_imputed; \n",
         "default continuous; \n",
         paste0("minrsqd ", minR2, "; \n"),
-        paste0("iterations ", parms$iters, "; \n"),
+        paste0("iterations ", iters, "; \n"),
         paste0("maxpred ", ncol(Z)-1, "; \n"),
         paste0("multiples ", parms$ndt, "; \n"),
         # "print all; \n", # generally don't want a lot of output

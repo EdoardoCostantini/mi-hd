@@ -1,7 +1,7 @@
 # Title:    Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2023-03-22
+# Modified: 2023-03-24
 
 # Functions ---------------------------------------------------------------
 
@@ -252,7 +252,9 @@ runCell <- function(cond, parms, rep_status) {
   imp_stepFor <- impute_IVEware(
     Z = Xy_mis,
     minR2 = cond$minR2,
+    iters = parms$iters,
     rep_status = rep_status,
+    perform = parms$meth_sel$stepFor,
     parms = parms
   )
 
@@ -839,6 +841,8 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
     Z = Xy_mis,
     minR2 = cond$minR2,
     rep_status = rep_status,
+    iters = parms$iters,
+    perform = parms$meth_sel$stepFor,
     parms = parms
   )
 

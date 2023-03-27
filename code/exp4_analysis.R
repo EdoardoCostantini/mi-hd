@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-27
-# Modified: 2023-02-23
+# Modified: 2023-03-24
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -22,6 +22,7 @@
   filename <- "exp4_simOut_20220226_0950" # see readme for details
   filename <- "exp4_simOut_20220131_1603" # joined 20201204_2121 and 20201207_1134 + MI-qp and MI-am
   filename <- "exp4_simOut_20220226_0950" # see readme for details
+  filename <- "exp4_simOut_20230323_1551" # see readme for details
   
   # Read R object
   res <- readRDS(paste0("../output/", filename, "_res.rds"))
@@ -64,7 +65,9 @@
   meths = rev(c("DURR_la", "IURR_la", 
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF", 
+                "MI_CART", 
+                "MI_RF", 
+                "stepFor", 
                 "missFor", 
                 "CC",
                 "MI_qp",
@@ -95,7 +98,9 @@
   meths = rev(c("DURR_la", "IURR_la", 
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF", 
+                "MI_CART", 
+                "MI_RF", 
+                "stepFor", 
                 "missFor", 
                 "CC",
                 "MI_qp",
@@ -127,7 +132,9 @@
   meths = rev(c("DURR_la", "IURR_la", 
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF", 
+                "MI_CART", 
+                "MI_RF", 
+                "stepFor", 
                 "missFor", 
                 "CC",
                 "MI_qp",
@@ -159,7 +166,9 @@
   meths = rev(c("DURR_la", "IURR_la", 
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF",
+                "MI_CART", 
+                "MI_RF",
+                "stepFor",
                 "MI_qp",
                 "MI_am",
                 "MI_OP",
@@ -197,7 +206,9 @@
   meths = rev(c("DURR_la", "IURR_la",
                 "blasso", "bridge",
                 "MI_PCA",
-                "MI_CART", "MI_RF",
+                "MI_CART",
+                "MI_RF",
+                "stepFor",
                 "MI_qp",
                 "MI_am",
                 "MI_OP",
@@ -316,45 +327,39 @@
 
 # Time plot ---------------------------------------------------------------
 
-  rm(list = ls())
-  source("./init_general.R")
-  
-  # Read R object
-  res <- readRDS(paste0("../output/", filename, ".rds"))
-
-  # Plot Size
-  sp_width <- 5
-  sp_height <- 4
-  
   # Produce data for plot
-  out_time <- sapply(1:nrow(out$conds), res_sem_time,
-                     out = out,
-                     n_reps = out$parms$dt_rep,
-                     methods = out$parms$methods[c(1:8, 13, 14)])
-  colnames(out_time) <- names(res[[1]])
-  dt = t(out_time)
-  
+  dt_outtime <- do.call(rbind, out$out_time)
+
   # Sanitazie names
-  colnames(dt) <- sub("_la", "", colnames(dt))
-  colnames(dt) <- sub("_", "-", colnames(dt))
-  rownames(dt) <- c("Condition 1", "Condition 2")
-  
+  colnames(dt_outtime) <- sub("_la", "", colnames(dt_outtime))
+  colnames(dt_outtime) <- sub("_", "-", colnames(dt_outtime))
+  rownames(dt_outtime) <- c("Condition 1", "Condition 2")
+
   # Get Plot
-  pf <- plot_time(dt = t(out_time), 
-            plot_cond = NULL,
-            plot_name = NULL,
-            meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
-                                 "MI_PCA",
-                                 "MI_CART", "MI_RF")),
-            meth_sort = FALSE)
+  pf <- plot_time(
+         dt = dt_outtime,
+         plot_cond = NULL,
+         plot_name = NULL,
+         meth_compare = rev(c(
+                "DURR",
+                "IURR",
+                "blasso",
+                "bridge",
+                "MI-PCA",
+                "MI-CART",
+                "MI-RF",
+                "stepFor"
+         )),
+         meth_sort = FALSE
+  )
   pf
-  # Save Plot  
+
+  # Save Plot
   ggsave(pf,
-         file = "../output/graphs/exp4_time.pdf", 
-         width = sp_width*2, height = sp_height*1,
-         units = "cm")
+         file = "../output/graphs/exp4_time.pdf",
+         width = sp_width * 2, height = sp_height * 1,
+         units = "cm"
+  )
 
   # Table
-  xtable(round(dt, 1), type = "latex")
-  
-  
+  xtable(dt_outtime, type = "latex", digits = 0)

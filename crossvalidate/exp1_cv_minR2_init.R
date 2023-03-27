@@ -2,7 +2,7 @@
 # Objective: Edits to default parms for cv of minR2 in IVEware imputation
 # Author:    Edoardo Costantini
 # Created:   2023-03-22
-# Modified:  2023-03-22
+# Modified:  2023-03-24
 # Notes:
 
 # Modify parameter of interest -------------------------------------------------
@@ -12,10 +12,11 @@ parms$meth_sel <- data.frame(
     DURR_la = FALSE,
     IURR_la = FALSE,
     blasso = FALSE,
-    bridge = TRUE,
+    bridge = FALSE,
     MI_PCA = FALSE,
     MI_CART = FALSE,
     MI_RF = FALSE,
+    stepFor = TRUE,
     MI_qp = FALSE,
     MI_am = FALSE,
     MI_OP = FALSE,
@@ -43,7 +44,7 @@ parms$store <- c(
 )
 
 # Iterations, repetitions, etc
-parms$dt_rep <- 20
+parms$dt_rep <- 30
 parms$chains <- 1
 parms$iters <- 70
 parms$burnin_imp <- 50
@@ -71,7 +72,7 @@ parms$results_file_name <- paste0(
 # > Conditions -----------------------------------------------------------------
 
 # Define factor values
-minR2 <- c(.2, 10^seq(from = -1, to = -5, by = -1))
+minR2 <- c(10^seq(from = -1, to = -7, by = -1))
 p <- c(50, 500) # c(50, 500) # number of variables
 latent <- c(FALSE, TRUE)[1]
 pm <- c(.1, .3)

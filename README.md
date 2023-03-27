@@ -110,6 +110,8 @@ Here, I want to keep track of which filenames are important for the results.
    - contains the results for corssvalidation of bridge with the correct use of intercept
 6. `exp1_simOut_20220225_1035_res.rds`
    - outcome of the exp1_results.R script combining (1), (2), and (4)
+7. `exp1_cv_IVEware_20230324_1326.rds`
+   - Output for cross-validation of IVEware `minR2` using 70 iterations
 
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`
@@ -122,7 +124,14 @@ Here, I want to keep track of which filenames are important for the results.
 4. `exp4_simOut_20220226_0950.rds`
    - 1e3 repetitions
    - re-run of bridge with correct intercept inclusion
-5. `exp4_simOut_20220226_0950_res.rds`
+5. `exp4_simOut_20230323_1551.rds`
+   - 1e3 repetitions
+   - run of IVEware with 70 iterations
+6. `exp4_simOut_20220226_0950_res.rds`
    - outcome of the exp4_results.R script combining (1), (2), (3), and (4)
-6. `exp4_cv_bridge_20220223_1646.rds`
+7. `exp4_simOut_20230323_1551_res.rds`
+   - outcome of the exp4_results.R script combining (1), (2), (3), (4), and (5)
+8. `exp4_cv_bridge_20220223_1646.rds`
    - contains the results for cross-validation of bridge with the correct use of intercept
+9. `exp4_cv_IVEware_20230322_1841.rds`
+   - contains the results for cross-validation of IVEware `minR2` parameter
