@@ -408,4 +408,4 @@ y <- out$y
 fit <- multinom(y ~ X)
 list(est = round(coef(fit), 3),
      true = round(out$true_par,3))
-# estiamted and true parameters values are almost the same
+# estimated and true parameters values are almost the same
