@@ -1,7 +1,9 @@
-# Title:    Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-05-19
-# Modified: 2023-03-24
+# Project:   imputeHD-comp
+# Objective: Check different aspect of the code base
+# Author:    Edoardo Costantini
+# Created:   2020-05-19
+# Modified:  2023-03-27
+# Notes: 
 
 rm(list=ls())
 source("./init_general.R")
@@ -415,7 +417,7 @@ list(est = round(coef(fit), 3),
 
 rm(list = ls())
 source("./init_general.R")
-source("./exp2_init.R")
+source("./exp1_init.R")
 
 # Define experimental factor levels
 p <- c(50) # c(50, 500) # number of variables
@@ -427,21 +429,26 @@ conds <- expand.grid(
   collinearity = collinearity
 )
 
+# Increase sample size to make things more clear
+parms$n <- 1e4
+
 # Crate a place to store factor structures
 storenScree <- list()
-i <- 2
-parms$n <- 1e4
+
+# Define a plotting arrangement
 par(mfrow = c(2,2))
-i <- 1
+
+# Loop over the conditions
 for(i in 1:nrow(conds)){
-  # Define active condition
+
+  # Define the active condition
   cond <- conds[i, ]
 
   # Generate data
   Xy <- simData_exp1(cond, parms)
 
   # Check correlation matrix
-  round(cor(Xy), 1)[1:20, 1:20] * 100
+  print(round(cor(Xy), 1)[1:20, 1:20] * 100)
 
   # 3 factor structure
   storenScree <- rbind(storenScree, nFactors::nScree(Xy)$Components)
