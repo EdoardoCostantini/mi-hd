@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2023-03-24
+# Modified: 2023-03-27
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -195,10 +195,14 @@
   # Main study: experimental factor levels
   pm <- c(.1, .3)
   collinearity <- c(NA)
+  ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
+  minR2 <- c(.001, .001, .001, .001)
 
   # Collinearity study: experimental factor levels
   pm <- .3
   collinearity <- c(NA, .6, .8, .9, .99)
+  ridge <- 1e-5
+  minR2 <- 1e-3
 
   # Create experimental conditions
   conds <- expand.grid(
@@ -209,7 +213,7 @@
   )
   
   # Bridge special parameters per condition #TODO: cross-validate
-  conds$ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
+  conds$ridge <- ridge
 
   # IVEware special parameters per condition #TODO: cross-validate
-  conds$minR2 <- c(.001, .001, .001, .001)
+  conds$minR2 <- minR2
