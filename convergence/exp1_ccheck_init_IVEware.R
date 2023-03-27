@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2023-03-24
-# Modified: 2023-03-24
+# Modified: 2023-03-27
 # Notes:    The goal is to find out how many iterations should be used
 #           in the full study for each method.
 
@@ -59,5 +59,6 @@ parms$description <- c(
 # Fix condition to desired one for convergence check
 p <- 500
 pm <- .3
-iters <- c(1, 5, 10, 15, 20, 30, 70, 150, 250)
-conds <- data.frame(p = p, pm = pm, iters = iters)
+iters <- c(1, 5, 10, 20, 40, 80, 160, 240, 320)
+seed <- c(2023, 3202, 1610, 4004, 9876)
+conds <- expand.grid(p = p, pm = pm, iters = iters, seed = seed)
