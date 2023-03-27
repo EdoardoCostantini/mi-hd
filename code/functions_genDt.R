@@ -1,14 +1,15 @@
-### Title:    data geneartion functions
-### Porject:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-06-23
-### Modified: 2023-03-17
+# Project:   imputeHD-comp
+# Objective: data generation functions
+# Author:    Edoardo Costantini
+# Created:   2020-06-23
+# Modified:  2023-03-27
+# Notes: 
 
 # Experiment 1: Multivariate Data -----------------------------------------
 simData_exp1 <- function(cond, parms){
   # For internals
   # cond <- conds[4,]
-  
+
   # 1. Generate covariance matrix -----------------------------------------
     Sigma <- diag(cond$p)
     
@@ -22,13 +23,17 @@ simData_exp1 <- function(cond, parms){
     block3_p <- cond$p - length(c(parms$blck1, parms$blck2))
     Sigma[-c(parms$blck1, parms$blck2), ] <- .01
 
-  # Check collinearity condition is present in the set
-    if("collinearity" %in% colnames(cond)){
-      # Within-block-2 correlation
-      Sigma[parms$blck2, parms$blck2] <- cond$collinearity
+  # If collinearity factor is not NA
+  if (!is.null(cond$collinearity)) {
+    if (!is.na(cond$collinearity)) {
+      # MAR predictors within-block-1 correlation
+      Sigma[c(3, 4), c(3, 4)] <- cond$collinearity
+      # MAR predictors within-block-2 correlation
+      Sigma[c(9, 10), c(9, 10)] <- cond$collinearity
       # Within-block-3 correlation
       Sigma[-c(parms$blck1, parms$blck2), -c(parms$blck1, parms$blck2)] <- cond$collinearity
     }
+  }
 
   # Fix diagonal
     diag(Sigma) <- 1
@@ -41,6 +46,7 @@ simData_exp1 <- function(cond, parms){
     Z <- rmvnorm(n     = parms$n, 
                  mean  = rep(0, cond$p), 
                  sigma = Sigma )
+
     # Give meaningful names
     colnames(Z) <- paste0("z", 1:ncol(Z))
   

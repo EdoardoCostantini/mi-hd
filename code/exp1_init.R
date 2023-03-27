@@ -188,18 +188,32 @@
 
 # Conditions --------------------------------------------------------------
 
-  p   <- c(50, 500) # c(50, 500) # number of variables
+  # Experimental factors that do not change between studies
   latent <- c(FALSE, TRUE)[1]
+  p   <- c(50, 500) # c(50, 500) # number of variables
+
+  # Main study: experimental factor levels
   pm <- c(.1, .3)
-
-  # Bridge special parameters
+  collinearity <- c(NA)
   ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
+  minR2 <- c(.001, .001, .001, .001)
 
-  # IVEware special parameters
-  minR2 <- c(.001, .1, .01, .001)
+  # Collinearity study: experimental factor levels
+  pm <- .3
+  collinearity <- c(NA, .6, .8, .9, .99)
+  ridge <- 1e-5
+  minR2 <- 1e-3
 
-  # Create conditions  
-  conds <- expand.grid(p, latent, pm)
-    colnames(conds) <- c("p", "latent", "pm")
+  # Create experimental conditions
+  conds <- expand.grid(
+    p = p,
+    latent = latent, 
+    pm = pm, 
+    collinearity = collinearity
+  )
+  
+  # Bridge special parameters per condition #TODO: cross-validate
   conds$ridge <- ridge
+
+  # IVEware special parameters per condition #TODO: cross-validate
   conds$minR2 <- minR2
