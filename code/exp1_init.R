@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2023-03-22
+# Modified: 2023-03-27
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -196,7 +196,7 @@
   ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
 
   # IVEware special parameters
-  minR2 <- c(.001, .001, .001, .001)
+  minR2 <- c(.001, .1, .01, .001)
 
   # Create conditions  
   conds <- expand.grid(p, latent, pm)

@@ -110,6 +110,8 @@ Here, I want to keep track of which filenames are important for the results.
    - contains the results for corssvalidation of bridge with the correct use of intercept
 6. `exp1_simOut_20220225_1035_res.rds`
    - outcome of the exp1_results.R script combining (1), (2), and (4)
+7. `exp1_cv_IVEware_20230324_1326.rds`
+   - Output for cross-validation of IVEware `minR2` using 70 iterations
 
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`

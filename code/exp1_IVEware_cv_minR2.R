@@ -101,7 +101,7 @@ saveRDS(
 )
 
 # Read the results again
-out <- readRDS("../output/exp1_cv_IVEware_20230321_1748.rds")
+out <- readRDS("../output/exp1_cv_IVEware_20230324_1326.rds")
 
 # Obtain conditions with cv ridge
 minR2_cv <- cvParm(
