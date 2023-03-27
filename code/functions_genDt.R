@@ -24,7 +24,8 @@ simData_exp1 <- function(cond, parms){
     Sigma[-c(parms$blck1, parms$blck2), ] <- .01
 
   # If collinearity factor is not NA
-    if(!is.na(cond$collinearity)){
+  if (!is.null(cond$collinearity)) {
+    if (!is.na(cond$collinearity)) {
       # MAR predictors within-block-1 correlation
       Sigma[c(3, 4), c(3, 4)] <- cond$collinearity
       # MAR predictors within-block-2 correlation
@@ -32,6 +33,7 @@ simData_exp1 <- function(cond, parms){
       # Within-block-3 correlation
       Sigma[-c(parms$blck1, parms$blck2), -c(parms$blck1, parms$blck2)] <- cond$collinearity
     }
+  }
 
   # Fix diagonal
     diag(Sigma) <- 1
