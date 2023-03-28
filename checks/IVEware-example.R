@@ -1,7 +1,7 @@
 # Title:    Example imputation with IVEware 
 # Author:   Edoardo Costantini
 # Created:  2023-02-23
-# Modified: 2023-03-20
+# Modified: 2023-03-28
 
 # Simple example ---------------------------------------------------------------
 
@@ -18,6 +18,9 @@ source(
         fsep = .Platform$file.sep
     )
 )
+
+# Number of variables with missing values ("imp" in  the output)
+sum(colSums(is.na(IVEwareExampleData)) != 0)
 
 # Store the file name containing the imputation instructions
 instr <- "IVEwareExampleInstr"
