@@ -63,7 +63,7 @@ saveRDS(
 )
 
 # Read results
-conv.out <- readRDS("../output/exp1_conv_IVEware_20230327_0946.rds")
+conv.out <- readRDS("../output/exp1_conv_IVEware_20230327_1143.rds")
 
 # For every imputed variable
 par(mfrow = c(3, 2))
