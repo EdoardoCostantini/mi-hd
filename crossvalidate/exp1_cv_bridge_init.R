@@ -14,6 +14,7 @@ parms$meth_sel <- data.frame(DURR_la    = FALSE,
                              MI_PCA     = FALSE,
                              MI_CART    = FALSE,
                              MI_RF      = FALSE,
+                             stepFor    = FALSE,
                              MI_qp      = FALSE,
                              MI_am      = FALSE,
                              MI_OP      = FALSE,
@@ -72,7 +73,7 @@ ridge <- 10^seq(from = -1, to = -8, by = -1)
 p   <- c(50, 500) # c(50, 500) # number of variables
 latent <- c(FALSE, TRUE)[1]
 pm <- c(.1, .3)
-collinearity <- c(NA, .6, .8, .9, .99)
+collinearity <- NA
 
 # Create experimental conditions
 conds <- expand.grid(
