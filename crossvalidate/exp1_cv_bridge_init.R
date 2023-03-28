@@ -66,12 +66,25 @@ parms$description <- c("In each repetition, 1 dataset is created for each condit
 
 
 # Conditions --------------------------------------------------------------
-# Modify condtions for crossvalidation
+# Modify conditions for crossvalidation
 
 ridge <- 10^seq(from = -1, to = -8, by = -1)
 p   <- c(50, 500) # c(50, 500) # number of variables
 latent <- c(FALSE, TRUE)[1]
 pm <- c(.1, .3)
+collinearity <- c(NA, .6, .8, .9, .99)
 
-conds <- expand.grid(ridge, p, latent, pm)#[c(1:2, 10:11, 17:18, 25:26), ]
-  colnames(conds) <- c("ridge", "p", "latent", "pm")
+# Create experimental conditions
+conds <- expand.grid(
+        ridge = ridge,
+        p = p,
+        latent = latent,
+        pm = pm,
+        collinearity = collinearity
+)
+
+# Bridge special parameters per condition #TODO: cross-validate
+conds$ridge <- ridge
+
+# IVEware special parameters per condition #TODO: cross-validate
+conds$minR2 <- NA
