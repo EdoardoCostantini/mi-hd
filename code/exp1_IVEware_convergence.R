@@ -38,9 +38,6 @@ for (i in 1:nrow(conds)) {
     # Which condition
     cond <- conds[i, ]
 
-    # Define the number of multiply imputed datasets
-    parms$ndt <- 2
-
     # Perform imputation
     store_imps[[i]] <- impute_IVEware(
         Z = Xy_mis,
@@ -61,9 +58,7 @@ saveRDS(
         conds = conds
     ),
     paste0(
-        "../output/exp1_conv_IVEware_",
-        when,
-        ".rds"
+        "../output/", parms$results_file_name
     )
 )
 

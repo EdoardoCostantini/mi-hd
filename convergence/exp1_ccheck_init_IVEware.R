@@ -15,7 +15,7 @@ parms$meth_sel <- data.frame(
     MI_PCA = FALSE,
     MI_CART = FALSE,
     MI_RF = FALSE,
-    stepFor = TRUE,
+    stepFor = TRUE, # The only MI method that should be active for this script
     MI_qp = FALSE,
     MI_am = FALSE,
     MI_OP = FALSE,
@@ -25,30 +25,21 @@ parms$meth_sel <- data.frame(
     GS = TRUE
 )
 
-# Decide which parameters suit best the convergence check
-parms$dt_rep <- 1 # replications for averaging results (200 goal)
-parms$chains <- 10 # number of parallel chains for convergence check
-parms$iters <- 250
-parms$burnin_imp <- 0 # no need, I want to see the first part as well
-parms$ndt <- parms$chains # same chians as dataset in mice like imp
-parms$thin <- (parms$iters - parms$burnin_imp) / parms$ndt
-parms$pos_dt <- (parms$burnin_imp + 1):parms$iters # candidate datasets (after convergence)
-parms$keep_dt <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)] # keep 1 dataset every thin
-
-# For mice-like algorithms
-parms$mice_iters <- parms$iters # for this they are the same.
-parms$mice_ndt <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
+# Define the number of multiply imputed datasets
+parms$ndt <- 30
 
 # Output and progress report related
 parms$outDir <- "../output/"
 parms$start_time <- format(Sys.time(), "%Y%m%d_%H%M")
 parms$report_file_name <- paste0(
-    "cnv_check_",
+    "exp", parms$exp,
+    "_cv_IVEware_",
     parms$start_time,
     ".txt"
 )
 parms$results_file_name <- paste0(
-    "cnv_check_",
+    "exp", parms$exp,
+    "_cv_IVEware_",
     parms$start_time,
     ".rds"
 )
