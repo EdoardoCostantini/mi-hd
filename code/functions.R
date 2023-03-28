@@ -1,8 +1,9 @@
-# Title:    helper functions
-# Porject:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-05-19
-# Modified:  2022-09-16
+# Project:   imputeHD-comp
+# Objective: helper functions
+# Author:    Edoardo Costantini
+# Created:   2020-05-19
+# Modified:  2023-03-28
+# Notes: 
 
 # generic functions -------------------------------------------------------
 
@@ -1614,16 +1615,23 @@ mean_traceplot <- function(out,
   
   # Variables to display
   if(is.null(v_range)){
-    v_range <- 1:length(out$parms$z_m_id)
+    v_range <- out$parms$z_m_id
   }
   
   # Display in same pane
   par(mfrow = c(3, ceiling(length(v_range)/3)))
+
   # Plot
   # Are imputations of mids class?
   if(class(out[[dat]][[1]]$imp_values[[method]]) == "mids"){
+    # Modify v_range if it is not a character vecotr
+    if(!is.character(v_range)){
+      v_range <- paste0("z", v_range)
+    }
+    # Plot mids
     plot(out[[dat]][[1]]$imp_values[[method]],
-         y = paste0("z", v_range))
+      y = v_range
+    )
   } else {
     # For each variable imputed
     for (v in v_range) {
@@ -1631,18 +1639,22 @@ mean_traceplot <- function(out,
       # CHAIN 1
       # Mean imputed value (across individuals), in the first CHAIN,
       # at each iteration
-      mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[1]][[v]][iters, ])
+      v_index <- which(v_range %in% v)
+      mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[1]][[v_index]][iters, ])
       
-      plot(iters, mean_imp, type = "l",
-           main = method,
-           ylim = y_range,
-           ylab = paste0("z", v), xlab = "Iteration")
-      
+      plot(iters, mean_imp,
+        type = "l",
+        main = method,
+        ylim = y_range,
+        ylab = v,
+        xlab = "Iteration"
+      )
+
       # CHAIN 2 to m 
       # Mean imputed value (across individuals), in the first CHAIN,
       # at each iteration
       for (i in 2:(out$parms$chains)) {
-        mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[i]][[v]][iters, ])
+        mean_imp <- rowMeans(out[[dat]][[1]]$imp_values[[method]][[i]][[v_index]][iters, ])
         lines(iters, mean_imp)
       }
     }

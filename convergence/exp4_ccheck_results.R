@@ -1,9 +1,9 @@
-### Title:    Conergence Check Blasso
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-07-03
-### Notes:    The goal is to find out how many iterations should be used
-###           in the full study for each method.
+# Project:   imputeHD-comp
+# Objective: Convergence checks for all methods in EXP 4 Evs
+# Author:    Edoardo Costantini
+# Created:   2020-07-03
+# Modified:  2023-03-28
+# Notes: 
 
 rm(list = ls())
 source("./init_general.R")
@@ -52,7 +52,7 @@ data.frame(
 # Plots -------------------------------------------------------------------
 
   # What to show
-  exp_dat     <- 10
+  exp_dat     <- 2
   iters_range <- 1:250 # which set of iterations
   y_range     <- c(2, 3.5)
 
@@ -61,7 +61,6 @@ data.frame(
     mean_traceplot(out_cnv, 
                    method = out_cnv$parms$method[x], 
                    dat = exp_dat, 
-                   y_center = TRUE,
                    y_range = y_range, 
                    iters = iters_range)}
   )
@@ -79,9 +78,9 @@ mean_traceplot(out_cnv,
 print(out_cnv$parms$method[2])
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[2], 
-               y_center = TRUE,
                dat = exp_dat, 
-               y_range = y_range, iters = iters_range)
+               y_range = y_range, 
+               iters = iters_range)
 
 # blasso (200-300 is a good range to chose from)
 print(out_cnv$parms$method[3])
@@ -96,7 +95,6 @@ print(out_cnv$parms$method[4])
 mean_traceplot(out_cnv, 
                method   = out_cnv$parms$method[4], 
                dat      = exp_dat,
-               y_center = FALSE,
                y_range  = c(-100, 100),
                iters    = iters_range)
 
@@ -111,16 +109,16 @@ mean_traceplot(out_cnv,
 print(out_cnv$parms$method[6])
 mean_traceplot(out_cnv,
                method = out_cnv$parms$method[6], 
-               y_center = TRUE,
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
+
 # MI_RF
 print(out_cnv$parms$method[7])
 mean_traceplot(out_cnv,
                method = out_cnv$parms$method[7],
-               y_center = TRUE,
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
+
 # MI_T
 print(out_cnv$parms$method[8])
 mean_traceplot(out_cnv, 
