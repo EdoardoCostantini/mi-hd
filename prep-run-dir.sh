@@ -3,7 +3,7 @@
 # Objective: Create a run directory for Lisa
 # Author:    Edoardo Costantini
 # Created:   2022-08-04
-# Modified:  2022-08-19
+# Modified:  2023-03-28
 
 # Define a run name
 
@@ -17,6 +17,7 @@
 # Create an empty output folder
 
   mkdir $loc/output/
+  mkdir $loc/output/console/
 
 # Copy current code folder
 
