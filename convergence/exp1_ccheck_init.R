@@ -10,17 +10,17 @@ source("./exp1_init.R")
 
 # Decide which methods you car about for the convergence check
 parms$meth_sel <- data.frame(
-    DURR_la = FALSE,
-    IURR_la = FALSE,
-    blasso = FALSE,
-    bridge = FALSE,
-    MI_PCA = FALSE,
-    MI_CART = FALSE,
-    MI_RF = FALSE,
-    stepFor = TRUE,
-    MI_qp = FALSE,
-    MI_am = FALSE,
-    MI_OP = FALSE,
+    DURR_la = TRUE,
+    IURR_la = TRUE,
+    blasso = TRUE,
+    bridge = TRUE,
+    MI_PCA = TRUE,
+    MI_CART = TRUE,
+    MI_RF = TRUE,
+    stepFor = FALSE,
+    MI_qp = TRUE,
+    MI_am = TRUE,
+    MI_OP = TRUE,
     missFor = TRUE,
     mean = TRUE,
     CC = TRUE,
@@ -46,10 +46,10 @@ parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes
 # Output and Progres report related
 parms$outDir <- "../output/"
 parms$start_time <- format(Sys.time(), "%Y%m%d_%H%M")
-parms$report_file_name <- paste0("cnv_check_", 
+parms$report_file_name <- paste0("exp1_colli_cnv_check_", 
                                  parms$start_time, 
                                  ".txt")
-parms$results_file_name <- paste0("cnv_check_", 
+parms$results_file_name <- paste0("exp1_colli_cnv_check_", 
                                   parms$start_time,
                                   ".rds")
 parms$description <- c("For the most challanging condition, data generation is repeated 
@@ -57,7 +57,23 @@ parms$description <- c("For the most challanging condition, data generation is r
                         then be used to check convergence")
 
 # Fix condition to desired one for convergence check
-p   <- 500
+latent <- FALSE
+p <- 500
 pm <- .3
-conds <- data.frame(p = p, pm = pm)
+collinearity <- c(.99)
+ridge <- .01
+minR2 <- 1e-3
 
+# Create experimental conditions
+conds <- expand.grid(
+    p = p,
+    latent = latent,
+    pm = pm,
+    collinearity = collinearity
+)
+
+# Bridge special parameters per condition #TODO: cross-validate
+conds$ridge <- ridge
+
+# IVEware special parameters per condition #TODO: cross-validate
+conds$minR2 <- minR2
