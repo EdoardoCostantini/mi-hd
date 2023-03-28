@@ -128,12 +128,31 @@
   parms$rfntree <- 2  # default value as no indication is given in paper
   parms$missFor_maxiter <- 2 # maxiter = 20
   parms$missFor_ntree <- 2  # ntree = 100
-  
+
+# Detect computer OS
+parms$OS <- switch(Sys.info()[["sysname"]],
+  Windows = {
+    print("Windows")
+  },
+  Linux = {
+    print("Linux")
+  },
+  Darwin = {
+    print("Mac")
+  }
+)
+
+# IVE specifics
+parms$IVEloc <- c(
+  Windows = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+  Mac = "/Library/Srclib/R"
+)[parms$OS]
+
 # Replicability related
   parms$seed     <- 20200512 #20200309
   parms$nStreams <- 1000
 
-# Storing prefrences ------------------------------------------------------
+# Storing preferences ------------------------------------------------------
   # Needs to match the location and name of the output list
  
   parms$store <-  c(cond         = TRUE,
