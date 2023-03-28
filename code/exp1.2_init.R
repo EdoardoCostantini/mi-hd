@@ -1,16 +1,17 @@
-# Title:    Initialization scirpt parameter
-# Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-05-19
-# Modified: 2022-02-25
+# Project:   imputeHD-comp
+# Objective: Initialization script for c
+# Author:    Edoardo Costantini
+# Created:   2022-02-25
+# Modified:  2023-03-28
+# Notes: 
 
 # Fixed Parameters --------------------------------------------------------
 
   parms <- list()
-  parms$exp <- 1 # which experiment is been run
+  parms$exp <- "1_2" # which experiment is been run
 
-# Itereations, repetitions, etc
-  parms$dt_rep     <- 5 # 1e3 replications for averaging results (200 goal)
+# Iterations, repetitions, etc
+  parms$dt_rep     <- 5 # replications for averaging results (250 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
   parms$iters      <- 5 # 70
   parms$burnin_imp <- 0 # 50 how many imputation iterations should be discarded
@@ -35,18 +36,19 @@
   
   # For mice-like algorithms
   parms$mice_iters <- 5 # 50
-  parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool esitmaes from (10)
+  parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool estimates from (10)
   
 # Data gen ----------------------------------------------------------------
 
-  parms$n       <- 200 # number of cases for data generationz
+# Sample size for data
+  parms$n       <- 200
 
-# "True" values
+# "True" values of variables
   parms$item_mean <- 5
   parms$item_var  <- 5
   
 # Variable blocks
-  parms$blck1 <- 1:5 # higly correlated
+  parms$blck1 <- 1:5 # highly correlated
   parms$blck2 <- (tail(parms$blck1,1)+1):10 # correlated
 
   parms$blck1_r <- .6 # correlation for highly correlated variables
@@ -55,81 +57,77 @@
 # Z gen (fully observed covariates)
   parms$Z_o_mu  <- 0 # mean for gen of fully observed variables
 
-# z_m gen (covariates that will have missingness)
-  # parms$z_m_id  <- c((parms$blck1[1]):3, 
-  #                    (parms$blck2[1]):8)
-  parms$z_m_id  <- paste0("z", c((parms$blck1[1]):3, 
-                                 (parms$blck2[1]):8))
+# z_m_id gen (variables that will have missingness)
+  parms$z_m_id <- paste0("z", c((parms$blck1[1]):3, (parms$blck2[1]):8))
   parms$zm_n <- length(parms$z_m_id)
-  parms$S_all   <- list(q1 = (paste0("z",c(parms$blck1, parms$blck2))), # variables in block 1 and 2
-                        q2 = (c(4:13, 50:59)))[[1]]
+  parms$S_all <- list(
+    q1 = (paste0("z", c(parms$blck1, parms$blck2))), # variables in block 1 and 2
+    q2 = (c(4:13, 50:59))
+  )[[1]]
 
-# y gen / imporntant predictors
-  # parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
+# y gen / important predictors
   parms$formula <- paste0(parms$z_m_id, collapse = ", ")
-  # variables that are to be imputed
-  # parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
   parms$lm_model <- paste0(parms$z_m_id[1], 
                            " ~ - 1 + ", 
                            paste0(parms$z_m_id[-1], collapse = " + "))
 
 # Response Model (rm)
   parms$missType <- c("high", "low")[2]
-  parms$auxWts   <- c(1, 1, 1, 1) # weighting the importance of predictors: all the same
-  parms$rm_x <- matrix(c(4, 5, 9, 10,
-                         4, 5, 9, 10,
-                         4, 5, 9, 10,
-                         4, 5, 9, 10,
-                         4, 5, 9, 10,
-                         4, 5, 9, 10),
-                       ncol = 4, nrow = 6,
-                       byrow = TRUE)
-  
+  parms$auxWts <- c(1, 1, 1, 1) # weighting the importance of predictors: all the same
+  parms$rm_x <- matrix(
+    c(
+      4, 5, 9, 10,
+      4, 5, 9, 10,
+      4, 5, 9, 10,
+      4, 5, 9, 10,
+      4, 5, 9, 10,
+      4, 5, 9, 10
+    ),
+    ncol = 4, nrow = 6,
+    byrow = TRUE
+  )
+
 # Models ------------------------------------------------------------------
   # source("./gen_lavaan_model.R") # generate txt file for lavaan model
   ## NOTE: this is not to be kept running in the windows simulation because if so
   ##       it creates problems. Run it just once to have it in the correct folder.
   parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), collapse="\n")
   
-  
-# Generic
-  parms$meth_sel <- data.frame(DURR_la    = FALSE,
-                               IURR_la    = FALSE,
-                               blasso     = FALSE,
-                               bridge     = FALSE,
-                               MI_PCA     = FALSE,
-                               MI_CART    = FALSE,
-                               MI_RF      = FALSE,
-                               stepFor    = TRUE,
-                               MI_qp      = FALSE,
-                               MI_am      = FALSE,
-                               MI_OP      = FALSE,
-                               missFor    = TRUE,
-                               mean       = TRUE,
-                               CC         = TRUE,
-                               GS         = TRUE)
-  
+  # Methods
+  parms$meth_sel <- data.frame(
+    DURR_la = TRUE,
+    IURR_la = TRUE,
+    blasso = TRUE,
+    bridge = TRUE,
+    MI_PCA = TRUE,
+    MI_CART = TRUE,
+    MI_RF = TRUE,
+    stepFor = TRUE,
+    MI_qp = TRUE,
+    MI_am = TRUE,
+    MI_OP = TRUE,
+    missFor = TRUE,
+    mean = TRUE,
+    CC = TRUE,
+    GS = TRUE
+  )
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
-    # (GS, CC always last, alwyas present)
+    # (GS, CC always last, always present)
 
+# Analysis related
   parms$alphaCI <- .95 # confidence level for parameters CI
+
+# IURR related
   parms$k_IURR  <- 0 # k value to bias coef sampling covariance matrix in IURR
                      # procedure to solve possible issues of singularity
 
 # PCA method related
-  parms$PCA_inter    <- FALSE # whether you want two way variables interactions
-  parms$PCA_poly     <- FALSE # whether you want poly terms 
-  parms$PCA_mincor   <- .3 # mincor for qucikpred for single imputation auxiliary vars
-  parms$PCA_maxpw    <- 2L # polynomials order
-  parms$PCA_pcthresh <- .5 # proportion of vairance for selection of PCs
+  parms$PCA_pcthresh <- .5 # proportion of variance for selection of PCs
 
 # Random forest related
-  parms$rfntree <- 10  # default value as no indication is given in paper
-  parms$missFor_maxiter <- 20 # maxiter = 20
-  parms$missFor_ntree <- 100  # ntree = 100
-  
-# Bayesina Ridge imputation related
-  parms$ridge <- 1e-5
+  parms$rfntree <- 2  # default value as no indication is given in paper
+  parms$missFor_maxiter <- 2 # maxiter = 20
+  parms$missFor_ntree <- 2  # ntree = 100
   
 # Replicability related
   parms$seed     <- 20200512 #20200309
@@ -150,32 +148,47 @@
                     run_time_min = TRUE,
                     imp_values   = FALSE)
   
-# Output and Progres report related
+# Output and Progress report related
   parms$outDir <- "../output/"
   parms$start_time <- format(Sys.time(), "%Y%m%d_%H%M")
-  parms$report_file_name <- paste0("exp",
-                                   parms$exp, "_",
-                                   "simOut_", 
-                                   parms$start_time, 
-                                   ".txt")
-  parms$results_file_name <- paste0("exp",
-                                    parms$exp, "_",
-                                    "simOut_", 
-                                    parms$start_time,
-                                    ".rds")
+  parms$report_file_name <- paste0(
+    "exp",
+    parms$exp, "_",
+    "simOut_",
+    parms$start_time,
+    ".txt"
+  )
+  parms$results_file_name <- paste0(
+    "exp",
+    parms$exp, "_",
+    "simOut_",
+    parms$start_time,
+    ".rds"
+  )
   parms$description <- c("In each repetition, 1 dataset is created for each condition.
         Imputation methods are used on that condition-specific dataset.
         Results are therefore given per dataset in condition")
 
 # Conditions --------------------------------------------------------------
 
-  p   <- 500 # c(50, 500) # number of variables
-  latent <- TRUE
+  # Collinearity study: experimental factor levels
   pm <- .3
-  ridge <- 1e-1 # TODO: still to cross-validate
-  collinearity <- c(.6, .99)
-  
-  conds <- expand.grid(p, latent, pm, collinearity)
-    colnames(conds) <- c("p", "latent", "pm", "collinearity")
-  conds$ridge <- ridge[1]
-    
+  p   <- c(50, 500)
+  latent <- TRUE
+  collinearity <- c(.6, .8, .9, .99)
+  ridge <- 1e-5
+  minR2 <- 1e-3
+
+  # Create experimental conditions
+  conds <- expand.grid(
+    p = p,
+    latent = latent,
+    pm = pm,
+    collinearity = collinearity
+  )
+
+  # Bridge special parameters per condition #TODO: cross-validate
+  conds$ridge <- ridge
+
+  # IVEware special parameters per condition #TODO: cross-validate
+  conds$minR2 <- minR2

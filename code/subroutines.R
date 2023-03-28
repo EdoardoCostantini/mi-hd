@@ -1,7 +1,7 @@
 # Title:    Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-05-19
-# Modified: 2023-03-24
+# Modified: 2023-03-28
 
 # Functions ---------------------------------------------------------------
 
@@ -50,7 +50,7 @@ doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
     
 # Experiment 1 ------------------------------------------------------------
 
-    if(parms$exp == 1){
+    if(parms$exp == 1 | parms$exp == "1_2"){
       for(i in 1 : nrow(conds)) {
         
         print(paste0("Exp: ", parms$exp, 
