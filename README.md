@@ -137,3 +137,5 @@ Here, I want to keep track of which filenames are important for the results.
    - contains the results for cross-validation of bridge with the correct use of intercept
 9. `exp4_cv_IVEware_20230322_1841.rds`
    - contains the results for cross-validation of IVEware `minR2` parameter
+10. `exp4_cv_IVEware_20230328_1544.rds`
+   - contains convergence checks results for IVEware on EVS data
