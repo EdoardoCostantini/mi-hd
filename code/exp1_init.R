@@ -59,8 +59,6 @@ parms$blck2_r <- .3 # correlation for correlated variables
 parms$Z_o_mu <- 0 # mean for gen of fully observed variables
 
 # z_m gen (covariates that will have missingness)
-# parms$z_m_id  <- c((parms$blck1[1]):3,
-#                    (parms$blck2[1]):8)
 parms$z_m_id <- paste0("z", c(
   (parms$blck1[1]):3,
   (parms$blck2[1]):8
@@ -71,11 +69,8 @@ parms$S_all <- list(
   q2 = (c(4:13, 50:59))
 )[[1]]
 
-# y gen / imporntant predictors
-# parms$formula <- paste0("z", parms$z_m_id, collapse = ", ")
+# y gen / important predictors
 parms$formula <- paste0(parms$z_m_id, collapse = ", ")
-# variables that are to be imputed
-# parms$lm_model <- paste0("z", parms$z_m_id) # not in formula version
 parms$lm_model <- paste0(
   parms$z_m_id[1],
   " ~ - 1 + ",
@@ -105,7 +100,7 @@ parms$rm_x <- matrix(
 parms$lav_model <- paste(readLines("../txt/lavaan_model_sat.txt"), collapse = "\n")
 
 
-# Generic
+# Define methods true / false
 parms$meth_sel <- data.frame(
   DURR_la = FALSE,
   IURR_la = FALSE,
@@ -118,18 +113,20 @@ parms$meth_sel <- data.frame(
   MI_qp = FALSE,
   MI_am = FALSE,
   MI_OP = FALSE,
-  missFor = TRUE,
-  mean = TRUE,
-  CC = TRUE,
-  GS = TRUE
+  missFor = TRUE, # must be TRUE
+  mean = TRUE, # must be TRUE
+  CC = TRUE, # must be TRUE
+  GS = TRUE # must be TRUE
 )
 
+# Define final methods vector
 parms$methods <- names(parms$meth_sel)[which(parms$meth_sel == TRUE)]
-# (GS, CC always last, alwyas present)
 
 parms$alphaCI <- .95 # confidence level for parameters CI
+
+# IURR related
 parms$k_IURR <- 0 # k value to bias coef sampling covariance matrix in IURR
-# procedure to solve possible issues of singularity
+                  # to solve possible issues of singularity
 
 # PCA method related
 parms$PCA_inter <- FALSE # whether you want two way variables interactions
@@ -169,7 +166,7 @@ parms$IVEloc <- c(
 parms$seed <- 20200512 # 20200309
 parms$nStreams <- 1000
 
-# Storing prefrences ------------------------------------------------------
+# Storing preferences ----------------------------------------------------------
 # Needs to match the location and name of the output list
 
 parms$store <- c(
@@ -186,7 +183,7 @@ parms$store <- c(
   imp_values = FALSE
 )
 
-# Output and Progres report related
+# Output and progress report related
 parms$outDir <- "../output/"
 parms$start_time <- format(Sys.time(), "%Y%m%d_%H%M")
 parms$report_file_name <- paste0(
@@ -211,7 +208,7 @@ parms$description <- c("In each repetition, 1 dataset is created for each condit
 
 # Experimental factors that do not change between studies
 latent <- c(FALSE, TRUE)[1]
-p <- c(50, 500) # c(50, 500) # number of variables
+p <- c(50, 500) # number of variables
 pm <- c(.1, .3)
 collinearity <- c(NA)
 ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
