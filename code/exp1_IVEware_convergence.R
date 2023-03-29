@@ -66,12 +66,23 @@ saveRDS(
 conv.out <- readRDS("../output/exp1_conv_IVEware_20230327_1143.rds")
 
 # For every imputed variable
-par(mfrow = c(3, 2))
+pdf(file = "../output/graphs/exp1_conv_IVEware_20230327_1143.pdf", width = 20, height = 20)
+par(mfrow = c(6, 2))
 
 # Loop over conditions
 for (condition in 1:nrow(conv.out$conds)) {
     # Look over variables
     for (variable in conv.out$parms$z_m_id) {
+
+        # Identify imputed values
+        imps <- is.na(conv.out$original.data[, variable])
+
+        # Find the highest point for ylim
+        maxDens <- sapply(1:conv.out$parms$ndt, function(j) {
+            object <- density(conv.out$imputed.data[[1]]$dats[[j]][imps, variable])
+            max(object$y)
+        })
+
         # Plot baseline
         plot(
             density(na.omit(conv.out$original.data[, variable])),
@@ -82,11 +93,30 @@ for (condition in 1:nrow(conv.out$conds)) {
         # Add densities for
         lapply(1:conv.out$parms$ndt, function(j) {
             lines(
-                density(conv.out$imputed.data[[condition]]$dats[[j]][, variable]),
+                density(conv.out$imputed.data[[condition]]$dats[[j]][imps, variable]),
                 col = "blue",
                 lwd = 1
             )
         })
+
+        # Plot baseline
+        plot(
+            density(na.omit(conv.out$original.data[, variable])),
+            lwd = 2,
+            main = paste0("Density plot for observed and imputed ", variable),
+            xlab = "",
+            ylim = c(0, max(maxDens))
+        )
+
+        # Add densities of imputed variable
+        lapply(1:conv.out$parms$ndt, function(j) {
+            lines(
+                density(conv.out$imputed.data[[condition]]$dats[[j]][, variable]),
+                col = "red",
+                lwd = 1
+            )
+        })
+
         # Add a shared title
         mtext(
             paste0(
@@ -99,3 +129,6 @@ for (condition in 1:nrow(conv.out$conds)) {
         )
     }
 }
+
+# Close pdf storing
+dev.off()

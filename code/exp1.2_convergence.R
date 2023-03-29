@@ -228,7 +228,7 @@ mean_traceplot(out_cnv,
 )
 
 # 2. Convergence for IVEware ---------------------------------------------------
-
+# TODO: this is not ready for simulation
 # Clean environment
 rm(list = ls())
 
