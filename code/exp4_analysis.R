@@ -2,7 +2,7 @@
 # Porject:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-27
-# Modified: 2023-03-24
+# Modified: 2023-03-30
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -327,44 +327,47 @@
 
 # Time plot ---------------------------------------------------------------
 
-  # Produce data for plot
-  dt_outtime <- do.call(rbind, out$out_time)
+# Produce data for plot
+dt_outtime <- do.call(rbind, out$out_time)
 
-  # Sanitazie names
-  colnames(dt_outtime) <- sub("_la", "", colnames(dt_outtime))
-  colnames(dt_outtime) <- sub("_", "-", colnames(dt_outtime))
-  rownames(dt_outtime) <- c("Condition 1", "Condition 2")
+# Sanitazie names
+colnames(dt_outtime) <- sub("_la", "", colnames(dt_outtime))
+colnames(dt_outtime) <- sub("_", "-", colnames(dt_outtime))
+rownames(dt_outtime) <- c("Condition 1", "Condition 2")
 
-  # Get Plot
-  pf <- plot_time(
-         dt = dt_outtime,
-         plot_cond = NULL,
-         plot_name = NULL,
-         meth_compare = rev(c(
-                "DURR",
-                "IURR",
-                "blasso",
-                "bridge",
-                "MI-PCA",
-                "MI-CART",
-                "MI-RF",
-                "stepFor"
-         )),
-         meth_sort = FALSE
-  )
-  pf
+# Get Plot
+pf <- plot_time(
+       dt = dt_outtime,
+       plot_cond = NULL,
+       plot_name = NULL,
+       meth_compare = c(
+              "DURR",
+              "IURR",
+              "blasso",
+              "bridge",
+              "MI-PCA",
+              "MI-CART",
+              "MI-RF",
+              "MI-qp",
+              "MI-am",
+              "MI-OP",
+              "stepFor"
+       ),
+       meth_sort = FALSE
+)
+pf
 
-  # Save Plot
-  ggsave(pf,
-         file = "../output/graphs/exp4_time.pdf",
-         width = sp_width * 2, height = sp_height * 1,
-         units = "cm"
-  )
+# Save Plot
+ggsave(pf,
+       file = "../output/graphs/exp4_time.pdf",
+       width = sp_width * 2, height = sp_height * 2,
+       units = "cm"
+)
 
-  # Table
-  xtable(
-         dt_outtime,
-         type = "latex",
-         digits = 1,
-         align = c("l", rep("c", ncol(dt_outtime)))
-  )
+# Table
+xtable(
+       dt_outtime,
+       type = "latex",
+       digits = 1,
+       align = c("l", rep("c", ncol(dt_outtime)))
+)

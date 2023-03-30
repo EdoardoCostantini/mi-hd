@@ -2,7 +2,7 @@
 # Objective: helper functions
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-03-28
+# Modified:  2023-03-30
 # Notes: 
 
 # generic functions -------------------------------------------------------
@@ -2536,69 +2536,129 @@ plot_time <- function(dt,
   #                  "MI_CART", "MI_RF", "missFor", "CC")
   # meth_sort = FALSE
   # bar_col = "#595959"
+
+  # Graphical parameters
+  font.plot <- "Arial" # font for the whole plot
+  x.axis.text.size <- 6 # Scale of plotted numbers
+  y.axis.text.size <- 6 # Imputation Methods names
+  grid.text.size <- 6 # Condition + Parameter type
+  segme.thick <- 1 # thickness of lines reporting results (was 1)
+  small.color <- "darkgray" # color of lines |PRB| < 10%
+  large.color <- "lightgray" # color of lines |PRB| < 10%
+  h.lines.thick <- .35 # thickness of lines separating methods (was .375)
+  h.lines.color <- "gray" # color of lines separating methods (was gray)
+  v.lines.thick <- .375 # thickness of reference lines
+  v.lines.color <- "darkgray" # color of reference lines
+  v.lines.type <- "dashed" # line type of reference lines
+
+  # Filter methods out
+  dt <- dt[, meth_compare]
   
+  # Adapt names
+  colnames(dt) <- sub("blasso", "BLasso", colnames(dt))
+  colnames(dt) <- sub("bridge", "BRidge", colnames(dt))
+  colnames(dt) <- sub("MI-qp", "MI-QP", colnames(dt))
+  colnames(dt) <- sub("MI-am", "MI-AM", colnames(dt))
+  colnames(dt) <- sub("MI-OP", "MI-OR", colnames(dt))
+  colnames(dt) <- sub("stepFor", "MI-SF", colnames(dt))
+
   # Gather data within list
   dt_edit <- gather(as.data.frame(dt))
-  
-  # Clean methods
-  # select methods to keep
-  dt_edit <- dt_edit[dt_edit$key %in% meth_compare, ] 
+
+  # Round results
+  dt_edit$value <- round(dt_edit$value, 1)
+
   # Make names prettier
   dt_edit$key <- sub("_la", "", dt_edit$key)
   dt_edit$key <- sub("_", "-", dt_edit$key)
-  # fix order of methods
+
+  # Fix order of methods
   dt_edit$key <- factor(dt_edit$key, levels = rev(unique(dt_edit$key)))
   
   # Add Condition tag
   n_conds <- nrow(dt)
-  dt_edit$cond <- paste0("Condition ", 
-                         rep(1:n_conds, 
-                             nrow(dt_edit)/n_conds))
+  dt_edit$cond <- factor(
+    rep(c(1, 2), nrow(dt_edit) / n_conds),
+    levels = c(1, 2),
+    labels = c(
+      "p = 243, n = 1000",
+      "p = 243, n = 300"
+    )
+  )
+
   # Plot limits
   plot_xlim   <- c(0, 90)
   plot_breaks <- c(0, 30, 60, 90)
-  plot_labels <- c("", "30min", "1h", "1h 30min")
+  plot_labels <- c("", "30", "60", "90")
   plot_vlines <- c(30, 60)
   plot_hlines <- NULL
-  
+
   # Plot
   p <- ggplot(dt_edit, aes(x = value, y = key)) +
     # Content
-    geom_bar(stat = "identity") + 
-    geom_text(aes(label = value), 
-              hjust = -.2,
-              size = 2) + 
-
+    geom_bar(stat = "identity", fill = large.color) +
+    geom_text(aes(label = value),
+      hjust = -.2,
+      size = 2
+    ) +
     # Faceting
-    facet_grid(cols = vars(cond),
-               scales = "free") +
+    facet_grid(
+      cols = vars(cond),
+      scales = "free"
+    ) +
     # Cosmetic
-    labs(title = element_blank(),
-         x     = element_blank(), 
-         y     = element_blank()) + 
-    theme(axis.text.x  = element_text(size = 5),
-          axis.text.y  = element_text(size = 5),
-          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
-          # Background
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          # Facet Related
-          strip.text = element_text(size = 8,
-                                    face = "plain",
-                                    margin = unit(c(.10, .10, .10, .10), "cm")) 
-    ) + 
+    labs(
+      title = element_blank(),
+      x = element_blank(),
+      y = element_blank()
+    ) +
     # X Axis
-    scale_x_continuous(breaks = plot_breaks,
-                       labels = plot_labels) +
-    geom_vline(xintercept = plot_vlines,
-               size = .375,
-               linetype = "dashed", color = "black") +
-    coord_cartesian(xlim = plot_xlim) + 
+    scale_x_continuous(
+      breaks = plot_breaks,
+      labels = plot_labels
+    ) +
+    geom_vline(
+      xintercept = plot_vlines,
+      size = v.lines.thick,
+      linetype = v.lines.type, 
+      color = v.lines.color
+    ) +
+    coord_cartesian(xlim = plot_xlim) +
     # Horizontal lines
-    geom_hline(yintercept = plot_hlines, 
-               size = .25,
-               color = "gray")
+    geom_hline(
+      yintercept = plot_hlines,
+      size = h.lines.thick,
+      color = h.lines.color
+    ) +
+    # Theme, title, and axis
+    theme(
+      plot.title = element_blank(),
+      # plot.margin  = unit(c(0, 0.1, 0, 0.05), "cm"),
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      axis.text.x = element_text(size = x.axis.text.size),
+      axis.text.y = element_text(size = y.axis.text.size),
+      # Background
+      panel.background = element_rect(fill = "white", colour = "white"),
+      axis.ticks = element_blank(),
+      panel.border = element_rect(
+        fill = NA,
+        color = "gray", size = 0.35
+      ),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      # Condition + Parameter type (Facet Related)
+      strip.text = element_text( # family = font.plot,
+        size = grid.text.size,
+        face = "plain"
+      ),
+      # Legend
+      legend.key = element_rect(colour = "gray", fill = NA, size = .15),
+      legend.text = element_text(size = 8),
+      legend.position = "bottom"
+    )
   p
+
   return(p)
 }
 
