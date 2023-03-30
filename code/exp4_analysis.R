@@ -362,4 +362,9 @@
   )
 
   # Table
-  xtable(dt_outtime, type = "latex", digits = 0)
+  xtable(
+         dt_outtime,
+         type = "latex",
+         digits = 1,
+         align = c("l", rep("c", ncol(dt_outtime)))
+  )
