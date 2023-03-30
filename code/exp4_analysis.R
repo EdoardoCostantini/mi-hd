@@ -239,20 +239,28 @@
          width = 15, height = 21,
          units = "cm",
          device = cairo_pdf)
-  
-  # > CIW (Facet) ####
-  pt1 <- plot_exp4_meth(dt = lapply(1:length(res$m1),
-                                    function(x) res$m1[[x]]$CIW),
-                        type = "CIW",
-                        dt_reps = 1e3,
-                        ci_lvl = .95,
-                        meth_compare = meths)
-  pt2 <- plot_exp4_meth(dt = lapply(1:length(res$m2),
-                                    function(x) res$m2[[x]]$CIW),
-                        type = "CIW",
-                        dt_reps = 1e3,
-                        ci_lvl = .95,
-                        meth_compare = meths)
+
+# > CIW (Facet) ####
+pt1 <- plot_exp4_meth(
+       dt = lapply(
+              1:length(res$m1),
+              function(x) res$m1[[x]]$CIW
+       ),
+       type = "CIW",
+       dt_reps = 1e3,
+       ci_lvl = .95,
+       meth_compare = meths
+)
+pt2 <- plot_exp4_meth(
+       dt = lapply(
+              1:length(res$m2),
+              function(x) res$m2[[x]]$CIW
+       ),
+       type = "CIW",
+       dt_reps = 1e3,
+       ci_lvl = .95,
+       meth_compare = meths
+)
 
   ggsave(pt1,
          file = "../output/graphs/exp4_imp_ciw_allParms_m1.pdf",

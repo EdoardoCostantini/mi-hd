@@ -2289,7 +2289,7 @@ plot_exp4_meth <- function(dt,
   # meth_compare = rev(c("DURR_la", "IURR_la", "blasso", "bridge",
   #                      "MI_PCA",
   #                      "MI_CART", "MI_RF", "missFor", "CC", "MI_OP"))
-  # small.ef = ""
+  # small.ef = c(1, 2)
   # dt = lapply(1:length(res$m1),
   #             function(x) res$m1[[x]]$bias_per)
   # dt = lapply(1:length(res$m2),
@@ -2322,6 +2322,7 @@ plot_exp4_meth <- function(dt,
     colnames(x) <- sub("MI-qp", "MI-QP", colnames(x))
     colnames(x) <- sub("MI-am", "MI-AM", colnames(x))
     colnames(x) <- sub("MI-OP", "MI-OR", colnames(x))
+    colnames(x) <- sub("stepFor", "MI-SF", colnames(x))
 
     # Extract Methods Name
     methods <- names(x)
@@ -2450,64 +2451,96 @@ plot_exp4_meth <- function(dt,
   v.lines.thick    <- .375 # thickness of reference lines
   v.lines.color    <- "darkgray" # color of reference lines
   v.lines.type     <- "dashed" # line type of reference lines
-  
-  # Plot
-  p <- ggplot(dt_edit, aes(x = value, y = id)) +
 
-    # Plot Content
-    geom_segment(aes(xend = 0, 
-                     yend = id,
-                     colour = flag),
-                 size = segme.thick) +
-    scale_color_manual(name = "",
-                       values = c(small.color,
-                                  large.color)) +
+  # Base plot
+  p <- ggplot(dt_edit, aes(x = value, y = id))
 
-    # X Axis
-    scale_x_continuous(breaks = plot_xbreaks,
-                       labels = plot_xlabels) +
-    geom_vline(xintercept = plot_vlines,
-               size = v.lines.thick,
-               linetype = v.lines.type, 
-               color = v.lines.color) +
-    coord_cartesian(xlim = plot_xlim,
-                    ylim = c(min(dt_edit$id), max(dt_edit$id)) ) +
-    
+  # Add colored segments
+  if (type == "CIW") {
+    p <- p + geom_segment(
+      aes(
+        xend = 0,
+        yend = id
+      ),
+      colour = large.color,
+      size = segme.thick
+    )
+  } else {
+    p <- p + geom_segment(
+      aes(
+        xend = 0,
+        yend = id,
+        colour = flag
+      ),
+      size = segme.thick
+    ) +
+      scale_color_manual(
+        name = "",
+        values = c(
+          small.color,
+          large.color
+        )
+      )
+  }
+
+  # X Axis
+  p <- p + scale_x_continuous(
+    breaks = plot_xbreaks,
+    labels = plot_xlabels
+  ) +
+    geom_vline(
+      xintercept = plot_vlines,
+      size = v.lines.thick,
+      linetype = v.lines.type,
+      color = v.lines.color
+    ) +
+    coord_cartesian(
+      xlim = plot_xlim,
+      ylim = c(min(dt_edit$id), max(dt_edit$id))
+    ) +
+
     # Y axis
-    scale_y_continuous(breaks = plot_ybreaks,
-                       labels = plot_ylabels, expand = c(.010, .010)) +
-    geom_hline(yintercept = plot_hlines,
-               size = h.lines.thick,
-               color = h.lines.color) + 
-    
+    scale_y_continuous(
+      breaks = plot_ybreaks,
+      labels = plot_ylabels, expand = c(.010, .010)
+    ) +
+    geom_hline(
+      yintercept = plot_hlines,
+      size = h.lines.thick,
+      color = h.lines.color
+    ) +
+
     # Facet
     facet_grid(cols = vars(conds)) +
 
     # Title and axis labels
-    theme(plot.title   = element_blank(),
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(),
-          axis.text.x  = element_text(size = x.axis.text.size),
-          axis.text.y  = element_text(size = y.axis.text.size),
-          plot.margin  = unit(c(0, 0.1, 0, 0.05), "cm"),
-          # Background
-          panel.background = element_rect(fill = "white", colour = "white"),
-          axis.ticks = element_blank(),
-          panel.border     = element_rect(fill = NA,
-                                          color = "gray",  size = 0.35),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          # Condition + Parameter type (Facet Related)
-          strip.text = element_text(#family = font.plot,
-            size = grid.text.size,
-            face = "plain",
-            margin = unit(c(.10, .10, .10, .10), "cm")),
-          # Legend
-          legend.key = element_rect(colour = "gray", fill = NA, size = .15),
-          legend.text = element_text(size = 8),
-          legend.position = "bottom"
+    theme(
+      plot.title = element_blank(),
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      axis.text.x = element_text(size = x.axis.text.size),
+      axis.text.y = element_text(size = y.axis.text.size),
+      plot.margin = unit(c(0, 0.1, 0, 0.05), "cm"),
+      # Background
+      panel.background = element_rect(fill = "white", colour = "white"),
+      axis.ticks = element_blank(),
+      panel.border = element_rect(
+        fill = NA,
+        color = "gray", size = 0.35
+      ),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      # Condition + Parameter type (Facet Related)
+      strip.text = element_text( # family = font.plot,
+        size = grid.text.size,
+        face = "plain",
+        margin = unit(c(.10, .10, .10, .10), "cm")
+      ),
+      # Legend
+      legend.key = element_rect(colour = "gray", fill = NA, size = .15),
+      legend.text = element_text(size = 8),
+      legend.position = "bottom"
     )
-  
   p
   return(p)
 }
