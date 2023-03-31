@@ -2,7 +2,7 @@
 # Objective: Script to cross-validate ridge and minR2 for collinearity study
 # Author:    Edoardo Costantini
 # Created:   2023-03-28
-# Modified:  2023-03-28
+# Modified:  2023-03-31
 # Notes: 
 
 # 1. Cross-validation of ridge in Bridge ---------------------------------------
@@ -81,7 +81,7 @@ parms$results_file_name <- paste0(filename, ".rds")
 latent <- FALSE
 pm <- .3
 p <- c(50, 500) # c(50, 500) # number of variables
-collinearity <- c(.6, .8, .90, .99)
+collinearity <- c(.6, .8, .90)
 ridge <- 10^seq(from = -1, to = -8, by = -1)
 
 # Create experimental conditions
@@ -238,7 +238,7 @@ parms$results_file_name <- paste0(filename, ".rds")
 latent <- FALSE
 pm <- .3
 p <- c(50, 500) # c(50, 500) # number of variables
-collinearity <- c(.6, .8, .90, .99)
+collinearity <- c(.6, .8, .90)
 minR2 <- c(10^seq(from = -1, to = -7, by = -1))
 
 # Create experimental conditions

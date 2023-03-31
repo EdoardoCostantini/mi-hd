@@ -2,7 +2,7 @@
 # Objective: Check convergence for collinearity study
 # Author:    Edoardo Costantini
 # Created:   2023-03-28
-# Modified:  2023-03-28
+# Modified:  2023-03-31
 # Notes: 
 
 # 1. Convergence for all R-based MI methods -------------------------------------
@@ -81,7 +81,7 @@ parms$results_file_name <- paste0(filename, ".rds")
 latent <- FALSE
 pm <- .3
 p <- 500 # c(50, 500) # number of variables
-collinearity <- c(.99)
+collinearity <- c(.9)
 ridge <- 0.01
 
 # Create experimental conditions

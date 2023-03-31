@@ -2,7 +2,7 @@
 # Objective: Initialization script for c
 # Author:    Edoardo Costantini
 # Created:   2022-02-25
-# Modified:  2023-03-28
+# Modified:  2023-03-31
 # Notes: 
 
 # Fixed Parameters --------------------------------------------------------
@@ -194,7 +194,7 @@ parms$IVEloc <- c(
   pm <- .3
   p   <- c(50, 500)
   latent <- TRUE
-  collinearity <- c(.6, .8, .9, .99)
+  collinearity <- c(.6, .8, .9)
   ridge <- 1e-5
   minR2 <- 1e-3
 
