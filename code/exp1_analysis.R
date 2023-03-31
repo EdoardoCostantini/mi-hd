@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-09
-# Modified: 2022-09-16
+# Modified: 2023-03-31
 # Notes:    reads output form results.R script and shows the numbers that
 #           are used to draw the conclusions.
 
@@ -14,22 +14,18 @@
   res <- readRDS("../output/exp1_simOut_20220201_1749_res.rds") # results with MI_qp and MI_am
   res <- readRDS("../output/exp1_simOut_20220225_1035_res.rds") # results bridge w/ intercept
   res <- readRDS("../output/exp1_simOut_20220225_1035_lm_res.rds") # results bridge w/ intercept lm model
+  res <- readRDS("../output/exp1_simOut_20230329_1301_res.rds")
 
   # Change names of methods if required
   levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")
   levels(res$methods) <- str_replace(levels(res$methods), "bridge", "BRidge")
-  levels(res$methods) <- str_replace(levels(res$methods),
-                                     "MI-qp",
-                                     "MI-QP")
-  levels(res$methods) <- str_replace(levels(res$methods),
-                                     "MI-am",
-                                     "MI-AM")
-  levels(res$methods) <- str_replace(levels(res$methods),
-                                     "MI-OP",
-                                     "MI-OR")
+  levels(res$methods) <- str_replace(levels(res$methods), "MI-qp", "MI-QP")
+  levels(res$methods) <- str_replace(levels(res$methods), "MI-am", "MI-AM")
+  levels(res$methods) <- str_replace(levels(res$methods), "MI-OP", "MI-OR")
+  levels(res$methods) <- str_replace(levels(res$methods), "stepFor", "MI-SF")
 
 # Which plot to plot
-  pm_grep <- c("0.1", "0.3")[2]
+  pm_grep <- c("0.1", "0.3")[1]
 
 # Plot Sizes Decisions
 
@@ -61,7 +57,7 @@
 
   # Fix methods order
   output_sem$methods <- factor(output_sem$methods,
-                               levels = levels(output_sem$methods)[c(1:7, 11:12, 8, 9, 10)])
+                               levels = levels(output_sem$methods)[c(1:7, 13, 11:12, 8, 9, 10)])
 
   # Bias
   x <- 1 # bias
@@ -235,11 +231,6 @@
 
 # SE for threshold
 dt_reps <- 1e3
-
-# Fix methods order
-output_sem$methods <- factor(output_sem$methods,
-  levels = levels(output_sem$methods)[c(1:7, 11:12, 8, 9, 10)]
-)
 
 # Bias
 x <- 3 # CIW
