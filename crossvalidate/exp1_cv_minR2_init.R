@@ -2,7 +2,7 @@
 # Objective: Edits to default parms for cv of minR2 in IVEware imputation
 # Author:    Edoardo Costantini
 # Created:   2023-03-22
-# Modified:  2023-03-24
+# Modified:  2023-03-31
 # Notes:
 
 # Modify parameter of interest -------------------------------------------------
@@ -48,7 +48,7 @@ parms$dt_rep <- 30
 parms$chains <- 1
 parms$iters <- 70
 parms$burnin_imp <- 50
-parms$ndt <- 10
+parms$ndt <- 100
 parms$thin <- (parms$iters - parms$burnin_imp) / parms$ndt
 parms$pos_dt <- (parms$burnin_imp + 1):parms$iters
 parms$keep_dt <- parms$pos_dt[seq(1, length(parms$pos_dt), parms$thin)]
