@@ -1,8 +1,9 @@
-# Title:    Simulation script for ridge paramter cross-validation
-# Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-08-25
-# Modified: 2023-03-22
+# Project:   imputeHD-comp
+# Objective: Simulation script for IVEware minr2 parameter cross-validation
+# Author:    Edoardo Costantini
+# Created:   2020-08-25
+# Modified:  2023-04-03
+# Notes: 
 
 # Prepare environment
 rm(list = ls())
@@ -100,8 +101,11 @@ saveRDS(
         )
 )
 
+# Results ----------------------------------------------------------------------
+
 # Read the results again
 out <- readRDS("../output/exp1_cv_IVEware_20230324_1326.rds")
+out <- readRDS("../output/exp1_cv_IVEware_20230331_1121.rds")
 
 # Obtain conditions with cv ridge
 minR2_cv <- cvParm(

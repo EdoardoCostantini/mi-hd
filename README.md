@@ -114,6 +114,7 @@ Here, I want to keep track of which filenames are important for the results.
    - Output for cross-validation of IVEware `minR2` using 70 iterations
 8. `exp1_conv_IVEware_20230327_1143.rds`
    - Output for convergence checks for IVEware (above 5 iterations everything seems fine)
+   - `exp1_cv_IVEware_20230331_1121.rds` is a version with 70 iterations and 100 multiple imputed datasets
 
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`
