@@ -2,7 +2,7 @@
 # Objective: Initialization script for simulation study 1
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-03-29
+# Modified:  2023-04-03
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -212,7 +212,7 @@ p <- c(50, 500) # number of variables
 pm <- c(.1, .3)
 collinearity <- c(NA)
 ridge <- c(1e-1, 1e-07, 1e-1, 1e-7)
-minR2 <- c(.001, .01, .1, .001)
+minR2 <- c(.001, .001, .001, .001)
 
 # Create experimental conditions
 conds <- expand.grid(
