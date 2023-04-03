@@ -1,7 +1,9 @@
-# Title:    Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-05-19
-# Modified: 2023-03-28
+# Project:   imputeHD-comp
+# Objective: Subroutines for simulation study
+# Author:    Edoardo Costantini
+# Created:   2020-05-19
+# Modified:  2023-04-03
+# Notes: 
 
 # Functions ---------------------------------------------------------------
 
@@ -185,7 +187,7 @@ runCell <- function(cond, parms, rep_status) {
   ## For internals
   # source("./exp1_init.R")
   # rep_status <- 1
-  # cond <- conds[4, ]
+  # cond <- conds[1, ]
   
   ## Data ------------------------------------------------------------------ ##
   # According to experiment set up, gen 1 fully-obs data dataset and
@@ -299,9 +301,9 @@ runCell <- function(cond, parms, rep_status) {
                      MI_CART = imp_CART$imps,
                      MI_RF   = imp_RANF$imps,
                      stepFor = imp_stepFor$imps,
-                     MI_qp   = imp_qp$imps,
-                     MI_am   = imp_MICE_am$imps,
-                     MI_OP   = imp_MICE_OP$mids) # I need this for convergence
+                     MI_qp   = imp_qp$mids,
+                     MI_am   = imp_MICE_am$mids,
+                     MI_OP   = imp_MICE_OP$mids)
   
   ## Analyse --------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
