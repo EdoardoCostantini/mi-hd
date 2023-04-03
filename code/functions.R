@@ -2,7 +2,7 @@
 # Objective: helper functions
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-03-30
+# Modified:  2023-04-03
 # Notes: 
 
 # generic functions -------------------------------------------------------
@@ -1690,24 +1690,68 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
     } else {
       # Average across model parameters
       avg_fmi_parms <- sapply(store_1, mean, na.rm = TRUE)
+
       # Average across repetitions
       out$conds$FMI[i] <- mean(avg_fmi_parms, na.rm = TRUE)
+
+      # Add bounds
+      out$conds$FMI_upr[i] <- out$conds$FMI[i] + sd(avg_fmi_parms, na.rm = TRUE)
+      out$conds$FMI_lwr[i] <- out$conds$FMI[i] - sd(avg_fmi_parms, na.rm = TRUE)
+
+      # Change names
       rownames(out$conds)[i] <- names(out[[dt]][i])
     }
   }
 
   # Group by conditions
-  solution <- out$conds %>% group_by_at(exp_factors) %>% slice(which.min(FMI))
+  solution <- out$conds %>%
+    group_by_at(exp_factors) %>%
+    slice(which.min(FMI))
 
-  # Plots
-  # Make ridge a factor
+  # prepare variables for plot
   grid_y_axis <- exp_factors[1]
   grid_x_axis <- exp_factors[2]
   out$conds[, cv.parm] <- factor(out$conds[, cv.parm], levels = unique(out$conds[, cv.parm]))
+
+  # Make plot
   p <- ggplot(
-    out$conds, aes(.data[[cv.parm]], FMI)) + 
+    out$conds,
+    aes(.data[[cv.parm]], FMI)
+  ) +
+    # Points
     geom_point() +
-    facet_grid(reformulate(grid_x_axis, grid_y_axis))
+    # Error bars
+    geom_errorbar(aes(ymin = FMI_lwr, ymax = FMI_upr),
+      width = .2,
+      position = position_dodge(.9)
+    ) +
+    # Add lower bound
+    geom_segment(
+      aes(
+        x = 0,
+        xend = nlevels(out$conds$minR2) + 1,
+        y = FMI_lwr,
+        yend = FMI_lwr
+      ),
+      data = solution,
+      colour = "blue",
+      size = .2
+    ) +
+    # Add upper bound
+    geom_segment(
+      aes(
+        x = 0,
+        xend = nlevels(out$conds$minR2) + 1,
+        y = FMI_upr,
+        yend = FMI_upr
+      ),
+      data = solution,
+      colour = "blue",
+      size = .2
+    ) +
+    # Grid
+    facet_grid(reformulate(grid_x_axis, grid_y_axis)) + 
+    theme_bw()
 
   return(list(values = solution,
               plot = p))
