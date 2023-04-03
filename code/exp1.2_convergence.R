@@ -193,9 +193,8 @@ saveRDS(
 # 1.4 Analyze results ----------------------------------------------------------
 
 # Load data
-
-# 20200803 Correct
-out_cnv <- readRDS("")
+out_cnv <- readRDS("../output/exp1_2_convergence_all_meth_20230328_1816.rds") # colli .99
+out_cnv <- readRDS("../output/exp1_2_convergence_all_meth_20230331_1157.rds") # colli .9
 
 # What to show
 iters_range <- 1:100 # which set of iterations
@@ -344,24 +343,14 @@ parms$store <- c(
     sem_CI = FALSE,
     lm_EST = FALSE,
     lm_CI = FALSE,
-    fmi = FALSE, #  <- this is what we want for CV
+    fmi = FALSE, 
     miss_descrps = FALSE,
     run_time_min = FALSE,
-    imp_values = TRUE
+    imp_values = TRUE #  <- this is what we want for convergence checks
 )
 
 # Iterations, repetitions, etc
-parms$dt_rep <- 3
-parms$ndt <- 5
-parms$iters <- 5
-parms$burnin_imp <- 1
-parms$thin <- (parms$iters - parms$burnin_imp) / parms$ndt
-parms$pos_dt <- (parms$burnin_imp + 1):parms$iters # candidate datasets (after convergence)
-parms$keep_dt <- parms$pos_dt[seq(
-    1,
-    length(parms$pos_dt),
-    parms$thin
-)] # keep 1 dataset every thin
+parms$dt_rep <- 20
 
 # Report names
 filename <- paste0(
@@ -375,86 +364,133 @@ parms$results_file_name <- paste0(filename, ".rds")
 
 # 2.2.2 Conds ------------------------------------------------------------------
 
-latent <- FALSE
+p <- 500
 pm <- .3
-p <- c(50, 500) # c(50, 500) # number of variables
-collinearity <- c(.6, .8, .90, .99)
-minR2 <- c(10^seq(from = -1, to = -7, by = -1))
-
-# Create experimental conditions
-conds <- expand.grid(
-    minR2 = minR2,
-    p = p,
-    latent = latent,
-    pm = pm,
-    collinearity = collinearity
-)[1:4, ]
-
-# IVEware special parameters per condition #TODO: cross-validate
-conds$ridge <- NA
+iters <- c(1, 5, 10, 20, 40, 80, 160, 240, 320)
+seed <- c(2023, 3202, 1610, 4004, 9876)
+conds <- expand.grid(p = p, pm = pm, iters = iters, seed = seed)
 
 # 2.3 Perform simulation -------------------------------------------------------
 
-# Start simulation
-sim_start <- Sys.time()
+# Set a seed
+set.seed(1234)
 
-# Create a cluster object:
-clus <- makeCluster(parms$dt_rep)
+# Generated data
+Xy <- simData_exp1(conds[1, ], parms)
 
-# Export call for packages
-clusterEvalQ(cl = clus, expr = source("./init_general.R"))
+# Impose missing values
+Xy_mis <- imposeMiss(Xy, parms, conds[1, ])
+Xy_mis <- cbind(
+    Xy_mis[, parms$z_m_id],
+    Xy_mis[, -which(colnames(Xy_mis) %in% parms$z_m_id)]
+)
 
-# Export parms and conds objects
-clusterExport(
-    cl = clus,
-    varlist = list(
-        "parms",
-        "conds"
+# Starting time stamp
+when <- format(Sys.time(), "%Y%m%d_%H%M")
+
+# Create an empty object to store the results
+store_imps <- list()
+
+# Define condition
+for (i in 1:nrow(conds)) {
+    # Set condition seed
+    set.seed(conds[i, "seed"])
+
+    # Which condition
+    cond <- conds[i, ]
+
+    # Perform imputation
+    store_imps[[i]] <- impute_IVEware(
+        Z = Xy_mis,
+        minR2 = 0.01,
+        rep_status = i,
+        iters = cond$iters,
+        perform = TRUE,
+        parms = parms
     )
-)
-
-# Run the computations in parallel on the 'clus' object:
-out <- parLapply(
-    cl = clus,
-    X = 1:(parms$dt_rep),
-    fun = doRep,
-    conds = conds,
-    parms = parms
-)
-
-# Kill the cluster:
-stopCluster(clus)
-
-sim_ends <- Sys.time()
-
-# Append Parms and conds to out object
-out$parms <- parms
-out$conds <- conds
-out$session_info <- devtools::session_info()
+}
 
 # Save results
 saveRDS(
-    out,
+    list(
+        original.data = Xy_mis,
+        imputed.data = store_imps,
+        parms = parms,
+        conds = conds
+    ),
     paste0(
-        parms$outDir,
-        parms$results_file_name
+        "../output/", parms$results_file_name
     )
 )
 
 # 2.4 Analyze results ----------------------------------------------------------
 
-# Load data
-out <- readRDS("../output/exp1_cv_bridge_20220224_1042.rds")
+# Read results
+conv.out <- readRDS("../output/")
 
-# Obtain conditions with cv ridge
-conds_bridge <- cvParm(
-    out,
-    cv.parm = "ridge",
-    exp_factors = colnames(out$conds)[c(2, 4)]
-)
+# For every imputed variable
+pdf(file = "../output/graphs/exp1_conv_IVEware_20230327_1143.pdf", width = 20, height = 20)
+par(mfrow = c(6, 2))
 
-# Selected values
-conds_bridge$values
+# Loop over conditions
+for (condition in 1:nrow(conv.out$conds)) {
+    # Look over variables
+    for (variable in conv.out$parms$z_m_id) {
+        # Identify imputed values
+        imps <- is.na(conv.out$original.data[, variable])
 
-# Plot
-conds_bridge$plot
+        # Find the highest point for ylim
+        maxDens <- sapply(1:conv.out$parms$ndt, function(j) {
+            object <- density(conv.out$imputed.data[[1]]$dats[[j]][imps, variable])
+            max(object$y)
+        })
+
+        # Plot baseline
+        plot(
+            density(na.omit(conv.out$original.data[, variable])),
+            lwd = 2,
+            main = paste0("Density plot for observed and imputed ", variable),
+            xlab = ""
+        )
+        # Add densities for
+        lapply(1:conv.out$parms$ndt, function(j) {
+            lines(
+                density(conv.out$imputed.data[[condition]]$dats[[j]][imps, variable]),
+                col = "blue",
+                lwd = 1
+            )
+        })
+
+        # Plot baseline
+        plot(
+            density(na.omit(conv.out$original.data[, variable])),
+            lwd = 2,
+            main = paste0("Density plot for observed and imputed ", variable),
+            xlab = "",
+            ylim = c(0, max(maxDens))
+        )
+
+        # Add densities of imputed variable
+        lapply(1:conv.out$parms$ndt, function(j) {
+            lines(
+                density(conv.out$imputed.data[[condition]]$dats[[j]][, variable]),
+                col = "red",
+                lwd = 1
+            )
+        })
+
+        # Add a shared title
+        mtext(
+            paste0(
+                "Seed = ", conv.out$conds$seed[condition], "; ",
+                "Iterations = ", conv.out$conds$iters[condition]
+            ),
+            side = 1, # bottom placement
+            line = -2,
+            outer = TRUE
+        )
+    }
+}
+
+# Close pdf storing
+dev.off()
