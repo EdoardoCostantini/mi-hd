@@ -2,7 +2,7 @@
 # Objective: Check convergence for collinearity study
 # Author:    Edoardo Costantini
 # Created:   2023-03-28
-# Modified:  2023-03-31
+# Modified:  2023-04-03
 # Notes: 
 
 # 1. Convergence for all R-based MI methods -------------------------------------
@@ -116,6 +116,26 @@ clusterExport(
     )
 )
 
+# Progress report file
+file.create(paste0(parms$outDir, parms$report_file_name))
+
+cat(
+    paste0(
+        "SIMULATION PROGRESS REPORT",
+        ## Description
+        "\n",
+        "Description: ", parms$description,
+        "\n",
+        ## Time
+        "\n", "------", "\n",
+        "Starts at: ", Sys.time(),
+        "\n", "------", "\n"
+    ),
+    file = paste0(parms$outDir, parms$report_file_name),
+    sep = "\n",
+    append = TRUE
+)
+
 # Run the computations in parallel on the 'clus' object:
 out <- parLapply(
     cl = clus,
@@ -134,6 +154,20 @@ sim_ends <- Sys.time()
 out$parms <- parms
 out$conds <- conds
 out$session_info <- devtools::session_info()
+
+# Close report file
+cat(
+    paste0(
+        "\n", "------", "\n",
+        "Ends at: ", Sys.time(), "\n",
+        "Run time: ",
+        round(difftime(sim_ends, sim_start, units = "hours"), 3), " h",
+        "\n", "------", "\n"
+    ),
+    file = paste0(parms$outDir, parms$report_file_name),
+    sep = "\n",
+    append = TRUE
+)
 
 # Save results
 saveRDS(
