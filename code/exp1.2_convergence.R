@@ -54,9 +54,9 @@ parms$store <- c(
 )
 
 # Iterations, repetitions, etc
-parms$dt_rep <- 10
+parms$dt_rep <- 5
 parms$ndt <- parms$mice_ndt <- parms$chains <- 5
-parms$iters <- parms$mice_iters <- 10 # 250 iterations
+parms$iters <- parms$mice_iters <- 10 # 100 iterations
 parms$burnin_imp <- 0
 parms$thin <- (parms$iters - parms$burnin_imp) / parms$ndt
 parms$pos_dt <- (parms$burnin_imp + 1):parms$iters # candidate datasets (after convergence)
@@ -65,6 +65,18 @@ parms$keep_dt <- parms$pos_dt[seq(
     length(parms$pos_dt),
     parms$thin
 )] # keep 1 dataset every thin
+
+# For blasso
+parms$chains_bl <- parms$chains
+parms$iters_bl <- parms$iters
+parms$burnin_imp_bl <- 0
+parms$thin_bl <- (parms$iters_bl - parms$burnin_imp_bl) / parms$ndt
+parms$pos_dt_bl <- (parms$burnin_imp_bl + 1):parms$iters_bl
+parms$keep_dt_bl <- parms$pos_dt_bl[seq(
+    1,
+    length(parms$pos_dt_bl),
+    parms$thin_bl
+)]
 
 # Report names
 filename <- paste0(
