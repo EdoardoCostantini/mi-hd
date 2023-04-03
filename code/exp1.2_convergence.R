@@ -198,76 +198,105 @@ saveRDS(
 out_cnv <- readRDS("")
 
 # What to show
-iters_range <- 1:5 # which set of iterations
+iters_range <- 1:100 # which set of iterations
 y_range <- c(3, 6)
-exp_dat <- 1 # which data replication (10 possibilities)
+exp_dat <- 2 # which data replication (10 possibilities)
 
-# Run description
+# Check run is correct for all involved methods
 data.frame(
-    Chians = c(all = out_cnv$parms$chains, MICE = out_cnv$parms$mice_ndt),
-    Iters = c(all = out_cnv$parms$iters, MICE = out_cnv$parms$mice_iters)
+    Chians = c(
+        all = out_cnv$parms$chains, 
+        blasso = out_cnv$parms$chains_bl,
+        MICE = out_cnv$parms$mice_ndt
+    ),
+    Iters = c(
+        all = out_cnv$parms$iters,
+        blasso = out_cnv$parms$iters_bl,
+        MICE = out_cnv$parms$mice_iters
+    )
 )
 
-# DURR_la
+# DURR
 mean_traceplot(
     out = out_cnv,
-    method = out_cnv$parms$method[1],
+    method = "DURR_la",
     dat = exp_dat,
     y_range = y_range,
     iters = iters_range
 )
 
-# IURR_la
-mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[2],
+# IURR
+mean_traceplot(
+    out = out_cnv,
+    method = "IURR_la",
     dat = exp_dat,
-    y_range = y_range, iters = iters_range
+    y_range = y_range,
+    iters = iters_range
 )
-# bridge
-mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[3],
-    dat = exp_dat,
-    y_range = c(3, 7), iters = iters_range
-)
+
 # blasso
-mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[4],
+mean_traceplot(
+    out = out_cnv,
+    method = "blasso",
     dat = exp_dat,
-    y_range = y_range, iters = iters_range
+    y_range = c(3, 7), 
+    iters = iters_range
 )
+
+# bridge
+mean_traceplot(
+    out = out_cnv,
+    method = "bridge",
+    dat = exp_dat,
+    y_range = c(-5, 15),
+    iters = iters_range
+)
+
 # MI_PCA
-mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[5],
+mean_traceplot(
+    out = out_cnv,
+    method = "MI_PCA",
     dat = exp_dat,
     y_range = y_range, iters = iters_range
 )
+
 # MI_CART
-mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[6],
+mean_traceplot(
+    out = out_cnv,
+    method = "MI_CART",
     dat = exp_dat,
     y_range = y_range, iters = iters_range
 )
+
 # MI_RF
-mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[7],
+mean_traceplot(
+    out = out_cnv,
+    method = "MI_RF",
     dat = exp_dat,
     y_range = y_range, iters = iters_range
 )
-# MI_T
-mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[8],
+
+# MI_qp
+mean_traceplot(
+    out = out_cnv,
+    method = "MI_qp",
     dat = exp_dat,
-    y_range = y_range, iters = iters_range
+    y_range = y_range,
+    iters = iters_range
 )
+
 # MI_am
 mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[8],
+    method = "MI_am",
     dat = exp_dat,
-    y_range = y_range, iters = iters_range
+    y_range = y_range,
+    iters = iters_range
 )
+
 # MI_OP
-mean_traceplot(out_cnv,
-    method = out_cnv$parms$method[2],
+mean_traceplot(
+    out = out_cnv,
+    method = "MI_OP",
     dat = exp_dat,
     y_range = y_range,
     iters = iters_range
