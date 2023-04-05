@@ -26,7 +26,7 @@
   levels(res$methods) <- str_replace(levels(res$methods), "stepFor", "MI-SF")
 
 # Which plot to plot
-  pm_grep <- c("0.1", "0.3")[1]
+  pm_grep <- c("0.1", "0.3")[2]
 
 # Plot Sizes Decisions
 
@@ -35,6 +35,12 @@
   sp_width <- 3.75
   sp_height <- 6
 
+# Plot font
+
+plot_text_family <- "sans"
+plot_text_face <- "plain"
+plot_text_size <- 9
+        
 # New version -------------------------------------------------------------
 
   output_sem <- res
@@ -96,30 +102,43 @@
                size = .15,
                aes(xintercept = xint)) +
 
-    # Format
-    scale_x_continuous(labels = xci_breaks,
-                       breaks = xci_breaks) +
+  # Format
+  scale_x_continuous(
+    labels = xci_breaks,
+    breaks = xci_breaks
+  ) +
     scale_y_discrete(limits = rev) +
     scale_shape_manual(values = c("I", "I", "I")) +
     coord_cartesian(xlim = c(0, 50)) +
-    labs(#title = label_parm[x],
-      x     = NULL,
-      y     = NULL,
+    labs( # title = label_parm[x],
+      x = NULL,
+      y = NULL,
       linetype = NULL,
-      shape = NULL) +
+      shape = NULL
+    ) +
     theme(
-      panel.background = element_rect(fill = NA,
-                                      color = "gray"),
-      panel.grid.major = element_line(color = "gray",
-                                      size = 0.15,
-                                      linetype = 1),
-      legend.key = element_rect(colour = "gray",
-                                fill = NA,
-                                size = .15
+      panel.background = element_rect(
+        fill = NA,
+        color = "gray"
       ),
-      text = element_text(size = 9),
+      panel.grid.major = element_line(
+        color = "gray",
+        size = 0.15,
+        linetype = 1
+      ),
+      legend.key = element_rect(
+        colour = "gray",
+        fill = NA,
+        size = .15
+      ),
+      text = element_text(
+        family = plot_text_family,
+        face = plot_text_face,
+        size = plot_text_size
+      ),
       axis.ticks = element_blank(),
-      legend.position = "none")
+      legend.position = "none"
+    )
 
     pf
 
@@ -188,35 +207,49 @@
     #                lty = paste0("Burton's range")),
     #            size = .20) +
 
-    # Format
-    scale_y_discrete(limits = rev) +
-    scale_x_continuous(labels = as.character(round(xci_breaks/100, 2)),
-                       breaks = xci_breaks) +
+  # Format
+  scale_y_discrete(limits = rev) +
+    scale_x_continuous(
+      labels = as.character(round(xci_breaks / 100, 2)),
+      breaks = xci_breaks
+    ) +
     coord_cartesian(xlim = c(min(xci_breaks), max(xci_breaks))) +
     scale_shape_manual(values = c("I", "I", "I")) +
     # scale_linetype_manual(values = c("longdash", "dashed", "solid")) +
     # guides(linetype = guide_legend(override.aes = list(size = c(.20, .20, .15)))) +
-    labs(#title = label_parm[x],
-      x     = NULL,
-      y     = NULL,
+    labs( # title = label_parm[x],
+      x = NULL,
+      y = NULL,
       linetype = NULL,
-      shape = NULL) +
+      shape = NULL
+    ) +
     theme(
-      panel.background = element_rect(fill = NA,
-                                      color = "gray"),
-      panel.grid.major = element_line(color = "gray",
-                                      size = 0.175,
-                                      linetype = 1),
-      axis.ticks = element_blank(),
-      legend.key = element_rect(colour = "gray",
-                                fill = NA,
-                                size = .15
+      panel.background = element_rect(
+        fill = NA,
+        color = "gray"
       ),
-      legend.position ="bottom",
-      text = element_text(size = 9),
-      axis.text.x = element_text(angle = 90,
-                                 vjust = 0.5,
-                                 hjust = 1)
+      panel.grid.major = element_line(
+        color = "gray",
+        size = 0.175,
+        linetype = 1
+      ),
+      axis.ticks = element_blank(),
+      legend.key = element_rect(
+        colour = "gray",
+        fill = NA,
+        size = .15
+      ),
+      legend.position = "bottom",
+      text = element_text(
+        family = plot_text_family,
+        face = plot_text_face,
+        size = plot_text_size
+      ),
+      axis.text.x = element_text(
+        angle = 90,
+        vjust = 0.5,
+        hjust = 1
+      )
     )
 
     pf
@@ -269,33 +302,37 @@ pf <- output_sem %>%
     cols = vars(cond)
   ) +
   coord_cartesian(xlim = c(0, 10)) +
-  
+
   # Format
   scale_y_discrete(limits = rev) +
-  labs( # title = label_parm[x],
-    x = NULL,
-    y = NULL,
-    linetype = NULL
-  ) +
-  theme(
-    panel.background = element_rect(
-      fill = NA,
-      color = "gray"
-    ),
-    panel.grid.major = element_line(
-      color = "gray",
-      size = 0.15,
-      linetype = 1
-    ),
-    legend.key = element_rect(
-      colour = "gray",
-      fill = NA,
-      size = .15
-    ),
-    text = element_text(size = 9),
-    axis.ticks = element_blank(),
-    legend.position = "none"
-  )
+    labs( # title = label_parm[x],
+      x = NULL,
+      y = NULL,
+      linetype = NULL
+    ) +
+    theme(
+      panel.background = element_rect(
+        fill = NA,
+        color = "gray"
+      ),
+      panel.grid.major = element_line(
+        color = "gray",
+        size = 0.15,
+        linetype = 1
+      ),
+      legend.key = element_rect(
+        colour = "gray",
+        fill = NA,
+        size = .15
+      ),
+      text = element_text(
+        family = plot_text_family,
+        face = plot_text_face,
+        size = plot_text_size
+      ),
+      axis.ticks = element_blank(),
+      legend.position = "none"
+    )
 
 pf
 

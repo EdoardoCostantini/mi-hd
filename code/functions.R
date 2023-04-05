@@ -2167,6 +2167,11 @@ plot_exp4 <- function(dt,
   # meth_sort = FALSE
   # bar_col = "darkgray"
   
+  # Plot font
+  plot_text_family <- "sans"
+  plot_text_face <- "plain"
+  plot_text_size <- 9
+
   # Gather data within list
   dt_edit <- lapply(Reduce(c, dt), gather)
   
@@ -2271,50 +2276,68 @@ plot_exp4 <- function(dt,
     plot_hlines <- 1:length(meth_compare)
     plot_vlines <- NULL
   }
-  
-  # Plot
-  p <- ggplot(dt_edit, aes(x = value, y = key)) +
-    # Content
-    geom_bar(stat = "identity",
-             fill = bar_col,
-             position = "dodge",
-             width = .5) +
-    # Faceting
-    facet_grid(rows = vars(model),
-               cols = vars(cond),
-               scales = "free") +
-    # Cosmetic
-    labs(title = element_blank(),
-         x     = element_blank(), 
-         y     = element_blank()) + 
-    theme(axis.text.x  = element_text(size = 5,
-                                      angle = 90,
-                                      vjust = .5),
-          axis.text.y  = element_text(size = 5),
-          plot.margin  = unit(c(.05, .0, .0, .0), "cm"),
-          # Background
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          # Facet Related
-          strip.text = element_text(size = 10,
-                                    face = "plain",
-                                    margin = unit(c(.10, .10, .10, .10), "cm")) 
-    ) + 
-    # X Axis
-    scale_x_continuous(breaks = plot_breaks,
-                       labels = plot_labels) +
-    coord_cartesian(xlim = plot_xlim) + 
-    
-    # Horizontal lines
-    geom_hline(yintercept = plot_hlines+.5, 
-               size = .25,
-               color = "gray") +
-    
-    # Vertical lines
-    geom_vline(xintercept = plot_vlines,
-               size = .375,
-               linetype = "dashed", 
-               color = "black")
+
+    # Plot
+    p <- ggplot(dt_edit, aes(x = value, y = key)) +
+      # Content
+      geom_bar(
+        stat = "identity",
+        fill = bar_col,
+        position = "dodge",
+        width = .5
+      ) +
+      # Faceting
+      facet_grid(
+        rows = vars(model),
+        cols = vars(cond),
+        scales = "free"
+      ) +
+      # Cosmetic
+      labs(
+        title = element_blank(),
+        x = element_blank(),
+        y = element_blank()
+      ) +
+      theme(
+        axis.text.x = element_text(
+          size = 5,
+          angle = 90,
+          vjust = .5
+        ),
+        axis.text.y = element_text(size = 5),
+        plot.margin = unit(c(.05, .0, .0, .0), "cm"),
+        # Background
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        # Facet Related
+        text = element_text(
+          family = plot_text_family,
+          face = plot_text_face,
+          size = plot_text_size
+        ),
+        strip.text = element_text(margin = unit(c(.10, .10, .10, .10), "cm"))
+      ) +
+      # X Axis
+      scale_x_continuous(
+        breaks = plot_breaks,
+        labels = plot_labels
+      ) +
+      coord_cartesian(xlim = plot_xlim) +
+
+      # Horizontal lines
+      geom_hline(
+        yintercept = plot_hlines + .5,
+        size = .25,
+        color = "gray"
+      ) +
+
+      # Vertical lines
+      geom_vline(
+        xintercept = plot_vlines,
+        size = .375,
+        linetype = "dashed",
+        color = "black"
+      )
   p
   return(p)
 }
@@ -2483,10 +2506,9 @@ plot_exp4_meth <- function(dt,
   }
 
   # Colors and texts
-  font.plot        <- "Arial" # font for the whole plot
-  x.axis.text.size <- 7.5 # Scale of plotted numbers
-  y.axis.text.size <- 7.5 # Imputation Methods names
-  grid.text.size   <- 10 # Condition + Parameter type
+  plot_text_family <- "sans"
+  plot_text_face   <- "plain"
+  plot_text_size   <- 9
   segme.thick      <- 1 # thickness of lines reporting results (was 1)
   small.color      <- "darkgray" # color of lines |PRB| < 10% 
   large.color      <- "lightgray" # color of lines |PRB| < 10%
@@ -2562,8 +2584,6 @@ plot_exp4_meth <- function(dt,
       plot.title = element_blank(),
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),
-      axis.text.x = element_text(size = x.axis.text.size),
-      axis.text.y = element_text(size = y.axis.text.size),
       plot.margin = unit(c(0, 0.1, 0, 0.05), "cm"),
       # Background
       panel.background = element_rect(fill = "white", colour = "white"),
@@ -2574,15 +2594,18 @@ plot_exp4_meth <- function(dt,
       ),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
+      # Text overall
+        text = element_text(
+          family = plot_text_family,
+          face = plot_text_face,
+          size = plot_text_size
+        ),
       # Condition + Parameter type (Facet Related)
-      strip.text = element_text( # family = font.plot,
-        size = grid.text.size,
-        face = "plain",
+      strip.text = element_text(
         margin = unit(c(.10, .10, .10, .10), "cm")
       ),
       # Legend
       legend.key = element_rect(colour = "gray", fill = NA, size = .15),
-      legend.text = element_text(size = 8),
       legend.position = "bottom"
     )
   p
