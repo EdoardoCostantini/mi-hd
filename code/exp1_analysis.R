@@ -1,10 +1,10 @@
-# Title:    Analysis of results
-# Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-07-09
-# Modified: 2023-03-31
+# Project:   imputeHD-comp
+# Objective: Analysis of results
+# Author:    Edoardo Costantini
+# Created:   2020-07-09
+# Modified:  2023-04-05
 # Notes:    reads output form results.R script and shows the numbers that
-#           are used to draw the conclusions.
+#           are used to draw conclusions.
 
   rm(list = ls())
   source("./init_general.R")
@@ -15,6 +15,7 @@
   res <- readRDS("../output/exp1_simOut_20220225_1035_res.rds") # results bridge w/ intercept
   res <- readRDS("../output/exp1_simOut_20220225_1035_lm_res.rds") # results bridge w/ intercept lm model
   res <- readRDS("../output/exp1_simOut_20230329_1301_res.rds")
+  res <- readRDS("../output/exp1_simOut_20230403_1631_res.rds")
 
   # Change names of methods if required
   levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")

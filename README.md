@@ -107,14 +107,18 @@ Here, I want to keep track of which filenames are important for the results.
    - 1e3 repetitions
    - re-run of bridge with correct intercept inclusion
 5. `exp1_cv_bridge_20220224_1042.rds` 
-   - contains the results for corssvalidation of bridge with the correct use of intercept
+   - Output for cross-validation of bridge with the correct use of intercept
 6. `exp1_simOut_20220225_1035_res.rds`
-   - outcome of the exp1_results.R script combining (1), (2), and (4)
+   - Output for `exp1_results.R` script combining (1), (2), and (4)
 7. `exp1_cv_IVEware_20230324_1326.rds`
    - Output for cross-validation of IVEware `minR2` using 70 iterations
 8. `exp1_conv_IVEware_20230327_1143.rds`
    - Output for convergence checks for IVEware (above 5 iterations everything seems fine)
    - `exp1_cv_IVEware_20230331_1121.rds` is a version with 70 iterations and 100 multiple imputed datasets
+9. `exp1_simOut_20230403_1631.rds`
+   - Output for IVEware method
+10. `exp1_simOut_20230403_1631_res.rds`
+   - Output for `exp1_results.R` script combining (1), (2), (4), and (9)
 
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`

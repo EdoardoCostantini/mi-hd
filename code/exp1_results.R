@@ -1,8 +1,9 @@
-# Title:    Putting result object together
-# Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-05-19
-# Modified: 2023-03-31
+# Project:   imputeHD-comp
+# Objective: Pulling result objects together
+# Author:    Edoardo Costantini
+# Created:   2020-05-19
+# Modified:  2023-04-05
+# Notes: 
 
   rm(list = ls())
   source("./init_general.R")
@@ -182,7 +183,7 @@ cbind(bs_out[[id]]$cond_50_FALSE_0.3$sem_EST[, "bridge"],
 # Add results for new method: IVEware ------------------------------------------
 
 # Define file names for the new file to join to the old
-nw_filename <- "exp1_simOut_20230329_1301" # new rds filename
+nw_filename <- "exp1_simOut_20230403_1631" # new rds filename
 filename <- nw_filename
 
 # Read it in of them in R
@@ -295,7 +296,7 @@ out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$metho
   )
 
   # Save
-  filename_lm <- paste0("exp1_simOut_20230329_1301_lm")
+  filename_lm <- paste0("exp1_simOut_20230403_1631_lm")
   saveRDS(
     gg_out_lm,
     paste0("../output/", filename_lm, "_res.rds")
@@ -320,7 +321,7 @@ out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$metho
   )
 
   # Save
-  filename <- paste0("exp1_simOut_20230329_1301")
+  filename <- paste0("exp1_simOut_20230403_1631")
   saveRDS(
     gg_out_sem,
     paste0("../output/", filename, "_res.rds")
