@@ -2638,10 +2638,10 @@ plot_time <- function(dt,
   # bar_col = "#595959"
 
   # Graphical parameters
-  font.plot <- "Arial" # font for the whole plot
+  plot_text_family <- "sans"
+  plot_text_face <- "plain"
+  plot_text_size <- 9
   x.axis.text.size <- 6 # Scale of plotted numbers
-  y.axis.text.size <- 6 # Imputation Methods names
-  grid.text.size <- 6 # Condition + Parameter type
   segme.thick <- 1 # thickness of lines reporting results (was 1)
   small.color <- "darkgray" # color of lines |PRB| < 10%
   large.color <- "lightgray" # color of lines |PRB| < 10%
@@ -2736,8 +2736,6 @@ plot_time <- function(dt,
       # plot.margin  = unit(c(0, 0.1, 0, 0.05), "cm"),
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),
-      axis.text.x = element_text(size = x.axis.text.size),
-      axis.text.y = element_text(size = y.axis.text.size),
       # Background
       panel.background = element_rect(fill = "white", colour = "white"),
       axis.ticks = element_blank(),
@@ -2747,11 +2745,12 @@ plot_time <- function(dt,
       ),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
-      # Condition + Parameter type (Facet Related)
-      strip.text = element_text( # family = font.plot,
-        size = grid.text.size,
-        face = "plain"
-      ),
+      # Text overall
+        text = element_text(
+          family = plot_text_family,
+          face = plot_text_face,
+          size = plot_text_size
+        ),
       # Legend
       legend.key = element_rect(colour = "gray", fill = NA, size = .15),
       legend.text = element_text(size = 8),
