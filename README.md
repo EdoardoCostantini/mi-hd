@@ -120,6 +120,12 @@ Here, I want to keep track of which filenames are important for the results.
 10. `exp1_simOut_20230403_1631_res.rds`
    - Output for `exp1_results.R` script combining (1), (2), (4), and (9)
 
+### Extra Simulation Study on Collinearity
+
+1. `exp1_2_convergence_all_meth_20230403_1027.rds`
+- Output for convergence checks for all R native methods.
+
+
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`
    - first 500 repetitions

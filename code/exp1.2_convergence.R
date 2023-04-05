@@ -193,8 +193,7 @@ saveRDS(
 # 1.4 Analyze results ----------------------------------------------------------
 
 # Load data
-out_cnv <- readRDS("../output/exp1_2_convergence_all_meth_20230328_1816.rds") # colli .99
-out_cnv <- readRDS("../output/exp1_2_convergence_all_meth_20230331_1157.rds") # colli .9
+out_cnv <- readRDS("../output/exp1_2_convergence_all_meth_20230403_1027.rds") # colli .9
 
 # What to show
 iters_range <- 1:100 # which set of iterations
