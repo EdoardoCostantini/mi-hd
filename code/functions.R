@@ -2369,16 +2369,18 @@ plot_exp4_meth <- function(dt,
   #             function(x) res$m1[[x]]$ci_cov)
   # dt = lapply(1:length(res$m1),
   #             function(x) res$m1[[x]]$CIW)
-  
+
   ## Prep data for plot (take absolute value)
-  dt_preEdit <- lapply(dt, function(d){
+  dt_preEdit <- lapply(dt, function(d) {
     abs(d[, meth_compare])
   })
-  
+
   # conds <- rep(c("Condition 1", "Condition 2"), 2)
-  conds <- rep(c("low-dim \n p = 243, n = 1000", 
-                 "high-dim \n p = 243, n = 300"), 2)
-  
+  conds <- rep(c(
+    "low-dim \n p = 243, n = 1000",
+    "high-dim \n p = 243, n = 300"
+  ), 2)
+
   # CONTINUE FROM HERE
   dt_edit <- lapply(1:length(dt_preEdit), function(id) {
     x <- dt_preEdit[[id]]
@@ -2393,31 +2395,35 @@ plot_exp4_meth <- function(dt,
 
     # Extract Methods Name
     methods <- names(x)
-    
+
     # Extract Results for a method
-    output_2 <- lapply(1:ncol(x), function(l){
+    output_2 <- lapply(1:ncol(x), function(l) {
       par_names <- rownames(x[l])[order(x[[l]], decreasing = TRUE)]
       par_value <- x[l][order(x[[l]], decreasing = TRUE), ]
 
       # Compose output for method
-      output_1 <- data.frame(key = methods[l], # method
-                             par = c(par_names, ""),
-                             value = c(par_value, 0),
-                             conds = factor(conds[id]))
+      output_1 <- data.frame(
+        key = methods[l], # method
+        par = c(par_names, ""),
+        value = c(par_value, 0),
+        conds = factor(conds[id])
+      )
       return(output_1)
     })
-    
+
     return(output_2)
   })
-  
+
   # Put them in groups by condition
-  dt_edit <- lapply(dt_edit, function(x){do.call(rbind, x)})
-  
-  dt_edit <- lapply(dt_edit, function(x){
+  dt_edit <- lapply(dt_edit, function(x) {
+    do.call(rbind, x)
+  })
+
+  dt_edit <- lapply(dt_edit, function(x) {
     x$id <- 1:nrow(x)
     return(x)
   })
-  
+
   # Combine for facet in one list
   dt_edit <- do.call(rbind, dt_edit)
 
@@ -2426,64 +2432,68 @@ plot_exp4_meth <- function(dt,
   dt_edit$key <- str_replace(dt_edit$key, "bridge", "BRidge")
 
   # Define Step Size for all parameters sets
-  step_size   <- (
+  step_size <- (
     nrow(dt_preEdit[[1]]) + # number of parameters
       1 # account for additional empty row
   ) / 2 # place label in the middle
-  plot_steps <- seq(0, 
-                    (nrow(dt_preEdit[[1]])+1) *  # number of parameters + empty row
-                      ncol(dt_preEdit[[1]]), # number of methods
-                    by = step_size)
-  plot_ybreaks <- plot_steps[c(FALSE, TRUE)]    # position label skip
-  plot_hlines <- plot_steps[c(TRUE, FALSE)]  
-  
+  plot_steps <- seq(0,
+    (nrow(dt_preEdit[[1]]) + 1) * # number of parameters + empty row
+      ncol(dt_preEdit[[1]]), # number of methods
+    by = step_size
+  )
+  plot_ybreaks <- plot_steps[c(FALSE, TRUE)] # position label skip
+  plot_hlines <- plot_steps[c(TRUE, FALSE)]
+
   # Methods labels
   plot_ylabels <- as.character(unique(dt_edit$key)) # unique for everyone
-  
+
   # Paramter Labels
-  # Ticks 
-  if(type == "bias"){
+  # Ticks
+  if (type == "bias") {
     # Levels order
     levs <- c(no = "<10%", yes = ">10%")
-    
+
     # Grid Plot Color based on exceeding or not PRB reference
     flag <- ifelse(dt_edit$value >= 10, yes = levs[2], no = levs[1])
     # flag[dt_edit$par %in% small.ef] <- "Largest Bias"
     dt_edit$flag <- factor(flag, levels = levs)
-    
+
     # Plot Limits
-    plot_xlim   <- c(0, 70)
-    
+    plot_xlim <- c(0, 70)
+
     # X axis
     plot_xbreaks <- seq(min(plot_xlim), max(plot_xlim), by = 10)
     plot_xlabels <- as.character(plot_xbreaks)
     plot_vlines <- 10
   }
 
-  if(type == "ci"){
+  if (type == "ci") {
     # Redefine values as differences from target
     dt_edit$value[dt_edit$value != 0] <- dt_edit$value[dt_edit$value != 0] - 95
-    
+
     # Plot Limits (reference: 0 = .95)
-    plot_xlim   <- c(-5, 5)
-    
-    # SE for threshold 
-    SEp <- sqrt(ci_lvl*(1-ci_lvl)/dt_reps)
-    low_thr <- ((.95-SEp*2)-.95)*100
-    hig_thr <- ((.95+SEp*2)-.95)*100
-    
+    plot_xlim <- c(-5, 5)
+
+    # SE for threshold
+    SEp <- sqrt(ci_lvl * (1 - ci_lvl) / dt_reps)
+    low_thr <- ((.95 - SEp * 2) - .95) * 100
+    hig_thr <- ((.95 + SEp * 2) - .95) * 100
+
     # Levels order
-    levs <- c(no = "Not significant",
-              yes = "Significant")
-    
+    levs <- c(
+      no = "Not significant",
+      yes = "Significant"
+    )
+
     # Grid Plot Color based on exceeding or not PRB reference
-    flag <- ifelse(dt_edit$value >= hig_thr | dt_edit$value <= low_thr, 
-                     yes = levs[2], no = levs[1])
+    flag <- ifelse(dt_edit$value >= hig_thr | dt_edit$value <= low_thr,
+      yes = levs[2], no = levs[1]
+    )
     dt_edit$flag <- factor(flag, levels = levs)
-    
+
     # X axis
     plot_xbreaks <- c(-5, low_thr, 0, hig_thr, 4, 5)
-    plot_xlabels <- as.character(round((plot_xbreaks+95)/100, 2))
+    plot_xlabels <- as.character(round((plot_xbreaks + 95) / 100, 2))
     plot_vlines <- c(-5, low_thr, hig_thr, 4)
   }
 
@@ -2507,16 +2517,16 @@ plot_exp4_meth <- function(dt,
 
   # Colors and texts
   plot_text_family <- "sans"
-  plot_text_face   <- "plain"
-  plot_text_size   <- 9
-  segme.thick      <- 1 # thickness of lines reporting results (was 1)
-  small.color      <- "darkgray" # color of lines |PRB| < 10% 
-  large.color      <- "lightgray" # color of lines |PRB| < 10%
-  h.lines.thick    <- .35 # thickness of lines separating methods (was .375)
-  h.lines.color    <- "gray" # color of lines separating methods (was gray)
-  v.lines.thick    <- .375 # thickness of reference lines
-  v.lines.color    <- "darkgray" # color of reference lines
-  v.lines.type     <- "dashed" # line type of reference lines
+  plot_text_face <- "plain"
+  plot_text_size <- 9
+  segme.thick <- 1 # thickness of lines reporting results (was 1)
+  small.color <- "darkgray" # color of lines |PRB| < 10%
+  large.color <- "lightgray" # color of lines |PRB| < 10%
+  h.lines.thick <- .35 # thickness of lines separating methods (was .375)
+  h.lines.color <- "gray" # color of lines separating methods (was gray)
+  v.lines.thick <- .375 # thickness of reference lines
+  v.lines.color <- "darkgray" # color of reference lines
+  v.lines.type <- "dashed" # line type of reference lines
 
   # Base plot
   p <- ggplot(dt_edit, aes(x = value, y = id))
@@ -2595,11 +2605,11 @@ plot_exp4_meth <- function(dt,
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       # Text overall
-        text = element_text(
-          family = plot_text_family,
-          face = plot_text_face,
-          size = plot_text_size
-        ),
+      text = element_text(
+        family = plot_text_family,
+        face = plot_text_face,
+        size = plot_text_size
+      ),
       # Condition + Parameter type (Facet Related)
       strip.text = element_text(
         margin = unit(c(.10, .10, .10, .10), "cm")
@@ -2612,13 +2622,12 @@ plot_exp4_meth <- function(dt,
   return(p)
 }
 
-plot_time <- function(dt, 
+plot_time <- function(dt,
                       plot_cond = NULL,
                       plot_name = NULL,
                       bar_col = "#595959",
                       meth_compare,
                       meth_sort = FALSE) {
-  
   # Function Inputs
   ## New Input
   # out_time <- sapply(1:length(names(res[[1]])), res_sem_time, out = res)
@@ -2653,7 +2662,7 @@ plot_time <- function(dt,
 
   # Filter methods out
   dt <- dt[, meth_compare]
-  
+
   # Adapt names
   colnames(dt) <- sub("blasso", "BLasso", colnames(dt))
   colnames(dt) <- sub("bridge", "BRidge", colnames(dt))
@@ -2674,7 +2683,7 @@ plot_time <- function(dt,
 
   # Fix order of methods
   dt_edit$key <- factor(dt_edit$key, levels = rev(unique(dt_edit$key)))
-  
+
   # Add Condition tag
   n_conds <- nrow(dt)
   dt_edit$cond <- factor(
@@ -2687,7 +2696,7 @@ plot_time <- function(dt,
   )
 
   # Plot limits
-  plot_xlim   <- c(0, 90)
+  plot_xlim <- c(0, 90)
   plot_breaks <- c(0, 30, 60, 90)
   plot_labels <- c("", "30", "60", "90")
   plot_vlines <- c(30, 60)
@@ -2720,7 +2729,7 @@ plot_time <- function(dt,
     geom_vline(
       xintercept = plot_vlines,
       size = v.lines.thick,
-      linetype = v.lines.type, 
+      linetype = v.lines.type,
       color = v.lines.color
     ) +
     coord_cartesian(xlim = plot_xlim) +
@@ -2746,11 +2755,11 @@ plot_time <- function(dt,
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       # Text overall
-        text = element_text(
-          family = plot_text_family,
-          face = plot_text_face,
-          size = plot_text_size
-        ),
+      text = element_text(
+        family = plot_text_family,
+        face = plot_text_face,
+        size = plot_text_size
+      ),
       # Legend
       legend.key = element_rect(colour = "gray", fill = NA, size = .15),
       legend.text = element_text(size = 8),
