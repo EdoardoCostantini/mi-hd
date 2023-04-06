@@ -2,7 +2,7 @@
 # Objective: helper functions
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-04-03
+# Modified:  2023-04-06
 # Notes: 
 
 # generic functions -------------------------------------------------------
@@ -1674,20 +1674,26 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
 
   # Add an extra column to the data to store the FMI along the conditions
   out$conds$FMI <- NA
+  out$conds$FMI_lwr <- NA
+  out$conds$FMI_upr <- NA
 
+  # for (i in 1:nrow(out$conds)) {
   for (i in 1:nrow(out$conds)) {
     # Extract fmi for all parameters for all models
     store_1 <- NULL
-    for (dt in 1:out$parms$dt_rep) {
+    for (dt in 1:(out$parms$dt_rep)) {
       store_1[[dt]] <- unlist(out[[dt]][[i]]$fmi[mods])
     }
 
     # Store the average FMI across model parameters and repetitions
     if(is.null(store_1)){
       # If the run failed just put an NA there
-      out$conds$FMI[i] <- NA
+      out$conds$FMI[i] <- out$conds$FMI_upr[i] <- out$conds$FMI_lwr[i] <- NA
       rownames(out$conds)[i] <- names(out[[dt]][i])
     } else {
+      # Drop empty list values
+      store_1 <- store_1[!sapply(store_1, is.null)]
+
       # Average across model parameters
       avg_fmi_parms <- sapply(store_1, mean, na.rm = TRUE)
 
@@ -1695,8 +1701,8 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
       out$conds$FMI[i] <- mean(avg_fmi_parms, na.rm = TRUE)
 
       # Add bounds
-      out$conds$FMI_upr[i] <- out$conds$FMI[i] + sd(avg_fmi_parms, na.rm = TRUE)
       out$conds$FMI_lwr[i] <- out$conds$FMI[i] - sd(avg_fmi_parms, na.rm = TRUE)
+      out$conds$FMI_upr[i] <- out$conds$FMI[i] + sd(avg_fmi_parms, na.rm = TRUE)
 
       # Change names
       rownames(out$conds)[i] <- names(out[[dt]][i])
@@ -1729,7 +1735,7 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
     geom_segment(
       aes(
         x = 0,
-        xend = nlevels(out$conds$minR2) + 1,
+        xend = nlevels(out$conds[, cv.parm]) + 1,
         y = FMI_lwr,
         yend = FMI_lwr
       ),
@@ -1741,7 +1747,7 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
     geom_segment(
       aes(
         x = 0,
-        xend = nlevels(out$conds$minR2) + 1,
+        xend = nlevels(out$conds[, cv.parm]) + 1,
         y = FMI_upr,
         yend = FMI_upr
       ),
@@ -1750,7 +1756,7 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
       size = .2
     ) +
     # Grid
-    facet_grid(reformulate(grid_x_axis, grid_y_axis)) + 
+    facet_grid(reformulate(grid_x_axis, grid_y_axis)) +
     theme_bw()
 
   return(list(values = solution,
