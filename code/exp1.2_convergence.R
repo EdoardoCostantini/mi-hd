@@ -2,7 +2,7 @@
 # Objective: Check convergence for collinearity study
 # Author:    Edoardo Costantini
 # Created:   2023-03-28
-# Modified:  2023-04-03
+# Modified:  2023-04-06
 # Notes: 
 
 # 1. Convergence for all R-based MI methods -------------------------------------
@@ -425,10 +425,10 @@ saveRDS(
 # 2.4 Analyze results ----------------------------------------------------------
 
 # Read results
-conv.out <- readRDS("../output/")
+conv.out <- readRDS("../output/exp1_2_cv_IVEware_20230405_1715.rds")
 
 # For every imputed variable
-pdf(file = "../output/graphs/exp1_conv_IVEware_20230327_1143.pdf", width = 20, height = 20)
+pdf(file = "../output/graphs/exp1_2_cv_IVEware_20230405_1715.pdf", width = 20, height = 20)
 par(mfrow = c(6, 2))
 
 # Loop over conditions
