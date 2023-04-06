@@ -54,8 +54,8 @@ parms$store <- c(
 )
 
 # Iterations, repetitions, etc
-parms$dt_rep <- 30
-parms$ndt <- 5
+parms$dt_rep <- 20
+parms$ndt <- 10
 parms$iters <- 70
 parms$burnin_imp <- 50
 parms$thin <- (parms$iters - parms$burnin_imp) / parms$ndt
@@ -147,13 +147,14 @@ saveRDS(
 # 1.4 Analyze results ----------------------------------------------------------
 
 # Load data
-out <- readRDS("../output/exp1_cv_bridge_20220224_1042.rds")
+out <- readRDS("../output/exp1_2_cv_bridge_20230405_1449.rds")
 
 # Obtain conditions with cv ridge
 conds_bridge <- cvParm(
     out,
     cv.parm = "ridge",
-    exp_factors = colnames(out$conds)[c(2, 4)]
+    mods = "sems",
+    exp_factors = colnames(out$conds)[c(2, 5)]
 )
 
 # Selected values
