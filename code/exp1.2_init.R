@@ -2,7 +2,7 @@
 # Objective: Initialization script for c
 # Author:    Edoardo Costantini
 # Created:   2022-02-25
-# Modified:  2023-03-31
+# Modified:  2023-04-08
 # Notes: 
 
 # Fixed Parameters --------------------------------------------------------
@@ -13,9 +13,9 @@
 # Iterations, repetitions, etc
   parms$dt_rep     <- 5 # replications for averaging results (250 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
-  parms$iters      <- 5 # 70
-  parms$burnin_imp <- 0 # 50 how many imputation iterations should be discarded
-  parms$ndt        <- 5 # 10 number of imputed datasets to pool estimates from (10)
+  parms$iters      <- 70 # 70
+  parms$burnin_imp <- 50 # 50 how many imputation iterations should be discarded
+  parms$ndt        <- 10 # 10 number of imputed datasets to pool estimates from (10)
   parms$thin       <- (parms$iters - parms$burnin_imp)/parms$ndt
     # every how many iterations should you keep the imputation for a dataset
     # Example: of 20 iterations, I burn the first 10 I need for convergence
@@ -26,8 +26,8 @@
 
   # For blasso
   parms$chains_bl     <- 1 # number of parallel chains for convergence check
-  parms$iters_bl      <- 5 # 70
-  parms$burnin_imp_bl <- 0 # 50 how many imputation iterations should be discarded
+  parms$iters_bl      <- 70 # 70
+  parms$burnin_imp_bl <- 50 # 50 how many imputation iterations should be discarded
   parms$thin_bl       <- (parms$iters_bl - parms$burnin_imp_bl)/parms$ndt
   parms$pos_dt_bl     <- (parms$burnin_imp_bl+1):parms$iters_bl # candidate datasets
   parms$keep_dt_bl    <- parms$pos_dt_bl[seq(1, 
@@ -35,7 +35,7 @@
                                              parms$thin_bl)]
   
   # For mice-like algorithms
-  parms$mice_iters <- 5 # 50
+  parms$mice_iters <- 50 # 50
   parms$mice_ndt   <- parms$ndt # 10 # number of imputed datasets to pool estimates from (10)
   
 # Data gen ----------------------------------------------------------------
@@ -193,9 +193,9 @@ parms$IVEloc <- c(
   # Collinearity study: experimental factor levels
   pm <- .3
   p   <- c(50, 500)
-  latent <- TRUE
+  latent <- FALSE
   collinearity <- c(.6, .8, .9)
-  ridge <- 1e-5
+  ridge <- c(rep(1e-8, 3), 1e-7, rep(1e-6, 2))
   minR2 <- 1e-3
 
   # Create experimental conditions
@@ -206,8 +206,11 @@ parms$IVEloc <- c(
     collinearity = collinearity
   )
 
-  # Bridge special parameters per condition #TODO: cross-validate
+  # Sort based on p
+  conds <- dplyr::arrange(conds, p)
+
+  # Bridge special parameters per condition
   conds$ridge <- ridge
 
-  # IVEware special parameters per condition #TODO: cross-validate
+  # IVEware special parameters per condition
   conds$minR2 <- minR2
