@@ -2,7 +2,7 @@
 # Objective: helper functions
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-04-06
+# Modified:  2023-04-08
 # Notes: 
 
 # generic functions -------------------------------------------------------
@@ -1665,7 +1665,7 @@ mean_traceplot <- function(out,
 cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
   ## Internals
   # mods = names(out[[1]][[1]]$fmi)[1]
-  # exp_factors = colnames(out$conds)[c(2, 4)]
+  # exp_factors = colnames(out$conds)[c(2, 5)]
   # cv.parm = colnames(out$conds)[1]
   
   ## Body
@@ -1710,14 +1710,58 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
   }
 
   # Group by conditions
-  solution <- out$conds %>%
+  solution <- as.data.frame(out$conds %>%
     group_by_at(exp_factors) %>%
-    slice(which.min(FMI))
+    slice(which.min(FMI)))
 
-  # prepare variables for plot
+  # Column names to merge data based on
+  coltomerge <- colnames(solution)
+
+  # Get rid of the outcome measures
+  coltomerge <- coltomerge[!grepl("FMI|minR2|ridge", coltomerge)]
+
+  # Merge solutions to original data
+  solution_1se <- merge(
+    x = out$conds %>%
+      group_by_at(exp_factors),
+    y = solution, 
+    by.x = c(coltomerge),
+    by.y = c(coltomerge),
+    suffixes = c("", ".sol"),
+    all = FALSE
+  )
+
+  # Identify if FMI is within 1SE of the solution
+  solution_1se$candidate <- solution_1se$FMI > solution_1se$FMI_lwr.sol & solution_1se$FMI < solution_1se$FMI_upr.sol
+
+  # Group by conditions
+  solution_1se <- as.data.frame(
+    solution_1se %>%
+      group_by_at(exp_factors) %>%
+      filter(candidate == TRUE) %>%
+      slice(which.min(.data[[cv.parm]]))
+  )
+
+  # Leep only important columns
+  solution_1se <- solution_1se[, colnames(solution)]
+
+  # Prepare grid variables for plot
   grid_y_axis <- exp_factors[1]
   grid_x_axis <- exp_factors[2]
-  out$conds[, cv.parm] <- factor(out$conds[, cv.parm], levels = unique(out$conds[, cv.parm]))
+
+  # Make factors for plot
+  out$conds[, cv.parm] <- factor(
+    x = out$conds[, cv.parm],
+    levels = unique(out$conds[, cv.parm])
+  )
+  solution_1se[, cv.parm] <- factor(
+    solution_1se[, cv.parm],
+    levels = levels(out$conds[, cv.parm])
+  )
+  solution[, cv.parm] <- factor(
+    solution[, cv.parm],
+    levels = levels(out$conds[, cv.parm])
+  )
 
   # Make plot
   p <- ggplot(
@@ -1726,6 +1770,18 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
   ) +
     # Points
     geom_point() +
+    # Add points for oneSE solution
+    geom_point(
+      data = solution_1se, 
+      aes(.data[[cv.parm]], FMI), 
+      shape = 2, 
+      size = 5) +
+    # Add points for normal solution
+    geom_point(
+      data = solution, 
+      aes(.data[[cv.parm]], FMI), 
+      shape = 1, 
+      size = 5) +
     # Error bars
     geom_errorbar(aes(ymin = FMI_lwr, ymax = FMI_upr),
       width = .2,
@@ -1757,10 +1813,17 @@ cvParm <- function(out, cv.parm = "ridge", mods = NULL, exp_factors = NULL){
     ) +
     # Grid
     facet_grid(reformulate(grid_x_axis, grid_y_axis)) +
+    # Theme
     theme_bw()
 
-  return(list(values = solution,
-              plot = p))
+    # What to return
+    return(
+      list(
+        solution = solution,
+        solution_1se = solution_1se,
+        plot = p
+      )
+    )
 }
 
 # Plot function for experiment 1 and 2

@@ -2,7 +2,7 @@
 # Objective: Script to cross-validate ridge and minR2 for collinearity study
 # Author:    Edoardo Costantini
 # Created:   2023-03-28
-# Modified:  2023-03-31
+# Modified:  2023-04-08
 # Notes: 
 
 # 1. Cross-validation of ridge in Bridge ---------------------------------------
@@ -158,7 +158,8 @@ conds_bridge <- cvParm(
 )
 
 # Selected values
-conds_bridge$values
+conds_bridge$solution
+conds_bridge$solution_1se
 
 # Plot
 conds_bridge$plot
@@ -212,9 +213,9 @@ parms$store <- c(
 )
 
 # Iterations, repetitions, etc
-parms$dt_rep <- 3
-parms$ndt <- 5
-parms$iters <- 5
+parms$dt_rep <- 30
+parms$ndt <- 50
+parms$iters <- 50
 parms$burnin_imp <- 1
 parms$thin <- (parms$iters - parms$burnin_imp) / parms$ndt
 parms$pos_dt <- (parms$burnin_imp + 1):parms$iters # candidate datasets (after convergence)
@@ -249,10 +250,7 @@ conds <- expand.grid(
     latent = latent,
     pm = pm,
     collinearity = collinearity
-)[1:4, ]
-
-# IVEware special parameters per condition #TODO: cross-validate
-conds$ridge <- NA
+)
 
 # 2.3 Perform simulation -------------------------------------------------------
 
@@ -305,17 +303,19 @@ saveRDS(
 # 2.4 Analyze results ----------------------------------------------------------
 
 # Load data
-out <- readRDS("../output/exp1_cv_bridge_20220224_1042.rds")
+out <- readRDS("../output/exp1_2_cv_IVEware_20230406_1053.rds")
 
 # Obtain conditions with cv ridge
-conds_bridge <- cvParm(
+conds_minR2 <- cvParm(
     out,
-    cv.parm = "ridge",
-    exp_factors = colnames(out$conds)[c(2, 4)]
+    mods = names(out[[1]][[1]]$fmi)[1],
+    cv.parm = "minR2",
+    exp_factors = colnames(out$conds)[c(2, 5)]
 )
 
 # Selected values
-conds_bridge$values
+conds_minR2$solution
+conds_minR2$solution_1se
 
 # Plot
-conds_bridge$plot
+conds_minR2$plot

@@ -2,7 +2,7 @@
 # Objective: Simulation script for IVEware minr2 parameter cross-validation
 # Author:    Edoardo Costantini
 # Created:   2020-08-25
-# Modified:  2023-04-03
+# Modified:  2023-04-08
 # Notes: 
 
 # Prepare environment
@@ -115,7 +115,7 @@ minR2_cv <- cvParm(
 )
 
 # Look at plot
-minR2_cv$plot
+minR2_cv$solution
+minR2_cv$solution_1se
 
-# Look at solutions
-minR2_cv$values
+minR2_cv$plot
