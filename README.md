@@ -126,6 +126,10 @@ Here, I want to keep track of which filenames are important for the results.
 - Output for convergence checks for all R native methods.
 2. `exp1_2_cv_IVEware_20230405_1715.rds`
 - Output for convergence checks for IVEware data.
+3. `exp1_2_cv_bridge_20230405_1449.rds`
+- Output for cross-validation of `ridge` parameter for bridge
+4. `exp1_2_cv_IVEware_20230406_1053.rds`
+- Output for cross-validation of `minR2` parameter for IVEware
 5. `exp1_2_simOut_20230408_1748.rds`
 - 30 repetitions for all methods (contains MI-QP time estimate!)
 
