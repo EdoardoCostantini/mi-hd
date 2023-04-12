@@ -126,6 +126,8 @@ Here, I want to keep track of which filenames are important for the results.
 - Output for convergence checks for all R native methods.
 2. `exp1_2_cv_IVEware_20230405_1715.rds`
 - Output for convergence checks for IVEware data.
+5. `exp1_2_simOut_20230408_1748.rds`
+- 30 repetitions for all methods (contains MI-QP time estimate!)
 
 
 ### Resampling Study
