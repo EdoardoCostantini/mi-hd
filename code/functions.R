@@ -2,7 +2,7 @@
 # Objective: helper functions
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-04-08
+# Modified:  2023-04-12
 # Notes: 
 
 # generic functions -------------------------------------------------------
@@ -3024,6 +3024,7 @@ plotwise <- function(res,
                      model,
                      parPlot,
                      meth_compare,
+                     exp_factors = c("p", "pm"),
                      item_group){
   # Inputs
   # res = output
@@ -3043,14 +3044,18 @@ plotwise <- function(res,
   n_parms <- length(parPlot)
 
   # Extract Info from analysis model for both bias and CI coverage
-  dt_bias = lapply(1:length(res[[model]]),
-                   function(x) data.frame( res[[model]][[x]]$bias_per))[1:4]
-  dt_cico = lapply(1:length(res[[model]]),
-                   function(x) data.frame( res[[model]][[x]]$ci_cov))[1:4]
+  dt_bias = lapply(
+    1:length(res[[model]]),
+    function(x) data.frame(res[[model]][[x]]$bias_per)
+  )[1:n_conds]
+  dt_cico = lapply(
+    1:length(res[[model]]),
+    function(x) data.frame(res[[model]][[x]]$ci_cov)
+  )[1:n_conds]
   dt_CIW = lapply(
     1:length(res[[model]]),
     function(x) data.frame(res[[model]][[x]]$CIW)
-  )[1:4]
+  )[1:n_conds]
 
   # Isolate parameters and methods for comparison
   dt_bias <- lapply(parPlot, function(x){
@@ -3081,10 +3086,14 @@ plotwise <- function(res,
   })
 
   # Define Condition and Parameters names
-  label_cond <- paste0("p = ",  res$conds$p, " ",
-                       "pm = ", res$conds$pm)
-  label_parm <- paste0(names(parPlot),
-                       " (", sapply(parPlot, length), ")")
+  label_cond <- apply(res$conds[, exp_factors], 1, function(i) {
+    paste0(exp_factors, " = ", i)
+  })
+  label_cond <- apply(t(label_cond), 1, paste, collapse = " ")
+  label_parm <- paste0(
+    names(parPlot),
+    " (", sapply(parPlot, length), ")"
+  )
 
   # Create a data matrix structure for facet_grid
   if (model == "sem") {
