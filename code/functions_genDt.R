@@ -2,13 +2,13 @@
 # Objective: data generation functions
 # Author:    Edoardo Costantini
 # Created:   2020-06-23
-# Modified:  2023-03-27
+# Modified:  2023-04-19
 # Notes: 
 
 # Experiment 1: Multivariate Data -----------------------------------------
 simData_exp1 <- function(cond, parms){
   # For internals
-  # cond <- conds[4,]
+  # cond <- conds[1,]
 
   # 1. Generate covariance matrix -----------------------------------------
     Sigma <- diag(cond$p)
@@ -27,7 +27,7 @@ simData_exp1 <- function(cond, parms){
   if (!is.null(cond$collinearity)) {
     if (!is.na(cond$collinearity)) {
       # MAR predictors within-block-1 correlation
-      Sigma[c(3, 4), c(3, 4)] <- cond$collinearity
+      Sigma[c(4, 5), c(4, 5)] <- cond$collinearity
       # MAR predictors within-block-2 correlation
       Sigma[c(9, 10), c(9, 10)] <- cond$collinearity
       # Within-block-3 correlation
