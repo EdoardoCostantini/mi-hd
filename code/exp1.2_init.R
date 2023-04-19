@@ -2,7 +2,7 @@
 # Objective: Initialization script for c
 # Author:    Edoardo Costantini
 # Created:   2022-02-25
-# Modified:  2023-04-08
+# Modified:  2023-04-19
 # Notes: 
 
 # Fixed Parameters --------------------------------------------------------
@@ -11,7 +11,7 @@
   parms$exp <- "1_2" # which experiment is been run
 
 # Iterations, repetitions, etc
-  parms$dt_rep     <- 5 # replications for averaging results (250 goal)
+  parms$dt_rep     <- 500 # replications for averaging results (500 goal)
   parms$chains     <- 1 # number of parallel chains for convergence check
   parms$iters      <- 70 # 70
   parms$burnin_imp <- 50 # 50 how many imputation iterations should be discarded

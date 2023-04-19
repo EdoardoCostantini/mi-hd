@@ -2,7 +2,7 @@
 # Objective: Simulation script for nonlinearity study
 # Author:    Edoardo Costantini
 # Created:   2023-03-28
-# Modified:  2023-03-28
+# Modified:  2023-04-19
 # Notes: 
 
 # Clean environment
@@ -13,7 +13,7 @@ source("./init_general.R")
 source("./exp1.2_init.R")
 
 # Create a cluster object:
-clus <- makeCluster(5)
+clus <- makeCluster(30)
 
 # Source the scripts on the worker nodes:
 clusterEvalQ(cl = clus, expr = source("./init_general.R"))
