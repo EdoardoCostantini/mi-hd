@@ -2,7 +2,7 @@
 # Objective: Check different aspect of the code base
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-03-27
+# Modified:  2023-04-20
 # Notes: 
 
 rm(list=ls())
@@ -314,10 +314,6 @@ for (r in 1:reps) {
   pdraw_hd$beta[1:49,]
   pdraw_hd$sigma
   
-
-
-
-
 # Interaction terms and number of predictors ------------------------------
 
   # Generaete some X predictors
@@ -411,7 +407,43 @@ y <- out$y
 fit <- multinom(y ~ X)
 list(est = round(coef(fit), 3),
      true = round(out$true_par,3))
-# estiamted and true parameters values are almost the same
+# estimated and true parameters values are almost the same
+
+# Correlation: single component structure --------------------------------------
+
+# Define number of variables
+p <- 50
+rho <- seq(0, .9, by = .1)
+
+# Storing objects
+ngs <- NULL
+cpve <- NULL
+
+# Loop over conditions
+for (r in seq_along(rho)) {
+  # Define Sigma
+  Sigma <- matrix(rho[r], p, p)
+  diag(Sigma) <- 1
+
+  # Sample data
+  X <- MASS::mvrnorm(1e4, mu = rep(1, p), Sigma = Sigma)
+
+  # PCA
+  svd_X <- svd(X)
+
+  # Compute cumulative proportion of explained variance
+  cpve <- rbind(cpve, cumsum(prop.table(svd_X$d^2)))
+
+  # Non-graphical solutions
+  ngs <- rbind(ngs, nFactors::nScree(cor(X))$Components)
+}
+
+# Number of factors underlying data
+cbind(
+  rho = rho,
+  ngs,
+  npc.cpve = round(cpve[, 1:5], 1)
+)
 
 # Collinearity data check ------------------------------------------------------
 
@@ -421,7 +453,7 @@ source("./exp1_init.R")
 
 # Define experimental factor levels
 p <- c(50) # c(50, 500) # number of variables
-collinearity <- c(NA, .8, .9, .99)
+collinearity <- c(NA, seq(0.1, .9, by = .1))
 
 # Create experimental conditions
 conds <- expand.grid(
@@ -434,27 +466,52 @@ parms$n <- 1e4
 
 # Crate a place to store factor structures
 storenScree <- list()
+cpve <- NULL
+pc1.loadings <- NULL
+plots <- NULL
+npcs_kpet <- NULL
 
 # Define a plotting arrangement
-par(mfrow = c(2,2))
+par(mfrow = c(ceiling(sqrt(nrow(conds))), sqrt(nrow(conds))))
 
 # Loop over the conditions
-for(i in 1:nrow(conds)){
-
+for (i in 1:nrow(conds)) {
   # Define the active condition
   cond <- conds[i, ]
 
   # Generate data
   Xy <- simData_exp1(cond, parms)
 
-  # Check correlation matrix
-  print(round(cor(Xy), 1)[1:20, 1:20] * 100)
+  # Scale data
+  Xy <- scale(Xy)
 
-  # 3 factor structure
-  storenScree <- rbind(storenScree, nFactors::nScree(Xy)$Components)
+  # Check correlation matrix
+  print(round(cor(Xy)[c(1:13, 48:50), c(1:13, 48:50)], 1) * 100)
+
+  # 3-factor structure
+  storenScree <- rbind(storenScree, nFactors::nScree(as.data.frame(Xy))$Components)
+
+  # PCA
+  svd_X <- svd(Xy)
+
+  # Store the loadings
+  pc1.loadings <- rbind(pc1.loadings, svd_X$v[, 1])
+
+  # Compute CPVE for this run
+  cpve_i <- cumsum(prop.table(svd_X$d^2))
+
+  # Compute cumulative proportion of explained variance
+  cpve <- rbind(cpve, cond = cpve_i)
+
+  # Apply the decision rule used in the simulation study
+  if (cpve_i[1] >= 0.5) {
+    npcs_kpet <- c(npcs_kpet, 1)
+  } else {
+    npcs_kpet <- c(npcs_kpet, sum(cpve_i <= 0.5))
+  }
 
   # Fit model regressing one variable on all the others
-  model_all <- lm(z1 ~ ., data = Xy)
+  model_all <- lm(z1 ~ ., data = as.data.frame(Xy))
 
   # Compute the VIFs
   vif_values <- car::vif(model_all)
@@ -470,10 +527,19 @@ for(i in 1:nrow(conds)){
   abline(v = 5, lwd = 3, lty = 2) # add vertical line at 5 as
   # If the value of VIF is :
   # - VIF < 1: no correlation
-  # - 1 < VIF < 5, there is a moderate correlation 
+  # - 1 < VIF < 5, there is a moderate correlation
   # - VIF > 5: severe correlation
-  
 }
 
-# Factor structure
-cbind(conds, storenScree)
+# Number of factors underlying data
+cbind(
+  collinearity = collinearity,
+  storenScree,
+  npcs50cpve = npcs_kpet,
+  cpve = round(cpve[, 1:3], 2)*100
+)
+
+# Loadings
+rownames(pc1.loadings) <- collinearity
+colnames(pc1.loadings) <- colnames(Xy)
+round(abs(pc1.loadings), 1)[, c(1:13, 48:50)] * 10
