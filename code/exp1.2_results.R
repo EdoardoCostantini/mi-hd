@@ -2,7 +2,7 @@
 # Objective: Process result files to prepare analysis
 # Author:    Edoardo Costantini
 # Created:   2023-04-12
-# Modified:  2023-04-19
+# Modified:  2023-04-21
 # Notes: 
 
 rm(list = ls())
@@ -12,7 +12,7 @@ source("./init_general.R")
 
 filename <- c(
     "exp1_2_simOut_20230408_1748", # 30 reps with MI-QP time estimate
-    "exp1_2_simOut_20230415_0830" # All R methods expect MI-QP
+    "exp1_2_simOut_20230419_1403" # All R methods expect MI-QP with correct collinearity
 )[2]
 
 # Read R object
@@ -131,7 +131,7 @@ out$parms <- parms
                      res_sem_time,
                      out = out,
                      n_reps = out$parms$dt_rep,
-                     methods = out$parms$methods[c(1:11)]
+                     methods = out$parms$methods#[c(1:11)]
   )
 
   colnames(out_time) <- names(out[[1]])
@@ -190,10 +190,19 @@ out$parms <- parms
         parPlot = list(Betas = 1:5),
         item_group = c(1:3), # items in a group receiving miss values
         meth_compare = c(
-            "DURR_la", "IURR_la", "blasso", "bridge",
-            "MI_PCA", "MI_CART", "MI_RF", "stepFor",
+            "DURR_la",
+            "IURR_la",
+            "blasso",
+            "bridge",
+            "MI_PCA",
+            "MI_CART",
+            "MI_RF",
+            "stepFor",
             "MI_OP",
-            "CC", "GS", "MI_qp", "MI_am"
+            "CC",
+            "GS",
+            "MI_qp",
+            "MI_am"
         ),
         exp_factors = c("p", "collinearity")
     )
@@ -215,10 +224,19 @@ out$parms <- parms
         ),
         item_group = c(1:3), # items in a group receiving miss values
         meth_compare = c(
-            "DURR_la", "IURR_la", "blasso", "bridge",
-            "MI_PCA", "MI_CART", "MI_RF", "stepFor",
+            "DURR_la", 
+            "IURR_la", 
+            "blasso", 
+            "bridge",
+            "MI_PCA",
+            "MI_CART",
+            "MI_RF",
+            "stepFor",
             "MI_OP",
-            "CC", "GS", "MI_qp", "MI_am"
+            "CC",
+            "GS",
+            "MI_qp",
+            "MI_am"
         ),
         exp_factors = c("p", "collinearity")
     )

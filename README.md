@@ -132,6 +132,8 @@ Here, I want to keep track of which filenames are important for the results.
 - Output for cross-validation of `minR2` parameter for IVEware
 5. `exp1_2_simOut_20230408_1748.rds`
 - 30 repetitions for all methods (contains MI-QP time estimate!)
+6. `exp1_2_simOut_20230419_1403.rds`
+- 500 of all R-based methods
 
 
 ### Resampling Study
