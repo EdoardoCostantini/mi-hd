@@ -2,7 +2,7 @@
 # Objective: Check different aspect of the code base
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-04-20
+# Modified:  2023-04-21
 # Notes: 
 
 rm(list=ls())
@@ -488,14 +488,17 @@ for (i in 1:nrow(conds)) {
   # Check correlation matrix
   print(round(cor(Xy)[c(1:13, 48:50), c(1:13, 48:50)], 1) * 100)
 
+  # Select possible auxiliary data
+  Xy_ma <- Xy[, -c(1:3, 6:8)]
+
   # 3-factor structure
-  storenScree <- rbind(storenScree, nFactors::nScree(as.data.frame(Xy))$Components)
+  storenScree <- rbind(storenScree, nFactors::nScree(as.data.frame(Xy_ma))$Components)
 
   # PCA
-  svd_X <- svd(Xy)
+  svd_X <- svd(Xy_ma)
 
   # Store the loadings
-  pc1.loadings <- rbind(pc1.loadings, svd_X$v[, 1])
+  pc1.loadings <- rbind(pc1.loadings, svd_X$v[, 4])
 
   # Compute CPVE for this run
   cpve_i <- cumsum(prop.table(svd_X$d^2))
@@ -541,5 +544,5 @@ cbind(
 
 # Loadings
 rownames(pc1.loadings) <- collinearity
-colnames(pc1.loadings) <- colnames(Xy)
-round(abs(pc1.loadings), 1)[, c(1:13, 48:50)] * 10
+colnames(pc1.loadings) <- colnames(Xy_ma)
+round(abs(pc1.loadings), 1)[, c(1:4, 40:44)] * 10
