@@ -86,11 +86,19 @@ impute_PCA <- function(Z, O, cond, parms = parms){
         rSquared <- cumsum(pcaOut$sdev^2) / sum(pcaOut$sdev^2)
 
         ## Extract the principal component scores:
-        # Does the first PC explain for than the threshold?
-        if(rSquared[1] >= parms$PCA_pcthresh){
-          Z_pca <- pcaOut$x[, 1, drop = FALSE]
+        if (is.numeric(parms$PCA_pcthresh)) { # Is the threshold numeric?
+          # Does the first PC explain more than the threshold?
+          if (rSquared[1] >= parms$PCA_pcthresh) {
+            Z_pca <- pcaOut$x[, 1, drop = FALSE]
+          } else {
+            Z_pca <- pcaOut$x[, rSquared <= parms$PCA_pcthresh]
+          }
         } else {
-          Z_pca <- pcaOut$x[, rSquared <= parms$PCA_pcthresh]
+          # Kaiser rule
+          nkaiser <- nFactors::nScree(pcaOut$sdev^2)$Components[, "nkaiser"]
+
+          # Keep the number of PCs found with Kaiser rule
+          Z_pca <- pcaOut$x[, 1:nkaiser]
         }
 
       }
