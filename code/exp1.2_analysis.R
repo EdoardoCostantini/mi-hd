@@ -2,7 +2,7 @@
 # Objective: Analysis of results for experiment 1.2
 # Author:    Edoardo Costantini
 # Created:   2023-04-12
-# Modified:  2023-04-12
+# Modified:  2023-04-21
 # Notes: 
 
 rm(list = ls())
@@ -11,6 +11,8 @@ source("./init_general.R")
 # Read results from the combined results
 res <- readRDS("../output/exp1_2_simOut_20230415_0830_res.rds")
 res <- readRDS("../output/exp1_2_simOut_20230419_1102_res.rds")
+res <- readRDS("../output/exp1_2_simOut_20230419_1510_res.rds")
+res <- readRDS("../output/exp1_2_simOut_20230419_1403_res.rds")
 
 # Change names of methods if required
 levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")
@@ -21,7 +23,7 @@ levels(res$methods) <- str_replace(levels(res$methods), "MI-OP", "MI-OR")
 levels(res$methods) <- str_replace(levels(res$methods), "stepFor", "MI-SF")
 
 # Which plot to plot
-p_grep <- c("50", "500")[1]
+p_grep <- c("50", "500")[2]
 
 # Plot Sizes Decisions
 
@@ -268,7 +270,7 @@ pf
 
 plot_name <- paste0(
   "../output/graphs/exp1.2_", "CI", "_",
-  as.numeric(p_grep) * 100, "revision.pdf"
+  p_grep, "revision.pdf"
 )
 ggsave(
   file = plot_name,
@@ -354,7 +356,7 @@ pf
 
 plot_name <- paste0(
     "../output/graphs/exp1.2_", "ciw", "_",
-    as.numeric(p_grep) * 100, "revision.pdf"
+    p_grep, "revision.pdf"
 )
 
 ggsave(
