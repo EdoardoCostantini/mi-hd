@@ -2,7 +2,7 @@
 # Objective: helper functions
 # Author:    Edoardo Costantini
 # Created:   2020-05-19
-# Modified:  2023-04-12
+# Modified:  2023-04-21
 # Notes: 
 
 # generic functions -------------------------------------------------------
@@ -3094,6 +3094,9 @@ plotwise <- function(res,
     names(parPlot),
     " (", sapply(parPlot, length), ")"
   )
+
+  # Make sure no names are there
+  names(label_cond) <- NULL
 
   # Create a data matrix structure for facet_grid
   if (model == "sem") {
