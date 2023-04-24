@@ -21,7 +21,7 @@ out_Rmeth <- readRDS(paste0("../output/", filename, ".rds"))
 # Load IVEware results ---------------------------------------------------------
 
 filename <- c(
-    "exp1_2_simOut_20230417_1051"
+    "exp1_2_simOut_20230421_1151"
 )[1]
 
 # Read R object

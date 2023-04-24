@@ -133,8 +133,9 @@ Here, I want to keep track of which filenames are important for the results.
 5. `exp1_2_simOut_20230408_1748.rds`
 - 30 repetitions for all methods (contains MI-QP time estimate!)
 6. `exp1_2_simOut_20230419_1403.rds`
-- 500 of all R-based methods
-
+- 500 for all R-based methods
+7. `exp1_2_simOut_20230421_1151.rds`
+- 500 repetitions for IVEware method (stepFor / MI-SF)
 
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`
