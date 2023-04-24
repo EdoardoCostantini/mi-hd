@@ -2,7 +2,7 @@
 # Objective: Initialization script for c
 # Author:    Edoardo Costantini
 # Created:   2022-02-25
-# Modified:  2023-04-19
+# Modified:  2023-04-24
 # Notes: 
 
 # Fixed Parameters --------------------------------------------------------
@@ -95,17 +95,17 @@
   
   # Methods
   parms$meth_sel <- data.frame(
-    DURR_la = TRUE,
-    IURR_la = TRUE,
-    blasso = TRUE,
-    bridge = TRUE,
-    MI_PCA = TRUE,
-    MI_CART = TRUE,
-    MI_RF = TRUE,
+    DURR_la = FALSE,
+    IURR_la = FALSE,
+    blasso = FALSE,
+    bridge = FALSE,
+    MI_PCA = FALSE,
+    MI_CART = FALSE,
+    MI_RF = FALSE,
     stepFor = TRUE,
-    MI_qp = TRUE,
-    MI_am = TRUE,
-    MI_OP = TRUE,
+    MI_qp = FALSE,
+    MI_am = FALSE,
+    MI_OP = FALSE,
     missFor = TRUE,
     mean = TRUE,
     CC = TRUE,
@@ -149,7 +149,7 @@ parms$IVEloc <- c(
 )[parms$OS]
 
 # Replicability related
-  parms$seed     <- 20200512 #20200309
+  parms$seed     <- 20230428
   parms$nStreams <- 1000
 
 # Storing preferences ------------------------------------------------------
@@ -194,8 +194,8 @@ parms$IVEloc <- c(
   pm <- .3
   p   <- c(50, 500)
   latent <- FALSE
-  collinearity <- c(.6, .8, .9)
-  ridge <- c(rep(1e-8, 3), 1e-7, rep(1e-6, 2))
+  collinearity <- c(NA, .6, .8, .9)
+  ridge <- c(1e-1, 1e-07, rep(1e-8, 3), 1e-7, rep(1e-6, 2))
   minR2 <- 1e-3
 
   # Create experimental conditions
