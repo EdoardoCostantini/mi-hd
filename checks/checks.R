@@ -546,3 +546,274 @@ cbind(
 rownames(pc1.loadings) <- collinearity
 colnames(pc1.loadings) <- colnames(Xy_ma)
 round(abs(pc1.loadings), 1)[, c(1:4, 40:44)] * 10
+
+# Test MI-PCA: run all collinearity values with 50% rule -----------------------
+
+# > Prepare data ---------------------------------------------------------------
+
+# Load results
+out_MIPCA_colli <- readRDS(paste0("../output/", "exp1_2_simOut_20230421_1424.rds"))
+
+# Review conditions run
+out_MIPCA_colli$conds
+
+# Model: means, variances, covariances (MLE estimates) per conditions
+sem_res <- lapply(
+  1:length(out_MIPCA_colli[[1]]),
+  function(x) {
+    res_sum(out_MIPCA_colli,
+      model = "sem",
+      condition = x
+    )
+  }
+)
+
+# Model: Linear regression per condition
+lm_res <- lapply(
+  1:length(out_MIPCA_colli[[1]]),
+  function(x) {
+    res_sum(out_MIPCA_colli,
+      model = "lm",
+      condition = x
+    )
+  }
+)
+
+# Shape for plot
+output <- lapply(
+  list(
+    sem = sem_res,
+    lm = lm_res
+  ),
+  function(x) {
+    names(x) <- paste0("cond", seq_along(out_MIPCA_colli[[1]]))
+    return(x)
+  }
+)
+output$parms <- out_MIPCA_colli$parms
+output$conds <- out_MIPCA_colli$conds
+
+gg_out_sem <- plotwise(
+  res = output,
+  model = "sem",
+  parPlot = list(
+    Means = 1:6,
+    Variances = 7:12,
+    Covariances = 13:27
+  ),
+  item_group = c(1:3), # items in a group receiving miss values
+  meth_compare = c(
+    "MI_PCA",
+    "MI_am",
+    "CC",
+    "GS"
+  ),
+  exp_factors = c("p", "collinearity")
+)
+
+# > Bias plot ------------------------------------------------------------------
+
+# Bias or CIC?
+x <- 1 # bias
+
+# Which methods
+methods_sel <- levels(gg_out_sem$methods)
+
+# Which p condition
+p_grep <- 500
+
+# X breaks
+xci_breaks <- sort(c(0, 10, 20, 50))
+
+# Plot font
+plot_text_family <- "sans"
+plot_text_face <- "plain"
+plot_text_size <- 9
+
+# Make the plot
+pf <- gg_out_sem %>%
+    filter(
+        analysis == unique(analysis)[x],
+        grepl(p_grep, cond),
+        variable %in% c("Min", "Mean", "Max"),
+        methods %in% methods_sel
+    ) %>%
+    mutate(methods = fct_relabel(
+        methods,
+        str_replace,
+        "-la", ""
+    )) %>%
+    # Main Plot
+    ggplot(data = ., aes(
+        y = methods,
+        x = value,
+        shape = variable
+    )) +
+    geom_point(size = 1.75) +
+    geom_line(aes(group = methods),
+        size = .25
+    ) +
+    # Grid
+    facet_grid(
+        rows = vars(factor(parm,
+            levels = unique(parm)
+        )),
+        cols = vars(cond)
+    ) +
+    geom_vline(
+        data = data.frame(
+            xint = 10,
+            analysis = "Percentage Relative Bias"
+        ),
+        linetype = "solid",
+        size = .15,
+        aes(xintercept = xint)
+    ) +
+
+    # Format
+    scale_x_continuous(
+        labels = xci_breaks,
+        breaks = xci_breaks
+    ) +
+    scale_y_discrete(limits = rev) +
+    scale_shape_manual(values = c("I", "I", "I")) +
+    coord_cartesian(xlim = c(0, 50)) +
+    labs( # title = label_parm[x],
+        x = NULL,
+        y = NULL,
+        linetype = NULL,
+        shape = NULL
+    ) +
+    theme(
+        panel.background = element_rect(
+            fill = NA,
+            color = "gray"
+        ),
+        panel.grid.major = element_line(
+            color = "gray",
+            size = 0.15,
+            linetype = 1
+        ),
+        legend.key = element_rect(
+            colour = "gray",
+            fill = NA,
+            size = .15
+        ),
+        text = element_text(
+            family = plot_text_family,
+            face = plot_text_face,
+            size = plot_text_size
+        ),
+        axis.ticks = element_blank(),
+        legend.position = "none"
+    )
+
+pf
+
+# > CIC plot -------------------------------------------------------------------
+
+x <- 2 # Confidence intervals
+methods_sel <- levels(gg_out_sem$methods)[1:2] # [-8]
+
+# SE for threshold
+ci_lvl <- .95
+dt_reps <- 500
+SEp <- sqrt(ci_lvl * (1 - ci_lvl) / dt_reps)
+low_thr <- (.95 - SEp * 2) * 100
+hig_thr <- (.95 + SEp * 2) * 100
+vline_burton <- c(low_thr, hig_thr)
+vline_vanBuu <- c(90, 99)
+xci_breaks <- sort(c(80, vline_vanBuu, 95, round(vline_burton, 1), 100))
+
+pf <- gg_out_sem %>%
+  filter(
+    analysis == unique(analysis)[x],
+    grepl(p_grep, cond),
+    variable %in% c("Min", "Mean", "Max"),
+    methods %in% methods_sel
+  ) %>%
+  # Drop pm = ** as we are plotting only one value for this condition
+  mutate(cond = fct_relabel(
+    cond,
+    str_replace,
+    " pm = [0-9]\\.[0-9]", ""
+  )) %>%
+  mutate(methods = fct_relabel(
+    methods,
+    str_replace,
+    "-la", ""
+  )) %>%
+  # Main Plot
+  ggplot(data = ., aes(
+    y = methods,
+    x = value,
+    shape = variable
+  )) +
+  geom_point(size = 1.75, show.legend = FALSE) +
+  geom_line(aes(group = methods),
+    size = .25
+  ) +
+  # Grid
+  facet_grid(
+    rows = vars(factor(parm,
+      levels = unique(parm)
+    )),
+    cols = vars(cond)
+  ) +
+  geom_vline(
+    data = data.frame(
+      xint = 95,
+      analysis = "CI coverage"
+    ),
+    linetype = "solid",
+    size = .15,
+    aes(
+      xintercept = xint,
+      lty = paste0("nominal level")
+    )
+  ) +
+
+  # Format
+  scale_y_discrete(limits = rev) +
+  scale_x_continuous(
+    labels = as.character(round(xci_breaks / 100, 2)),
+    breaks = xci_breaks
+  ) +
+  coord_cartesian(xlim = c(min(xci_breaks), max(xci_breaks))) +
+  scale_shape_manual(values = c("I", "I", "I")) +
+  labs( # title = label_parm[x],
+    x = NULL,
+    y = NULL,
+    linetype = NULL,
+    shape = NULL
+  ) +
+  theme(
+    panel.background = element_rect(
+      fill = NA,
+      color = "gray"
+    ),
+    panel.grid.major = element_line(
+      color = "gray",
+      size = 0.175,
+      linetype = 1
+    ),
+    axis.ticks = element_blank(),
+    legend.key = element_rect(
+      colour = "gray",
+      fill = NA,
+      size = .15
+    ),
+    legend.position = "bottom",
+    text = element_text(
+      family = plot_text_family,
+      face = plot_text_face,
+      size = plot_text_size
+    ),
+    axis.text.x = element_text(
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1
+    )
+  )
+
+pf
