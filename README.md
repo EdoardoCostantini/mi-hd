@@ -136,7 +136,11 @@ Here, I want to keep track of which filenames are important for the results.
 - 500 for all R-based methods
 7. `exp1_2_simOut_20230421_1151.rds`
 - 500 repetitions for IVEware method (stepFor / MI-SF)
-9. `exp1_2_simOut_20230421_1424.rds`
+8. `exp1_2_simOut_20230424_0945.rds`
+- 500 repetitions for MI-QP
+9. `exp1_2_simOut_20230425_0918.rds`
+- Concatenated version of 6, 7 and 8.
+10. `exp1_2_simOut_20230421_1424.rds`
 - Contains results of MI-PCA (using 50% rule) vs MI-AM test on all collinearity conditions.
 
 ### Resampling Study

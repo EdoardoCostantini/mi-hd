@@ -2,7 +2,7 @@
 # Objective: Process result files to prepare analysis
 # Author:    Edoardo Costantini
 # Created:   2023-04-12
-# Modified:  2023-04-21
+# Modified:  2023-04-25
 # Notes: 
 
 rm(list = ls())
@@ -30,7 +30,7 @@ out_IVEware <- readRDS(paste0("../output/", filename, ".rds"))
 # Load MI-QP results -----------------------------------------------------------
 
 filename <- c(
-    "exp1_2_simOut_20230419_0957"
+    "exp1_2_simOut_20230424_0945"
 )[1]
 
 # Read R object
