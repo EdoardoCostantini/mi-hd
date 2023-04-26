@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-01
-# Modified: 2023-03-20
+# Modified: 2023-04-26
 
 # Packages ----------------------------------------------------------------
 
@@ -29,6 +29,7 @@ pack_list <- c("tidyverse",
                "miceadds",
                "ridge",
                "imputeR",
+               "nFactors",
                "blasso")
 
 # If not available, install
