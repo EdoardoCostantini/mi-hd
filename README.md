@@ -142,6 +142,8 @@ Here, I want to keep track of which filenames are important for the results.
 - Concatenated version of 6, 7 and 8.
 10. `exp1_2_simOut_20230421_1424.rds`
 - Contains results of MI-PCA (using 50% rule) vs MI-AM test on all collinearity conditions.
+11. `exp1_2_simOut_20230426_0906.rds`
+- Contains results of MI-PCA (using Kaiser rule) vs MI-AM test on all collinearity conditions.
 
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`

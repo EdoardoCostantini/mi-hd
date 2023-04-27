@@ -551,8 +551,11 @@ round(abs(pc1.loadings), 1)[, c(1:4, 40:44)] * 10
 
 # > Prepare data ---------------------------------------------------------------
 
-# Load results
+# All collinearity: 50% CPVE rule
 out_MIPCA_colli <- readRDS(paste0("../output/", "exp1_2_simOut_20230421_1424.rds"))
+
+# All collinearity: Kaiser Rule
+out_MIPCA_colli <- readRDS(paste0("../output/", "exp1_2_simOut_20230426_0906.rds"))
 
 # Review conditions run
 out_MIPCA_colli$conds
@@ -620,7 +623,7 @@ x <- 1 # bias
 methods_sel <- levels(gg_out_sem$methods)
 
 # Which p condition
-p_grep <- 500
+p_grep <- 50
 
 # X breaks
 xci_breaks <- sort(c(0, 10, 20, 50))
