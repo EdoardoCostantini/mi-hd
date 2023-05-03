@@ -3168,7 +3168,7 @@ plotwise <- function(res,
       # Correct names and dimensions
       rownames(results) <- sub("_", "-", rownames(results))
       if(ncol(results) < 6){
-        results <- cbind(results, NA)
+        results <- cbind(results, X3 = NA)
       }
 
       # Attach Methods as factor w/ precise levels order
@@ -3181,7 +3181,12 @@ plotwise <- function(res,
         analysis = rep(c("Bias", "CI coverage", "CI width"), each = nrow(out_bias)),
         results
       )
-      colnames(out) <- colnames(store)
+
+      # Attach conds at the end
+      out <- cbind(out, res$conds[cc, ])
+
+      # Given names
+      # colnames(out) <- colnames(store)
 
       # Attach Condition Name
       store <- rbind(store, out)
@@ -3190,7 +3195,9 @@ plotwise <- function(res,
 
   # Reshape
   store_melt <- reshape2::melt(store,
-                               id.var = c("parm", "cond", "methods", "analysis"))
+    id.var = c("parm", "cond", "methods", "analysis", colnames(res$conds))
+  )
+
   levels(store_melt$variable) <- c("Min", "Mean", "Max",
                                    "Item set 1", "Item set 2",
                                    "Item set 1 and 2")
