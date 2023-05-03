@@ -230,19 +230,31 @@ for (i in 1:length(og_out)) { # for every repetition
 
 out <- og_out
 out <- append(out, meta$nw_out)
+out$conds <- meta$og_out$conds
 out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$methods))
 
 # Time Analyses -----------------------------------------------------------
 
   out_time <- sapply(1:nrow(out$conds),
-                     res_sem_time,
-                     out = out,
-                     n_reps = out$parms$dt_rep,
-                     methods = out$parms$methods[c(1:8, 13:15)]
+    res_sem_time,
+    out = out,
+    n_reps = out$parms$dt_rep,
+    methods = out$parms$methods[c(1:8, 13:15)]
   )
 
-  colnames(out_time) <- names(out[[1]])
-  t(out_time)
+  # Take transpose
+  out_time <- t(out_time)
+
+  # Attach conditions
+  out_time <- cbind(cond = names(out[[1]]), out$conds, out_time)
+
+  # Melt 
+  out_time <- reshape2::melt(out_time,
+    id.var = c("cond", colnames(out$conds))
+  )
+  
+  # Transpose
+  saveRDS(out_time, "../output/exp1_simOut_time.rds")
   
 # Univariate Analyses -----------------------------------------------------
   

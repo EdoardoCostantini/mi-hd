@@ -131,18 +131,23 @@ out$parms <- parms
                      res_sem_time,
                      out = out,
                      n_reps = out$parms$dt_rep,
-                     methods = out$parms$methods#[c(1:11)]
+                     methods = out$parms$methods[c(1:11)]
   )
 
-  colnames(out_time) <- names(out[[1]])
-  t(out_time)
+  # Take transpose
+  out_time <- t(out_time)
 
-  # Save
-  saveRDS(
-      t(out_time),
-      paste0("../output/", filename, "_time.rds")
+  # Attach conditions
+  out_time <- cbind(cond = names(out[[1]]), out$conds, out_time)
+
+  # Melt
+  out_time <- reshape2::melt(out_time,
+      id.var = c("cond", colnames(out$conds))
   )
-  
+
+  # Transpose
+  saveRDS(out_time, "../output/exp1_2_simOut_time.rds")
+
 # Univariate Analyses -----------------------------------------------------
   
 ## MLE estimates (saturated sem model) ##
