@@ -36,6 +36,15 @@ filename <- c(
 # Read R object
 out_MIQP <- readRDS(paste0("../output/", filename, ".rds"))
 
+# Load MI-PCA with kaiser rule result ------------------------------------------
+
+filename <- c(
+    "exp1_2_simOut_20230426_0906"
+)[1]
+
+# Read R object
+out_MIPCA_kaiser <- readRDS(paste0("../output/", filename, ".rds"))
+
 # Final file name --------------------------------------------------------------
 
 filename <- paste0("exp1_2_simOut_", format(Sys.time(), "%Y%m%d_%H%M"))
@@ -106,6 +115,30 @@ for (i in 1:(out_Rmeth$parms$dt_rep)) { # for every repetition
     }
 }
 
+# Add MI-PCA with Kaiser rule
+
+for (i in 1:(out_Rmeth$parms$dt_rep)) { # for every repetition
+    # i <- 500
+    for (j in 1:(nrow(out_Rmeth$conds))) { # for every condition
+        # j <- 1
+        for (h in 2:length(out_Rmeth[[i]][[j]])) {
+            # h <- 6
+            multi_dim <- length(dim(out_Rmeth[[i]][[j]][[h]])) == 2
+            if (multi_dim) {
+                out_Rmeth[[i]][[j]][[h]] <- cbind(
+                    out_Rmeth[[i]][[j]][[h]],
+                    MI_PCA_k = out_MIPCA_kaiser[[i]][[j]][[h]][, "MI_PCA"]
+                )
+            } else {
+                out_Rmeth[[i]][[j]][[h]] <- c(
+                    out_Rmeth[[i]][[j]][[h]],
+                    MI_PCA_k = out_MIPCA_kaiser[[i]][[j]][[h]][["MI_PCA"]]
+                )
+            }
+        }
+    }
+}
+
 # Update the parms objects -----------------------------------------------------
 
 # Start from the first file's parms object
@@ -116,6 +149,9 @@ new_meth <- rep(TRUE, length(parms$meth_sel))
 
 # Give it good names
 names(new_meth) <- names(parms$meth_sel)
+
+# Add MI-PCA-k method
+new_meth <- c(new_meth, MI_PCA_k = TRUE)
 
 # Update internal objects 
 parms$meth_sel <- new_meth
@@ -131,7 +167,7 @@ out$parms <- parms
                      res_sem_time,
                      out = out,
                      n_reps = out$parms$dt_rep,
-                     methods = out$parms$methods[c(1:11)]
+                     methods = out$parms$methods#[c(1:11)]
   )
 
   # Take transpose
@@ -200,6 +236,7 @@ out$parms <- parms
             "blasso",
             "bridge",
             "MI_PCA",
+            "MI_PCA_k",
             "MI_CART",
             "MI_RF",
             "stepFor",
@@ -234,6 +271,7 @@ out$parms <- parms
             "blasso", 
             "bridge",
             "MI_PCA",
+            "MI_PCA_k",
             "MI_CART",
             "MI_RF",
             "stepFor",

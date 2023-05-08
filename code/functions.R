@@ -3086,7 +3086,7 @@ plotwise <- function(res,
   })
 
   # Define Condition and Parameters names
-  label_cond <- apply(res$conds[, exp_factors], 1, function(i) {
+  label_cond <- apply(res$conds[, exp_factors, drop = FALSE], 1, function(i) {
     paste0(exp_factors, " = ", i)
   })
   label_cond <- apply(t(label_cond), 1, paste, collapse = " ")
@@ -3166,7 +3166,7 @@ plotwise <- function(res,
       results <- rbind(out_bias, out_cico, out_CIW)
 
       # Correct names and dimensions
-      rownames(results) <- sub("_", "-", rownames(results))
+      rownames(results) <- gsub("_", "-", rownames(results))
       if(ncol(results) < 6){
         results <- cbind(results, X3 = NA)
       }
