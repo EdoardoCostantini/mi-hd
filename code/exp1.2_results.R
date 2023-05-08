@@ -122,17 +122,21 @@ for (i in 1:(out_Rmeth$parms$dt_rep)) { # for every repetition
     for (j in 1:(nrow(out_Rmeth$conds))) { # for every condition
         # j <- 1
         for (h in 2:length(out_Rmeth[[i]][[j]])) {
-            # h <- 6
+            # h <- 2
             multi_dim <- length(dim(out_Rmeth[[i]][[j]][[h]])) == 2
             if (multi_dim) {
+                MI_PCA_position <- grep("MI_PCA", colnames(out_Rmeth[[i]][[j]][[h]]))
                 out_Rmeth[[i]][[j]][[h]] <- cbind(
-                    out_Rmeth[[i]][[j]][[h]],
-                    MI_PCA_k = out_MIPCA_kaiser[[i]][[j]][[h]][, "MI_PCA"]
+                    out_Rmeth[[i]][[j]][[h]][, 1:MI_PCA_position],
+                    MI_PCA_k = out_MIPCA_kaiser[[i]][[j]][[h]][, "MI_PCA"],
+                    out_Rmeth[[i]][[j]][[h]][, -c(1:MI_PCA_position)]
                 )
             } else {
+                MI_PCA_position <- grep("MI_PCA", names(out_Rmeth[[i]][[j]][[h]]))
                 out_Rmeth[[i]][[j]][[h]] <- c(
-                    out_Rmeth[[i]][[j]][[h]],
-                    MI_PCA_k = out_MIPCA_kaiser[[i]][[j]][[h]][["MI_PCA"]]
+                    out_Rmeth[[i]][[j]][[h]][1:MI_PCA_position],
+                    MI_PCA_k = out_MIPCA_kaiser[[i]][[j]][[h]][["MI_PCA"]],
+                    out_Rmeth[[i]][[j]][[h]][-c(1:MI_PCA_position)]
                 )
             }
         }
@@ -150,8 +154,15 @@ new_meth <- rep(TRUE, length(parms$meth_sel))
 # Give it good names
 names(new_meth) <- names(parms$meth_sel)
 
+# Find position of MI_PCA
+MI_PCA_position <- grep("MI_PCA", names(new_meth))
+
 # Add MI-PCA-k method
-new_meth <- c(new_meth, MI_PCA_k = TRUE)
+new_meth <- c(
+    new_meth[1:MI_PCA_position],
+    MI_PCA_k = TRUE,
+    new_meth[-c(1:MI_PCA_position)]
+)
 
 # Update internal objects 
 parms$meth_sel <- new_meth
