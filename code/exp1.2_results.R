@@ -47,7 +47,7 @@ out_MIPCA_kaiser <- readRDS(paste0("../output/", filename, ".rds"))
 
 # Final file name --------------------------------------------------------------
 
-filename <- paste0("exp1_2_simOut_", format(Sys.time(), "%Y%m%d_%H%M"))
+filename <- "exp1_2_simOut_main_results"
 
 # Concatenate results ----------------------------------------------------------
 

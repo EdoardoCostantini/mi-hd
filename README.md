@@ -138,12 +138,12 @@ Here, I want to keep track of which filenames are important for the results.
 - 500 repetitions for IVEware method (stepFor / MI-SF)
 8. `exp1_2_simOut_20230424_0945.rds`
 - 500 repetitions for MI-QP
-9. `exp1_2_simOut_20230425_0918.rds`
-- Concatenated version of 6, 7 and 8.
-10. `exp1_2_simOut_20230421_1424.rds`
+9. `exp1_2_simOut_20230421_1424.rds`
 - Contains results of MI-PCA (using 50% rule) vs MI-AM test on all collinearity conditions.
-11. `exp1_2_simOut_20230426_0906.rds`
+10. `exp1_2_simOut_20230426_0906.rds`
 - Contains results of MI-PCA (using Kaiser rule) vs MI-AM test on all collinearity conditions.
+11. `exp1_2_simOut_main_results.rds`
+- Concatenated version of 6, 7, 8, and MI-PCA-k (Kaiser rule) results from 10.
 
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`
