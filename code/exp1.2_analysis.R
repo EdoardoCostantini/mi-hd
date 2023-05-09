@@ -10,8 +10,10 @@ source("./init_general.R")
 
 # Read results from the combined results
 res <- readRDS("../output/exp1_2_simOut_20230425_0918_res.rds")
+res <- readRDS("../output/exp1_2_simOut_main_results_res.rds")
 
 # Change names of methods if required
+levels(res$methods) <- str_replace(levels(res$methods), "-la", "")
 levels(res$methods) <- str_replace(levels(res$methods), "blasso", "BLasso")
 levels(res$methods) <- str_replace(levels(res$methods), "bridge", "BRidge")
 levels(res$methods) <- str_replace(levels(res$methods), "MI-qp", "MI-QP")
@@ -20,7 +22,7 @@ levels(res$methods) <- str_replace(levels(res$methods), "MI-OP", "MI-OR")
 levels(res$methods) <- str_replace(levels(res$methods), "stepFor", "MI-SF")
 
 # Which plot to plot
-p_grep <- c("50", "500")[1]
+p_grep <- c("50", "500")[2]
 
 # Plot Sizes Decisions
 gp_width <- 15
@@ -370,3 +372,253 @@ dt_outtime <- readRDS("../output/exp1_2_simOut_20230408_1748_time.rds")
 round(dt_outtime, 1)
 round(dt_outtime/60, 0)
 
+# Plot for paper ---------------------------------------------------------------
+
+# Reset output
+output_sem <- res
+
+# Rename analysis as in paper
+output_sem$analysis <- factor(
+  x = output_sem$analysis,
+  levels = unique(output_sem$analysis),
+  labels = c("PRB", "CIC", "CIW")
+)
+
+# Which plot to plot
+p_grep <- c("50", "500")[2]
+
+# Which methods
+methods_sel <- levels(output_sem$methods)[c(1:5, 7:14)]
+
+# > Bias -----------------------------------------------------------------------
+
+# New facet label names for collinearity variable
+output_sem$collinearity[is.na(output_sem$collinearity)] <- 0
+collinearity_labs <- c("p = 0", "p = 0.6", "p = 0.8", "p = 0.9")
+names(collinearity_labs) <- unique(output_sem$collinearity)
+
+output_sem$collinearity <- factor(
+  x = output_sem$collinearity,
+  levels = unique(output_sem$collinearity),
+  labels = c("rho[pva]*' = 0'", "rho[pva]*' = 0.6'", "rho[pva]*' = 0.8'", "rho[pva]*' = 0.9'")
+)
+output_sem$collinearity <- as.character(output_sem$collinearity)
+
+# Request Bias
+x <- 1
+
+# Define breaks for bias
+xci_breaks <- sort(c(0, 10, 20, 50))
+
+# Prepare data
+data_plot <- output_sem %>%
+  filter(
+    parm == unique(output_sem$parm)[3],
+    analysis == unique(output_sem$analysis)[x],
+    grepl(p_grep, cond),
+    collinearity %in% unique(output_sem$collinearity)[-1],
+    variable %in% c("Min", "Mean", "Max"),
+    methods %in% methods_sel
+  ) %>%
+  mutate(methods = fct_relabel(
+    methods,
+    str_replace,
+    "-la", ""
+  ))
+
+# Main Plot
+pf_bias <- ggplot(data = data_plot, aes(
+  y = methods,
+  x = value,
+  shape = variable
+)) +
+  geom_point(size = 1.75) +
+  geom_line(aes(group = methods),
+    size = .25
+  ) +
+  # Grid
+  facet_grid(
+    analysis ~ collinearity,
+    labeller = labeller(
+      collinearity = label_parsed
+    )
+  )
+
+  pf_bias <- pf_bias +
+    geom_vline(
+      data = data.frame(
+        xint = 10,
+        analysis = "PRB"
+      ),
+      linetype = "solid",
+      size = .15,
+      aes(xintercept = xint)
+    )
+
+  # Format
+  pf_bias <- pf_bias + scale_x_continuous(
+    labels = xci_breaks,
+    breaks = xci_breaks
+  ) +
+  scale_y_discrete(limits = rev) +
+  scale_shape_manual(values = c("I", "I", "I")) +
+  coord_cartesian(xlim = c(0, 50)) +
+  labs( # title = label_parm[x],
+    x = NULL,
+    y = NULL,
+    linetype = NULL,
+    shape = NULL
+  ) +
+  theme(
+    panel.background = element_rect(
+      fill = NA,
+      color = "gray"
+    ),
+    panel.grid.major = element_line(
+      color = "gray",
+      size = 0.15,
+      linetype = 1
+    ),
+    legend.key = element_rect(
+      colour = "gray",
+      fill = NA,
+      size = .15
+    ),
+    text = element_text(
+      family = plot_text_family,
+      face = plot_text_face,
+      size = plot_text_size
+    ),
+    axis.ticks = element_blank(),
+    legend.position = "none"
+  )
+
+pf_bias
+
+# > Confidence interval --------------------------------------------------------
+
+# Request Confidence intervals
+x <- 2
+
+# SE for threshold
+ci_lvl <- .95
+dt_reps <- 500
+SEp <- sqrt(ci_lvl * (1 - ci_lvl) / dt_reps)
+low_thr <- (.95 - SEp * 2) * 100
+hig_thr <- (.95 + SEp * 2) * 100
+vline_burton <- c(low_thr, hig_thr)
+vline_vanBuu <- c(90, 99)
+xci_breaks <- sort(c(80, vline_vanBuu, 95, round(vline_burton)))
+
+pf_cic <- output_sem %>%
+  filter(
+    parm == unique(output_sem$parm)[3],
+    analysis == unique(output_sem$analysis)[x],
+    grepl(p_grep, cond),
+    collinearity %in% unique(output_sem$collinearity)[-1],
+    variable %in% c("Min", "Mean", "Max"),
+    methods %in% methods_sel
+  ) %>%
+  # Drop pm = ** as we are plotting only one value for this condition
+  mutate(cond = fct_relabel(
+    cond,
+    str_replace,
+    " pm = [0-9]\\.[0-9]", ""
+  )) %>%
+  mutate(methods = fct_relabel(
+    methods,
+    str_replace,
+    "-la", ""
+  )) %>%
+  # Main Plot
+  ggplot(data = ., aes(
+    y = methods,
+    x = value,
+    shape = variable
+  )) +
+  geom_point(size = 1.75, show.legend = FALSE) +
+  geom_line(aes(group = methods),
+    size = .25
+  ) +
+  # Grid
+  facet_grid(
+    rows = vars(analysis),
+    cols = vars(collinearity)
+  ) +
+  geom_vline(
+    data = data.frame(
+      xint = 95,
+      analysis = "CIC"
+    ),
+    linetype = "solid",
+    size = .15,
+    aes(
+      xintercept = xint,
+      lty = paste0("nominal level")
+    )
+  ) +
+
+  # Format
+  scale_y_discrete(limits = rev) +
+  scale_x_continuous(
+    labels = as.character(round(xci_breaks / 100, 2)),
+    breaks = xci_breaks
+  ) +
+  coord_cartesian(xlim = c(min(xci_breaks), max(xci_breaks))) +
+  scale_shape_manual(values = c("I", "I", "I")) +
+  labs( # title = label_parm[x],
+    x = NULL,
+    y = NULL,
+    linetype = NULL,
+    shape = NULL
+  ) +
+  theme(
+    panel.background = element_rect(
+      fill = NA,
+      color = "gray"
+    ),
+    panel.grid.major = element_line(
+      color = "gray",
+      size = 0.175,
+      linetype = 1
+    ),
+    axis.ticks = element_blank(),
+    legend.key = element_rect(
+      colour = "gray",
+      fill = NA,
+      size = .15
+    ),
+    legend.position = "bottom",
+    text = element_text(
+      family = plot_text_family,
+      face = plot_text_face,
+      size = plot_text_size
+    ),
+    axis.text.x = element_text(
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1
+    ),
+    strip.text.x = element_blank()
+  )
+
+pf_cic
+
+# Combine plots
+library(patchwork)
+pf_PRB_CIC <- pf_bias / pf_cic
+
+# Define plot name
+plot_name <- paste0(
+  "../output/graphs/exp1.2_", "PRB_CIC", "_",
+  p_grep, "revision.pdf"
+)
+
+# Save plot
+ggsave(
+  file = plot_name,
+  width = gp_width, 
+  height = gp_height * .65,
+  units = "cm",
+  pf_PRB_CIC
+)
