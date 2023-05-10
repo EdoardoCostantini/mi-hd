@@ -356,10 +356,10 @@ pf <- plot_time(
               "MI-PCA",
               "MI-CART",
               "MI-RF",
+              "stepFor",
               "MI-qp",
               "MI-am",
-              "MI-OP",
-              "stepFor"
+              "MI-OP"
        ),
        meth_sort = FALSE
 )
