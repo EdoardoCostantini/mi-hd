@@ -3,7 +3,7 @@
 # Author:    Edoardo Costantini
 # Created:   2020-07-03
 # Modified:  2023-03-28
-# Notes: 
+# Notes:
 
 rm(list = ls())
 source("./init_general.R")
@@ -92,14 +92,13 @@ mean_traceplot(
 # Number of repetitions
 reps <- length(out_cnv) - 1
 r <- 1
-m <- 5
-# Number of 
+m <- 1
+v <- 1
 
 # Create an empty object for storing the results of the repetition
-mids_long_r <- NULL
+mids_r <- NULL
 
-for(r in 1:reps){
-
+for (r in 1:reps) {
     # Drop unused methods
     out_cnv[[r]][[1]]$imp_values <- out_cnv[[r]][[1]]$imp_values[!grepl("_el", names(out_cnv[[r]][[1]]$imp_values))]
 
@@ -114,63 +113,86 @@ for(r in 1:reps){
     names(mids_methods) <- names(out_cnv[[r]][[1]]$imp_values)
 
     # Create an empty object for storing the results of the method
-    mids_long_m <- NULL
+    mids_method <- NULL
 
     # For every method
     for (m in 1:length(out_cnv[[r]][[1]]$imp_values)) {
-
-        # Create an empty object for storing the results of chain
-        mids_long_cn <- NULL
-
+    
         # Is the object mids?
         is.mids <- class(out_cnv[[r]][[1]]$imp_values[[m]]) == "mids"
 
         # If so, do this
-        if(is.mids == FALSE){
+        if (is.mids == FALSE) {
+            # Create two empty arrays
+            mids_chainMean <- array(
+                NA,
+                dim = c(
+                    length(out_cnv$parms$z_m_id), # number imputed vars
+                    out_cnv$parms$iters, # number of iterations
+                    out_cnv$parms$ndt # number of chains
+                ),
+                dimnames = list(
+                    paste0("z", out_cnv$parms$z_m_id),
+                    1:out_cnv$parms$iters,
+                    paste0("chain", 1:out_cnv$parms$ndt)
+                )
+            )
+            mids_chainVar <- array(
+                NA,
+                dim = c(
+                    length(out_cnv$parms$z_m_id), # number imputed vars
+                    out_cnv$parms$iters, # number of iterations
+                    out_cnv$parms$ndt # number of chains
+                ),
+                dimnames = list(
+                    paste0("z", out_cnv$parms$z_m_id),
+                    1:out_cnv$parms$iters,
+                    paste0("chain", 1:out_cnv$parms$ndt)
+                )
+            )
+
             # For every chain
             for (cn in 1:length(out_cnv[[r]][[1]]$imp_values[[m]])) {
-
-                # Create an empty object for storing the results for the variable
-                mids_long_v <- NULL
-
                 # For every variable
                 for (v in 1:length(out_cnv[[r]][[1]]$imp_values[[m]][[cn]])) {
-                        # Create a unit of information
-                        temp_mean_sd <- data.frame(
-                            repetition = r,
-                            method = names(out_cnv[[r]][[1]]$imp_values)[m],
-                            chain = cn,
-                            iter = 1:nrow(out_cnv[[r]][[1]]$imp_values[[m]][[cn]][[v]]),
-                            variable = paste0("z", c(1:3, 6:8)[v]),
-                            mean = rowMeans(out_cnv[[r]][[1]]$imp_values[[m]][[cn]][[v]]),
-                            sd = apply(out_cnv[[r]][[1]]$imp_values[[m]][[cn]][[v]], 1, sd)
-                        )
-                    # Reshape for future plots
-                    mids_long <- reshape2::melt(
-                        temp_mean_sd,
-                        id.var = c("repetition", "method", "chain", "iter", "variable"),
-                        variable.name = "outcome"
-                    )
+                    # Compute mean imputed values
+                    mids_chainMean[v, , cn] <- rowMeans(out_cnv[[r]][[1]]$imp_values[[m]][[cn]][[v]])
 
-                    # Combine different variables
-                    mids_long_v <- rbind(mids_long_v, mids_long)
+                    # Compute sd of imputed values
+                    mids_chainVar[v, , cn] <- apply(out_cnv[[r]][[1]]$imp_values[[m]][[cn]][[v]], 1, var)
                 }
-                # Combine different chains
-                mids_long_cn <- rbind(mids_long_cn, mids_long_v)
+
+                # Create slim mids objects
+                mids_m <- list(
+                    chainMean = mids_chainMean,
+                    chainVar = mids_chainVar,
+                    m = length(out_cnv[[r]][[1]]$imp_values[[m]]),
+                    iteration = ncol(mids_chainMean)
+                )
             }
         } else {
             # Obtain an object on the same shame starting from
             id_values <- rowSums(is.nan(out_cnv[[r]][[1]]$imp_values[[m]]$chainMean)) == 0
 
-            # Keep only values
-            mids_chainMean <- out_cnv[[r]][[1]]$imp_values[[m]]$chainMean[id_values, ,]
-            mids_chainVar <- out_cnv[[r]][[1]]$imp_values[[m]]$chainVar[id_values, ,]
+            # Create slim mids objects
+            mids_m <- list(
+                chainMean = out_cnv[[r]][[1]]$imp_values[[m]]$chainMean[id_values, , ],
+                chainVar = out_cnv[[r]][[1]]$imp_values[[m]]$chainVar[id_values, , ],
+                m = out_cnv[[r]][[1]]$imp_values[[m]]$m,
+                iteration = out_cnv[[r]][[1]]$imp_values[[m]]$iteration
+            )
         }
 
-        # Combine different methods
-        mids_long_m <- rbind(mids_long_m, mids_long_cn)
+        mids_method[[m]] <- mids_m
+
     }
 
+    # Give names to the mids objects
+    names(mids_method) <- names(out_cnv[[r]][[1]]$imp_values)
+
     # Combine repetitions
-    mids_long_r <- rbind(mids_long_r, mids_long_m)
+    mids_r[[r]] <- mids_method
 }
+
+# Save slim and prepped mids object
+out_cnv <- saveRDS(mids_r, "../output/exp1_conv_20200731_1652_shiny.rds")
