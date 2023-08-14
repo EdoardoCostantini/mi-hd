@@ -1,7 +1,7 @@
-# imputeHD-comp
+# Multiple Imputation with High-dimensional Imputation Models
 Repository hosting project high-dimensional imputation comparison.
 
-# Summary
+## Summary
 Including a large number of predictors in the imputation model underlying a 
 Multiple Imputation (MI) procedure is one of the most challenging tasks 
 imputers face.
@@ -22,7 +22,7 @@ We find that using regularized regression to select the predictors used in the
 MI model, and using principal component analysis to reduce the dimensionality 
 of auxiliary data produce the best results.
 
-# Contents
+## Contents
 This directory contains the following main subfolders:
 - code: the main software to run the study
 - output: the folder where the results of scripts located in code are stored
@@ -33,15 +33,15 @@ This directory contains the following main subfolders:
 - checks: contains scripts checking expected behaviour of different functions
    and set-ups
 
-# How to replicate results
+## How to replicate results
 
 The content of this directory can be used to replicate the results reported in the manuscript: "SMR-21-0138.R1 - High-dimensional imputation for the social sciences: a comparison of state-of-the-art methods"
 
-## Running the simulations
+### Running the simulations
 
 We used R for these simulations.
 
-### Simulation study
+#### Simulation study
 1. Installing Dependencies:
    1. Open the script [init_general.R](./code/init_general.R) and install the
       packages with the traditional `install.packages()` function.
@@ -58,7 +58,7 @@ We used R for these simulations.
       function `makeCluster()`
    5. Run the entire script
 
-### Collinearity study
+#### Collinearity study
 
 1. Installing Dependencies: same as above
 2. Running the simulation:
@@ -70,7 +70,7 @@ We used R for these simulations.
       function `makeCluster()`
    5. Run the entire script
 
-### EVS resampling study
+#### EVS resampling study
 1. Installing Dependencies: same as above
 2. Preparing the EVS population data: 
    1. Download the EVS 2017 Third pre-release [https://doi.org/10.4232/1.13511](https://doi.org/10.4232/1.13511)
@@ -84,7 +84,7 @@ We used R for these simulations.
       `makeCluster()`
    4. Run the entire script
 
-## Obtaining the plots and tables
+### Obtaining the plots and tables
 The procedure is described for the simulation study "exp1". 
 By using the scripts for "exp1.2" and "exp4", the same procedure can be followed for the collinearity study and the EVS 
 resampling study.
@@ -99,13 +99,13 @@ resampling study.
    you will be able to produce the plots for the smaller proportion of missing 
    cases.
 
-## Keeping track of the results
+### Keeping track of the results
 
 Because it happens that after getting a review you need to add conditions, repetitions, or tweak other aspects of simulation studies, you need to be able to re-run only certain aspects of the study.
 This requires being able to stitch together parts of the results.
 Here, I want to keep track of which filenames are important for the results.
 
-### Simulation Study
+#### Simulation Study
 
 1. `exp1_simOut_20201130_1006.rds`
    - 1e3 repetitions
@@ -132,7 +132,7 @@ Here, I want to keep track of which filenames are important for the results.
 10. `exp1_simOut_20230403_1631_res.rds`
    - Output for `exp1_results.R` script combining (1), (2), (4), and (9)
 
-### Extra Simulation Study on Collinearity
+#### Extra Simulation Study on Collinearity
 
 1. `exp1_2_convergence_all_meth_20230403_1027.rds`
 - Output for convergence checks for all R native methods.
@@ -157,7 +157,7 @@ Here, I want to keep track of which filenames are important for the results.
 11. `exp1_2_simOut_main_results.rds`
 - Concatenated version of 6, 7, 8, and MI-PCA-k (Kaiser rule) results from 10.
 
-### Resampling Study
+#### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`
    - first 500 repetitions
 2. `exp4_simOut_20201207_1134.rds`
