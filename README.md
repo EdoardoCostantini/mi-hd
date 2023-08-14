@@ -58,6 +58,18 @@ We used R for these simulations.
       function `makeCluster()`
    5. Run the entire script
 
+### Collinearity study
+
+1. Installing Dependencies: same as above
+2. Running the simulation:
+   1. Open the script [exp1.2_init.R](./code/exp1.2_init.R) and make sure that the parameters and conditions of the simulation study are set to desired values. In particular, pay attention to:
+      - `parms$IVEloc` which needs to be set to the correct path for the operating system you are running (for more info look for `~/srclib` [here](https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/))
+   2. Open the script [exp1.2_simulation_script_win.R](./code/exp1_simulation_script_win.R)
+   3. Make sure the working directory is set to the location of this script (`./code/`)
+   4. Define the number of clusters to be used by specifying the first argument in the
+      function `makeCluster()`
+   5. Run the entire script
+
 ### EVS resampling study
 1. Installing Dependencies: same as above
 2. Preparing the EVS population data: 
@@ -73,8 +85,8 @@ We used R for these simulations.
    4. Run the entire script
 
 ## Obtaining the plots and tables
-The procedure is described for the simulation study. 
-By using the scripts for "exp4", the same procedure can be followed for the EVS 
+The procedure is described for the simulation study "exp1". 
+By using the scripts for "exp1.2" and "exp4", the same procedure can be followed for the collinearity study and the EVS 
 resampling study.
 1. Open the script [exp1_results.R](./code/exp1_results.R) and make sure you specify 
    the name of the .rds file obtained from the simulation study run.
