@@ -86,7 +86,20 @@ impute_PCA <- function(Z, O, cond, parms = parms){
         rSquared <- cumsum(pcaOut$sdev^2) / sum(pcaOut$sdev^2)
 
         ## Extract the principal component scores:
-        Z_pca <- pcaOut$x[, rSquared <= parms$PCA_pcthresh]
+        if (is.numeric(parms$PCA_pcthresh)) { # Is the threshold numeric?
+          # Does the first PC explain more than the threshold?
+          if (rSquared[1] >= parms$PCA_pcthresh) {
+            Z_pca <- pcaOut$x[, 1, drop = FALSE]
+          } else {
+            Z_pca <- pcaOut$x[, rSquared <= parms$PCA_pcthresh]
+          }
+        } else {
+          # Kaiser rule
+          nkaiser <- nFactors::nScree(pcaOut$sdev^2)$Components[, "nkaiser"]
+
+          # Keep the number of PCs found with Kaiser rule
+          Z_pca <- pcaOut$x[, 1:nkaiser]
+        }
 
       }
       
@@ -107,8 +120,8 @@ impute_PCA <- function(Z, O, cond, parms = parms){
       end.time <- Sys.time()
       
       # Identification of models
-      imp_PCA_diff_comps <- list(nobs = colSums(!is.na(Z_input[, 1:10])), 
-                                 npcs = ncol(imp_PCA_mids$predictorMatrix)-1)
+      imp_PCA_diff_comps <- list(nobs = colSums(!is.na(Z_input)), 
+                                 npcs = ncol(imp_PCA_mids$predictorMatrix)-6)
       
       # Store results
       print("PCA Impute: Storing Results")

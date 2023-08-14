@@ -1,7 +1,9 @@
-# Title:    Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-05-19
-# Modified: 2022-01-31
+# Project:   imputeHD-comp
+# Objective: Subroutines for simulation study
+# Author:    Edoardo Costantini
+# Created:   2020-05-19
+# Modified:  2023-04-03
+# Notes: 
 
 # Functions ---------------------------------------------------------------
 
@@ -50,7 +52,7 @@ doRep <- function(rp, conds, parms, debug = FALSE, verbose = TRUE) {
     
 # Experiment 1 ------------------------------------------------------------
 
-    if(parms$exp == 1){
+    if(parms$exp == 1 | parms$exp == "1_2"){
       for(i in 1 : nrow(conds)) {
         
         print(paste0("Exp: ", parms$exp, 
@@ -184,6 +186,7 @@ runCell <- function(cond, parms, rep_status) {
   # selected methods
   ## For internals
   # source("./exp1_init.R")
+  # rep_status <- 1
   # cond <- conds[1, ]
   
   ## Data ------------------------------------------------------------------ ##
@@ -197,7 +200,7 @@ runCell <- function(cond, parms, rep_status) {
   
   O <- !is.na(Xy_mis) # matrix index of observed values
   miss_descrps <- colMeans(!O[, parms$z_m_id]) 
-    
+
   ## Imputation ------------------------------------------------------------ ##
   # Impute m times the data w/ missing values w/ different methods
 
@@ -247,6 +250,16 @@ runCell <- function(cond, parms, rep_status) {
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
 
+  # MICE w/ step-wise forward regression
+  imp_stepFor <- impute_IVEware(
+    Z = Xy_mis,
+    minR2 = cond$minR2,
+    iters = parms$iters,
+    rep_status = rep_status,
+    perform = parms$meth_sel$stepFor,
+    parms = parms
+  )
+
   # MICE w/ quickpred
   imp_qp <- impute_MICE_qp(Z = Xy_mis,
                            perform = parms$meth_sel$MI_qp,
@@ -287,14 +300,15 @@ runCell <- function(cond, parms, rep_status) {
                      MI_PCA  = imp_PCA$mids,
                      MI_CART = imp_CART$imps,
                      MI_RF   = imp_RANF$imps,
-                     MI_qp   = imp_qp$imps,
-                     MI_am   = imp_MICE_am$imps,
-                     MI_OP   = imp_MICE_OP$mids) # I need this for convergence
+                     stepFor = imp_stepFor$imps,
+                     MI_qp   = imp_qp$mids,
+                     MI_am   = imp_MICE_am$mids,
+                     MI_OP   = imp_MICE_OP$mids)
   
   ## Analyse --------------------------------------------------------------- ##
   # For each imp method, analyse all datasets based on model defined in init.R
   
-  ## MLE estaimte of mean, variance, covariance
+  ## MLE estimate of mean, variance, covariance
   
   # Multiple imputed dataset
   
@@ -305,6 +319,7 @@ runCell <- function(cond, parms, rep_status) {
                           MI_PCA  = imp_PCA$dats,
                           MI_CART = imp_CART$dats,
                           MI_RF   = imp_RANF$dats,
+                          stepFor = imp_stepFor$dats,
                           MI_qp   = imp_qp$dats,
                           MI_am   = imp_MICE_am$dats,
                           MI_OP   = imp_MICE_OP$dats), 
@@ -328,6 +343,7 @@ runCell <- function(cond, parms, rep_status) {
                          MI_PCA  = imp_PCA$dats,
                          MI_CART = imp_CART$dats,
                          MI_RF   = imp_RANF$dats,
+                         stepFor = imp_stepFor$dats,
                          MI_qp   = imp_qp$dats,
                          MI_am   = imp_MICE_am$dats,
                          MI_OP   = imp_MICE_OP$dats), 
@@ -384,6 +400,7 @@ runCell <- function(cond, parms, rep_status) {
                    MI_PCA  = imp_PCA$time,
                    MI_CART = imp_CART$time,
                    MI_RF   = imp_RANF$time,
+                   stepFor = imp_stepFor$time,
                    MI_qp   = imp_qp$time,
                    MI_am   = imp_MICE_am$time,
                    MI_OP   = imp_MICE_OP$time)
@@ -820,6 +837,18 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                           perform = parms$meth_sel$MI_RF,
                           parms = parms)
 
+
+  # MICE w/ step-wise forward regression
+  imp_stepFor <- impute_IVEware(
+    Z = Xy_mis,
+    minR2 = cond$minR2,
+    rep_status = rep_status,
+    iters = parms$iters,
+    perform = parms$meth_sel$stepFor,
+    parms = parms
+  )
+
+
   # MICE w/ quickpred
   imp_qp <- impute_MICE_qp(Z = Xy_mis,
                            perform = parms$meth_sel$MI_qp,
@@ -862,6 +891,7 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                      MI_PCA     = imp_PCA$mids,
                      MI_CART    = imp_CART$imps,
                      MI_RF      = imp_RANF$imps,
+                     stepFor    = imp_stepFor$imps,
                      MI_qp      = imp_qp$imps,
                      MI_am      = imp_MICE_am$imps,
                      MI_OP      = imp_MICE_OP$mids)
@@ -878,6 +908,7 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                   MI_PCA     = imp_PCA$dats,
                   MI_CART    = imp_CART$dats,
                   MI_RF      = imp_RANF$dats,
+                  stepFor    = imp_stepFor$dats,
                   MI_qp      = imp_qp$dats,
                   MI_am      = imp_MICE_am$dats,
                   MI_OP      = imp_MICE_OP$dats)
@@ -969,6 +1000,7 @@ runCell_evs <- function(cond, parms, rep_status, data_source) {
                    MI_PCA     = imp_PCA$time,
                    MI_CART    = imp_CART$time,
                    MI_RF      = imp_RANF$time,
+                   stepFor    = imp_stepFor$time,
                    MI_qp      = imp_qp$time,
                    MI_am      = imp_MICE_am$time,
                    MI_OP      = imp_MICE_OP$time)

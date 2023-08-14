@@ -1,0 +1,16 @@
+title Multiple imputation;
+datain ../data/IVEwareExampleData;
+dataout ./IVEwareExampleDataImputed;
+default continuous;
+categorical casecnt gender race3 hyper diab smoke fammi edusubj3 cholesth;
+mixed cafftot alcohol3;
+transfer studyid;
+restrict numcig(smoke=2,3) yrssmoke(smoke=2,3);
+bounds numcig(>0) yrssmoke(>0,<=age-12) fatindex(>0) cafftot(>=0) alcohol3(>=0);
+maxpred redtot(3) wgtkg(2);
+minrsqd .01;
+iterations 5;
+multiples 5;
+print all;
+seed 2001;
+run;

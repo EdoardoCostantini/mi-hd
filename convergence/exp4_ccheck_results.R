@@ -1,9 +1,9 @@
-### Title:    Conergence Check Blasso
-### Project:  Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-07-03
-### Notes:    The goal is to find out how many iterations should be used
-###           in the full study for each method.
+# Project:   imputeHD-comp
+# Objective: Convergence checks for all methods in EXP 4 Evs
+# Author:    Edoardo Costantini
+# Created:   2020-07-03
+# Modified:  2023-03-28
+# Notes: 
 
 rm(list = ls())
 source("./init_general.R")
@@ -52,7 +52,7 @@ data.frame(
 # Plots -------------------------------------------------------------------
 
   # What to show
-  exp_dat     <- 10
+  exp_dat     <- 2
   iters_range <- 1:250 # which set of iterations
   y_range     <- c(2, 3.5)
 
@@ -61,7 +61,6 @@ data.frame(
     mean_traceplot(out_cnv, 
                    method = out_cnv$parms$method[x], 
                    dat = exp_dat, 
-                   y_center = TRUE,
                    y_range = y_range, 
                    iters = iters_range)}
   )
@@ -79,9 +78,9 @@ mean_traceplot(out_cnv,
 print(out_cnv$parms$method[2])
 mean_traceplot(out_cnv, 
                method = out_cnv$parms$method[2], 
-               y_center = TRUE,
                dat = exp_dat, 
-               y_range = y_range, iters = iters_range)
+               y_range = y_range, 
+               iters = iters_range)
 
 # blasso (200-300 is a good range to chose from)
 print(out_cnv$parms$method[3])
@@ -89,14 +88,13 @@ iters_range_bl <- 1:250
 mean_traceplot(out_cnv,
                method   = out_cnv$parms$method[3],
                dat      = exp_dat, 
-               y_range  = c(2, 3.5), iters = iters_range_bl)
+               y_range  = c(2, 3.5), iters = iters_range)
 
 # bridge (50-100 good for all)
 print(out_cnv$parms$method[4])
 mean_traceplot(out_cnv, 
                method   = out_cnv$parms$method[4], 
                dat      = exp_dat,
-               y_center = FALSE,
                y_range  = c(-100, 100),
                iters    = iters_range)
 
@@ -111,16 +109,16 @@ mean_traceplot(out_cnv,
 print(out_cnv$parms$method[6])
 mean_traceplot(out_cnv,
                method = out_cnv$parms$method[6], 
-               y_center = TRUE,
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
+
 # MI_RF
 print(out_cnv$parms$method[7])
 mean_traceplot(out_cnv,
                method = out_cnv$parms$method[7],
-               y_center = TRUE,
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
+
 # MI_T
 print(out_cnv$parms$method[8])
 mean_traceplot(out_cnv, 
@@ -128,3 +126,116 @@ mean_traceplot(out_cnv,
                dat = exp_dat, 
                y_range = y_range, iters = iters_range)
 
+# 1.5 Reshape for shiny app ----------------------------------------------------
+
+# Number of repetitions
+reps <- length(out_cnv) - 2
+r <- 1
+m <- 1
+v <- 1
+
+# Create an empty object for storing the results of the repetition
+mids_r <- NULL
+
+for (r in 1:reps) {
+  # Rename methods
+  names(out_cnv[[r]][[1]]$imp_values) <- gsub("_la", "", names(out_cnv[[r]][[1]]$imp_values))
+  names(out_cnv[[r]][[1]]$imp_values) <- gsub("bridge", "BRidge", names(out_cnv[[r]][[1]]$imp_values))
+  names(out_cnv[[r]][[1]]$imp_values) <- gsub("blasso", "BLasso", names(out_cnv[[r]][[1]]$imp_values))
+  names(out_cnv[[r]][[1]]$imp_values) <- gsub("_", "-", names(out_cnv[[r]][[1]]$imp_values))
+  names(out_cnv[[r]][[1]]$imp_values) <- gsub("qp", "QP", names(out_cnv[[r]][[1]]$imp_values))
+  names(out_cnv[[r]][[1]]$imp_values) <- gsub("am", "AM", names(out_cnv[[r]][[1]]$imp_values))
+  names(out_cnv[[r]][[1]]$imp_values) <- gsub("OP", "OR", names(out_cnv[[r]][[1]]$imp_values))
+
+  # Create a storing object
+  mids_methods <- vector("list", length(out_cnv[[r]][[1]]$imp_values))
+  names(mids_methods) <- names(out_cnv[[r]][[1]]$imp_values)
+
+  # Create an empty object for storing the results of the method
+  mids_method <- NULL
+
+  # For every method
+  for (m in 1:length(out_cnv[[r]][[1]]$imp_values)) {
+    # Is the object null?
+    is_null <- is.null(out_cnv[[r]][[1]]$imp_values[[m]])
+
+    if (is_null == FALSE) {
+      # Is the object mids?
+      is.mids <- class(out_cnv[[r]][[1]]$imp_values[[m]]) == "mids"
+
+      # If so, do this
+      if (is.mids == FALSE) {
+        # Create two empty arrays
+        mids_chainMean <- array(
+          NA,
+          dim = c(
+            length(out_cnv$parms$z_m_id), # number imputed vars
+            out_cnv$parms$iters, # number of iterations
+            out_cnv$parms$ndt # number of chains
+          ),
+          dimnames = list(
+            out_cnv$parms$z_m_id,
+            1:out_cnv$parms$iters,
+            paste0("chain", 1:out_cnv$parms$ndt)
+          )
+        )
+        mids_chainVar <- array(
+          NA,
+          dim = c(
+            length(out_cnv$parms$z_m_id), # number imputed vars
+            out_cnv$parms$iters, # number of iterations
+            out_cnv$parms$ndt # number of chains
+          ),
+          dimnames = list(
+            out_cnv$parms$z_m_id,
+            1:out_cnv$parms$iters,
+            paste0("chain", 1:out_cnv$parms$ndt)
+          )
+        )
+
+        # For every chain
+        for (cn in 1:length(out_cnv[[r]][[1]]$imp_values[[m]])) {
+          # For every variable
+          for (v in 1:length(out_cnv[[r]][[1]]$imp_values[[m]][[cn]])) {
+            # Compute mean imputed values
+            mids_chainMean[v, , cn] <- rowMeans(out_cnv[[r]][[1]]$imp_values[[m]][[cn]][[v]])
+
+            # Compute sd of imputed values
+            mids_chainVar[v, , cn] <- apply(out_cnv[[r]][[1]]$imp_values[[m]][[cn]][[v]], 1, var)
+          }
+
+          # Create slim mids objects
+          mids_m <- list(
+            chainMean = mids_chainMean,
+            chainVar = mids_chainVar,
+            m = length(out_cnv[[r]][[1]]$imp_values[[m]]),
+            iteration = ncol(mids_chainMean)
+          )
+        }
+      } else {
+        # Obtain an object on the same shame starting from
+        id_values <- rowSums(is.nan(out_cnv[[r]][[1]]$imp_values[[m]]$chainMean)) == 0
+
+        # Create slim mids objects
+        mids_m <- list(
+          chainMean = out_cnv[[r]][[1]]$imp_values[[m]]$chainMean[id_values, , ],
+          chainVar = out_cnv[[r]][[1]]$imp_values[[m]]$chainVar[id_values, , ],
+          m = out_cnv[[r]][[1]]$imp_values[[m]]$m,
+          iteration = out_cnv[[r]][[1]]$imp_values[[m]]$iteration
+        )
+      }
+      mids_method[[m]] <- mids_m
+    } else {
+      mids_method[[m]] <- NA
+    }
+  }
+
+  # Give names to the mids objects
+  names(mids_method) <- names(out_cnv[[r]][[1]]$imp_values)
+
+  # Combine repetitions
+  mids_r[[r]] <- mids_method
+}
+
+# Save slim and prepped mids object
+out_cnv <- saveRDS(mids_r, "../output/exp4_conv_20201015_1555_shiny.rds")

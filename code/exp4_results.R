@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-10-05
-# Modified: 2022-02-16
+# Modified: 2023-03-24
 
   rm(list = ls())
   source("./init_general.R")
@@ -45,7 +45,7 @@
   out$info <- list(out_pt1 = out_pt1[c(501:length(out_pt1))],
                    out_pt2 = out_pt2[c(501:length(out_pt2))])
 
-# Join additional methods not considered before --------------------------------
+# Add results for new method: MI-qp and MI-am ----------------------------------
 
 # Define file names for the new file to join to the old
 nw_filename <- "exp4_simOut_20220131_1603" # new rds filename
@@ -184,17 +184,68 @@ out <- bs_out
 out <- append(out, meta$rp_out)
 out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$methods))
 
+# Add results for new method: IVEware ------------------------------------------
+
+# Define file names for the new file to join to the old
+nw_filename <- "exp4_simOut_20230323_1551" # new rds filename
+filename <- nw_filename
+
+# Read it in of them in R
+nw_out <- readRDS(paste0("../output/", nw_filename, ".rds"))
+
+# Extract the meta data from both
+meta <- list(
+  og_out = tail(out, 3),
+  nw_out = tail(nw_out, 3)
+)
+
+# Get rid of the meta data
+og_out <- out[1:out$parms$dt_rep] # temporary mod
+nw_out <- nw_out[1:nw_out$parms$dt_rep]
+
+# Append new methods as columns to each repetition and condition
+
+for (i in 1:length(og_out)) { # for every repetition
+  for (j in 1:length(og_out[[i]])) { # for every condition
+    for (h in 2:length(og_out[[i]][[j]])) {
+      multi_dim <- length(dim(og_out[[i]][[j]][[h]])) == 2
+      if (multi_dim) {
+        colnames1 <- colnames(og_out[[i]][[j]][[h]])
+        colnames2 <- colnames(nw_out[[i]][[j]][[h]])
+        colindex <- !colnames2 %in% colnames1
+        og_out[[i]][[j]][[h]] <- cbind(
+          og_out[[i]][[j]][[h]],
+          nw_out[[i]][[j]][[h]][, colindex,
+            drop = FALSE
+          ]
+        )
+      } else {
+        names1 <- names(og_out[[i]][[j]][[h]])
+        names2 <- names(nw_out[[i]][[j]][[h]])
+        namesindex <- !names2 %in% names1
+        og_out[[i]][[j]][[h]] <- c(
+          og_out[[i]][[j]][[h]],
+          nw_out[[i]][[j]][[h]][namesindex]
+        )
+      }
+    }
+  }
+}
+
+out <- og_out
+out <- append(out, meta$nw_out)
+out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$methods))
 
 # Time Analyses -----------------------------------------------------------
 
-  out_time <- sapply(1:nrow(out$conds),
+  out_time <- lapply(1:nrow(out$conds),
                      res_sem_time,
                      out = out,
                      n_reps = out$parms$dt_rep,
-                     methods = out$parms$methods[c(1:8, 13:14)]
+                     methods = out$parms$methods[c(1:8, 13:15)]
   )
-  colnames(out_time) <- names(out[[1]])
-  t(out_time)
+  # colnames(out_time) <- names(out[[1]])
+  # t(out_time)
   
   # Catch weird runs
   condition <- 2
@@ -226,6 +277,7 @@ out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$metho
   # Bias for a given model
   lapply(1:length(out[[1]]), function(x) m1_res[[x]]$bias_per)
   lapply(1:length(out[[1]]), function(x) round(m1_res[[x]]$bias_sd, 1))
+  lapply(1:length(out[[1]]), function(x) m1_res[[x]]$CIW)
   
   # CI
   lapply(1:length(out[[1]]), function(x) m1_res[[x]]$ci_cov)
@@ -243,6 +295,7 @@ out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$metho
   # Bias for model 2
   lapply(1:length(out[[1]]), function(x) m2_res[[x]]$bias_per)
   lapply(1:length(out[[1]]), function(x) round(m2_res[[x]]$bias_sd, 1))
+  lapply(1:length(out[[1]]), function(x) m2_res[[x]]$CIW)
   
   # CI
   lapply(1:length(out[[1]]), function(x) m2_res[[x]]$ci_cov)
@@ -259,7 +312,8 @@ out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$metho
 # Save Results ------------------------------------------------------------
   output <- lapply(list(m1 = m1_res,
                         m2 = m2_res,
-                        ed_all = ed_all_res), 
+                        ed_all = ed_all_res,
+                        out_time = out_time), 
                    function(x){
                      names(x) <- paste0("cond", seq_along(out[[1]]))
                      return(x)
@@ -270,5 +324,5 @@ out$parms$methods <- unique(c(meta$bs_out$parms$methods, meta$rp_out$parms$metho
   
   saveRDS(
     output, 
-    paste0("../output/", "exp4_simOut_20220226_0950", "_res.rds")
+    paste0("../output/", "exp4_simOut_20230323_1551", "_res.rds")
   )

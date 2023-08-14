@@ -1,8 +1,9 @@
-# Title:    Putting result object together
-# Project:  Imputing High Dimensional Data
-# Author:   Edoardo Costantini
-# Created:  2020-05-19
-# Modified: 2022-02-28
+# Project:   imputeHD-comp
+# Objective: Pulling result objects together
+# Author:    Edoardo Costantini
+# Created:   2020-05-19
+# Modified:  2023-04-05
+# Notes: 
 
   rm(list = ls())
   source("./init_general.R")
@@ -179,17 +180,81 @@ id <- sample(1:1e3, 1)
 cbind(bs_out[[id]]$cond_50_FALSE_0.3$sem_EST[, "bridge"],
       rp_out[[id]]$cond_50_FALSE_0.3$sem_EST[, "bridge"])
 
+# Add results for new method: IVEware ------------------------------------------
+
+# Define file names for the new file to join to the old
+nw_filename <- "exp1_simOut_20230403_1631" # new rds filename
+filename <- nw_filename
+
+# Read it in of them in R
+nw_out <- readRDS(paste0("../output/", nw_filename, ".rds"))
+
+# Extract the meta data from both
+meta <- list(
+  og_out = tail(out, 3),
+  nw_out = tail(nw_out, 3)
+)
+
+# Get rid of the meta data
+og_out <- out[1:out$parms$dt_rep] # temporary mod
+nw_out <- nw_out[1:nw_out$parms$dt_rep]
+
+# Append new methods as columns to each repetition and condition
+
+for (i in 1:length(og_out)) { # for every repetition
+  for (j in 1:length(og_out[[i]])) { # for every condition
+    for (h in 2:length(og_out[[i]][[j]])) {
+      multi_dim <- length(dim(og_out[[i]][[j]][[h]])) == 2
+      if (multi_dim) {
+        colnames1 <- colnames(og_out[[i]][[j]][[h]])
+        colnames2 <- colnames(nw_out[[i]][[j]][[h]])
+        colindex <- !colnames2 %in% colnames1
+        og_out[[i]][[j]][[h]] <- cbind(
+          og_out[[i]][[j]][[h]],
+          nw_out[[i]][[j]][[h]][, colindex,
+            drop = FALSE
+          ]
+        )
+      } else {
+        names1 <- names(og_out[[i]][[j]][[h]])
+        names2 <- names(nw_out[[i]][[j]][[h]])
+        namesindex <- !names2 %in% names1
+        og_out[[i]][[j]][[h]] <- c(
+          og_out[[i]][[j]][[h]],
+          nw_out[[i]][[j]][[h]][namesindex]
+        )
+      }
+    }
+  }
+}
+
+out <- og_out
+out <- append(out, meta$nw_out)
+out$conds <- meta$og_out$conds
+out$parms$methods <- unique(c(meta$og_out$parms$methods, meta$nw_out$parms$methods))
+
 # Time Analyses -----------------------------------------------------------
 
   out_time <- sapply(1:nrow(out$conds),
-                     res_sem_time,
-                     out = out,
-                     n_reps = out$parms$dt_rep,
-                     methods = out$parms$methods[c(1:8, 13:14)]
+    res_sem_time,
+    out = out,
+    n_reps = out$parms$dt_rep,
+    methods = out$parms$methods[c(1:8, 13:15)]
   )
 
-  colnames(out_time) <- names(out[[1]])
-  t(out_time)
+  # Take transpose
+  out_time <- t(out_time)
+
+  # Attach conditions
+  out_time <- cbind(cond = names(out[[1]]), out$conds, out_time)
+
+  # Melt 
+  out_time <- reshape2::melt(out_time,
+    id.var = c("cond", colnames(out$conds))
+  )
+  
+  # Transpose
+  saveRDS(out_time, "../output/exp1_simOut_time.rds")
   
 # Univariate Analyses -----------------------------------------------------
   
@@ -228,20 +293,47 @@ cbind(bs_out[[id]]$cond_50_FALSE_0.3$sem_EST[, "bridge"],
   output$parms <- out$parms
   output$conds <- out$conds
 
-  # Transform for plot
-  gg_out_sem <- plotwise(res = output,
-                         model = "sem",
-                         parPlot = list(Means = 1:6,
-                                        Variances = 7:12,
-                                        Covariances = 13:27),
-                         item_group = c(1:3), # items in a group recieving miss values
-                         meth_compare = c("DURR_la","IURR_la", "blasso", "bridge",
-                                          "MI_PCA", "MI_CART" ,"MI_RF",
-                                          "MI_OP",
-                                          "CC", "GS", "MI_qp", "MI_am"))
+  # Transform for plot lm model
+  gg_out_lm <- plotwise(
+    res = output,
+    model = "lm",
+    parPlot = list(Betas = 1:5),
+    item_group = c(1:3), # items in a group recieving miss values
+    meth_compare = c(
+      "DURR_la", "IURR_la", "blasso", "bridge",
+      "MI_PCA", "MI_CART", "MI_RF", "stepFor",
+      "MI_OP",
+      "CC", "GS", "MI_qp", "MI_am"
+    )
+  )
 
   # Save
-  filename <- paste0("exp1_simOut_20220225_1035")
+  filename_lm <- paste0("exp1_simOut_20230403_1631_lm")
+  saveRDS(
+    gg_out_lm,
+    paste0("../output/", filename_lm, "_res.rds")
+  )
+
+  # Transform for plot sem model
+  gg_out_sem <- plotwise(
+    res = output,
+    model = "sem",
+    parPlot = list(
+      Means = 1:6,
+      Variances = 7:12,
+      Covariances = 13:27
+    ),
+    item_group = c(1:3), # items in a group recieving miss values
+    meth_compare = c(
+      "DURR_la", "IURR_la", "blasso", "bridge",
+      "MI_PCA", "MI_CART", "MI_RF", "stepFor",
+      "MI_OP",
+      "CC", "GS", "MI_qp", "MI_am"
+    )
+  )
+
+  # Save
+  filename <- paste0("exp1_simOut_20230403_1631")
   saveRDS(
     gg_out_sem,
     paste0("../output/", filename, "_res.rds")

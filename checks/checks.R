@@ -1,6 +1,9 @@
-### Title:    Imputing High Dimensional Data
-### Author:   Edoardo Costantini
-### Created:  2020-05-19
+# Project:   imputeHD-comp
+# Objective: Check different aspect of the code base
+# Author:    Edoardo Costantini
+# Created:   2020-05-19
+# Modified:  2023-04-21
+# Notes: 
 
 rm(list=ls())
 source("./init_general.R")
@@ -311,10 +314,6 @@ for (r in 1:reps) {
   pdraw_hd$beta[1:49,]
   pdraw_hd$sigma
   
-
-
-
-
 # Interaction terms and number of predictors ------------------------------
 
   # Generaete some X predictors
@@ -408,4 +407,416 @@ y <- out$y
 fit <- multinom(y ~ X)
 list(est = round(coef(fit), 3),
      true = round(out$true_par,3))
-# estiamted and true parameters values are almost the same
+# estimated and true parameters values are almost the same
+
+# Correlation: single component structure --------------------------------------
+
+# Define number of variables
+p <- 50
+rho <- seq(0, .9, by = .1)
+
+# Storing objects
+ngs <- NULL
+cpve <- NULL
+
+# Loop over conditions
+for (r in seq_along(rho)) {
+  # Define Sigma
+  Sigma <- matrix(rho[r], p, p)
+  diag(Sigma) <- 1
+
+  # Sample data
+  X <- MASS::mvrnorm(1e4, mu = rep(1, p), Sigma = Sigma)
+
+  # PCA
+  svd_X <- svd(X)
+
+  # Compute cumulative proportion of explained variance
+  cpve <- rbind(cpve, cumsum(prop.table(svd_X$d^2)))
+
+  # Non-graphical solutions
+  ngs <- rbind(ngs, nFactors::nScree(cor(X))$Components)
+}
+
+# Number of factors underlying data
+cbind(
+  rho = rho,
+  ngs,
+  npc.cpve = round(cpve[, 1:5], 1)
+)
+
+# Collinearity data check ------------------------------------------------------
+
+rm(list = ls())
+source("./init_general.R")
+source("./exp1_init.R")
+
+# Define experimental factor levels
+p <- c(50) # c(50, 500) # number of variables
+collinearity <- c(NA, seq(0.1, .9, by = .1))
+
+# Create experimental conditions
+conds <- expand.grid(
+  p = p,
+  collinearity = collinearity
+)
+
+# Increase sample size to make things more clear
+parms$n <- 1e4
+
+# Crate a place to store factor structures
+storenScree <- list()
+cpve <- NULL
+pc1.loadings <- NULL
+plots <- NULL
+npcs_kpet <- NULL
+
+# Define a plotting arrangement
+par(mfrow = c(ceiling(sqrt(nrow(conds))), sqrt(nrow(conds))))
+
+# Loop over the conditions
+for (i in 1:nrow(conds)) {
+  # Define the active condition
+  cond <- conds[i, ]
+
+  # Generate data
+  Xy <- simData_exp1(cond, parms)
+
+  # Scale data
+  Xy <- scale(Xy)
+
+  # Check correlation matrix
+  print(round(cor(Xy)[c(1:13, 48:50), c(1:13, 48:50)], 1) * 100)
+
+  # Select possible auxiliary data
+  Xy_ma <- Xy[, -c(1:3, 6:8)]
+
+  # 3-factor structure
+  storenScree <- rbind(storenScree, nFactors::nScree(as.data.frame(Xy_ma))$Components)
+
+  # PCA
+  svd_X <- svd(Xy_ma)
+
+  # Store the loadings
+  pc1.loadings <- rbind(pc1.loadings, svd_X$v[, 4])
+
+  # Compute CPVE for this run
+  cpve_i <- cumsum(prop.table(svd_X$d^2))
+
+  # Compute cumulative proportion of explained variance
+  cpve <- rbind(cpve, cond = cpve_i)
+
+  # Apply the decision rule used in the simulation study
+  if (cpve_i[1] >= 0.5) {
+    npcs_kpet <- c(npcs_kpet, 1)
+  } else {
+    npcs_kpet <- c(npcs_kpet, sum(cpve_i <= 0.5))
+  }
+
+  # Fit model regressing one variable on all the others
+  model_all <- lm(z1 ~ ., data = as.data.frame(Xy))
+
+  # Compute the VIFs
+  vif_values <- car::vif(model_all)
+
+  # Plot the vif values
+  barplot(vif_values,
+    main = paste0("VIF Values", " (cor = ", cond[, "collinearity"], ")"),
+    horiz = TRUE,
+    col = "steelblue"
+  ) # create
+
+  # And plot a reference line at 5 (VIF > 5 -> problem!)
+  abline(v = 5, lwd = 3, lty = 2) # add vertical line at 5 as
+  # If the value of VIF is :
+  # - VIF < 1: no correlation
+  # - 1 < VIF < 5, there is a moderate correlation
+  # - VIF > 5: severe correlation
+}
+
+# Number of factors underlying data
+cbind(
+  collinearity = collinearity,
+  storenScree,
+  npcs50cpve = npcs_kpet,
+  cpve = round(cpve[, 1:3], 2)*100
+)
+
+# Loadings
+rownames(pc1.loadings) <- collinearity
+colnames(pc1.loadings) <- colnames(Xy_ma)
+round(abs(pc1.loadings), 1)[, c(1:4, 40:44)] * 10
+
+# Test MI-PCA: run all collinearity values with 50% rule -----------------------
+
+# > Prepare data ---------------------------------------------------------------
+
+# All collinearity: 50% CPVE rule
+out_MIPCA_colli <- readRDS(paste0("../output/", "exp1_2_simOut_20230421_1424.rds"))
+
+# All collinearity: Kaiser Rule
+out_MIPCA_colli <- readRDS(paste0("../output/", "exp1_2_simOut_20230426_0906.rds"))
+
+# Review conditions run
+out_MIPCA_colli$conds
+
+# Model: means, variances, covariances (MLE estimates) per conditions
+sem_res <- lapply(
+  1:length(out_MIPCA_colli[[1]]),
+  function(x) {
+    res_sum(out_MIPCA_colli,
+      model = "sem",
+      condition = x
+    )
+  }
+)
+
+# Model: Linear regression per condition
+lm_res <- lapply(
+  1:length(out_MIPCA_colli[[1]]),
+  function(x) {
+    res_sum(out_MIPCA_colli,
+      model = "lm",
+      condition = x
+    )
+  }
+)
+
+# Shape for plot
+output <- lapply(
+  list(
+    sem = sem_res,
+    lm = lm_res
+  ),
+  function(x) {
+    names(x) <- paste0("cond", seq_along(out_MIPCA_colli[[1]]))
+    return(x)
+  }
+)
+output$parms <- out_MIPCA_colli$parms
+output$conds <- out_MIPCA_colli$conds
+
+gg_out_sem <- plotwise(
+  res = output,
+  model = "sem",
+  parPlot = list(
+    Means = 1:6,
+    Variances = 7:12,
+    Covariances = 13:27
+  ),
+  item_group = c(1:3), # items in a group receiving miss values
+  meth_compare = c(
+    "MI_PCA",
+    "MI_am",
+    "CC",
+    "GS"
+  ),
+  exp_factors = c("p", "collinearity")
+)
+
+# > Bias plot ------------------------------------------------------------------
+
+# Bias or CIC?
+x <- 1 # bias
+
+# Which methods
+methods_sel <- levels(gg_out_sem$methods)
+
+# Which p condition
+p_grep <- 50
+
+# X breaks
+xci_breaks <- sort(c(0, 10, 20, 50))
+
+# Plot font
+plot_text_family <- "sans"
+plot_text_face <- "plain"
+plot_text_size <- 9
+
+# Make the plot
+pf <- gg_out_sem %>%
+    filter(
+        analysis == unique(analysis)[x],
+        grepl(p_grep, cond),
+        variable %in% c("Min", "Mean", "Max"),
+        methods %in% methods_sel
+    ) %>%
+    mutate(methods = fct_relabel(
+        methods,
+        str_replace,
+        "-la", ""
+    )) %>%
+    # Main Plot
+    ggplot(data = ., aes(
+        y = methods,
+        x = value,
+        shape = variable
+    )) +
+    geom_point(size = 1.75) +
+    geom_line(aes(group = methods),
+        size = .25
+    ) +
+    # Grid
+    facet_grid(
+        rows = vars(factor(parm,
+            levels = unique(parm)
+        )),
+        cols = vars(cond)
+    ) +
+    geom_vline(
+        data = data.frame(
+            xint = 10,
+            analysis = "Percentage Relative Bias"
+        ),
+        linetype = "solid",
+        size = .15,
+        aes(xintercept = xint)
+    ) +
+
+    # Format
+    scale_x_continuous(
+        labels = xci_breaks,
+        breaks = xci_breaks
+    ) +
+    scale_y_discrete(limits = rev) +
+    scale_shape_manual(values = c("I", "I", "I")) +
+    coord_cartesian(xlim = c(0, 50)) +
+    labs( # title = label_parm[x],
+        x = NULL,
+        y = NULL,
+        linetype = NULL,
+        shape = NULL
+    ) +
+    theme(
+        panel.background = element_rect(
+            fill = NA,
+            color = "gray"
+        ),
+        panel.grid.major = element_line(
+            color = "gray",
+            size = 0.15,
+            linetype = 1
+        ),
+        legend.key = element_rect(
+            colour = "gray",
+            fill = NA,
+            size = .15
+        ),
+        text = element_text(
+            family = plot_text_family,
+            face = plot_text_face,
+            size = plot_text_size
+        ),
+        axis.ticks = element_blank(),
+        legend.position = "none"
+    )
+
+pf
+
+# > CIC plot -------------------------------------------------------------------
+
+x <- 2 # Confidence intervals
+methods_sel <- levels(gg_out_sem$methods)[1:2] # [-8]
+
+# SE for threshold
+ci_lvl <- .95
+dt_reps <- 500
+SEp <- sqrt(ci_lvl * (1 - ci_lvl) / dt_reps)
+low_thr <- (.95 - SEp * 2) * 100
+hig_thr <- (.95 + SEp * 2) * 100
+vline_burton <- c(low_thr, hig_thr)
+vline_vanBuu <- c(90, 99)
+xci_breaks <- sort(c(80, vline_vanBuu, 95, round(vline_burton, 1), 100))
+
+pf <- gg_out_sem %>%
+  filter(
+    analysis == unique(analysis)[x],
+    grepl(p_grep, cond),
+    variable %in% c("Min", "Mean", "Max"),
+    methods %in% methods_sel
+  ) %>%
+  # Drop pm = ** as we are plotting only one value for this condition
+  mutate(cond = fct_relabel(
+    cond,
+    str_replace,
+    " pm = [0-9]\\.[0-9]", ""
+  )) %>%
+  mutate(methods = fct_relabel(
+    methods,
+    str_replace,
+    "-la", ""
+  )) %>%
+  # Main Plot
+  ggplot(data = ., aes(
+    y = methods,
+    x = value,
+    shape = variable
+  )) +
+  geom_point(size = 1.75, show.legend = FALSE) +
+  geom_line(aes(group = methods),
+    size = .25
+  ) +
+  # Grid
+  facet_grid(
+    rows = vars(factor(parm,
+      levels = unique(parm)
+    )),
+    cols = vars(cond)
+  ) +
+  geom_vline(
+    data = data.frame(
+      xint = 95,
+      analysis = "CI coverage"
+    ),
+    linetype = "solid",
+    size = .15,
+    aes(
+      xintercept = xint,
+      lty = paste0("nominal level")
+    )
+  ) +
+
+  # Format
+  scale_y_discrete(limits = rev) +
+  scale_x_continuous(
+    labels = as.character(round(xci_breaks / 100, 2)),
+    breaks = xci_breaks
+  ) +
+  coord_cartesian(xlim = c(min(xci_breaks), max(xci_breaks))) +
+  scale_shape_manual(values = c("I", "I", "I")) +
+  labs( # title = label_parm[x],
+    x = NULL,
+    y = NULL,
+    linetype = NULL,
+    shape = NULL
+  ) +
+  theme(
+    panel.background = element_rect(
+      fill = NA,
+      color = "gray"
+    ),
+    panel.grid.major = element_line(
+      color = "gray",
+      size = 0.175,
+      linetype = 1
+    ),
+    axis.ticks = element_blank(),
+    legend.key = element_rect(
+      colour = "gray",
+      fill = NA,
+      size = .15
+    ),
+    legend.position = "bottom",
+    text = element_text(
+      family = plot_text_family,
+      face = plot_text_face,
+      size = plot_text_size
+    ),
+    axis.text.x = element_text(
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1
+    )
+  )
+
+pf

@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-08-24
-# Modified: 2022-02-25
+# Modified:  2023-04-08
 
 rm(list = ls())
 source("./init_general.R")
@@ -17,6 +17,7 @@ out <- readRDS(paste0(dataDir, filename, ".rds"))
 range(out$conds$ridge)
 
 # Obtain conditions with cv ridge
-conds_bridge <- bridge_cv(out, exp_factors = c("n"))
-conds_bridge$values
+conds_bridge <- cvParm(out, exp_factors = c("n"))
+conds_bridge$solution
+conds_bridge$solution_1se
 conds_bridge$plot

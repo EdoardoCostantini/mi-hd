@@ -2,7 +2,7 @@
 # Project:  Imputing High Dimensional Data
 # Author:   Edoardo Costantini
 # Created:  2020-07-01
-# Modified: 2022-02-25
+# Modified: 2023-03-22
 
 # Fixed Parameters --------------------------------------------------------
 
@@ -82,21 +82,24 @@
 
 # Imputation methods ------------------------------------------------------
   parms$alphaCI <- .95 # confidence level for parameters CI
-  parms$meth_sel <- data.frame(DURR_la    = FALSE,
-                               IURR_la    = FALSE,
-                               blasso     = FALSE,
-                               bridge     = FALSE,
-                               MI_PCA     = FALSE,
-                               MI_CART    = FALSE,
-                               MI_RF      = FALSE,
-                               MI_qp      = TRUE,
-                               MI_am      = TRUE,
-                               MI_OP      = TRUE,
-                               missFor    = TRUE,
-                               mean       = TRUE,
-                               CC         = TRUE,
-                               GS         = TRUE)
-  
+  parms$meth_sel <- data.frame(
+    DURR_la = FALSE,
+    IURR_la = FALSE,
+    blasso = FALSE,
+    bridge = FALSE,
+    MI_PCA = FALSE,
+    MI_CART = FALSE,
+    MI_RF = FALSE,
+    stepFor = TRUE,
+    MI_qp = FALSE,
+    MI_am = FALSE,
+    MI_OP = FALSE,
+    missFor = TRUE, # must be true
+    mean = TRUE,    # must be true
+    CC = TRUE,      # must be true 
+    GS = TRUE       # must be true
+  )
+
   parms$methods <- names(parms$meth_sel)[which(parms$meth_sel==TRUE)]
     # (missFor, mean, CC, GS always last, alwyas present)
   
@@ -120,9 +123,9 @@
   parms$PCA_pcthresh <- .5 # proportion of vairance for selection of PCs
   
   # Random Forest
-  parms$rfntree <- 10
-  parms$missFor_maxiter <- 20 # maxiter = 20
-  parms$missFor_ntree <- 100  # ntree = 100
+  parms$rfntree <- 1
+  parms$missFor_maxiter <- 1 # maxiter = 20
+  parms$missFor_ntree <- 2  # ntree = 100
   
   # MICE true
   parms$S_all <- c(parms$rm_x,   # variables influencing the missingness
@@ -153,6 +156,25 @@
                      "v6", # Religiousness
                      "v51v52_comb"  # Denomination
   )
+
+  # Detect computer OS
+  parms$OS <- switch(Sys.info()[["sysname"]],
+    Windows = {
+      print("Windows")
+    },
+    Linux = {
+      print("Linux")
+    },
+    Darwin = {
+      print("Mac")
+    }
+  )
+
+  # IVE specifics
+  parms$IVEloc <- c(
+    Windows = "C:\\Program Files\\Srclib\\R", # or other location https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/
+    Mac = "/Library/Srclib/R"
+  )[parms$OS]
 
 # Simulation desing -------------------------------------------------------
   # Replicability
@@ -210,6 +232,9 @@
   conds <- expand.grid(n = n)
   
   # Add ridge specification for each condition
-  conds <- cbind(conds, ridge = c(1e-2,
-                                  1e-07))
+  conds <- cbind(
+    conds,
+    ridge = c(1e-2,1e-07), # cross-validated
+    minR2 = c(.0001, .001) # cross-validated
+  )
   

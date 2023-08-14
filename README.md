@@ -46,14 +46,17 @@ We used R for these simulations.
    1. Open the script [init_general.R](./code/init_general.R) and install the
       packages with the traditional `install.packages()` function.
    2. Install the package `PcAux` using `devtools::install_github("PcAux")`
-   3. Install the package `blasso` by downloading a compatible version of the package
-      from the [package author's website](https://www.asc.ohio-state.edu/hans.11/software/blasso/)  
+   3. Install the package `blasso` by downloading a compatible version of the package from the [package author's website](https://www.asc.ohio-state.edu/hans.11/software/blasso/). If you are running on windows, you need to install g++ to be able to install this package. You can follow these [instructions](https://www3.cs.stonybrook.edu/~alee/g++/g++.html)
+   4. Install IVEware by following this [guide](https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/)
+
 2. Running the simulation:
-   1. Open the script [exp1_simulation_script_win.R](./code/exp1_simulation_script_win.R)
-   2. Make sure the working directory is set to the location of this script (`./code/`)
-   3. Define the number of clusters to be used by specifying the first argument in the
+   1. Open the script [exp1_init.R](./code/exp1_init.R) and make sure that the parameters and conditions of the simulation study are set to desired values. In particular, pay attention to:
+      - `parms$IVEloc` which needs to be set to the correct path for the operating system you are running (for more info look for `~/srclib` [here](https://www.src.isr.umich.edu/software/iveware/iveware-documentation/installation-guide/))
+   2. Open the script [exp1_simulation_script_win.R](./code/exp1_simulation_script_win.R)
+   3. Make sure the working directory is set to the location of this script (`./code/`)
+   4. Define the number of clusters to be used by specifying the first argument in the
       function `makeCluster()`
-   4. Run the entire script
+   5. Run the entire script
 
 ### EVS resampling study
 1. Installing Dependencies: same as above
@@ -104,9 +107,43 @@ Here, I want to keep track of which filenames are important for the results.
    - 1e3 repetitions
    - re-run of bridge with correct intercept inclusion
 5. `exp1_cv_bridge_20220224_1042.rds` 
-   - contains the results for corssvalidation of bridge with the correct use of intercept
+   - Output for cross-validation of bridge with the correct use of intercept
 6. `exp1_simOut_20220225_1035_res.rds`
-   - outcome of the exp1_results.R script combining (1), (2), and (4)
+   - Output for `exp1_results.R` script combining (1), (2), and (4)
+7. `exp1_cv_IVEware_20230324_1326.rds`
+   - Output for cross-validation of IVEware `minR2` using 70 iterations
+8. `exp1_conv_IVEware_20230327_1143.rds`
+   - Output for convergence checks for IVEware (above 5 iterations everything seems fine)
+   - `exp1_cv_IVEware_20230331_1121.rds` is a version with 70 iterations and 100 multiple imputed datasets
+9. `exp1_simOut_20230403_1631.rds`
+   - Output for IVEware method
+10. `exp1_simOut_20230403_1631_res.rds`
+   - Output for `exp1_results.R` script combining (1), (2), (4), and (9)
+
+### Extra Simulation Study on Collinearity
+
+1. `exp1_2_convergence_all_meth_20230403_1027.rds`
+- Output for convergence checks for all R native methods.
+2. `exp1_2_cv_IVEware_20230405_1715.rds`
+- Output for convergence checks for IVEware data.
+3. `exp1_2_cv_bridge_20230405_1449.rds`
+- Output for cross-validation of `ridge` parameter for bridge
+4. `exp1_2_cv_IVEware_20230406_1053.rds`
+- Output for cross-validation of `minR2` parameter for IVEware
+5. `exp1_2_simOut_20230408_1748.rds`
+- 30 repetitions for all methods (contains MI-QP time estimate!)
+6. `exp1_2_simOut_20230419_1403.rds`
+- 500 for all R-based methods
+7. `exp1_2_simOut_20230421_1151.rds`
+- 500 repetitions for IVEware method (stepFor / MI-SF)
+8. `exp1_2_simOut_20230424_0945.rds`
+- 500 repetitions for MI-QP
+9. `exp1_2_simOut_20230421_1424.rds`
+- Contains results of MI-PCA (using 50% rule) vs MI-AM test on all collinearity conditions.
+10. `exp1_2_simOut_20230426_0906.rds`
+- Contains results of MI-PCA (using Kaiser rule) vs MI-AM test on all collinearity conditions.
+11. `exp1_2_simOut_main_results.rds`
+- Concatenated version of 6, 7, 8, and MI-PCA-k (Kaiser rule) results from 10.
 
 ### Resampling Study
 1. `exp4_simOut_20201204_2121.rds`
@@ -119,7 +156,16 @@ Here, I want to keep track of which filenames are important for the results.
 4. `exp4_simOut_20220226_0950.rds`
    - 1e3 repetitions
    - re-run of bridge with correct intercept inclusion
-5. `exp4_simOut_20220226_0950_res.rds`
+5. `exp4_simOut_20230323_1551.rds`
+   - 1e3 repetitions
+   - run of IVEware with 70 iterations
+6. `exp4_simOut_20220226_0950_res.rds`
    - outcome of the exp4_results.R script combining (1), (2), (3), and (4)
-6. `exp4_cv_bridge_20220223_1646.rds`
+7. `exp4_simOut_20230323_1551_res.rds`
+   - outcome of the exp4_results.R script combining (1), (2), (3), (4), and (5)
+8. `exp4_cv_bridge_20220223_1646.rds`
    - contains the results for cross-validation of bridge with the correct use of intercept
+9. `exp4_cv_IVEware_20230322_1841.rds`
+   - contains the results for cross-validation of IVEware `minR2` parameter
+10. `exp4_cv_IVEware_20230328_1544.rds`
+   - contains convergence checks results for IVEware on EVS data
