@@ -387,10 +387,10 @@ output_sem$analysis <- factor(
 # Which plot to plot
 p_grep <- c("50", "500")[2]
 
-# Which methods
-methods_sel <- levels(output_sem$methods)[c(1:5, 7:14)]
-
 # > Bias -----------------------------------------------------------------------
+
+# Which methods
+methods_sel <- levels(output_sem$methods)[c(1:5, 7:13)]
 
 # New facet label names for collinearity variable
 output_sem$collinearity[is.na(output_sem$collinearity)] <- 0
@@ -496,6 +496,9 @@ pf_bias <- ggplot(data = data_plot, aes(
 pf_bias
 
 # > Confidence interval --------------------------------------------------------
+
+# Which methods
+methods_sel <- levels(output_sem$methods)[c(1:5, 7:14)]
 
 # Request Confidence intervals
 x <- 2

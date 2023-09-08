@@ -69,7 +69,7 @@ output_sem$methods <- factor(output_sem$methods,
 
 # Bias
 x <- 1 # bias
-methods_sel <- levels(output_sem$methods)[1:11]
+methods_sel <- levels(output_sem$methods)[1:12]
 
 pf <- output_sem %>%
   filter(
@@ -305,7 +305,7 @@ dt_reps <- 1e3
 
 # Bias
 x <- 3 # CIW
-methods_sel <- levels(output_sem$methods)[-c(12)]
+methods_sel <- levels(output_sem$methods)#[-c(12)]
 
 pf <- output_sem %>%
   filter(
