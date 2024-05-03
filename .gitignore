@@ -76,3 +76,6 @@ rsconnect/
 
 # Igonre the notes folder
 /notes/
+
+# Igonre txt files in the output folder
+/output/*.txt
