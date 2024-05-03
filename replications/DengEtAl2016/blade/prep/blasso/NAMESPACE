@@ -1,4 +1,0 @@
-useDynLib(blasso)
-
-export(blasso, blasso.vs)
-
