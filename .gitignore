@@ -73,3 +73,6 @@ rsconnect/
 
 # Ignore feedback folder
 /manuscript/feedback/
+
+# Igonre the notes folder
+/notes/
