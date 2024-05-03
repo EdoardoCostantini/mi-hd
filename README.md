@@ -11,7 +11,7 @@ In this study, we investigate a wide range of extant MI-HD techniques that can h
 We assess the relative performance of seven MI-HD methods with a Monte Carlo simulation study and a resampling study based on real survey data.
 The performance of the methods is defined by the degree to which they facilitate unbiased and confidence-valid estimates of the parameters of complete data analysis models.
 
-We find that using regularized regression to select the predictors used in the MI model, and using principal component analysis to reduce the dimensionality of auxiliary data produce the best results.
+We find that using regularized regression to select the predictors used in the MI model and using principal component analysis to reduce the dimensionality of auxiliary data produce the best results.
 
 ## Contents
 
@@ -178,4 +178,4 @@ You can contact me if you want to get access to any of them.
 9. `exp4_cv_IVEware_20230322_1841.rds`
    - contains the results for cross-validation of IVEware `minR2` parameter
 10. `exp4_cv_IVEware_20230328_1544.rds`
-   - contains convergence checks results for IVEware on EVS data
+       - contains convergence checks results for IVEware on EVS data
